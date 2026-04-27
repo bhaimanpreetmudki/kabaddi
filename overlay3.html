@@ -3,92 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Animated Kabaddi Overlay - Manpreet Mudki</title>
+    <title>Double Strip Overlay - Manpreet Mudki</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Segoe UI', Arial, sans-serif; }
+        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Arial Black', sans-serif; }
 
-        /* MAIN BOTTOM CONTAINER */
-        .bottom-bar {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 95%; height: 60px; display: flex; align-items: center;
-            background: rgba(0, 0, 0, 0.9); border-radius: 8px;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.8); border: 1px solid #333;
-            overflow: hidden; opacity: 0; transition: 0.5s;
+        .main-container {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 90%; display: flex; flex-direction: column; gap: 5px;
         }
 
-        /* LIVE BADGE */
-        .live-tag {
-            background: #da3633; color: white; height: 100%; padding: 0 20px;
-            display: flex; align-items: center; font-weight: 900; font-size: 18px;
-            letter-spacing: 1px; position: relative; z-index: 10;
+        /* STRIP 1: SCORE or SPONSORS */
+        .top-strip {
+            height: 60px; background: rgba(0, 0, 0, 0.9); border-radius: 8px 8px 0 0;
+            display: flex; align-items: center; overflow: hidden; border-bottom: 2px solid #f39c12;
+            position: relative;
         }
-        .live-tag::after { content: ''; position: absolute; right: -15px; border-left: 15px solid #da3633; border-top: 30px solid transparent; border-bottom: 30px solid transparent; }
 
-        /* TEAM SCORE SECTION */
-        .score-section {
-            display: flex; align-items: center; padding: 0 40px; min-width: 450px;
-            background: linear-gradient(90deg, #161b22, #0d1117); height: 100%;
+        /* Score Layout */
+        .score-layout {
+            display: flex; width: 100%; height: 100%; align-items: center;
+            transition: 0.5s; position: absolute;
         }
-        .t-name { color: white; font-size: 22px; font-weight: bold; text-transform: uppercase; }
-        .t-score { 
-            background: #f39c12; color: #000; padding: 5px 15px; border-radius: 4px;
-            font-size: 32px; font-weight: 900; margin: 0 15px; min-width: 50px; text-align: center;
-        }
-        .vs { color: #8b949e; font-size: 14px; font-weight: bold; }
+        .t-name { flex: 1; text-align: center; color: white; font-size: 22px; text-transform: uppercase; }
+        .t-score { background: #f39c12; color: #000; width: 80px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; }
 
-        /* FLASHING INFO BOX (Right Side) */
-        .flash-info {
-            flex: 1; height: 100%; position: relative; background: #f39c12;
-            display: flex; align-items: center; padding-left: 30px;
-            color: #000; font-weight: 800; font-size: 20px; text-transform: uppercase;
+        /* Sponsor Flash Layout (Shows when score is hidden) */
+        .sponsor-layout {
+            width: 100%; height: 100%; background: #161b22; color: #f39c12;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; text-transform: uppercase; transition: 0.5s;
+            position: absolute; transform: translateY(100%);
         }
-        .flash-info::before { content: ''; position: absolute; left: 0; border-left: 20px solid #0d1117; border-top: 30px solid transparent; border-bottom: 30px solid transparent; }
 
-        /* ANIMATION FOR FLASHING TEXT */
-        .animate-text {
-            position: absolute; width: 100%; opacity: 0;
-            transform: translateY(20px); transition: 0.5s ease-in-out;
+        /* STRIP 2: INFO FLASH (Always Active) */
+        .bottom-strip {
+            height: 45px; background: #f39c12; border-radius: 0 0 8px 8px;
+            display: flex; align-items: center; overflow: hidden; color: #000;
         }
-        .animate-text.active { opacity: 1; transform: translateY(0); }
+        .info-label { background: #000; color: #fff; height: 100%; padding: 0 15px; display: flex; align-items: center; font-size: 14px; font-weight: bold; }
+        .info-content { flex: 1; padding-left: 20px; font-size: 20px; position: relative; height: 100%; display: flex; align-items: center; }
+        
+        .f-text { position: absolute; opacity: 0; transform: translateX(20px); transition: 0.5s; white-space: nowrap; }
+        .f-text.active { opacity: 1; transform: translateX(0); }
 
-        /* WING BOX (WINNERS - Floating Style) */
-        .wing-float {
-            position: absolute; bottom: 90px; left: 2.5%; width: 250px;
-            background: rgba(0,0,0,0.85); border-radius: 8px; border-left: 5px solid #238636;
-            padding: 10px; color: white; transition: 0.5s; opacity: 0; transform: translateX(-20px);
-        }
-        .wing-float.show { opacity: 1; transform: translateX(0); }
-        .wing-title { color: #238636; font-size: 12px; font-weight: bold; margin-bottom: 5px; text-transform: uppercase; }
-        .win-team { font-size: 16px; margin-bottom: 3px; color: #f39c12; }
-
+        /* VISIBILITY LOGIC */
+        .hide-score .score-layout { transform: translateY(-100%); opacity: 0; }
+        .hide-score .sponsor-layout { transform: translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
 
-    <div id="wing-box" class="wing-float">
-        <div class="wing-title">🏆 Jitu Teams (Wing Box)</div>
-        <div id="winners-list"></div>
-    </div>
-
-    <div id="bottom-bar" class="bottom-bar">
-        <div class="live-tag">LIVE</div>
-
-        <div class="score-section">
-            <div class="t-name" id="nameA">TEAM A</div>
-            <div class="t-score" id="scoreA">0</div>
-            <div class="vs">VS</div>
-            <div class="t-score" id="scoreB">0</div>
-            <div class="t-name" id="nameB">TEAM B</div>
+    <div id="main-wrap" class="main-container">
+        
+        <div class="top-strip">
+            <div class="score-layout">
+                <div class="t-name" id="nameA">TEAM A</div>
+                <div class="t-score" id="scoreA">0</div>
+                <div style="background:#fff; color:#000; padding:0 10px; height:100%; display:flex; align-items:center; font-size:12px;">VS</div>
+                <div class="t-score" id="scoreB">0</div>
+                <div class="t-name" id="nameB">TEAM B</div>
+            </div>
+            <div class="sponsor-layout" id="sponsor-text">
+                THANKS FOR WATCHING - LIVE FROM MUDKI
+            </div>
         </div>
 
-        <div class="flash-info">
-            <div id="flash-1" class="animate-text active">🏆 <span id="tour-display">Tournament Name</span></div>
-            <div id="flash-2" class="animate-text">💰 Prize: <span id="prize-display">₹0</span></div>
-            <div id="flash-3" class="animate-text">⏭ Next: <span id="next-display">Upcoming Match</span></div>
-            <div id="flash-4" class="animate-text">📞 Help: <span id="booking-display">98765-XXXXX</span></div>
+        <div class="bottom-strip">
+            <div class="info-label">LIVE UPDATE</div>
+            <div class="info-content">
+                <div class="f-text active" id="f1">🏆 <span id="tour-val">TOURNAMENT</span></div>
+                <div class="f-text" id="f2">💰 PRIZE: <span id="prize-val">0</span></div>
+                <div class="f-text" id="f3">⏭ NEXT: <span id="next-val">---</span></div>
+                <div class="f-text" id="f4">📞 HELP: <span id="help-val">---</span></div>
+            </div>
         </div>
+
     </div>
 
 <script>
@@ -96,38 +87,44 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("kabaddiMatch");
 
-    // Flash Animation Logic
-    let currentFlash = 1;
-    function rotateFlash() {
-        document.querySelectorAll('.animate-text').forEach(el => el.classList.remove('active'));
-        document.getElementById('flash-' + currentFlash).classList.add('active');
-        currentFlash = currentFlash >= 4 ? 1 : currentFlash + 1;
-    }
-    setInterval(rotateFlash, 4000); // Change text every 4 seconds
+    // Bottom Strip Rotation
+    let flashIdx = 1;
+    setInterval(() => {
+        document.querySelectorAll('.f-text').forEach(t => t.classList.remove('active'));
+        document.getElementById('f' + flashIdx).classList.add('active');
+        flashIdx = flashIdx >= 4 ? 1 : flashIdx + 1;
+    }, 4000);
+
+    // Sponsor Text Rotation (If Score Hidden)
+    const sponsors = ["DONATED BY: MANPREET MUDKI", "LIVE KABADDI CUP 2026", "SUBSCRIBE OUR CHANNEL"];
+    let spIdx = 0;
+    setInterval(() => {
+        spIdx = (spIdx + 1) % sponsors.length;
+        document.getElementById('sponsor-text').innerText = sponsors[spIdx];
+    }, 6000);
 
     db.on("value", (snap) => {
         const data = snap.val() || {};
         
-        // Show/Hide Elements
-        document.getElementById('bottom-bar').style.opacity = data.scoreVisible ? "1" : "0";
-        const wing = document.getElementById('wing-box');
-        if(data.wingVisible) wing.classList.add('show'); else wing.classList.remove('show');
+        // Handle Score Visibility
+        const wrap = document.getElementById('main-wrap');
+        if (data.scoreVisible) {
+            wrap.classList.remove('hide-score');
+        } else {
+            wrap.classList.add('hide-score');
+        }
 
-        // Update Scores
-        document.getElementById('nameA').innerText = data.nameA || "TEAM A";
-        document.getElementById('nameB').innerText = data.nameB || "TEAM B";
+        // Update Scores/Names
+        document.getElementById('nameA').innerText = data.nameA || "---";
+        document.getElementById('nameB').innerText = data.nameB || "---";
         document.getElementById('scoreA').innerText = data.scoreA || 0;
         document.getElementById('scoreB').innerText = data.scoreB || 0;
 
-        // Update Info
-        document.getElementById('tour-display').innerText = data.tourName || "KABADDI CUP";
-        document.getElementById('prize-display').innerText = data.prize || "TBD";
-        document.getElementById('next-display').innerText = data.nextMatch || "TBD";
-        document.getElementById('booking-display').innerText = data.watermark || "Contact Admin";
-
-        // Update Winners
-        const winners = data.winnersData || [];
-        document.getElementById('winners-list').innerHTML = winners.map(w => `<div class="win-team">● ${w.name}</div>`).join('');
+        // Update Bottom Info
+        document.getElementById('tour-val').innerText = data.tourName || "KABADDI CUP";
+        document.getElementById('prize-val').innerText = data.prize || "---";
+        document.getElementById('next-val').innerText = data.nextMatch || "TBD";
+        document.getElementById('help-val').innerText = data.watermark || "---";
     });
 </script>
 </body>
