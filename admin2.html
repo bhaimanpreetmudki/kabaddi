@@ -13,21 +13,20 @@
         #drag-container { width: 100%; max-width: 600px; }
         .card { background: #161b22; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 12px; overflow: hidden; }
         .header-flex { background: #f39c12; color: #000; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; cursor: grab; }
-        .header-title { font-weight: 900; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .header-title { font-weight: 900; text-transform: uppercase; font-size: 11px; }
         .upd-btn-small { background: #000; color: #fff; border: none; padding: 5px 12px; border-radius: 4px; font-size: 10px; cursor: pointer; font-weight: bold; }
         .p-15 { padding: 15px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
-        input, select, textarea { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 13px; margin-bottom: 5px; }
+        input, select, textarea { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
         .btn { border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .btn-green { background: #238636; color: white; }
         .btn-red { background: #da3633; color: white; }
         .btn-blue { background: #1f6feb; color: white; }
         .btn-orange { background: #f39c12; color: black; }
-        .score-val { font-size: 60px; font-weight: 900; color: #f39c12; text-align: center; line-height: 1; margin: 10px 0; }
-        .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 150px; overflow-y: auto; padding: 10px; font-size: 13px; margin-top: 5px; }
-        .list-item { padding: 8px; border-bottom: 1px solid #222; color: #eee; }
-        .match-num { color: #f39c12; font-weight: bold; margin-right: 5px; }
+        .score-val { font-size: 60px; font-weight: 900; color: #f39c12; text-align: center; margin: 10px 0; line-height: 1; }
+        .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 160px; overflow-y: auto; padding: 10px; font-size: 13px; }
+        .list-item { padding: 8px; border-bottom: 1px solid #222; }
+        .match-id { color: #f39c12; font-weight: bold; margin-right: 6px; }
     </style>
 </head>
 <body>
@@ -41,8 +40,8 @@
         </div>
         <div class="p-15">
             <div class="grid-2">
-                <div><small style="color:#f39c12; font-size:9px;">SELECT TEAM 1</small><select id="selA" onchange="updateMatchTeams()"></select></div>
-                <div><small style="color:#f39c12; font-size:9px;">SELECT TEAM 2</small><select id="selB" onchange="updateMatchTeams()"></select></div>
+                <select id="selA" onchange="updateMatchTeams()"></select>
+                <select id="selB" onchange="updateMatchTeams()"></select>
             </div>
             
             <div style="background:#0d1117; border-radius:10px; padding:15px; border:1px solid #333; margin-bottom:10px;">
@@ -64,56 +63,43 @@
                 </div>
             </div>
 
-            <div class="grid-3">
-                <button class="btn btn-blue" onclick="swapNames()">T-SWIPE</button>
-                <button class="btn btn-blue" onclick="swapScoreOnly()">S-SWIPE</button>
-                <button class="btn btn-blue" onclick="swapFull()">FULL</button>
+            <div class="grid-2">
+                <button class="btn btn-blue" onclick="swapNames()">TEAM SWIPE</button>
+                <button class="btn btn-blue" onclick="swapFull()">SWIPE WITH SCORE</button>
             </div>
+            <button class="btn btn-orange" style="margin-bottom:8px; background:#e67e22;" onclick="swapNames()">CAMERA / OPPO VIEW (PANEL ONLY SWAP)</button>
             
             <div class="grid-2">
                 <button class="btn btn-red" onclick="confirmReset('score')">RESET SCORE</button>
-                <button class="btn btn-green" onclick="declareWinner()">🏆 DECLARE RESULT (WIN & MOVE TO WING BOX)</button>
+                <button class="btn btn-green" onclick="declareWinner()">🏆 WIN & ADD TO BOX</button>
             </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="header-flex">
-            <span class="header-title"><i class="fas fa-grip-lines handle"></i> ROUND 2 / NEXT MATCH CREATOR</span>
-        </div>
-        <div class="p-15">
-            <div class="grid-2">
-                <select id="winSelA"><option>Select Winner</option></select>
-                <select id="winSelB"><option>Select Winner</option></select>
-            </div>
-            <button class="btn btn-orange" onclick="addCustomMatch()">ADD THIS MATCH TO LIST</button>
         </div>
     </div>
 
     <div class="card">
         <div class="header-flex">
             <span class="header-title"><i class="fas fa-grip-lines handle"></i> TEAM LIST & WING BOX</span>
-            <button class="upd-btn-small" style="background:#1f6feb;" onclick="promoteWinners()">PROMOTE TO LIST</button>
+            <button class="upd-btn-small" style="background:#1f6feb;" onclick="promoteWinners()">PROMOTE</button>
         </div>
         <div class="p-15">
             <div class="grid-2">
                 <div>
-                    <small style="color:#f39c12; font-size:9px;">ENTER TEAMS (Separate by , or New Line)</small>
-                    <textarea id="manualTyan" placeholder="Mudki, Gill, Faridkot, Moga..." style="height:60px;" oninput="syncTeams()"></textarea>
+                    <small style="color:#f39c12; font-size:9px;">ENTER TEAMS (Separate by - or New Line)</small>
+                    <textarea id="manualTyan" placeholder="Mudki - Gill&#10;Faridkot - Moga" style="height:60px;" oninput="syncTeams()"></textarea>
                     <div id="playingList" class="box-list"></div>
                 </div>
                 <div>
                     <small style="color:#f39c12; font-size:9px;">WING BOX (WINNERS)</small>
-                    <div id="winnerList" class="box-list" style="height:215px;"></div>
+                    <div id="winnerList" class="box-list" style="height:228px;"></div>
                 </div>
             </div>
-            <button class="btn btn-red" style="margin-top:10px;" onclick="confirmReset('teams')">RESET ALL DATA</button>
+            <button class="btn btn-red" style="margin-top:10px;" onclick="confirmReset('teams')">RESET LIST</button>
         </div>
     </div>
 
     <div class="card">
         <div class="header-flex">
-            <span class="header-title"><i class="fas fa-grip-lines handle"></i> TOURNAMENT INFO & EVENTS</span>
+            <span class="header-title"><i class="fas fa-grip-lines handle"></i> INFO & WATERMARK</span>
             <button class="upd-btn-small" onclick="updateInfo()">UPDATE</button>
         </div>
         <div class="p-15">
@@ -121,7 +107,7 @@
                 <input type="text" id="tourName" placeholder="Tournament Name">
                 <input type="text" id="prizeInp" placeholder="Prize Details">
             </div>
-            <textarea id="upcomingInp" placeholder="Upcoming Events / Programs..." style="height:50px;"></textarea>
+            <textarea id="upcomingInp" placeholder="Upcoming Events..." style="height:50px; margin-bottom:8px;"></textarea>
             <input type="text" id="wmText" placeholder="Watermark: LIVE MANPREET MUDKI">
         </div>
     </div>
@@ -140,7 +126,6 @@
     db.on("value", (snap) => {
         const data = snap.val() || {};
         status = data; allTeams = data.teams || []; winners = data.winners || [];
-        
         document.getElementById('dispA').innerText = data.scoreA || 0;
         document.getElementById('dispB').innerText = data.scoreB || 0;
         document.getElementById('tourName').value = data.tourName || "";
@@ -148,31 +133,18 @@
         document.getElementById('upcomingInp').value = data.events || "";
         document.getElementById('wmText').value = data.watermark || "";
         document.getElementById('scoreVisBtn').innerText = data.scoreVisible ? "HIDE" : "SHOW";
-        
         renderUI();
     });
 
     function renderUI() {
         let opt = `<option value="">Select Team</option>`;
         allTeams.forEach(t => opt += `<option value="${t}">${t}</option>`);
-        document.getElementById('selA').innerHTML = opt; 
-        document.getElementById('selB').innerHTML = opt;
-        document.getElementById('selA').value = status.nameA || ""; 
-        document.getElementById('selB').value = status.nameB || "";
+        document.getElementById('selA').innerHTML = opt; document.getElementById('selB').innerHTML = opt;
+        document.getElementById('selA').value = status.nameA || ""; document.getElementById('selB').value = status.nameB || "";
 
-        let winOpt = `<option value="">Select Winner</option>`;
-        winners.forEach(w => winOpt += `<option value="${w}">${w}</option>`);
-        document.getElementById('winSelA').innerHTML = winOpt; 
-        document.getElementById('winSelB').innerHTML = winOpt;
-
-        // MATCH LIST LOGIC: 1. Team vs Team
         let html = "";
-        let matchCount = 1;
         for(let i=0; i<allTeams.length; i+=2) {
-            let t1 = allTeams[i];
-            let t2 = allTeams[i+1] || "WAITING";
-            html += `<div class="list-item"><span class="match-num">${matchCount}.</span> ${t1} <b style="color:#f39c12">vs</b> ${t2}</div>`;
-            matchCount++;
+            html += `<div class="list-item"><span class="match-id">${(i/2)+1}.</span> ${allTeams[i]} <b style="color:#f39c12">vs</b> ${allTeams[i+1] || "WAITING"}</div>`;
         }
         document.getElementById('playingList').innerHTML = html;
         document.getElementById('winnerList').innerHTML = winners.map(w => `<div class="list-item">🏆 ${w}</div>`).join('');
@@ -180,8 +152,8 @@
 
     function syncTeams() {
         let input = document.getElementById('manualTyan').value;
-        // Split by comma OR new line and clean up
-        let list = input.split(/[,\n]/).map(t => t.trim()).filter(t => t !== "");
+        // Split by '-' or new line
+        let list = input.split(/[-\n]/).map(t => t.trim()).filter(t => t !== "");
         db.update({ teams: list });
     }
 
@@ -196,47 +168,31 @@
     }
 
     function swapNames() { db.update({ nameA: status.nameB, nameB: status.nameA }); }
-    function swapScoreOnly() { db.update({ scoreA: status.scoreB, scoreB: status.scoreA }); }
     function swapFull() { db.update({ nameA: status.nameB, nameB: status.nameA, scoreA: status.scoreB, scoreB: status.scoreA }); }
     function toggleVis(key) { db.child(key).set(!status[key]); }
 
     function declareWinner() {
         const win = status.scoreA > status.scoreB ? status.nameA : status.nameB;
         const lose = status.scoreA > status.scoreB ? status.nameB : status.nameA;
-        if(!win || !lose) return alert("ਪਹਿਲਾਂ ਟੀਮਾਂ ਸਿਲੈਕਟ ਕਰੋ!");
-        if(confirm(win + " ਜੇਤੂ ਹੈ?")) {
+        if(!win || !lose) return alert("Select Teams!");
+        if(confirm(win + " Wins?")) {
             db.update({ winners: [...winners, win], teams: allTeams.filter(t => t !== lose && t !== win), scoreA: 0, scoreB: 0, scoreVisible: false });
         }
     }
 
     function updateInfo() {
-        db.update({ 
-            tourName: document.getElementById('tourName').value, 
-            prize: document.getElementById('prizeInp').value, 
-            events: document.getElementById('upcomingInp').value, 
-            watermark: document.getElementById('wmText').value 
-        });
-        alert("ਸਾਰੀ ਜਾਣਕਾਰੀ ਅਪਡੇਟ ਹੋ ਗਈ ਹੈ!");
+        db.update({ tourName: document.getElementById('tourName').value, prize: document.getElementById('prizeInp').value, events: document.getElementById('upcomingInp').value, watermark: document.getElementById('wmText').value });
+        alert("Updated!");
     }
 
     function confirmReset(type) {
-        if(!confirm("ਕੀ ਤੁਸੀਂ ਪੱਕਾ ਸਾਰਾ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) return;
+        if(!confirm("Reset Data?")) return;
         if(type === 'score') db.update({ scoreA: 0, scoreB: 0 });
         if(type === 'teams') { db.update({ teams: [], winners: [] }); document.getElementById('manualTyan').value = ""; }
     }
 
     function promoteWinners() {
-        if(confirm("ਜੇਤੂਆਂ ਨੂੰ ਅਗਲੇ ਰਾਊਂਡ ਦੀ ਲਿਸਟ ਵਿੱਚ ਪਾ ਦੇਈਏ?")) db.update({ teams: [...winners], winners: [] });
-    }
-
-    function addCustomMatch() {
-        const t1 = document.getElementById('winSelA').value;
-        const t2 = document.getElementById('winSelB').value;
-        if(t1 && t2) {
-            db.update({ nameA: t1, nameB: t2, scoreA: 0, scoreB: 0, scoreVisible: true });
-        } else {
-            alert("ਪਹਿਲਾਂ ਦੋਵੇਂ ਜੇਤੂ ਟੀਮਾਂ ਚੁਣੋ!");
-        }
+        if(confirm("Promote Winners?")) db.update({ teams: [...winners], winners: [] });
     }
 </script>
 </body>
