@@ -3,86 +3,98 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Double Strip Ticker - Manpreet Mudki</title>
+    <title>Sports Channel Overlay - Design 1</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Arial Black', sans-serif; }
+        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Montserrat', 'Arial Black', sans-serif; }
 
-        /* MAIN CONTAINER */
-        .overlay-container {
-            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
-            width: 95%; height: 110px; /* Two strips height */
-            display: flex; flex-direction: column; gap: 4px;
+        /* The master container at the bottom */
+        .master-bar {
+            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
+            width: 90%; height: 70px;
+            overflow: hidden; /* Crucial for animation */
+            border-radius: 10px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.8);
+            border: 2px solid #333;
         }
 
-        /* STRIP 1: SLIDING SCOREBOARD */
-        .strip-top {
-            height: 60px; background: rgba(0, 0, 0, 0.95); border-radius: 8px 8px 0 0;
-            position: relative; overflow: hidden; border-bottom: 2px solid #f39c12;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        /* Container that moves up/down */
+        .sliding-content {
+            width: 100%; height: 140px; /* Two strips height */
+            display: flex; flex-direction: column;
+            transition: transform 1.2s cubic-bezier(0.645, 0.045, 0.355, 1);
         }
 
-        /* Layer 1: Scoreboard */
-        .layer-score {
-            display: flex; width: 100%; height: 100%; align-items: center;
-            position: absolute; transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
-        }
-        .t-name { flex: 1; text-align: center; color: white; font-size: 22px; text-transform: uppercase; }
-        .t-score { background: #f39c12; color: #000; width: 80px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; }
-        .vs-box { background: #fff; color: #000; padding: 0 15px; height: 100%; display: flex; align-items: center; font-size: 14px; font-weight: 900; }
+        /* General strip style */
+        .strip { width: 100%; height: 70px; display: flex; align-items: center; position: relative; }
 
-        /* Layer 2: Top Info (Appears when scoreboard slides up) */
-        .layer-info {
-            width: 100%; height: 100%; background: #161b22; color: #f39c12;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px; text-transform: uppercase; position: absolute;
-            transform: translateY(100%); transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
-        }
+        /* --- STRIP 1: MODERN SCOREBOARD --- */
+        .score-strip { background: linear-gradient(180deg, #1a1d21 0%, #0d0f12 100%); }
+        .score-strip::before { content: ''; position: absolute; top: 0; left: 0; width: 100%; height: 1px; background: rgba(255,255,255,0.1); }
 
-        /* STRIP 2: CONTINUOUS TICKER (Always visible) */
-        .strip-bottom {
-            height: 40px; background: #f39c12; border-radius: 0 0 8px 8px;
-            display: flex; align-items: center; overflow: hidden; color: #000;
-        }
-        .tag-black { background: #000; color: #fff; padding: 0 20px; height: 100%; display: flex; align-items: center; font-size: 13px; font-weight: bold; z-index: 5; }
-        .ticker-wrap { flex: 1; position: relative; height: 100%; display: flex; align-items: center; padding-left: 20px; }
+        .team-block { flex: 1; display: flex; align-items: center; justify-content: center; height: 100%; position: relative; }
+        .t-name { color: white; font-size: 26px; font-weight: 800; text-transform: uppercase; letter-spacing: 1px; padding: 0 15px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
         
-        .ticker-text { position: absolute; opacity: 0; transform: translateY(10px); transition: 0.8s; font-weight: 800; font-size: 18px; }
-        .ticker-text.active { opacity: 1; transform: translateY(0); }
+        .score-block { 
+            width: 100px; height: 100%; display: flex; align-items: center; justify-content: center;
+            font-size: 48px; font-weight: 900; color: #000;
+            background: linear-gradient(135deg, #f39c12 0%, #d35400 100%);
+            box-shadow: inset 0 0 15px rgba(0,0,0,0.3);
+            position: relative;
+        }
+        .score-block::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 4px; background: rgba(0,0,0,0.3); }
 
-        /* ANIMATION TOGGLE */
-        .hide-score .layer-score { transform: translateY(-100%); }
-        .hide-score .layer-info { transform: translateY(0); }
+        .vs-divider { 
+            width: 60px; height: 100%; background: #fff; color: #000;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 16px; font-weight: 900;
+            position: relative;
+        }
+        .vs-divider::before { content: ''; position: absolute; top: 0; left: 0; width: 1px; height: 100%; background: #ccc; }
+
+        /* --- STRIP 2: INFO FLASH (Always Active) --- */
+        .info-strip { background: linear-gradient(90deg, #238636, #1d6e30); }
+        .info-strip::after { content: ''; position: absolute; bottom: 0; left: 0; width: 100%; height: 2px; background: #fff; }
+        
+        .info-label { background: #000; color: #fff; padding: 0 25px; height: 100%; display: flex; align-items: center; font-size: 14px; font-weight: 900; letter-spacing: 1px; text-transform: uppercase; }
+        .flash-wrap { flex: 1; position: relative; height: 100%; display: flex; align-items: center; padding-left: 20px; }
+        
+        .flash-text { position: absolute; opacity: 0; transform: translateY(10px); transition: all 0.8s ease; font-weight: 800; font-size: 22px; color: white; text-transform: uppercase;}
+        .flash-text.active { opacity: 1; transform: translateY(0); }
+
+        /* ANIMATION TRIGGERS */
+        .master-bar.hide-score .sliding-content { transform: translateY(-70px); } /* Slide down to show info */
     </style>
 </head>
 <body>
 
-    <div id="main-wrap" class="overlay-container">
-        
-        <div class="strip-top">
-            <div class="layer-score">
-                <div class="t-name" id="nameA">TEAM A</div>
-                <div class="t-score" id="scoreA">0</div>
-                <div class="vs-box">VS</div>
-                <div class="t-score" id="scoreB">0</div>
-                <div class="t-name" id="nameB">TEAM B</div>
+    <div id="main-bar" class="master-bar">
+        <div class="sliding-content">
+            
+            <div class="strip score-strip">
+                <div class="team-block">
+                    <div class="t-name" id="nameA">TEAM A</div>
+                    <div class="score-block" id="scoreA">0</div>
+                </div>
+                <div class="vs-divider">VS</div>
+                <div class="team-block">
+                    <div class="score-block" id="scoreB">0</div>
+                    <div class="t-name" id="nameB">TEAM B</div>
+                </div>
             </div>
-            <div class="layer-info" id="top-flash">
-                SPECIAL THANKS TO ALL SPONSORS
+            
+            <div class="strip info-strip">
+                <div class="info-label">LIVE UPDATE</div>
+                <div class="flash-wrap">
+                    <div class="flash-text active" id="f1">🏆 <span id="tour-val">LOADING...</span></div>
+                    <div class="flash-text" id="f2">💰 PRIZE: ₹<span id="prize-val">0</span></div>
+                    <div class="flash-text" id="f3">⏭ NEXT: <span id="next-val">---</span></div>
+                    <div class="flash-text" id="f4">📞 HELP: <span id="help-val">---</span></div>
+                </div>
             </div>
-        </div>
 
-        <div class="strip-bottom">
-            <div class="tag-black">KABADDI UPDATE</div>
-            <div class="ticker-wrap">
-                <div class="ticker-text active" id="msg1">🏆 <span id="tour-display">TOURNAMENT NAME</span></div>
-                <div class="ticker-text" id="msg2">💰 PRIZE: <span id="prize-display">0</span></div>
-                <div class="ticker-text" id="msg3">⏭ NEXT: <span id="next-display">---</span></div>
-                <div class="ticker-text" id="msg4">📞 HELP: <span id="help-display">---</span></div>
-            </div>
         </div>
-
     </div>
 
 <script>
@@ -90,31 +102,23 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("kabaddiMatch");
 
-    // Bottom Ticker Rotation
-    let msgIdx = 1;
+    // Flash Text Logic
+    let flashIdx = 1;
     setInterval(() => {
-        document.querySelectorAll('.ticker-text').forEach(t => t.classList.remove('active'));
-        document.getElementById('msg' + msgIdx).classList.add('active');
-        msgIdx = msgIdx >= 4 ? 1 : msgIdx + 1;
-    }, 4500);
-
-    // Top Info Rotation (If Score Hidden)
-    const ads = ["SUBSCRIBE OUR CHANNEL", "LIVE KABADDI CUP 2026", "SHARE THIS STREAM"];
-    let adIdx = 0;
-    setInterval(() => {
-        adIdx = (adIdx + 1) % ads.length;
-        document.getElementById('top-flash').innerText = ads[adIdx];
-    }, 6000);
+        document.querySelectorAll('.flash-text').forEach(t => t.classList.remove('active'));
+        document.getElementById('f' + flashIdx).classList.add('active');
+        flashIdx = flashIdx >= 4 ? 1 : flashIdx + 1;
+    }, 5000); // 5 seconds per message
 
     db.on("value", (snap) => {
         const data = snap.val() || {};
-        const wrap = document.getElementById('main-wrap');
+        const bar = document.getElementById('main-bar');
 
         // SLOW SLIDE LOGIC: If scoreVisible is false, slide score UP
         if (data.scoreVisible) {
-            wrap.classList.remove('hide-score');
+            bar.classList.remove('hide-score');
         } else {
-            wrap.classList.add('hide-score');
+            bar.classList.add('hide-score');
         }
 
         // UPDATE CONTENT
@@ -122,10 +126,10 @@
         document.getElementById('nameB').innerText = data.nameB || "---";
         document.getElementById('scoreA').innerText = data.scoreA || 0;
         document.getElementById('scoreB').innerText = data.scoreB || 0;
-        document.getElementById('tour-display').innerText = data.tourName || "KABADDI CUP";
-        document.getElementById('prize-display').innerText = data.prize || "---";
-        document.getElementById('next-display').innerText = data.nextMatch || "TBD";
-        document.getElementById('help-display').innerText = data.watermark || "---";
+        document.getElementById('tour-val').innerText = data.tourName || "KABADDI CUP";
+        document.getElementById('prize-val').innerText = data.prize || "---";
+        document.getElementById('next-val').innerText = data.nextMatch || "TBD";
+        document.getElementById('help-val').innerText = data.watermark || "---";
     });
 </script>
 </body>
