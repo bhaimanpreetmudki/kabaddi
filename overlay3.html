@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Double Strip Overlay - Manpreet Mudki</title>
+    <title>Slow Motion Overlay - Manpreet Mudki</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -11,46 +11,48 @@
 
         .main-container {
             position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            width: 90%; display: flex; flex-direction: column; gap: 5px;
+            width: 92%; display: flex; flex-direction: column; gap: 3px;
         }
 
-        /* STRIP 1: SCORE or SPONSORS */
+        /* TOP STRIP: Container for Score and Flashing Info */
         .top-strip {
-            height: 60px; background: rgba(0, 0, 0, 0.9); border-radius: 8px 8px 0 0;
-            display: flex; align-items: center; overflow: hidden; border-bottom: 2px solid #f39c12;
-            position: relative;
+            height: 65px; background: rgba(0, 0, 0, 0.95); border-radius: 12px 12px 0 0;
+            overflow: hidden; border-bottom: 3px solid #f39c12;
+            position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
         }
 
-        /* Score Layout */
+        /* Scoreboard Layout (Layer 1) */
         .score-layout {
             display: flex; width: 100%; height: 100%; align-items: center;
-            transition: 0.5s; position: absolute;
+            position: absolute; transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 1s;
         }
-        .t-name { flex: 1; text-align: center; color: white; font-size: 22px; text-transform: uppercase; }
-        .t-score { background: #f39c12; color: #000; width: 80px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; }
+        .t-name { flex: 1; text-align: center; color: white; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
+        .t-score { background: #f39c12; color: #000; width: 90px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 45px; font-weight: 900; box-shadow: inset 0 0 15px rgba(0,0,0,0.2); }
+        .vs-box { background: #fff; color: #000; height: 100%; display: flex; align-items: center; padding: 0 12px; font-size: 14px; font-weight: bold; }
 
-        /* Sponsor Flash Layout (Shows when score is hidden) */
-        .sponsor-layout {
-            width: 100%; height: 100%; background: #161b22; color: #f39c12;
-            display: flex; align-items: center; justify-content: center;
-            font-size: 24px; text-transform: uppercase; transition: 0.5s;
-            position: absolute; transform: translateY(100%);
+        /* Alternative Info Layout (Layer 2 - Active when score is hidden) */
+        .info-flash-layout {
+            width: 100%; height: 100%; background: linear-gradient(90deg, #161b22, #0d1117);
+            color: #f39c12; display: flex; align-items: center; justify-content: center;
+            font-size: 26px; text-transform: uppercase; position: absolute;
+            transform: translateY(100%); transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 1s;
+            opacity: 0;
         }
 
-        /* STRIP 2: INFO FLASH (Always Active) */
+        /* BOTTOM STRIP: Secondary Information */
         .bottom-strip {
-            height: 45px; background: #f39c12; border-radius: 0 0 8px 8px;
+            height: 45px; background: #f39c12; border-radius: 0 0 12px 12px;
             display: flex; align-items: center; overflow: hidden; color: #000;
         }
-        .info-label { background: #000; color: #fff; height: 100%; padding: 0 15px; display: flex; align-items: center; font-size: 14px; font-weight: bold; }
-        .info-content { flex: 1; padding-left: 20px; font-size: 20px; position: relative; height: 100%; display: flex; align-items: center; }
+        .label-box { background: #000; color: #fff; height: 100%; padding: 0 20px; display: flex; align-items: center; font-size: 14px; font-weight: 900; letter-spacing: 1px; }
+        .scroll-wrap { flex: 1; padding-left: 30px; font-size: 20px; position: relative; height: 100%; display: flex; align-items: center; }
         
-        .f-text { position: absolute; opacity: 0; transform: translateX(20px); transition: 0.5s; white-space: nowrap; }
-        .f-text.active { opacity: 1; transform: translateX(0); }
+        .b-text { position: absolute; opacity: 0; transform: translateY(10px); transition: all 0.8s ease; font-weight: 800; }
+        .b-text.active { opacity: 1; transform: translateY(0); }
 
-        /* VISIBILITY LOGIC */
-        .hide-score .score-layout { transform: translateY(-100%); opacity: 0; }
-        .hide-score .sponsor-layout { transform: translateY(0); opacity: 1; }
+        /* ANIMATION TRIGGERS */
+        .show-info .score-layout { transform: translateY(-100%); opacity: 0; }
+        .show-info .info-flash-layout { transform: translateY(0); opacity: 1; }
     </style>
 </head>
 <body>
@@ -61,22 +63,23 @@
             <div class="score-layout">
                 <div class="t-name" id="nameA">TEAM A</div>
                 <div class="t-score" id="scoreA">0</div>
-                <div style="background:#fff; color:#000; padding:0 10px; height:100%; display:flex; align-items:center; font-size:12px;">VS</div>
+                <div class="vs-box">VS</div>
                 <div class="t-score" id="scoreB">0</div>
                 <div class="t-name" id="nameB">TEAM B</div>
             </div>
-            <div class="sponsor-layout" id="sponsor-text">
-                THANKS FOR WATCHING - LIVE FROM MUDKI
+            
+            <div class="info-flash-layout" id="top-info-text">
+                LIVE KABADDI CUP 2026 - MUDKI
             </div>
         </div>
 
         <div class="bottom-strip">
-            <div class="info-label">LIVE UPDATE</div>
-            <div class="info-content">
-                <div class="f-text active" id="f1">🏆 <span id="tour-val">TOURNAMENT</span></div>
-                <div class="f-text" id="f2">💰 PRIZE: <span id="prize-val">0</span></div>
-                <div class="f-text" id="f3">⏭ NEXT: <span id="next-val">---</span></div>
-                <div class="f-text" id="f4">📞 HELP: <span id="help-val">---</span></div>
+            <div class="label-box">LATEST</div>
+            <div class="scroll-wrap">
+                <div class="b-text active" id="b1">🏆 <span id="tour-val">LOADING...</span></div>
+                <div class="b-text" id="b2">💰 PRIZE: <span id="prize-val">0</span></div>
+                <div class="b-text" id="b3">⏭ NEXT: <span id="next-val">TBD</span></div>
+                <div class="b-text" id="b4">📞 HELPLINE: <span id="help-val">---</span></div>
             </div>
         </div>
 
@@ -87,40 +90,38 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("kabaddiMatch");
 
-    // Bottom Strip Rotation
-    let flashIdx = 1;
+    // Bottom Strip Rotation (Slow - 5 seconds)
+    let bIdx = 1;
     setInterval(() => {
-        document.querySelectorAll('.f-text').forEach(t => t.classList.remove('active'));
-        document.getElementById('f' + flashIdx).classList.add('active');
-        flashIdx = flashIdx >= 4 ? 1 : flashIdx + 1;
-    }, 4000);
+        document.querySelectorAll('.b-text').forEach(t => t.classList.remove('active'));
+        document.getElementById('b' + bIdx).classList.add('active');
+        bIdx = bIdx >= 4 ? 1 : bIdx + 1;
+    }, 5000);
 
-    // Sponsor Text Rotation (If Score Hidden)
-    const sponsors = ["DONATED BY: MANPREET MUDKI", "LIVE KABADDI CUP 2026", "SUBSCRIBE OUR CHANNEL"];
-    let spIdx = 0;
+    // Top Strip Alternative Content Rotation (Slow - 7 seconds)
+    const topMsgs = ["JOIN US LIVE ON YOUTUBE", "THANKS TO ALL SPONSORS", "LIKE & SHARE THE STREAM"];
+    let tIdx = 0;
     setInterval(() => {
-        spIdx = (spIdx + 1) % sponsors.length;
-        document.getElementById('sponsor-text').innerText = sponsors[spIdx];
-    }, 6000);
+        tIdx = (tIdx + 1) % topMsgs.length;
+        document.getElementById('top-info-text').innerText = topMsgs[tIdx];
+    }, 7000);
 
     db.on("value", (snap) => {
         const data = snap.val() || {};
-        
-        // Handle Score Visibility
         const wrap = document.getElementById('main-wrap');
+
+        // Toggle Animation (If scoreVisible is false, show alternative info)
         if (data.scoreVisible) {
-            wrap.classList.remove('hide-score');
+            wrap.classList.remove('show-info');
         } else {
-            wrap.classList.add('hide-score');
+            wrap.classList.add('show-info');
         }
 
-        // Update Scores/Names
+        // Data Updates
         document.getElementById('nameA').innerText = data.nameA || "---";
         document.getElementById('nameB').innerText = data.nameB || "---";
         document.getElementById('scoreA').innerText = data.scoreA || 0;
         document.getElementById('scoreB').innerText = data.scoreB || 0;
-
-        // Update Bottom Info
         document.getElementById('tour-val').innerText = data.tourName || "KABADDI CUP";
         document.getElementById('prize-val').innerText = data.prize || "---";
         document.getElementById('next-val').innerText = data.nextMatch || "TBD";
