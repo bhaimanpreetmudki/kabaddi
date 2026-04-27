@@ -15,10 +15,16 @@
         }
 
         /* 📊 SCOREBOARD */
-        #scoreboard { position: absolute; top: 60px; right: 80px; display: flex; flex-direction: column; align-items: center; transition: 0.7s ease; }
-        .main-bar { display: flex; align-items: center; height: 75px; background: rgba(0, 0, 0, 0.9); border-radius: 12px; border: 3px solid #00aeef; padding: 0 15px; }
+        #scoreboard-wrap { position: absolute; top: 60px; right: 80px; display: flex; flex-direction: column; align-items: flex-end; }
+        .main-bar { display: flex; align-items: center; height: 75px; background: rgba(0, 0, 0, 0.95); border-radius: 12px; border: 3px solid #00aeef; padding: 0 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
         .s-box { background: linear-gradient(145deg, #00aeef, #005a8d); color: white; font-size: 50px; font-weight: 900; min-width: 90px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 8px; text-shadow: 2px 2px 4px #000; }
-        .name-area { width: 220px; color: white; font-size: 30px; font-weight: bold; text-align: center; text-transform: uppercase; }
+        
+        .name-area { width: 220px; height: 100%; display: flex; align-items: center; overflow: hidden; white-space: nowrap; color: white; font-size: 28px; font-weight: bold; text-transform: uppercase; position: relative; }
+        .team-scroller { display: inline-block; padding-left: 100%; animation: team-scroll 8s linear infinite; }
+        @keyframes team-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        /* 🕒 CLOCK STYLE */
+        #live-clock { background: #00aeef; color: white; padding: 5px 25px; font-size: 32px; font-weight: 900; border-radius: 10px 10px 0 0; margin-bottom: -5px; margin-right: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
 
         /* 📜 3-LINE TICKER SYSTEM */
         #ticker-wrap { position: absolute; bottom: 0px; left: 0px; width: 1920px; height: 145px; display: flex; flex-direction: column; z-index: 999; }
@@ -28,12 +34,7 @@
         .row-2 { background: white; color: #b91c1c; height: 42px; font-size: 28px; } 
         .row-3 { background: rgba(0, 0, 0, 0.95); color: #ffcc00; height: 43px; font-size: 28px; }
 
-        /* SCROLLER ANIMATION - Duration JS ਨਾਲ ਸੈੱਟ ਹੋਵੇਗੀ */
-        .scroller { 
-            display: inline-block; 
-            padding-left: 100%; 
-            animation: scroll-anim linear infinite; 
-        }
+        .scroller { display: inline-block; padding-left: 100%; animation: scroll-anim linear infinite; }
         @keyframes scroll-anim { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
     </style>
 </head>
@@ -41,20 +42,21 @@
 
 <div id="expiry-notice">⚠ PLAN EXPIRED - RECHARGE NOW ⚠</div>
 
-<div id="scoreboard">
+<div id="scoreboard-wrap">
+    <div id="live-clock">00:00:00</div>
     <div class="main-bar">
         <div class="name-area" id="nA">TEAM 1</div>
         <div class="s-box" id="sA">0</div>
-        <div style="color:white; font-weight:900; margin:0 15px;">VS</div>
+        <div style="color:white; font-weight:900; margin:0 15px; font-size:24px;">VS</div>
         <div class="s-box" id="sB">0</div>
         <div class="name-area" id="nB">TEAM 2</div>
     </div>
 </div>
 
 <div id="ticker-wrap">
-    <div class="row-text row-1" id="c1"><div class="scroller" id="t1"></div></div>
-    <div class="row-text row-2" id="c2"><div class="scroller" id="t2"></div></div>
-    <div class="row-text row-3" id="c3"><div class="scroller" id="t3"></div></div>
+    <div class="row-text row-1"><div class="scroller" id="t1"></div></div>
+    <div class="row-text row-2"><div class="scroller" id="t2"></div></div>
+    <div class="row-text row-3"><div class="scroller" id="t3"></div></div>
 </div>
 
 <script>
@@ -65,51 +67,49 @@
     const urlParams = new URLSearchParams(window.location.search);
     const userID = urlParams.get('id') || 'demo';
 
-    // --- ਸਪੀਡ ਫਿਕਸ ਕਰਨ ਵਾਲਾ ਫੰਕਸ਼ਨ ---
+    // --- ਸਪੀਡ ਕੰਟਰੋਲ ਫੰਕਸ਼ਨ ---
     function updateTickerWithSpeed(elementId, text) {
         const el = document.getElementById(elementId);
-        if (!text || text.trim() === "") {
-            el.innerText = "";
-            return;
-        }
-        
-        el.innerText = text;
-        
-        // ⚙️ ਸਪੀਡ ਸੈਟਿੰਗ: 150 ਮਤਲਬ ਨੋਰਮਲ, 200 ਮਤਲਬ ਤੇਜ਼, 100 ਮਤਲਬ ਹੌਲੀ
-        const pixelsPerSecond = 160; 
-        const textWidth = el.offsetWidth;
-        const containerWidth = 1920;
-        
-        // ਆਪਣੇ ਆਪ ਸਹੀ ਸੈਕਿੰਡ ਕੱਢਣਾ
-        const duration = (textWidth + containerWidth) / pixelsPerSecond;
+        el.innerText = text || "";
+        const pixelsPerSecond = 150; // ਸਪੀਡ ਇੱਥੋਂ ਫਿਕਸ ਹੈ
+        const duration = (el.offsetWidth + 1920) / pixelsPerSecond;
         el.style.animationDuration = duration + "s";
     }
+
+    // --- ਟੀਮ ਨੇਮ ਆਟੋ-ਸਕ੍ਰੋਲ ---
+    function setTeamName(id, txt) {
+        const el = document.getElementById(id);
+        const nameText = txt || "TEAM";
+        if(nameText.length > 12) { 
+            el.innerHTML = `<div class="team-scroller">${nameText}</div>`; 
+        } else { 
+            el.innerHTML = `<div style="width:100%; text-align:center;">${nameText}</div>`; 
+        }
+    }
+
+    // --- ਟਾਈਮ ਅਪਡੇਟ ---
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString([], { hour12: true });
+    }
+    setInterval(updateClock, 1000);
 
     db.ref("users/" + userID).on("value", (uSnap) => {
         const userData = uSnap.val();
         const now = new Date();
-        const expiry = userData ? new Date(userData.expiry) : new Date(0);
-
-        if (now > expiry) {
+        if (userData && now > new Date(userData.expiry)) {
             document.getElementById('expiry-notice').style.display = "block";
-            document.getElementById('ticker-wrap').style.display = "none";
         } else {
             document.getElementById('expiry-notice').style.display = "none";
-            document.getElementById('ticker-wrap').style.display = "flex";
-
             db.ref("matchData").on("value", (snap) => {
                 const data = snap.val() || {};
-                
-                // ਸਕੋਰ ਅਪਡੇਟ
                 document.getElementById('sA').innerText = data.scoreA || "0";
                 document.getElementById('sB').innerText = data.scoreB || "0";
-                document.getElementById('nA').innerText = data.nameA || "TEAM 1";
-                document.getElementById('nB').innerText = data.nameB || "TEAM 2";
-
-                // ਟਿੱਕਰ ਅਪਡੇਟ (with Auto Speed)
-                updateTickerWithSpeed('t1', data.row1Txt || "WELCOME TO LIVE KABADDI");
-                updateTickerWithSpeed('t2', data.row2Txt || "SUBSCRIBE OUR CHANNEL");
-                updateTickerWithSpeed('t3', data.row3Txt || "LIKE & SHARE");
+                setTeamName('nA', data.nameA);
+                setTeamName('nB', data.nameB);
+                updateTickerWithSpeed('t1', data.row1Txt);
+                updateTickerWithSpeed('t2', data.row2Txt);
+                updateTickerWithSpeed('t3', data.row3Txt);
             });
         }
     });
