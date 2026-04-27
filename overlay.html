@@ -23,13 +23,23 @@
         .team-scroller { display: inline-block; padding-left: 100%; animation: team-scroll 8s linear infinite; }
         @keyframes team-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
 
-        /* 🕒 CLOCK STYLE */
-        #live-clock { background: #00aeef; color: white; padding: 5px 25px; font-size: 32px; font-weight: 900; border-radius: 10px 10px 0 0; margin-bottom: -5px; margin-right: 20px; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
+        /* 📜 TICKER SYSTEM WITH TIME BOX */
+        #ticker-container {
+            position: absolute; bottom: 0px; left: 0px; width: 1920px; height: 145px; 
+            display: flex; flex-direction: column; z-index: 999;
+        }
 
-        /* 📜 3-LINE TICKER SYSTEM */
-        #ticker-wrap { position: absolute; bottom: 0px; left: 0px; width: 1920px; height: 145px; display: flex; flex-direction: column; z-index: 999; }
-        .row-text { display: flex; align-items: center; font-weight: 900; text-transform: uppercase; width: 100%; overflow: hidden; white-space: nowrap; }
+        .ticker-row { display: flex; width: 100%; overflow: hidden; }
+        .row-text-area { flex: 1; overflow: hidden; white-space: nowrap; display: flex; align-items: center; font-weight: 900; text-transform: uppercase; }
         
+        /* TIME BOX IN TICKER */
+        .ticker-time-box { 
+            width: 300px; background: #00aeef; color: white; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 40px; font-weight: 900; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            border-left: 3px solid rgba(255,255,255,0.3);
+        }
+
         .row-1 { background: rgba(0, 0, 0, 0.95); color: white; height: 60px; font-size: 38px; border-top: 3px solid #00aeef; } 
         .row-2 { background: white; color: #b91c1c; height: 42px; font-size: 28px; } 
         .row-3 { background: rgba(0, 0, 0, 0.95); color: #ffcc00; height: 43px; font-size: 28px; }
@@ -43,7 +53,6 @@
 <div id="expiry-notice">⚠ PLAN EXPIRED - RECHARGE NOW ⚠</div>
 
 <div id="scoreboard-wrap">
-    <div id="live-clock">00:00:00</div>
     <div class="main-bar">
         <div class="name-area" id="nA">TEAM 1</div>
         <div class="s-box" id="sA">0</div>
@@ -53,10 +62,17 @@
     </div>
 </div>
 
-<div id="ticker-wrap">
-    <div class="row-text row-1"><div class="scroller" id="t1"></div></div>
-    <div class="row-text row-2"><div class="scroller" id="t2"></div></div>
-    <div class="row-text row-3"><div class="scroller" id="t3"></div></div>
+<div id="ticker-container">
+    <div class="ticker-row row-1">
+        <div class="row-text-area"><div class="scroller" id="t1"></div></div>
+        <div class="ticker-time-box" id="live-time">00:00:00</div>
+    </div>
+    <div class="ticker-row row-2">
+        <div class="row-text-area"><div class="scroller" id="t2"></div></div>
+    </div>
+    <div class="ticker-row row-3">
+        <div class="row-text-area"><div class="scroller" id="t3"></div></div>
+    </div>
 </div>
 
 <script>
@@ -71,8 +87,8 @@
     function updateTickerWithSpeed(elementId, text) {
         const el = document.getElementById(elementId);
         el.innerText = text || "";
-        const pixelsPerSecond = 150; // ਸਪੀਡ ਇੱਥੋਂ ਫਿਕਸ ਹੈ
-        const duration = (el.offsetWidth + 1920) / pixelsPerSecond;
+        const pixelsPerSecond = 150; 
+        const duration = (el.offsetWidth + 1620) / pixelsPerSecond; // 1920-300 = 1620
         el.style.animationDuration = duration + "s";
     }
 
@@ -87,10 +103,10 @@
         }
     }
 
-    // --- ਟਾਈਮ ਅਪਡੇਟ ---
+    // --- ਟਾਈਮ ਅਪਡੇਟ (ਟਿੱਕਰ ਲਈ) ---
     function updateClock() {
         const now = new Date();
-        document.getElementById('live-clock').innerText = now.toLocaleTimeString([], { hour12: true });
+        document.getElementById('live-time').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
     }
     setInterval(updateClock, 1000);
 
@@ -99,6 +115,7 @@
         const now = new Date();
         if (userData && now > new Date(userData.expiry)) {
             document.getElementById('expiry-notice').style.display = "block";
+            document.getElementById('ticker-container').style.display = "none";
         } else {
             document.getElementById('expiry-notice').style.display = "none";
             db.ref("matchData").on("value", (snap) => {
