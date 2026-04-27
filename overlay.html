@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { margin: 0; padding: 0; width: 1920px; height: 1080px; background: transparent; font-family: 'Arial', sans-serif; overflow: hidden; position: relative; }
+        
+        /* EXPIRY NOTIFICATION STYLE */
+        #expiry-notice {
+            position: absolute; top: 0; left: 0; width: 1920px; background: #dc3545; color: white;
+            font-size: 40px; font-weight: bold; text-align: center; padding: 15px 0;
+            z-index: 10000; display: none; text-transform: uppercase; letter-spacing: 5px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
+        }
+
+        #logo-container {
+            position: absolute; top: -15px; left: 40px; z-index: 9999;
+            opacity: 1; transition: all 0.7s ease; 
+        }
+        #logo-container.hidden { opacity: 0; transform: scale(0); }
+
+        #main-logo {
+            height: 260px; width: auto; max-width: 380px; object-fit: contain;
+            filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.6));
+            animation: logo-flip 12s infinite ease-in-out; 
+        }
+        @keyframes logo-flip {
+            0%, 85% { transform: perspective(1000px) rotateY(0deg); }
+            90% { transform: perspective(1000px) rotateY(180deg); filter: drop-shadow(0 0 15px rgba(255,255,255,0.8)); }
+            95% { transform: perspective(1000px) rotateY(360deg); }
+            100% { transform: perspective(1000px) rotateY(360deg); }
+        }
+
+        #single-wm { 
+            position: absolute; color: white; font-size: 35px; font-weight: bold; 
+            text-transform: uppercase; text-shadow: 2px 2px 5px #000; white-space: nowrap; 
+            z-index: 1; opacity: 1;
+        }
+
+        #ticker-wrap {
+            position: absolute; bottom: 0px; left: 0px; width: 1920px; height: 145px; display: flex; 
+            z-index: 9999; opacity: 1; transition: all 0.7s ease;
+        }
+        #ticker-wrap.hidden { opacity: 0; transform: translateY(150px); }
+
+        .center-wrap { flex: 1; display: flex; flex-direction: column; overflow: hidden; border-top: 2px solid #444; position: relative; }
+        .row-text { display: flex; align-items: center; font-weight: 900; text-transform: uppercase; width: 100%; overflow: hidden; box-sizing: border-box; white-space: nowrap; }
+        
+        .row-1 { background: rgba(0, 0, 0, 0.9); color: white; height: 60px; font-size: 38px; border-bottom: 1px solid rgba(255,255,255,0.1); text-shadow: 2px 2px 3px rgba(0,0,0,0.8); } 
+        .row-2 { background: white; color: #b91c1c; height: 42px; font-size: 28px; text-shadow: none; letter-spacing: 1px; } 
+        .row-3 { background: rgba(0, 0, 0, 0.9); color: #ffcc00; height: 43px; font-size: 28px; border-top: 1px solid rgba(255,255,255,0.1); text-shadow: 2px 2px 3px rgba(0,0,0,0.8); }
+
+        .scroller { display: inline-block; padding-left: 100%; animation: scroll-anim 20s linear infinite; }
+        @keyframes scroll-anim { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        .box-live, .box-time { 
+            width: 160px; background: linear-gradient(145deg, #00aeef, #006699); 
+            color: white; display: flex; align-items: center; justify-content: center; 
+            font-size: 34px; font-weight: 900; text-shadow: 2px 2px 4px #000; box-shadow: inset 3px 3px 8px rgba(255,255,255,0.5); z-index: 11;
+        }
+        .box-time { width: 300px; position: relative; border-left: 2px solid #8ebae6; }
+        .time-wrap, .date-wrap { position: absolute; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; transition: 0.8s; }
+        .time-str { color: #ffcc00; font-size: 44px; letter-spacing: 1px; }
+        .date-str { font-size: 28px; background: rgba(0,0,0,0.4); padding: 5px 20px; border-radius: 10px; }
+
+        #scoreboard { 
+            position: absolute; top: 60px; right: 80px; display: flex; flex-direction: column; align-items: center; z-index: 9999;
+            opacity: 1; transition: all 0.7s ease; 
+        }
+        #scoreboard.hidden { opacity: 0; transform: translateY(-80px); }
+        
+        .main-bar { 
+            display: flex; align-items: center; height: 60px; background: rgba(20, 20, 20, 0.95); 
+            border-radius: 6px; border: 2px solid rgba(255,255,255,0.2); 
+            z-index: 2; padding: 0 5px; position: relative; overflow: hidden; 
+        }
+        
+        .main-bar::after {
+            content: ""; position: absolute; top: 0; left: -50%; width: 20%; height: 100%;
+            background: linear-gradient(to right, rgba(255,255,255,0), rgba(255,255,255,0.5), rgba(255,255,255,0));
+            transform: skewX(-35deg); animation: score-light-sweep 25s infinite ease-in-out; 
+            pointer-events: none; z-index: 10;
+        }
+        @keyframes score-light-sweep { 0% { left: -50%; } 15% { left: 150%; } 100% { left: 150%; } }
+        
+        .s-box { 
+            background: linear-gradient(145deg, #00aeef, #004b75); color: #ffffff; 
+            font-size: 45px; font-weight: 900; width: 90px; height: 100%; display: flex; align-items: center; justify-content: center; 
+            transform: skewX(-15deg); text-shadow: 2px 2px 5px #000; 
+            box-shadow: inset 3px 3px 8px rgba(255,255,255,0.6), inset -3px -3px 8px rgba(0,0,0,0.6); 
+            position: relative; z-index: 11; 
+        }
+        .s-left { margin-left: -17px; border: 2px solid #5bc0de; border-radius: 4px 0 0 4px; }
+        .s-right { margin-right: -17px; border: 2px solid #5bc0de; border-radius: 0 4px 4px 0; }
+        .inner-val { transform: skewX(15deg); }
+        
+        .name-area { 
+            width: 220px; height: 100%; display: flex; align-items: center; overflow: hidden; 
+            white-space: nowrap; color: #ffffff; font-size: 26px; font-weight: bold; 
+            text-align: center; padding: 0 10px; text-shadow: 2px 2px 4px #000; box-sizing: border-box;
+            text-transform: uppercase; position: relative; z-index: 11;
+        }
+        .team-scroller { display: inline-block; padding-left: 100%; animation: team-scroll 8s linear infinite; }
+        @keyframes team-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+        
+        .vs-text { 
+            color: #ffffff; font-size: 20px; font-weight: 900; margin: 0 10px; text-shadow: 1px 1px 3px #000; 
+            background: linear-gradient(145deg, #00aeef, #005a8d); 
+            display: flex; align-items: center; justify-content: center;
+            width: 45px; height: 45px; border-radius: 50%; 
+            box-shadow: inset 2px 2px 5px rgba(255,255,255,0.6), 0 0 10px rgba(0,174,239,0.8);
+            border: 2px solid #5bc0de; position: relative; z-index: 11;
+        }
+
+        .round-display {
+            color: white; font-size: 22px; font-weight: bold; text-transform: uppercase;
+            margin-top: 20px; text-shadow: 2px 2px 6px #000; letter-spacing: 2px; display: block; 
+        }
+    </style>
+</head>
+<body>
+
+<div id="expiry-notice">⚠ YOUR PLAN HAS EXPIRED - PLEASE RECHARGE TO REMOVE THIS BLOCK ⚠</div>
+
+<div id="logo-container">
+    <img id="main-logo" src="https://raw.githubusercontent.com/4kjunctionofficial-code/Manpreetteam/main/taqdeer%20tv.png" alt="Logo">
+</div>
+
+<div id="single-wm">M LIVE</div>
+
+<div id="scoreboard">
+    <div class="main-bar">
+        <div class="s-box s-left"><div class="inner-val" id="sA">0</div></div>
+        <div class="name-area" id="nA-container"><div id="nA" style="width:100%; text-align:center;">TEAM 1</div></div>
+        <div class="vs-text">VS</div>
+        <div class="name-area" id="nB-container"><div id="nB" style="width:100%; text-align:center;">TEAM 2</div></div>
+        <div class="s-box s-right"><div class="inner-val" id="sB">0</div></div>
+    </div>
+    <div class="round-display" id="round-display">LIVE MATCH</div>
+</div>
+
+<div id="ticker-wrap">
+    <div class="box-live">● LIVE</div>
+    <div class="center-wrap">
+        <div class="row-text row-1" id="c1">WELCOME TO LIVE KABADDI</div>
+        <div class="row-text row-2" id="c2">SUBSCRIBE OUR CHANNEL</div>
+        <div class="row-text row-3" id="c3">LIKE & SHARE</div>
+    </div>
+    <div class="box-time">
+        <div class="time-wrap" id="t-wrap"><div class="time-str" id="live-time"></div></div>
+        <div class="date-wrap" id="d-wrap" style="opacity:0;"><div class="date-str" id="live-date"></div></div>
+    </div>
+</div>
+
+<script>
+    // --- FIREBASE CONFIG ---
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // --- URL PARAMS ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const userID = urlParams.get('id') || 'sukhdeeptv'; // Default ID if not provided
+
+    // --- MAIN DATA LISTENER ---
+    db.ref("matchData").on("value", (snap) => {
+        const data = snap.val() || {}; 
+        
+        // Expiry Check (Checks from users table)
+        db.ref("users/" + userID).on("value", (uSnap) => {
+            const userData = uSnap.val();
+            const now = new Date();
+            const expiry = userData ? new Date(userData.expiry) : new Date(0);
+            
+            if (now > expiry) {
+                // IF EXPIRED
+                document.getElementById('expiry-notice').style.display = "block";
+                document.getElementById('logo-container').style.opacity = "0";
+                document.getElementById('scoreboard').style.opacity = "0";
+                document.getElementById('ticker-wrap').style.opacity = "0";
+                document.getElementById('single-wm').style.opacity = "0";
+            } else {
+                // IF NOT EXPIRED
+                document.getElementById('expiry-notice').style.display = "none";
+                document.getElementById('single-wm').style.opacity = "1";
+
+                // Visibility Controls
+                if(data.logoVisible === false) { document.getElementById('logo-container').classList.add('hidden'); } else { document.getElementById('logo-container').classList.remove('hidden'); }
+                if(data.scoreVisible === false) { document.getElementById('scoreboard').classList.add('hidden'); } else { document.getElementById('scoreboard').classList.remove('hidden'); }
+                if(data.tickerVisible === false) { document.getElementById('ticker-wrap').classList.add('hidden'); } else { document.getElementById('ticker-wrap').classList.remove('hidden'); }
+                
+                // Content Updates
+                document.getElementById('sA').innerText = data.scoreA !== undefined ? data.scoreA : "0";
+                document.getElementById('sB').innerText = data.scoreB !== undefined ? data.scoreB : "0";
+                setTeamName('nA-container', data.nameA || "TEAM 1");
+                setTeamName('nB-container', data.nameB || "TEAM 2");
+                document.getElementById('single-wm').innerText = data.watermarkTxt || "M LIVE";
+                
+                const roundVal = data.round || "";
+                const roundEl = document.getElementById('round-display');
+                roundEl.innerText = roundVal;
+                roundEl.style.display = roundVal.trim() === "" ? "none" : "block";
+                
+                setAlwaysScroll('c1', data.row1Txt || "WELCOME TO LIVE KABADDI"); 
+                setAlwaysScroll('c2', data.row2Txt || "SUBSCRIBE OUR CHANNEL"); 
+                setAlwaysScroll('c3', data.row3Txt || "LIKE & SHARE"); 
+            }
+        });
+    });
+
+    function setTeamName(containerId, txt) {
+        const el = document.getElementById(containerId);
+        if(txt.length > 12) { el.innerHTML = `<div class="team-scroller">${txt}</div>`; }
+        else { el.innerHTML = `<div style="width:100%; text-align:center;">${txt}</div>`; }
+    }
+
+    function setAlwaysScroll(id, txt) {
+        const el = document.getElementById(id);
+        if(txt && txt.trim().length > 0) { el.innerHTML = `<div class="scroller">${txt}</div>`; }
+        else { el.innerHTML = ""; }
+    }
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('live-time').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        document.getElementById('live-date').innerText = now.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' }).toUpperCase();
+    }
+    setInterval(updateClock, 1000); updateClock();
+
+    let isTime = true;
+    setInterval(() => { isTime = !isTime; document.getElementById('t-wrap').style.opacity = isTime ? "1" : "0"; document.getElementById('d-wrap').style.opacity = isTime ? "0" : "1"; }, 5000);
+
+    const wmEl = document.getElementById('single-wm');
+    function moveWM() { wmEl.style.left = (Math.random() * 1400 + 100) + 'px'; wmEl.style.top = (Math.random() * 600 + 150) + 'px'; }
+    moveWM(); setInterval(moveWM, 6000);
+</script>
+</body>
+</html>
