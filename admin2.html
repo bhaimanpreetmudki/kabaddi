@@ -13,6 +13,7 @@
         .header-flex { background: #f39c12; color: #000; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; text-transform: uppercase; font-size: 11px; }
         .p-15 { padding: 15px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         input, select, textarea { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
         .btn { border: none; padding: 10px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .btn-green { background: #238636; color: white; }
@@ -20,21 +21,25 @@
         .btn-blue { background: #1f6feb; color: white; }
         .btn-orange { background: #f39c12; color: black; }
         .score-val { font-size: 60px; font-weight: 900; color: #f39c12; text-align: center; line-height: 1; margin: 10px 0; }
-        
-        /* MATCH LIST BOX STYLE */
-        .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 200px; overflow-y: auto; padding: 5px; margin-top: 5px; }
-        .list-item { padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; font-size: 12px; transition: 0.3s; }
-        .list-item:hover { background: #1c2128; }
-        .match-tag { background: #30363d; color: #f39c12; padding: 2px 6px; border-radius: 4px; font-weight: bold; font-size: 10px; margin-right: 8px; }
-        .live-status { background: #da3633; color: white; padding: 2px 6px; border-radius: 4px; font-size: 9px; font-weight: bold; animation: blink 1s infinite; }
-        @keyframes blink { 50% { opacity: 0.5; } }
-        .edit-btn { background: none; border: none; color: #1f6feb; cursor: pointer; padding: 5px; }
+        .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 180px; overflow-y: auto; padding: 5px; margin-top: 5px; }
+        .list-item { padding: 8px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .match-tag { color: #f39c12; font-weight: bold; margin-right: 5px; }
     </style>
 </head>
 <body>
 
     <div class="card">
-        <div class="header-flex">LIVE SCORE CONTROL <button class="btn btn-blue" style="padding:4px 8px;" onclick="toggleVis('scoreVisible')">SHOW/HIDE</button></div>
+        <div class="header-flex">DISPLAY CONTROLS</div>
+        <div class="p-15">
+            <div class="grid-2">
+                <button id="scoreVisBtn" class="btn btn-blue" onclick="toggleVis('scoreVisible')">SCOREBOARD: OFF</button>
+                <button id="tickerVisBtn" class="btn btn-blue" onclick="toggleVis('tickerVisible')">TICKER: OFF</button>
+            </div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="header-flex">LIVE SCORE CONTROL</div>
         <div class="p-15">
             <div class="grid-2">
                 <select id="selA" onchange="updateMatchTeams()"></select>
@@ -52,34 +57,39 @@
                     </div>
                 </div>
             </div>
-            <button class="btn btn-green" style="padding:15px; width:100%;" onclick="declareWinner()">🏆 DECLARE WINNER & MOVE TO WING BOX</button>
-        </div>
-    </div>
-
-    <div class="card">
-        <div class="header-flex">TYIAN / MATCH LIST BOX</div>
-        <div class="p-15">
-            <div class="box-list" id="playingList">
-                </div>
-            <div class="grid-2" style="margin-top:10px;">
-                <button class="btn btn-blue" onclick="promoteWinners()">PROMOTE WINNERS</button>
-                <button class="btn btn-red" onclick="resetTeams()">CLEAR LIST</button>
+            <div class="grid-3" style="margin-bottom:10px;">
+                <button class="btn btn-blue" onclick="swapNames()">T-SWIPE</button>
+                <button class="btn btn-blue" onclick="swapScores()">S-SWIPE</button>
+                <button class="btn btn-orange" onclick="swapFull()">FULL SWAP</button>
             </div>
+            <button class="btn btn-green" style="padding:15px; width:100%;" onclick="declareWinner()">🏆 DECLARE WINNER</button>
         </div>
     </div>
 
     <div class="card">
-        <div class="header-flex">WING BOX (WINNERS)</div>
+        <div class="header-flex">TYAIN (MATCH LIST) & WING BOX</div>
         <div class="p-15">
-            <div class="box-list" id="winnerList" style="height: 120px;"></div>
+            <div class="grid-2">
+                <div><small>MATCH LIST</small><div id="playingList" class="box-list"></div></div>
+                <div><small>WING BOX (WINNERS)</small><div id="winnerList" class="box-list"></div></div>
+            </div>
+            <button class="btn btn-blue" style="margin-top:10px;" onclick="promoteWinners()">PROMOTE ALL WINNERS</button>
         </div>
     </div>
 
     <div class="card">
-        <div class="header-flex">ADD NEW TEAMS</div>
+        <div class="header-flex">TOURNAMENT SETTINGS</div>
         <div class="p-15">
-            <textarea id="manualTyan" placeholder="Enter names: Team A, Team B..." style="height:60px; margin-bottom:8px;"></textarea>
-            <button class="btn btn-green" onclick="syncTeams()">ADD TO MATCH LIST</button>
+            <div class="grid-3">
+                <input type="text" id="tourName" placeholder="Tournament Name">
+                <input type="text" id="prizeInp" placeholder="Prize Money">
+                <input type="text" id="wmText" placeholder="Watermark (LIVE)">
+            </div>
+            <textarea id="tickerText" placeholder="Ticker Message / Events..." style="height:50px; margin: 8px 0;"></textarea>
+            <button class="btn btn-orange" onclick="updateInfo()">UPDATE ALL INFO</button>
+            <hr style="border:0.5px solid #333; margin:15px 0;">
+            <textarea id="manualTyan" placeholder="Add Teams (Team A, Team B...)" style="height:50px; margin-bottom:8px;"></textarea>
+            <button class="btn btn-green" onclick="syncTeams()">ADD TEAMS TO LIST</button>
         </div>
     </div>
 
@@ -98,12 +108,23 @@
         
         document.getElementById('dispA').innerText = data.scoreA || 0;
         document.getElementById('dispB').innerText = data.scoreB || 0;
+        document.getElementById('tourName').value = data.tourName || "";
+        document.getElementById('prizeInp').value = data.prize || "";
+        document.getElementById('wmText').value = data.watermark || "";
+        document.getElementById('tickerText').value = data.events || "";
+
+        const sBtn = document.getElementById('scoreVisBtn');
+        sBtn.innerText = data.scoreVisible ? "SCOREBOARD: ON" : "SCOREBOARD: OFF";
+        sBtn.style.background = data.scoreVisible ? "#238636" : "#da3633";
+
+        const tBtn = document.getElementById('tickerVisBtn');
+        tBtn.innerText = data.tickerVisible ? "TICKER: ON" : "TICKER: OFF";
+        tBtn.style.background = data.tickerVisible ? "#238636" : "#da3633";
 
         renderUI();
     });
 
     function renderUI() {
-        // Dropdowns
         let opt = `<option value="">Select Team</option>`;
         allTeams.forEach(t => opt += `<option value="${t}">${t}</option>`);
         document.getElementById('selA').innerHTML = opt; 
@@ -111,39 +132,22 @@
         document.getElementById('selA').value = status.nameA || ""; 
         document.getElementById('selB').value = status.nameB || "";
 
-        // --- MATCH LIST LOGIC ---
+        // Render Match List in Pairs
         let matchHtml = "";
-        let count = 1;
         for (let i = 0; i < allTeams.length; i += 2) {
             let t1 = allTeams[i];
             let t2 = allTeams[i+1];
-            
-            let isLive = (t1 === status.nameA && t2 === status.nameB) || (t1 === status.nameB && t2 === status.nameA);
-            
-            if (t2) {
-                matchHtml += `
-                <div class="list-item">
-                    <span><span class="match-tag">${count}</span> ${t1} <b style="color:#f39c12">VS</b> ${t2}</span>
-                    ${isLive ? '<span class="live-status">LIVE</span>' : ''}
-                    <button class="edit-btn" onclick="editTeam(${i})"><i class="fas fa-edit"></i></button>
-                </div>`;
-            } else {
-                matchHtml += `
-                <div class="list-item">
-                    <span><span class="match-tag">${count}</span> ${t1}</span>
-                    <b style="color:#238636; font-size:10px;">BYE</b>
-                    <button class="edit-btn" onclick="editTeam(${i})"><i class="fas fa-edit"></i></button>
-                </div>`;
-            }
-            count++;
+            matchHtml += `<div class="list-item"><span><span class="match-tag">${(i/2)+1}.</span> ${t1} ${t2 ? 'vs ' + t2 : '(BYE)'}</span></div>`;
         }
-        document.getElementById('playingList').innerHTML = matchHtml || "<center><small>No teams added</small></center>";
+        document.getElementById('playingList').innerHTML = matchHtml;
 
-        // Winner List
-        document.getElementById('winnerList').innerHTML = winnersData.map((w, i) => `
-            <div class="list-item"><span>🏆 ${w.name} (${w.score})</span><button class="edit-btn" onclick="editWinner(${i})"><i class="fas fa-edit"></i></button></div>
-        `).join('');
+        // Render Winners
+        document.getElementById('winnerList').innerHTML = winnersData.map(w => `<div class="list-item">🏆 ${w.name} (${w.score})</div>`).join('');
     }
+
+    function swapNames() { db.update({ nameA: status.nameB, nameB: status.nameA }); }
+    function swapScores() { db.update({ scoreA: status.scoreB, scoreB: status.scoreA }); }
+    function swapFull() { db.update({ nameA: status.nameB, nameB: status.nameA, scoreA: status.scoreB, scoreB: status.scoreA }); }
 
     function changeScore(team, val) {
         let cur = status[team] || 0;
@@ -163,9 +167,19 @@
             db.update({ 
                 winnersData: [...winnersData, { name: winN, score: winS }], 
                 teams: allTeams.filter(t => t !== status.nameA && t !== status.nameB),
-                scoreA: 0, scoreB: 0, nameA: "", nameB: ""
+                scoreA: 0, scoreB: 0, nameA: "", nameB: "", scoreVisible: false
             });
         }
+    }
+
+    function updateInfo() {
+        db.update({ 
+            tourName: document.getElementById('tourName').value, 
+            prize: document.getElementById('prizeInp').value,
+            watermark: document.getElementById('wmText').value,
+            events: document.getElementById('tickerText').value 
+        });
+        alert("Settings Updated!");
     }
 
     function syncTeams() {
@@ -177,24 +191,11 @@
     }
 
     function promoteWinners() {
-        if(winnersData.length === 0) return alert("No winners!");
-        if(confirm("Promote winners to next round?")) {
-            db.update({ teams: [...allTeams, ...winnersData.map(w => w.name)], winnersData: [] });
-        }
+        if(winnersData.length === 0) return;
+        db.update({ teams: [...allTeams, ...winnersData.map(w => w.name)], winnersData: [] });
     }
 
-    function resetTeams() { if(confirm("Clear Match List?")) db.update({ teams: [] }); }
     function toggleVis(key) { db.child(key).set(!status[key]); }
-    
-    function editTeam(idx) {
-        let n = prompt("Edit Team Name:", allTeams[idx]);
-        if(n) { allTeams[idx] = n; db.update({ teams: allTeams }); }
-    }
-    function editWinner(idx) {
-        let n = prompt("Edit Winner:", winnersData[idx].name);
-        let s = prompt("Edit Score:", winnersData[idx].score);
-        if(n) { winnersData[idx].name = n; winnersData[idx].score = s; db.update({ winnersData: winnersData }); }
-    }
 </script>
 </body>
 </html>
