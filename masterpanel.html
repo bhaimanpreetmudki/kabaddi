@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Kabaddi Master Admin - Manage Clients</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; padding: 20px; margin: 0; }
+        .container { max-width: 1100px; margin: auto; background: #161b22; padding: 25px; border-radius: 15px; border: 1px solid #30363d; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        h2 { color: #f39c12; text-align: center; text-transform: uppercase; margin-bottom: 25px; letter-spacing: 1px; }
+        
+        .add-card { background: #0d1117; padding: 20px; border-radius: 10px; margin-bottom: 30px; border-left: 5px solid #f39c12; }
+        .grid-inputs { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 15px; }
+        
+        label { display: block; font-size: 12px; color: #8b949e; margin-bottom: 5px; text-transform: uppercase; }
+        input { padding: 12px; background: #161b22; border: 1px solid #30363d; color: white; border-radius: 8px; width: 100%; box-sizing: border-box; outline: none; }
+        input:focus { border-color: #f39c12; }
+
+        button { padding: 12px 20px; border: none; border-radius: 8px; font-weight: bold; cursor: pointer; transition: 0.3s; text-transform: uppercase; }
+        .btn-add { background: #f39c12; color: black; margin-top: 20px; width: 100%; font-size: 15px; }
+        .btn-add:hover { background: #e67e22; }
+        
+        .table-scroll { overflow-x: auto; margin-top: 20px; }
+        table { width: 100%; border-collapse: collapse; background: #0d1117; min-width: 800px; }
+        th { background: #30363d; color: #f39c12; padding: 15px; text-align: left; font-size: 13px; }
+        td { padding: 15px; border-bottom: 1px solid #30363d; font-size: 14px; }
+        
+        .btn-save { background: #238636; color: white; margin-right: 5px; font-size: 11px; }
+        .btn-del { background: #da3633; color: white; font-size: 11px; }
+        .link-btn { color: #58a6ff; text-decoration: none; font-size: 12px; font-weight: bold; border: 1px solid #30363d; padding: 4px 8px; border-radius: 4px; background: #161b22; }
+        .link-btn:hover { background: #30363d; color: white; }
+        
+        .status-tag { padding: 2px 6px; border-radius: 4px; font-size: 10px; font-weight: bold; margin-left: 5px; }
+        .active { background: #238636; color: white; }
+        .expired { background: #da3633; color: white; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>🏆 KABADDI MASTER CONTROL</h2>
+    
+    <div class="add-card">
+        <div class="grid-inputs">
+            <div><label>User ID (ਕਲਾਇੰਟ ਆਈਡੀ)</label><input type="text" id="cID" placeholder="e.g. mudki01"></div>
+            <div><label>Password (ਪਾਸਵਰਡ)</label><input type="text" id="cPass" placeholder="Password"></div>
+            <div><label>Expiry Date (ਵੈਲਡਿਟੀ ਕਦੋਂ ਤੱਕ)</label><input type="datetime-local" id="cExpiry"></div>
+        </div>
+        <button class="btn-add" onclick="createClient()">Create New Kabaddi Client</button>
+    </div>
+
+    <h3>Client Management List</h3>
+    <div class="table-scroll">
+        <table>
+            <thead>
+                <tr>
+                    <th>User ID</th>
+                    <th>Validity & Expiry</th>
+                    <th>Access Links</th>
+                    <th>Actions</th>
+                </tr>
+            </thead>
+            <tbody id="clientTable"></tbody>
+        </table>
+    </div>
+</div>
+
+<script>
+    // Firebase Setup (Kabaddi Database)
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    // 1. Create New Client
+    function createClient() {
+        const id = document.getElementById('cID').value.trim().toLowerCase();
+        const pass = document.getElementById('cPass').value;
+        const expiry = document.getElementById('cExpiry').value;
+
+        if(!id || !pass || !expiry) return alert("Please fill all fields!");
+
+        // Kabaddi Default Setup
+        db.ref('users/' + id).set({
+            password: pass,
+            expiry: expiry,
+            matchData: {
+                nameA: "TEAM 1",
+                nameB: "TEAM 2",
+                scoreA: 0,
+                scoreB: 0,
+                round: "LIVE MATCH",
+                row1Txt: "WELCOME TO LIVE KABADDI",
+                row2Txt: "SUBSCRIBE OUR CHANNEL",
+                row3Txt: "LIKE & SHARE",
+                watermarkTxt: "M LIVE",
+                scoreVisible: true,
+                tickerVisible: true,
+                logoVisible: true
+            }
+        }).then(() => {
+            alert("New Kabaddi Client Created Successfully!");
+            document.getElementById('cID').value = "";
+            document.getElementById('cPass').value = "";
+            document.getElementById('cExpiry').value = "";
+        }).catch(err => alert("Error: " + err));
+    }
+
+    // 2. Load and Refresh List
+    function loadList() {
+        db.ref('users').on('value', (snapshot) => {
+            const data = snapshot.val();
+            const tbody = document.getElementById('clientTable');
+            tbody.innerHTML = "";
+
+            if(!data) return;
+
+            for (let id in data) {
+                // Formatting links based on current folder
+                const baseUrl = window.location.href.substring(0, window.location.href.lastIndexOf("/") + 1);
+                const adminL = baseUrl + "admin.html?id=" + id;
+                const overL = baseUrl + "overlay.html?id=" + id;
+
+                // Date Formatting
+                const d = new Date(data[id].expiry);
+                const now = new Date();
+                const isExp = now > d;
+                
+                const formattedDate = d.getDate().toString().padStart(2, '0') + "-" + 
+                                    (d.getMonth() + 1).toString().padStart(2, '0') + "-" + 
+                                    d.getFullYear() + " " + 
+                                    d.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+
+                tbody.innerHTML += `
+                    <tr>
+                        <td>
+                            <b>${id}</b>
+                            <span class="status-tag ${isExp ? 'expired' : 'active'}">${isExp ? 'EXPIRED' : 'ACTIVE'}</span>
+                        </td>
+                        <td>
+                            <input type="datetime-local" id="newExp-${id}" value="${data[id].expiry}" style="padding:5px; font-size:12px; width:auto; background:#0d1117; border:1px solid #444;">
+                            <div style="font-size:11px; color:#f39c12; margin-top:5px;">Current: ${formattedDate}</div>
+                        </td>
+                        <td>
+                            <a class="link-btn" href="${adminL}" target="_blank">PANEL</a>
+                            <a class="link-btn" href="${overL}" target="_blank">OVERLAY</a>
+                        </td>
+                        <td>
+                            <button class="btn-save" onclick="updateClient('${id}')">UPDATE</button>
+                            <button class="btn-del" onclick="deleteClient('${id}')">DEL</button>
+                        </td>
+                    </tr>
+                `;
+            }
+        });
+    }
+
+    // 3. Update Expiry
+    function updateClient(id) {
+        const newTime = document.getElementById('newExp-' + id).value;
+        if(!newTime) return alert("Select a date!");
+        db.ref('users/' + id).update({ expiry: newTime })
+          .then(() => alert("Validity Updated for " + id));
+    }
+
+    // 4. Delete Client
+    function deleteClient(id) {
+        if(confirm("Are you sure you want to delete '" + id + "'? This will remove all their match data.")) {
+            db.ref('users/' + id).remove();
+        }
+    }
+
+    loadList();
+</script>
+</body>
+</html>
