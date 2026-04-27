@@ -3,42 +3,35 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kabaddi Admin - Auto Sync</title>
+    <title>Kabaddi Admin - Score Control</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: #161b22; width: 100%; max-width: 600px; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 15px; overflow: hidden; }
-        
-        .header-flex { background: #f39c12; color: #000; padding: 12px 15px; display: flex; justify-content: space-between; align-items: center; }
-        .header-title { font-weight: 900; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; }
-        
-        .upd-btn-large { 
-            background: #ffffff; color: #000; border: 2px solid #000; padding: 12px 24px; border-radius: 8px; 
-            font-size: 14px; cursor: pointer; font-weight: 900; text-transform: uppercase; transition: 0.2s;
-        }
-        .btn-status-on { background: #238636 !important; color: white !important; }
-        .btn-status-off { background: #da3633 !important; color: white !important; }
-
+        .card { background: #161b22; width: 100%; max-width: 600px; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 12px; overflow: hidden; }
+        .header-flex { background: #f39c12; color: #000; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; }
+        .header-title { font-weight: 900; text-transform: uppercase; font-size: 13px; }
         .p-15 { padding: 15px; }
-        .score-top { display: flex; justify-content: space-around; align-items: center; background: #0d1117; padding: 20px; border-radius: 12px; border: 2px solid #f39c12; margin-bottom: 12px; }
-        .score-num { font-size: 65px; font-weight: 900; color: #f39c12; line-height: 1; margin: 10px 0; }
-        .team-name-label { font-size: 18px; font-weight: bold; color: #fff; text-transform: uppercase; background: #21262d; padding: 5px 10px; border-radius: 4px; }
-
-        input, select, textarea { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 8px; margin-bottom: 10px; box-sizing: border-box; font-size: 15px; }
-        .btn { border: none; padding: 14px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; margin-bottom: 8px; font-size: 13px; }
         
+        /* SCORE SECTION STYLE */
+        .score-container { background: #0d1117; border: 2px solid #f39c12; border-radius: 15px; padding: 20px; margin-bottom: 15px; position: relative; }
+        .team-input-row { display: grid; grid-template-columns: 1fr 40px 1fr; gap: 10px; align-items: center; margin-bottom: 15px; }
+        .score-row { display: grid; grid-template-columns: 1fr 40px 1fr; gap: 10px; align-items: center; text-align: center; }
+        .score-val { font-size: 60px; font-weight: 900; color: #f39c12; line-height: 1; margin: 10px 0; }
+        
+        input, select { width: 100%; padding: 10px; background: #1c2128; border: 1px solid #30363d; color: #fff; border-radius: 8px; text-align: center; font-size: 14px; }
+        .vs-text { font-weight: 900; color: #f39c12; text-align: center; }
+        
+        .btn { border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; font-size: 12px; transition: 0.2s; }
         .btn-green { background: #238636; color: white; }
-        .btn-blue { background: #1f6feb; color: white; }
         .btn-red { background: #da3633; color: white; }
+        .btn-blue { background: #1f6feb; color: white; }
         .btn-orange { background: #f39c12; color: black; }
         
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 180px; overflow-y: auto; padding: 10px; font-size: 16px; }
-        .list-item { padding: 8px 0; border-bottom: 1px solid #222; color: #e6edf3; font-weight: 600; }
-        
-        small { font-size: 12px; font-weight: bold; margin-bottom: 5px; display: block; text-transform: uppercase; color: #f39c12; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
+        .plus-minus-btns { display: flex; gap: 5px; justify-content: center; }
+        .pm-btn { width: 45px; height: 45px; font-size: 20px; }
     </style>
 </head>
 <body>
@@ -46,179 +39,125 @@
 <div class="card">
     <div class="header-flex">
         <span class="header-title">Live Score Control</span>
-        <button id="mainToggleBtn" class="upd-btn-large" onclick="toggleVis('scoreVisible')">Show Board</button>
+        <button id="showBtn" class="btn btn-green" style="width: auto; padding: 5px 15px;" onclick="toggleVis()">Show Board</button>
     </div>
+    
     <div class="p-15">
-        <div class="score-top">
-            <div style="text-align:center;">
-                <div id="dispNameA" class="team-name-label">TEAM 1</div>
-                <div class="score-num" id="dispA">0</div>
-                <div style="display:flex; gap:8px;"><button class="btn btn-green" onclick="changeScore('scoreA', 1)">+</button><button class="btn btn-red" onclick="changeScore('scoreA', -1)">-</button></div>
+        <div class="score-container">
+            <div class="team-input-row">
+                <input type="text" id="nameA" placeholder="TEAM 1" oninput="updateNames()">
+                <div class="vs-text">VS</div>
+                <input type="text" id="nameB" placeholder="TEAM 2" oninput="updateNames()">
             </div>
-            <div style="font-weight:900; font-size: 24px; color: #f39c12;">VS</div>
-            <div style="text-align:center;">
-                <div id="dispNameB" class="team-name-label">TEAM 2</div>
-                <div class="score-num" id="dispB">0</div>
-                <div style="display:flex; gap:8px;"><button class="btn btn-green" onclick="changeScore('scoreB', 1)">+</button><button class="btn btn-red" onclick="changeScore('scoreB', -1)">-</button></div>
+            
+            <div class="score-row">
+                <div>
+                    <div class="score-val" id="dispA">0</div>
+                    <div class="plus-minus-btns">
+                        <button class="btn btn-green pm-btn" onclick="changeScore('scoreA', 1)">+</button>
+                        <button class="btn btn-red pm-btn" onclick="changeScore('scoreA', -1)">-</button>
+                    </div>
+                </div>
+                <div class="vs-text"></div>
+                <div>
+                    <div class="score-val" id="dispB">0</div>
+                    <div class="plus-minus-btns">
+                        <button class="btn btn-green pm-btn" onclick="changeScore('scoreB', 1)">+</button>
+                        <button class="btn btn-red pm-btn" onclick="changeScore('scoreB', -1)">-</button>
+                    </div>
+                </div>
             </div>
+        </div>
+
+        <div class="grid-2">
+            <button class="btn btn-blue" onclick="swapNames()">Only Team Swipe</button>
+            <button class="btn btn-blue" onclick="swapFull()">Full Swipe</button>
         </div>
         
         <div class="grid-2">
-            <button class="btn btn-blue" onclick="swapOnlyTeams()">Only Team Swipe</button>
-            <button class="btn btn-blue" onclick="swapWithScore()">Full Swipe</button>
-        </div>
-        
-        <div class="grid-2" style="margin-top:10px;">
-            <button class="btn btn-red" onclick="confirmReset('score')">Reset Score</button>
+            <button class="btn btn-red" onclick="resetScores()">Reset Score</button>
             <button class="btn btn-green" onclick="declareWinner()">🏆 Win & Add to Box</button>
         </div>
     </div>
 </div>
 
-<div class="card">
-    <div class="header-flex">
-        <span class="header-title">Match Starter (Auto Add to List)</span>
-        <button class="upd-btn-large" style="padding: 8px 15px;" onclick="confirmUpdate('match')">Start Match</button>
-    </div>
-    <div class="p-15">
-        <small>Select or Type Teams to Start & Auto-Add to List</small>
-        <div class="grid-2">
-            <input type="text" id="customA" placeholder="Team 1 Name">
-            <input type="text" id="customB" placeholder="Team 2 Name">
-        </div>
-        <div class="grid-2">
-            <select id="selA"></select>
-            <select id="selB"></select>
-        </div>
-    </div>
-</div>
-
-<div class="card">
-    <div class="header-flex">
-        <span class="header-title">Match Tyian & Winners</span>
-        <button class="upd-btn-large" style="padding: 8px 15px;" onclick="confirmUpdate('tyian')">Save Tyian</button>
-    </div>
-    <div class="p-15">
-        <div class="grid-2">
-            <div>
-                <small>MATCH LIST (Auto-Updated)</small>
-                <div id="playingList" class="box-list"></div>
-                <button class="btn btn-red" style="width:100%; margin-top:5px; padding: 8px; font-size: 11px;" onclick="confirmReset('teams')">Clear All</button>
-            </div>
-            <div>
-                <small>WINNER BOX</small>
-                <div id="winnerList" class="box-list"></div>
-                <button class="btn btn-blue" style="width:100%; margin-top:5px; padding: 8px; font-size: 11px;" onclick="confirmUpdate('promote')">Promote for Next Round</button>
-            </div>
-        </div>
-        <small style="margin-top:10px;">Manual Edit Tyian List:</small>
-        <textarea id="manualTyan" placeholder="1. Mudki vs Gill..." style="height:60px;"></textarea>
-    </div>
-</div>
-
-<div class="card">
-    <div class="header-flex">
-        <span class="header-title">Tournament Info</span>
-        <button class="upd-btn-large" style="padding: 8px 15px;" onclick="confirmUpdate('info')">Update Info</button>
-    </div>
-    <div class="p-15">
-        <div class="grid-2">
-            <input type="text" id="tourName" placeholder="Tournament Name">
-            <input type="text" id="prizeInp" placeholder="Prize Details">
-        </div>
-        <textarea id="upcomingInp" placeholder="Upcoming Programs..." style="height:60px;"></textarea>
-        <input type="text" id="wmText" placeholder="Watermark: LIVE MANPREET MUDKI">
-    </div>
-</div>
-
 <script>
+    // ਫਾਇਰਬੇਸ ਕਨੈਕਸ਼ਨ (ਤੁਹਾਡਾ URL)
     const firebaseConfig = { databaseURL: "https://manpreetpigeons-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("kabaddiMatch");
 
-    let status = {}, winners = [];
+    let status = {};
 
     db.on("value", (snap) => {
         const data = snap.val() || {};
         status = data;
-        winners = data.winners || [];
         
+        // ਇਨਪੁਟ ਬਾਕਸਾਂ ਵਿੱਚ ਨਾਮ ਦਿਖਾਉਣਾ
+        document.getElementById('nameA').value = data.nameA || "";
+        document.getElementById('nameB').value = data.nameB || "";
+        
+        // ਸਕੋਰ ਦਿਖਾਉਣਾ
         document.getElementById('dispA').innerText = data.scoreA || 0;
         document.getElementById('dispB').innerText = data.scoreB || 0;
-        document.getElementById('dispNameA').innerText = data.nameA || "TEAM 1";
-        document.getElementById('dispNameB').innerText = data.nameB || "TEAM 2";
-        document.getElementById('manualTyan').value = data.tyianText || "";
-        document.getElementById('tourName').value = data.tourName || "";
-        document.getElementById('prizeInp').value = data.prize || "";
-        document.getElementById('upcomingInp').value = data.events || "";
-        document.getElementById('wmText').value = data.watermark || "";
         
-        const btn = document.getElementById('mainToggleBtn');
-        if(data.scoreVisible) {
-            btn.innerText = "HIDE BOARD";
-            btn.className = "upd-btn-large btn-status-off";
-        } else {
-            btn.innerText = "SHOW BOARD";
-            btn.className = "upd-btn-large btn-status-on";
-        }
-        renderUI();
+        // ਬਟਨ ਦਾ ਟੈਕਸਟ
+        document.getElementById('showBtn').innerText = data.scoreVisible ? "HIDE BOARD" : "SHOW BOARD";
+        document.getElementById('showBtn').className = data.scoreVisible ? "btn btn-red" : "btn btn-green";
     });
 
-    function renderUI() {
-        const lines = (status.tyianText || "").split('\n').filter(l => l.trim() !== "");
-        document.getElementById('playingList').innerHTML = lines.map(l => `<div class="list-item">${l}</div>`).join('');
-        document.getElementById('winnerList').innerHTML = winners.map(w => `<div class="list-item">🏆 ${w}</div>`).join('');
-
-        let opt = `<option value="">Select Team</option>`;
-        const extracted = (status.tyianText || "").replace(/vs/gi, '\n').split('\n').map(t => t.trim().replace(/^\d+\.\s*/, '')).filter(t => t !== "");
-        [...new Set(extracted)].forEach(t => opt += `<option value="${t}">${t}</option>`);
-        document.getElementById('selA').innerHTML = opt;
-        document.getElementById('selB').innerHTML = opt;
-    }
-
-    function confirmUpdate(type) {
-        if(!confirm("ਕੀ ਤੁਸੀਂ ਅਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) return;
-        if(type === 'tyian') db.update({ tyianText: document.getElementById('manualTyan').value });
-        if(type === 'info') {
-            db.update({ tourName: document.getElementById('tourName').value, prize: document.getElementById('prizeInp').value, events: document.getElementById('upcomingInp').value, watermark: document.getElementById('wmText').value });
-        }
-        if(type === 'promote') { db.update({ tyianText: winners.map((w,i) => (i%2==0 ? w : " vs "+w)).join('\n'), winners: [] }); }
-        if(type === 'match') {
-            const n1 = document.getElementById('customA').value || document.getElementById('selA').value;
-            const n2 = document.getElementById('customB').value || document.getElementById('selB').value;
-            if(n1 && n2) {
-                const currentTyian = status.tyianText || "";
-                const matchStr = n1 + " vs " + n2;
-                // Automatic add to list if not already there
-                const updatedTyian = currentTyian ? currentTyian + "\n" + matchStr : matchStr;
-                db.update({ nameA: n1, nameB: n2, scoreA: 0, scoreB: 0, scoreVisible: true, tyianText: updatedTyian });
-                document.getElementById('customA').value = ""; document.getElementById('customB').value = "";
-            }
-        }
+    function updateNames() {
+        db.update({
+            nameA: document.getElementById('nameA').value,
+            nameB: document.getElementById('nameB').value
+        });
     }
 
     function changeScore(team, val) {
         let cur = status[team] || 0;
-        let newVal = (val > 0) ? (cur === 0 && (status.scoreA+status.scoreB === 0) ? 1.5 : cur + 1) : Math.max(0, cur === 1.5 ? 0 : cur - 1);
+        let newVal;
+        if(val > 0) {
+            // ਪਹਿਲਾ ਨੰਬਰ 1.5 ਕਰਨ ਲਈ (ਜੇ ਦੋਵੇਂ 0 ਹੋਣ)
+            newVal = (cur === 0 && (status.scoreA + status.scoreB === 0)) ? 1.5 : cur + 1;
+        } else {
+            newVal = Math.max(0, cur === 1.5 ? 0 : cur - 1);
+        }
         db.update({ [team]: newVal });
+    }
+
+    function swapNames() {
+        db.update({ nameA: status.nameB, nameB: status.nameA });
+    }
+
+    function swapFull() {
+        db.update({ 
+            nameA: status.nameB, nameB: status.nameA, 
+            scoreA: status.scoreB, scoreB: status.scoreA 
+        });
+    }
+
+    function resetScores() {
+        if(confirm("ਕੀ ਸਕੋਰ ਜ਼ੀਰੋ ਕਰਨਾ ਹੈ?")) {
+            db.update({ scoreA: 0, scoreB: 0 });
+        }
+    }
+
+    function toggleVis() {
+        db.child('scoreVisible').set(!status.scoreVisible);
     }
 
     function declareWinner() {
         const win = status.scoreA > status.scoreB ? status.nameA : status.nameB;
-        if(confirm(win + " ਨੂੰ Winner Box ਵਿੱਚ ਭੇਜੀਏ?")) {
-            db.update({ winners: [...winners, win], scoreVisible: false });
+        if(confirm(win + " ਨੂੰ ਜੇਤੂ ਬਣਾ ਕੇ ਲਿਸਟ ਵਿੱਚ ਪਾ ਦੇਈਏ?")) {
+            // ਇੱਥੇ ਜੇਤੂ ਲਿਸਟ ਵਿੱਚ ਡਾਟਾ ਭੇਜਣ ਦਾ ਕੋਡ
+            let winners = status.winners || [];
+            db.update({ 
+                winners: [...winners, win],
+                scoreA: 0, scoreB: 0,
+                scoreVisible: false
+            });
         }
     }
-
-    function toggleVis(key) { db.child(key).set(!status[key]); }
-    function confirmReset(type) {
-        if(!confirm("ਸਾਵਧਾਨ! ਕੀ ਤੁਸੀਂ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) return;
-        if(type === 'score') db.update({ scoreA: 0, scoreB: 0 });
-        if(type === 'teams') db.update({ tyianText: "", winners: [] });
-    }
-
-    function swapOnlyTeams() { db.update({ nameA: status.nameB, nameB: status.nameA }); }
-    function swapWithScore() { db.update({ nameA: status.nameB, nameB: status.nameA, scoreA: status.scoreB, scoreB: status.scoreA }); }
 </script>
 </body>
 </html>
