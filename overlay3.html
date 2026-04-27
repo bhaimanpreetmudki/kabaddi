@@ -2,160 +2,132 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Kabaddi Live Overlay - Manpreet Mudki</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Rajdhani', sans-serif; }
-
-        /* SCOREBOARD CONTAINER */
-        #scoreboard {
-            position: absolute;
-            top: 40px;
-            left: 50%;
-            transform: translateX(-50%);
-            display: none; /* Controlled by Firebase */
-            flex-direction: row;
-            align-items: center;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Arial Black', sans-serif; }
+        
+        /* TOP HEADER: Tournament & Prize */
+        .top-header {
+            position: absolute; top: 10px; left: 50%; transform: translateX(-50%);
+            display: flex; gap: 5px;
         }
-
-        .team-box {
-            background: rgba(0, 0, 0, 0.85);
-            color: white;
-            padding: 10px 30px;
-            min-width: 200px;
-            text-align: center;
-            font-size: 28px;
-            font-weight: 700;
-            text-transform: uppercase;
-            border-bottom: 4px solid #f39c12;
-            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+        .info-box {
+            background: rgba(0, 0, 0, 0.85); border-bottom: 4px solid #f39c12;
+            color: white; padding: 5px 20px; border-radius: 5px; text-transform: uppercase;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
+        .prize-box { background: #f39c12; color: black; font-weight: 900; }
 
+        /* SCOREBOARD MAIN */
+        .scoreboard {
+            position: absolute; bottom: 60px; left: 50%; transform: translateX(-50%);
+            display: flex; align-items: center; background: rgba(0, 0, 0, 0.9);
+            border: 3px solid #333; border-radius: 10px; overflow: hidden;
+            height: 70px; min-width: 700px;
+        }
+        .team-name { flex: 1; text-align: center; color: white; font-size: 24px; padding: 0 20px; text-transform: uppercase; }
         .score-box {
-            background: #f39c12;
-            color: black;
-            font-family: 'Anton', sans-serif;
-            font-size: 45px;
-            padding: 5px 25px;
-            min-width: 70px;
-            text-align: center;
-            margin: 0 -15px;
-            z-index: 2;
-            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
-            border: 2px solid #fff;
+            background: #f39c12; color: #000; width: 80px; height: 100%;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 45px; font-weight: 900; box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
         }
+        .vs-tag { background: #fff; color: #000; padding: 5px 10px; font-size: 14px; font-weight: 900; }
 
-        .vs-badge {
-            background: #fff;
-            color: #000;
-            font-size: 14px;
-            font-weight: 900;
-            padding: 2px 8px;
-            position: absolute;
-            top: -10px;
-            left: 50%;
-            transform: translateX(-50%);
-            border-radius: 4px;
+        /* LEFT SIDE: WINNERS LIST (WING BOX) */
+        .wing-box {
+            position: absolute; left: 20px; top: 100px; width: 220px;
+            background: rgba(0,0,0,0.8); border-left: 5px solid #238636; border-radius: 5px;
         }
+        .wing-header { background: #238636; color: white; font-size: 12px; padding: 5px; text-align: center; }
+        #winners-list { color: #f39c12; font-size: 16px; padding: 10px; line-height: 1.6; }
 
-        /* TICKER / PATTI */
-        #ticker-container {
-            position: absolute;
-            bottom: 0;
-            width: 100%;
-            height: 50px;
-            background: rgba(0, 0, 0, 0.9);
-            border-top: 3px solid #f39c12;
-            display: none; /* Controlled by Firebase */
-            align-items: center;
-            overflow: hidden;
+        /* RIGHT SIDE: NEXT MATCH & EVENT */
+        .next-info {
+            position: absolute; right: 20px; top: 100px; width: 220px;
+            background: rgba(0,0,0,0.8); border-right: 5px solid #1f6feb; border-radius: 5px;
         }
+        .next-header { background: #1f6feb; color: white; font-size: 12px; padding: 5px; text-align: center; }
+        .next-content { color: #fff; font-size: 14px; padding: 10px; text-align: right; }
 
-        .ticker-label {
-            background: #f39c12;
-            color: black;
-            font-weight: 900;
-            padding: 0 20px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            z-index: 5;
-            text-transform: uppercase;
-            font-size: 20px;
-            position: relative;
+        /* BOTTOM TICKER: HELPLINE & EVENTS */
+        .bottom-ticker {
+            position: absolute; bottom: 0; width: 100%; height: 40px;
+            background: linear-gradient(90deg, #f39c12, #d35400);
+            display: flex; align-items: center; overflow: hidden;
+            color: #000; font-weight: bold; font-size: 18px;
         }
+        .ticker-text { white-space: nowrap; animation: scroll-left 20s linear infinite; }
+        @keyframes scroll-left { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
 
-        .ticker-label::after {
-            content: '';
-            position: absolute;
-            right: -20px;
-            border-left: 20px solid #f39c12;
-            border-top: 25px solid transparent;
-            border-bottom: 25px solid transparent;
-        }
+        .booking-tag { background: #000; color: #fff; padding: 0 20px; height: 100%; display: flex; align-items: center; z-index: 10; font-size: 14px; }
 
-        .marquee {
-            white-space: nowrap;
-            font-size: 24px;
-            color: #fff;
-            font-weight: 600;
-            padding-left: 100%;
-            animation: scroll 20s linear infinite;
-        }
-
-        @keyframes scroll {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-150%); }
-        }
-
-        /* ANIMATIONS */
-        .fade-in { animation: fadeIn 0.5s ease-in-out; }
-        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
-
+        /* HIDDEN OVERLAY CONTROL */
+        #main-overlay { transition: opacity 0.5s; opacity: 0; }
     </style>
 </head>
 <body>
 
-    <div id="scoreboard" class="fade-in">
-        <div class="vs-badge">LIVE MATCH</div>
-        <div class="team-box" id="teamA">TEAM A</div>
-        <div class="score-box" id="scoreA">0</div>
-        <div class="score-box" id="scoreB">0</div>
-        <div class="team-box" id="teamB">TEAM B</div>
-    </div>
+    <div id="main-overlay">
+        <div class="top-header">
+            <div class="info-box" id="tour-display">TOURNAMENT NAME</div>
+            <div class="info-box prize-box" id="prize-display">PRIZE: ₹0</div>
+        </div>
 
-    <div id="ticker-container">
-        <div class="ticker-label" id="tourName">KABADDI CUP</div>
-        <div class="marquee" id="tickerText">ਜੀ ਆਇਆਂ ਨੂੰ ਸਾਰੇ ਖੇਡ ਪ੍ਰੇਮੀਆਂ ਨੂੰ... ਲਾਈਵ ਕਬੱਡੀ ਕੱਪ ਦਾ ਆਨੰਦ ਮਾਣੋ।</div>
+        <div class="wing-box">
+            <div class="wing-header">🏆 JITU TEAMS (WING BOX)</div>
+            <div id="winners-list"></div>
+        </div>
+
+        <div class="next-info">
+            <div class="next-header">NEXT EVENT / MATCH</div>
+            <div class="next-content" id="event-display">Loading...</div>
+        </div>
+
+        <div class="scoreboard">
+            <div class="team-name" id="nameA">TEAM A</div>
+            <div class="score-box" id="scoreA">0</div>
+            <div class="vs-tag">VS</div>
+            <div class="score-box" id="scoreB">0</div>
+            <div class="team-name" id="nameB">TEAM B</div>
+        </div>
+
+        <div class="bottom-ticker">
+            <div class="booking-tag">LIVE BOOKING / HELP: <span id="booking-num">98765-XXXXX</span></div>
+            <div class="ticker-text" id="ticker-msg">WELCOME TO KABADDI LIVE STREAMING... </div>
+        </div>
     </div>
 
 <script>
-    // Firebase Configuration
     const firebaseConfig = { databaseURL: "https://manpreetpigeons-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("kabaddiMatch");
 
     db.on("value", (snap) => {
         const data = snap.val() || {};
+        
+        // Show/Hide Overlay
+        document.getElementById('main-overlay').style.opacity = data.scoreVisible ? "1" : "0";
 
-        // Scoreboard Update
-        document.getElementById('teamA').innerText = data.nameA || "TEAM 1";
-        document.getElementById('teamB').innerText = data.nameB || "TEAM 2";
+        // Update Scores & Names
+        document.getElementById('nameA').innerText = data.nameA || "TEAM A";
+        document.getElementById('nameB').innerText = data.nameB || "TEAM B";
         document.getElementById('scoreA').innerText = data.scoreA || 0;
         document.getElementById('scoreB').innerText = data.scoreB || 0;
-        
-        // Show/Hide Scoreboard
-        document.getElementById('scoreboard').style.display = data.scoreVisible ? 'flex' : 'none';
 
-        // Ticker Update
-        document.getElementById('tourName').innerText = data.tourName || "LIVE";
-        document.getElementById('tickerText').innerText = data.events || "Welcome to Live Kabaddi Tournament...";
-        
-        // Show/Hide Ticker
-        document.getElementById('ticker-container').style.display = data.tickerVisible ? 'flex' : 'none';
+        // Update Header & Ticker
+        document.getElementById('tour-display').innerText = data.tourName || "KABADDI CUP";
+        document.getElementById('prize-display').innerText = "PRIZE: " + (data.prize || "TBD");
+        document.getElementById('ticker-msg').innerText = data.events || "LIVE FROM MUDKI...";
+        document.getElementById('booking-num').innerText = data.watermark || "ADD NUMBER IN ADMIN";
+        document.getElementById('event-display').innerText = data.nextMatch || "TBD";
+
+        // Update Winners (Wing Box)
+        const winners = data.winnersData || [];
+        let winHtml = winners.map(w => `<div>• ${w.name}</div>`).join('');
+        document.getElementById('winners-list').innerHTML = winHtml || "Waiting for winners...";
     });
 </script>
 </body>
