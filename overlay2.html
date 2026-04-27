@@ -2,114 +2,95 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Admin Panel - Manpreet Mudki</title>
+    <title>Kabaddi Scoreboard Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: sans-serif; background: #0f1113; color: white; margin: 0; padding: 10px; -webkit-text-size-adjust: 100%; }
-        .status-bar { background: #1a1d21; border: 1px solid #333; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 10px; border-left: 5px solid #f39c12; align-items: center; }
-        .help-box { background: white; color: black; padding: 6px 12px; border-radius: 6px; font-weight: 950; font-size: 14px; display: inline-block; cursor: pointer; text-decoration: none; }
-        .status-val { font-size: 13px; font-weight: 900; color: #2ecc71; text-transform: uppercase; }
-        
-        /* ਕਬੱਡੀ ਸਟਾਈਲ ਟਿੱਕਰ */
-        .kabaddi-ticker { display: flex; background: #1a1d21; border: 2px solid #333; border-radius: 8px; overflow: hidden; margin-bottom: 15px; height: 50px; align-items: center; }
-        .live-tag { background: #007bff; color: white; padding: 0 20px; height: 100%; display: flex; align-items: center; font-weight: 900; font-size: 16px; clip-path: polygon(0 0, 85% 0, 100% 100%, 0% 100%); min-width: 70px; }
-        .ticker-content { flex-grow: 1; padding: 0 10px; color: #f39c12; font-weight: bold; font-size: 13px; overflow: hidden; }
-        .money-icon { background: #eee; padding: 5px; height: 100%; display: flex; align-items: center; clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%); }
-        .money-icon img { height: 30px; }
+        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Arial', sans-serif; }
 
-        .overlay-links-box { background: #1a1d21; padding: 15px; border-radius: 12px; border: 1px solid #444; margin-bottom: 15px; border-top: 4px solid #007bff; }
-        .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
-        .link-btn { background: #333; color: #3498db; padding: 10px; border-radius: 6px; text-decoration: none; text-align: center; font-size: 11px; font-weight: bold; border: 1px solid #444; text-transform: uppercase; }
-        
-        .btn-recharge-main { width: 100%; padding: 14px; background: #f39c12; color: black; border: none; border-radius: 8px; font-weight: 900; font-size: 16px; margin-bottom: 15px; cursor: pointer; }
-        .controls-container { background: #1a1d21; padding: 15px; border-radius: 12px; border: 1px solid #333; margin-bottom: 15px; }
-        textarea, input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #444; color: white; border-radius: 8px; font-size: 16px; outline: none; box-sizing: border-box; margin-bottom: 10px; }
-        .btn-add { background: #f39c12; border: none; font-weight: 900; padding: 12px; border-radius: 8px; color: black; width: 100%; cursor: pointer; }
-        .btn-update { width: 100%; padding: 14px; background: #2ecc71; color: black; border: none; border-radius: 8px; font-weight: 900; font-size: 16px; cursor: pointer; }
-        
-        .admin-sum-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
-        .sum-item { background: #1a1d21; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
-        .sum-item b { font-size: 18px; color: #f39c12; }
-        
-        .pigeon-row { background: #21262d; padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; align-items: center; border: 1px solid #30363d; }
-        .st-btn { border: none; padding: 10px; border-radius: 5px; font-weight: 900; opacity: 0.3; color: white; width: 35px; margin-left: 5px; }
-        .st-btn.active { opacity: 1; border: 1.5px solid white; }
-        .st-fly { background: #007bff; } .st-time { background: #ffc107; color: black; } .st-out { background: #dc3545; }
+        /* ਓਵਰਲੇਅ ਦਾ ਮੇਨ ਕੰਟੇਨਰ */
+        .main-ticker-wrapper {
+            position: absolute;
+            bottom: 30px;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 90%;
+            height: 55px;
+            display: flex;
+            align-items: center;
+            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));
+        }
 
-        #recharge-modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.9); z-index: 2000; padding: 20px; }
-        .modal-content { background: #1a1d21; padding: 20px; border-radius: 15px; border: 2px solid #f39c12; max-width: 400px; margin: auto; }
+        /* ਖੱਬੇ ਪਾਸੇ ਵਾਲਾ LIVE ਬਾਕਸ (ਟੇਢਾ ਕੱਟ) */
+        .live-side {
+            background: #007bff;
+            color: white;
+            height: 100%;
+            padding: 0 30px 0 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            font-style: italic;
+            clip-path: polygon(0 0, 85% 0, 100% 100%, 0% 100%);
+            z-index: 3;
+        }
+
+        /* ਵਿਚਾਲੇ ਵਾਲਾ ਮੈਸੇਜ ਬਾਕਸ */
+        .message-area {
+            background: rgba(15, 17, 19, 0.9);
+            height: 85%;
+            flex-grow: 1;
+            margin-left: -20px;
+            margin-right: -20px;
+            display: flex;
+            align-items: center;
+            border-top: 2px solid #444;
+            border-bottom: 2px solid #444;
+            z-index: 1;
+            overflow: hidden;
+        }
+
+        marquee {
+            color: white;
+            font-size: 20px;
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+
+        /* ਸੱਜੇ ਪਾਸੇ ਵਾਲਾ ਪ੍ਰਾਈਜ਼/ਨੋਟ ਬਾਕਸ */
+        .prize-side {
+            background: #4db8ff;
+            height: 100%;
+            padding: 0 15px 0 30px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
+            z-index: 3;
+            min-width: 80px;
+        }
+
+        .prize-side img {
+            height: 40px;
+            filter: drop-shadow(0px 0px 2px black);
+        }
     </style>
 </head>
 <body>
 
-<div id="login-box" style="max-width:400px; margin:80px auto; text-align:center; background:#1a1d21; padding:25px; border-radius:15px; border:1px solid #333;">
-    <h2 style="color:#f39c12; font-weight:900;">ADMIN LOGIN</h2>
-    <input type="password" id="adminPass" placeholder="ਪਾਸਵਰਡ ਭਰੋ...">
-    <button onclick="checkLogin()" class="btn-recharge-main">ENTER CONTROL</button>
-</div>
+    <div class="main-ticker-wrapper">
+        <div class="live-side">LIVE</div>
 
-<div id="main-content" style="display:none;">
-    <div class="status-bar">
-        <div><span style="font-size:10px; color:#888;">HELPLINE:</span><br><a href="tel:+918699640061" class="help-box">📞 CALL HELP</a></div>
-        <div style="text-align: right;"><span style="font-size:10px; color:#888;">EXPIRY:</span><br><div id="expDisp" class="status-val">--</div></div>
-    </div>
-
-    <div class="kabaddi-ticker">
-        <div class="live-tag">LIVE</div>
-        <div class="ticker-content">
-            <marquee id="ticker-preview" scrollamount="4">ਸੁਆਗਤ ਹੈ - ਤੁਹਾਡਾ ਮੈਸੇਜ ਇੱਥੇ ਦਿਖੇਗਾ...</marquee>
+        <div class="message-area">
+            <marquee id="ticker-text" scrollamount="5">Connecting to database...</marquee>
         </div>
-        <div class="money-icon">
+
+        <div class="prize-side">
             <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" alt="prize">
         </div>
     </div>
-
-    <div class="overlay-links-box">
-        <span style="font-size: 12px; color: #888; font-weight: bold;">LIVE LINKS FOR: <b id="client-name-display" style="color:#f39c12;">--</b></span>
-        <div class="link-grid">
-            <a href="#" id="link-t1" target="_blank" class="link-btn">Overlay 1</a>
-            <a href="#" id="link-t2" target="_blank" class="link-btn">Overlay 2</a>
-            <a href="#" id="link-t3" target="_blank" class="link-btn">Overlay 3</a>
-            <a href="#" id="link-t4" target="_blank" class="link-btn">Overlay 4</a>
-        </div>
-    </div>
-
-    <button class="btn-recharge-main" onclick="toggleRecharge(true)">💳 RECHARGE / EXTEND PLAN</button>
-
-    <div id="admin-controls-wrapper">
-        <div class="controls-container">
-            <textarea id="pName" placeholder="ਪਾਰਟੀਆਂ ਦੇ ਨਾਮ ਕੌਮਾ (,) ਪਾ ਕੇ ਲਿਖੋ..."></textarea>
-            <button class="btn-add" onclick="addP()">ADD ALL TEAMS</button>
-        </div>
-
-        <div class="controls-container">
-            <input type="text" id="inpTicker" placeholder="ਟਿੱਕਰ ਮੈਸੇਜ ਲਿਖੋ...">
-            <input type="text" id="inpBoxTime" placeholder="ਸਮਾਂ (Time) ਸੈੱਟ ਕਰੋ...">
-            <button class="btn-update" onclick="save()">UPDATE TICKER & TIME</button>
-        </div>
-
-        <div class="admin-sum-grid">
-            <div class="sum-item"><div>TOT</div><b id="sum-total">0</b></div>
-            <div class="sum-item"><div>FLY</div><b id="sum-fly" style="color:#007bff;">0</b></div>
-            <div class="sum-item"><div>TIME</div><b id="sum-time" style="color:#ffc107;">0</b></div>
-            <div class="sum-item"><div>OUT</div><b id="sum-out" style="color:#dc3545;">0</b></div>
-        </div>
-
-        <button onclick="resetData()" style="width:100%; padding:10px; background:#dc3545; color:white; border:none; border-radius:8px; margin-bottom:15px; font-weight:bold;">🔄 RESET TOURNAMENT</button>
-        <div id="listArea"></div>
-    </div>
-
-    <div id="recharge-modal">
-        <div class="modal-content">
-            <h3 style="text-align:center; color:#f39c12;">CHOOSE PLAN</h3>
-            <div id="plans-container"></div>
-            <button onclick="toggleRecharge(false)" style="width:100%; padding:12px; background:#444; color:white; border:none; border-radius:10px; margin-top:10px;">CLOSE</button>
-        </div>
-    </div>
-</div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetpigeons-default-rtdb.firebaseio.com/" };
@@ -118,96 +99,18 @@
 
     const urlParams = new URLSearchParams(window.location.search);
     const userID = urlParams.get('id');
-    let localData = { pigeons: [], config: {} };
-    let isExpired = false;
 
     if(userID) {
-        document.getElementById('client-name-display').innerText = userID;
-        document.getElementById('link-t1').href = `overlay.html?id=${userID}`;
-        document.getElementById('link-t2').href = `overlay2.html?id=${userID}`;
-        document.getElementById('link-t3').href = `overlay3.html?id=${userID}`;
-        document.getElementById('link-t4').href = `overlay4.html?id=${userID}`;
-    }
-
-    function checkLogin() {
-        if(!userID) return alert("ID missing!");
-        db.ref('users/' + userID).once('value', snap => {
-            const data = snap.val();
-            if(data && data.password === document.getElementById('adminPass').value) {
-                const expiryDate = new Date(data.expiry);
-                const now = new Date();
-                document.getElementById('login-box').style.display = "none";
-                document.getElementById('main-content').style.display = "block";
-                
-                if (now > expiryDate) {
-                    isExpired = true;
-                    document.getElementById('admin-controls-wrapper').style.display = "none";
-                    document.getElementById('expDisp').innerText = "EXPIRED";
-                    document.getElementById('expDisp').style.color = "red";
-                } else {
-                    document.getElementById('expDisp').innerText = expiryDate.toLocaleString('en-GB', {day:'2-digit', month:'short', hour:'2-digit', minute:'2-digit', hour12:true});
-                    db.ref('users/' + userID).on('value', s => { 
-                        localData = s.val() || {pigeons:[], config:{}}; 
-                        render(); 
-                    });
-                }
-            } else { alert("Wrong Password!"); }
+        db.ref('users/' + userID + '/config').on('value', (snapshot) => {
+            const config = snapshot.val();
+            if(config && config.ticker) {
+                document.getElementById('ticker-text').innerText = config.ticker;
+            }
         });
+    } else {
+        document.getElementById('ticker-text').innerText = "ID NOT FOUND IN URL";
     }
-
-    function save() {
-        if(isExpired) return;
-        const config = { 
-            ticker: document.getElementById('inpTicker').value, 
-            boxTime: document.getElementById('inpBoxTime').value.trim() 
-        };
-        db.ref('users/' + userID).update({ 
-            pigeons: localData.pigeons || [], 
-            config: {...localData.config, ...config} 
-        });
-    }
-
-    function render() {
-        if(isExpired) return;
-        const conf = localData.config || {};
-        document.getElementById('inpTicker').value = conf.ticker || "";
-        document.getElementById('inpBoxTime').value = conf.boxTime || "";
-        document.getElementById('ticker-preview').innerText = conf.ticker || "ਸੁਆਗਤ ਹੈ...";
-        
-        let counts = { fly: 0, time: 0, out: 0 };
-        const list = document.getElementById('listArea'); list.innerHTML = "";
-        const pigeonList = localData.pigeons || [];
-        
-        pigeonList.forEach((p, idx) => {
-            if(p.status === 'fly') counts.fly++; else if(p.status === 'time') counts.time++; else if(p.status === 'out') counts.out++;
-            list.innerHTML += `<div class="pigeon-row">
-                <div style="flex-grow:1;"><b>${idx+1}.</b> ${p.name}</div>
-                <button class="st-btn st-fly ${p.status=='fly'?'active':''}" onclick="setStatus(${p.id},'fly')">F</button>
-                <button class="st-btn st-time ${p.status=='time'?'active':''}" onclick="setStatus(${p.id},'time')">T</button>
-                <button class="st-btn st-out ${p.status=='out'?'active':''}" onclick="setStatus(${p.id},'out')">O</button>
-                <button onclick="delP(${p.id})" style="background:none;border:none;color:red;margin-left:10px;">×</button>
-            </div>`;
-        });
-        document.getElementById('sum-total').innerText = pigeonList.length;
-        document.getElementById('sum-fly').innerText = counts.fly;
-        document.getElementById('sum-time').innerText = counts.time;
-        document.getElementById('sum-out').innerText = counts.out;
-    }
-
-    function addP() {
-        const val = document.getElementById('pName').value;
-        if(!val.trim()) return;
-        const names = val.split(',').map(n => n.trim()).filter(n => n !== "");
-        if(!localData.pigeons) localData.pigeons = [];
-        names.forEach(n => localData.pigeons.push({ id: Date.now() + Math.random(), name: n, status: 'fly' }));
-        document.getElementById('pName').value = "";
-        save();
-    }
-
-    function setStatus(id, s) { localData.pigeons = localData.pigeons.map(p => p.id === id ? {...p, status: s} : p); save(); }
-    function delP(id) { if(confirm("Delete?")) { localData.pigeons = localData.pigeons.filter(p => p.id !== id); save(); } }
-    function resetData() { if(confirm("Reset All?")) { localData.pigeons = []; save(); } }
-    function toggleRecharge(s) { document.getElementById('recharge-modal').style.display = s ? 'block' : 'none'; }
 </script>
+
 </body>
 </html>
