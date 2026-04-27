@@ -1,0 +1,164 @@
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Admin Panel - Manpreet Mudki</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: sans-serif; background: #0f1113; color: white; margin: 0; padding: 10px; }
+        .status-bar { background: #1a1d21; border: 1px solid #333; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 10px; border-left: 5px solid #f39c12; align-items: center; }
+        .help-box { background: white; color: black; padding: 6px 12px; border-radius: 6px; font-weight: 950; font-size: 14px; text-decoration: none; }
+        .status-val { font-size: 13px; font-weight: 900; color: #2ecc71; text-transform: uppercase; }
+        
+        /* Kabaddi 365 Style Ticker Design */
+        .kabaddi-ticker-wrap { display: flex; background: #1a1d21; height: 50px; border-radius: 5px; overflow: hidden; border: 1px solid #333; margin-bottom: 15px; position: relative; }
+        .live-label { background: #007bff; color: white; padding: 0 25px; display: flex; align-items: center; font-weight: 900; font-size: 18px; position: relative; z-index: 2; clip-path: polygon(0 0, 85% 0, 100% 100%, 0% 100%); }
+        .ticker-content { flex: 1; display: flex; align-items: center; padding-left: 10px; overflow: hidden; position: relative; }
+        .ticker-input-field { width: 100%; background: transparent; border: none; color: white; font-size: 16px; outline: none; padding: 5px; }
+
+        .overlay-links-box { background: #1a1d21; padding: 15px; border-radius: 12px; border: 1px solid #444; margin-bottom: 15px; border-top: 4px solid #007bff; }
+        .link-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .link-btn { background: #333; color: #3498db; padding: 10px; border-radius: 6px; text-decoration: none; text-align: center; font-size: 11px; font-weight: bold; border: 1px solid #444; text-transform: uppercase; }
+        
+        .btn-recharge-main { width: 100%; padding: 14px; background: #f39c12; color: black; border: none; border-radius: 8px; font-weight: 900; font-size: 16px; margin-bottom: 15px; cursor: pointer; text-transform: uppercase; }
+        .btn-update-ticker { width: 100%; padding: 12px; background: #2ecc71; color: black; border: none; border-radius: 8px; font-weight: 900; font-size: 16px; margin-bottom: 15px; cursor: pointer; }
+        
+        .row { display: flex; gap: 10px; margin-bottom: 10px; flex-direction: column; }
+        textarea { width: 100%; height: 80px; padding: 12px; background: #1a1d21; border: 1px solid #444; color: white; border-radius: 8px; font-size: 16px; outline: none; resize: none; box-sizing: border-box; }
+        input[type="text"] { padding: 12px; background: #1a1d21; border: 1px solid #444; color: white; border-radius: 8px; font-size: 16px; width: 100%; outline: none; box-sizing: border-box; }
+        
+        .btn-add { background: #f39c12; border: none; font-weight: 900; padding: 12px; border-radius: 8px; color: black; font-size: 16px; cursor: pointer; width: 100%; margin-top: 5px; }
+        .btn-reset { width: 100%; padding: 12px; background: #dc3545; color: white; border: none; border-radius: 8px; font-weight: 900; font-size: 15px; margin-top: 10px; }
+
+        .admin-sum-grid { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 15px; }
+        .sum-item { background: #1a1d21; padding: 10px; border-radius: 8px; text-align: center; border: 1px solid #333; }
+        .sum-item div { font-size: 10px; color: #888; }
+        .sum-item b { font-size: 18px; color: #f39c12; }
+
+        .pigeon-row { background: #21262d; padding: 12px; border-radius: 10px; margin-bottom: 8px; display: flex; align-items: center; border: 1px solid #30363d; }
+        .st-btn { border: none; padding: 10px 0; border-radius: 5px; font-weight: 900; font-size: 14px; opacity: 0.2; color: white; width: 38px; text-align: center; margin-left: 5px; }
+        .st-btn.active { opacity: 1; border: 1.5px solid white; }
+        .st-fly { background: #007bff; } .st-time { background: #ffc107; color: black; } .st-out { background: #dc3545; }
+    </style>
+</head>
+<body>
+
+<div id="main-content">
+    <div class="status-bar">
+        <div><span style="font-size:10px; color:#888;">HELPLINE:</span><br><a href="tel:+918699640061" class="help-box">📞 CALL</a></div>
+        <div style="text-align: right;"><span style="font-size:10px; color:#888;">EXPIRY:</span><br><div id="expDisp" class="status-val">--</div></div>
+    </div>
+
+    <div class="overlay-links-box">
+        <div class="link-grid">
+            <a href="#" id="link-t1" target="_blank" class="link-btn">Overlay 1</a>
+            <a href="#" id="link-t2" target="_blank" class="link-btn">Overlay 2</a>
+            <a href="#" id="link-t3" target="_blank" class="link-btn">Overlay 3</a>
+            <a href="#" id="link-t4" target="_blank" class="link-btn">Overlay 4</a>
+        </div>
+    </div>
+
+    <button class="btn-recharge-main" onclick="toggleRecharge(true)">💳 RECHARGE / EXTEND PLAN</button>
+
+    <div class="kabaddi-ticker-wrap">
+        <div class="live-label">LIVE</div>
+        <div class="ticker-content">
+            <input type="text" id="inpTicker" class="ticker-input-field" placeholder="ਟਿੱਕਰ ਮੈਸੇਜ ਇੱਥੇ ਲਿਖੋ...">
+        </div>
+    </div>
+
+    <input type="text" id="inpBoxTime" placeholder="ਸਮੇਂ ਵਾਲੇ ਕਬੂਤਰਾਂ ਲਈ ਟਾਈਮ (e.g. 10:30)" style="margin-bottom: 10px;">
+    <button class="btn-update-ticker" onclick="save()">UPDATE TICKER & TIME</button>
+
+    <div class="controls-container" style="background: #1a1d21; padding: 15px; border-radius: 12px; border: 1px solid #333; margin-bottom: 15px;">
+        <textarea id="pName" placeholder="ਪਾਰਟੀਆਂ / ਟੀਮਾਂ ਦੇ ਨਾਮ (ਨਾਮ ਲਿਖ ਕੇ ਕੌਮਾ , ਪਾਓ)"></textarea>
+        <button class="btn-add" onclick="addP()">ADD ALL TEAMS</button>
+    </div>
+
+    <div class="admin-sum-grid">
+        <div class="sum-item"><div>TOT</div><b id="sum-total">0</b></div>
+        <div class="sum-item"><div>FLY</div><b id="sum-fly" style="color:#007bff;">0</b></div>
+        <div class="sum-item"><div>TIME</div><b id="sum-time" style="color:#ffc107;">0</b></div>
+        <div class="sum-item"><div>OUT</div><b id="sum-out" style="color:#dc3545;">0</b></div>
+    </div>
+
+    <div id="listArea"></div>
+    <button class="btn-reset" onclick="resetData()">🔄 RESET TOURNAMENT</button>
+</div>
+
+<script>
+    const firebaseConfig = { databaseURL: "https://manpreetpigeons-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userID = urlParams.get('id') || "sukhdeeptv"; 
+    let localData = { pigeons: [], config: {} };
+
+    // Set Links
+    document.getElementById('link-t1').href = `overlay.html?id=${userID}`;
+    document.getElementById('link-t2').href = `overlay2.html?id=${userID}`;
+    document.getElementById('link-t3').href = `overlay3.html?id=${userID}`;
+    document.getElementById('link-t4').href = `overlay4.html?id=${userID}`;
+
+    db.ref('users/' + userID).on('value', s => { 
+        localData = s.val() || {pigeons:[], config:{}}; 
+        render(); 
+    });
+
+    function save() {
+        const config = { 
+            ticker: document.getElementById('inpTicker').value, 
+            boxTime: document.getElementById('inpBoxTime').value.trim()
+        };
+        db.ref('users/' + userID).update({ 
+            pigeons: localData.pigeons || [], 
+            config: {...localData.config, ...config} 
+        });
+    }
+
+    function render() {
+        const conf = localData.config || {};
+        document.getElementById('inpTicker').value = conf.ticker || "";
+        document.getElementById('inpBoxTime').value = conf.boxTime || "";
+        
+        let counts = { fly: 0, time: 0, out: 0 };
+        const list = document.getElementById('listArea'); list.innerHTML = "";
+        const pigeonList = localData.pigeons || [];
+        
+        pigeonList.forEach((p, idx) => {
+            if(p.status === 'fly') counts.fly++; else if(p.status === 'time') counts.time++; else if(p.status === 'out') counts.out++;
+            list.innerHTML += `
+                <div class="pigeon-row">
+                    <div style="flex:1;"><span style="color:#f39c12; font-weight:900; margin-right:10px;">${idx + 1}</span> <b>${p.name}</b></div>
+                    <div>
+                        <button class="st-btn st-fly ${p.status=='fly'?'active':''}" onclick="setStatus(${p.id},'fly')">F</button>
+                        <button class="st-btn st-time ${p.status=='time'?'active':''}" onclick="setStatus(${p.id},'time')">T</button>
+                        <button class="st-btn st-out ${p.status=='out'?'active':''}" onclick="setStatus(${p.id},'out')">O</button>
+                    </div>
+                </div>`;
+        });
+        document.getElementById('sum-total').innerText = pigeonList.length;
+        document.getElementById('sum-fly').innerText = counts.fly;
+        document.getElementById('sum-time').innerText = counts.time;
+        document.getElementById('sum-out').innerText = counts.out;
+    }
+
+    function addP() {
+        const inputVal = document.getElementById('pName').value; 
+        if(!inputVal.trim()) return;
+        const names = inputVal.split(',').map(n => n.trim()).filter(n => n !== "");
+        if(!localData.pigeons) localData.pigeons = [];
+        names.forEach(n => { localData.pigeons.push({ id: Date.now() + Math.random(), name: n, status: 'fly' }); });
+        document.getElementById('pName').value = ""; 
+        save();
+    }
+
+    function setStatus(id, s) { localData.pigeons = localData.pigeons.map(p => p.id === id ? {...p, status: s} : p); save(); }
+    function resetData() { if(confirm("Reset Tournament?")) { localData.pigeons = []; save(); } }
+</script>
+</body>
+</html>
