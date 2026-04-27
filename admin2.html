@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Advanced Kabaddi Admin - Manpreet Mudki</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0f1113; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        .status-bar { background: #1a1d21; border: 1px solid #333; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 10px; border-left: 5px solid #f39c12; align-items: center; width: 100%; max-width: 500px; box-sizing: border-box; }
+        .card { background: #1a1d21; width: 100%; max-width: 500px; border-radius: 15px; border: 1px solid #333; overflow: hidden; margin-bottom: 20px; box-sizing: border-box;}
+        .header { background: #1a73e8; color: white; padding: 12px; text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; }
+        .teams-container { display: flex; padding: 15px; gap: 10px; border-bottom: 2px solid #333; }
+        .team-box { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .score-val { font-size: 50px; font-weight: 900; color: #f39c12; margin: 5px 0; }
+        .btn-pm { border: none; color: white; padding: 12px; border-radius: 6px; font-size: 24px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 4px; }
+        .btn-plus { background: #28a745; } .btn-minus { background: #dc3545; }
+        .controls { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .btn-full { border: none; color: white; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; }
+        .btn-blue { background: #1a73e8; } .btn-yellow { background: #fbbc05; color: #000; } .btn-red { background: #ea4335; } .btn-green { background: #2ecc71; color: #000; }
+        select { width: 100%; padding: 10px; background: #0d1117; color: white; border: 1px solid #444; border-radius: 6px; margin-bottom: 5px; }
+        textarea, .std-input { width: 100%; padding: 10px; border: 1px solid #444; background: #0d1117; color: white; border-radius: 6px; margin-bottom: 12px; box-sizing: border-box; }
+        .team-list-item { background: #21262d; padding: 10px; margin-bottom: 5px; border-radius: 6px; display: flex; justify-content: space-between; align-items: center; font-size: 14px; }
+    </style>
+</head>
+<body>
+
+<div id="login-box" style="max-width:400px; margin:80px auto; text-align:center; background:#1a1d21; padding:25px; border-radius:15px; border:1px solid #333;">
+    <h2 style="color:#f39c12; font-weight:900;">KABADDI ADMIN LOGIN</h2>
+    <input type="password" id="adminPass" placeholder="ਪਾਸਵਰਡ ਭਰੋ..." style="width:100%; padding:12px; background:#0d1117; border:1px solid #444; color:white; border-radius:8px; margin-bottom:15px;">
+    <button onclick="handleManualLogin()" class="btn-full btn-yellow">ENTER CONTROL</button>
+</div>
+
+<div id="main-content" style="display:none; width: 100%; max-width: 500px;">
+    <div class="status-bar">
+        <div><span style="font-size:10px; color:#888;">HELPLINE:</span><br><a href="tel:+918699640061" style="color:white; text-decoration:none; font-weight:bold;">📞 CALL HELP</a></div>
+        <div style="text-align: right;"><span style="font-size:10px; color:#888;">EXPIRY:</span><br><div id="expDisp" class="status-val">--</div></div>
+    </div>
+
+    <div class="card">
+        <div class="header">Add Tournament Teams</div>
+        <div style="padding:15px;">
+            <textarea id="bulkTeams" placeholder="ਟੀਮਾਂ ਦੇ ਨਾਮ ਲਿਖੋ (ਕੌਮਾ ਪਾ ਕੇ), ਜਿਵੇਂ: Team A, Team B"></textarea>
+            <button class="btn-full btn-blue" onclick="addBulkTeams()">Update Team List</button>
+            <div id="listDisplay" style="margin-top:10px; max-height:150px; overflow-y:auto;"></div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="header">Live Match Control</div>
+        <div style="padding:15px; border-bottom:1px solid #333;">
+            <label style="font-size:11px; color:#888;">SELECT ACTIVE TEAMS</label>
+            <div style="display:flex; gap:10px; margin-top:5px;">
+                <select id="selA" onchange="updateMatchTeams()"></select>
+                <select id="selB" onchange="updateMatchTeams()"></select>
+            </div>
+        </div>
+        <div class="teams-container">
+            <div class="team-box">
+                <div id="dispNameA" style="font-weight:bold; color:#1a73e8;">TEAM 1</div>
+                <div class="score-val" id="dispA">0</div>
+                <div style="display:flex; width:100%;">
+                    <button class="btn-pm btn-minus" onclick="changeScore('scoreA', -1)">-</button>
+                    <button class="btn-pm btn-plus" onclick="changeScore('scoreA', 1)">+</button>
+                </div>
+                <button class="btn-full btn-green" style="margin-top:10px; padding:8px;" onclick="setWinner(1)">WINNER</button>
+            </div>
+            <div style="display:flex; align-items:center; font-weight:bold;">VS</div>
+            <div class="team-box">
+                <div id="dispNameB" style="font-weight:bold; color:#1a73e8;">TEAM 2</div>
+                <div class="score-val" id="dispB">0</div>
+                <div style="display:flex; width:100%;">
+                    <button class="btn-pm btn-minus" onclick="changeScore('scoreB', -1)">-</button>
+                    <button class="btn-pm btn-plus" onclick="changeScore('scoreB', 1)">+</button>
+                </div>
+                <button class="btn-full btn-green" style="margin-top:10px; padding:8px;" onclick="setWinner(2)">WINNER</button>
+            </div>
+        </div>
+        <div class="controls">
+            <button id="visBtn" class="btn-full btn-red" onclick="toggleVis('scoreVisible')">Show/Hide Scoreboard</button>
+            <input type="text" id="roundInp" class="std-input" placeholder="ROUND (e.g. Semi Final)" oninput="updateDB()">
+            <button class="btn-full btn-blue" onclick="resetScores()">Reset Scores Only</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="header">Ticker & Tyaun Box</div>
+        <div style="padding:15px;">
+            <textarea id="row1Inp" placeholder="Ticker Message" oninput="updateDB()"></textarea>
+            <button id="tickVisBtn" class="btn-full btn-blue" onclick="toggleVis('tickerVisible')">Show/Hide Ticker</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database().ref("matchData");
+    const userRef = firebase.database().ref("users");
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userID = urlParams.get('id') || 'default';
+    let curA = 0, curB = 0, sVis = true, tVis = true, allTeams = [];
+
+    // Login logic same as before
+    function handleManualLogin() { checkLogin(document.getElementById('adminPass').value); }
+    function checkLogin(pass) {
+        userRef.child(userID).once('value', snap => {
+            const userData = snap.val();
+            if(userData && userData.password === pass) {
+                document.getElementById('login-box').style.display = "none";
+                document.getElementById('main-content').style.display = "block";
+                document.getElementById('expDisp').innerText = new Date(userData.expiry).toLocaleDateString();
+                loadMatchData();
+            } else { alert("Wrong Password!"); }
+        });
+    }
+
+    function loadMatchData() {
+        db.on("value", (snap) => {
+            const data = snap.val() || {};
+            curA = parseFloat(data.scoreA) || 0; curB = parseFloat(data.scoreB) || 0;
+            sVis = !!data.scoreVisible; tVis = !!data.tickerVisible;
+            allTeams = data.teams || [];
+
+            document.getElementById('dispA').innerText = curA;
+            document.getElementById('dispB').innerText = curB;
+            document.getElementById('dispNameA').innerText = data.nameA || "TEAM 1";
+            document.getElementById('dispNameB').innerText = data.nameB || "TEAM 2";
+            document.getElementById('roundInp').value = data.round || "";
+            document.getElementById('row1Inp').value = data.row1Txt || "";
+
+            updateBtnUI('visBtn', sVis, "Scoreboard");
+            updateBtnUI('tickVisBtn', tVis, "Ticker");
+            renderTeams();
+        });
+    }
+
+    function renderTeams() {
+        let opt = `<option value="">Select Team</option>`;
+        let listHtml = "";
+        allTeams.forEach(t => {
+            opt += `<option value="${t}">${t}</option>`;
+            listHtml += `<div class="team-list-item">${t} <button onclick="deleteTeam('${t}')" style="background:none; border:none; color:red;">×</button></div>`;
+        });
+        document.getElementById('selA').innerHTML = opt;
+        document.getElementById('selB').innerHTML = opt;
+        document.getElementById('listDisplay').innerHTML = listHtml;
+    }
+
+    function addBulkTeams() {
+        const val = document.getElementById('bulkTeams').value;
+        if(!val) return;
+        const newTeams = val.split(',').map(item => item.trim()).filter(i => i !== "");
+        const combined = [...new Set([...allTeams, ...newTeams])];
+        db.update({ teams: combined });
+        document.getElementById('bulkTeams').value = "";
+    }
+
+    function deleteTeam(name) {
+        const filtered = allTeams.filter(t => t !== name);
+        db.update({ teams: filtered });
+    }
+
+    function updateMatchTeams() {
+        db.update({ 
+            nameA: document.getElementById('selA').value, 
+            nameB: document.getElementById('selB').value,
+            scoreA: 0, scoreB: 0 
+        });
+    }
+
+    function changeScore(team, val) {
+        let current = (team === 'scoreA' ? curA : curB);
+        let newVal = (val > 0) ? (current === 0 && (curA+curB === 0) ? 1.5 : current + 1) : Math.max(0, current === 1.5 ? 0 : current - 1);
+        db.update({ [team]: newVal });
+    }
+
+    function setWinner(side) {
+        const winner = side === 1 ? document.getElementById('dispNameA').innerText : document.getElementById('dispNameB').innerText;
+        const loser = side === 1 ? document.getElementById('dispNameB').innerText : document.getElementById('dispNameA').innerText;
+        if(confirm(winner + " ਜੇਤੂ ਹੈ? (ਹਾਰਨ ਵਾਲੀ ਟੀਮ ਲਿਸਟ ਵਿੱਚੋਂ ਹਟ ਜਾਵੇਗੀ)")) {
+            const filtered = allTeams.filter(t => t !== loser);
+            db.update({ teams: filtered, lastWinner: winner, scoreVisible: false });
+            alert(winner + " ਅਗਲੇ ਰਾਊਂਡ ਵਿੱਚ ਪਹੁੰਚ ਗਈ!");
+        }
+    }
+
+    function updateDB() {
+        db.update({
+            round: document.getElementById('roundInp').value,
+            row1Txt: document.getElementById('row1Inp').value
+        });
+    }
+
+    function toggleVis(f) { db.child(f).set(f==='scoreVisible'?!sVis:!tVis); }
+    function resetScores() { if(confirm("Reset Match Scores?")) db.update({ scoreA: 0, scoreB: 0 }); }
+    function updateBtnUI(id, val, text) { 
+        const btn = document.getElementById(id); 
+        btn.innerText = val ? "Hide " + text : "Show " + text; 
+        btn.style.background = val ? "#dc3545" : "#28a745"; 
+    }
+</script>
+</body>
+</html>
