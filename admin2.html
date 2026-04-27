@@ -6,51 +6,40 @@
     <title>Kabaddi Admin Pro - Manpreet Mudki</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        #drag-container { width: 100%; max-width: 600px; }
-        .card { background: #161b22; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 12px; overflow: hidden; width: 100%; }
-        .header-flex { background: #f39c12; color: #000; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; cursor: grab; }
-        .header-title { font-weight: 900; text-transform: uppercase; font-size: 11px; }
+        .card { background: #161b22; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 12px; overflow: hidden; width: 100%; max-width: 600px; }
+        .header-flex { background: #f39c12; color: #000; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; font-weight: bold; text-transform: uppercase; font-size: 12px; }
         .p-15 { padding: 15px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
         input, select, textarea { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
         .btn { border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
-        
-        /* ਬਟਨ ਸਟਾਈਲ */
         .btn-green { background: #238636; color: white; }
         .btn-red { background: #da3633; color: white; }
         .btn-blue { background: #1f6feb; color: white; }
-        .btn-big-toggle { padding: 15px; font-size: 14px; margin-bottom: 10px; border: 2px solid #30363d; }
-        
+        .btn-orange { background: #f39c12; color: black; }
         .score-val { font-size: 60px; font-weight: 900; color: #f39c12; text-align: center; line-height: 1; margin: 10px 0; }
-        .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 180px; overflow-y: auto; padding: 5px; margin-top: 5px; }
-        .list-item { padding: 10px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
-        .live-tag { background: #da3633; color: white; padding: 2px 5px; border-radius: 3px; font-size: 9px; font-weight: bold; }
+        .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 160px; overflow-y: auto; padding: 5px; margin-top: 5px; }
+        .list-item { padding: 8px; border-bottom: 1px solid #222; display: flex; justify-content: space-between; align-items: center; font-size: 12px; }
+        .edit-btn { background: none; border: none; color: #1f6feb; cursor: pointer; }
     </style>
 </head>
 <body>
 
-<div id="drag-container">
-
     <div class="card">
-        <div class="header-flex"><span class="header-title">DISPLAY CONTROLS</span></div>
+        <div class="header-flex">DISPLAY CONTROLS</div>
         <div class="p-15">
             <div class="grid-2">
-                <button id="scoreVisBtn" class="btn btn-big-toggle btn-blue" onclick="toggleVis('scoreVisible')">
-                    <i class="fas fa-desktop"></i> SCOREBOARD: OFF
-                </button>
-                <button id="tickerVisBtn" class="btn btn-big-toggle btn-blue" onclick="toggleVis('tickerVisible')">
-                    <i class="fas fa-stream"></i> TICKER: OFF
-                </button>
+                <button id="scoreVisBtn" class="btn btn-blue" onclick="toggleVis('scoreVisible')">SCOREBOARD: OFF</button>
+                <button id="tickerVisBtn" class="btn btn-blue" onclick="toggleVis('tickerVisible')">TICKER: OFF</button>
             </div>
         </div>
     </div>
 
     <div class="card">
-        <div class="header-flex"><span class="header-title">LIVE SCORE CONTROL</span></div>
+        <div class="header-flex">LIVE SCORE CONTROL</div>
         <div class="p-15">
             <div class="grid-2">
                 <select id="selA" onchange="updateMatchTeams()"></select>
@@ -68,12 +57,17 @@
                     </div>
                 </div>
             </div>
+            <div class="grid-3" style="margin-bottom:10px;">
+                <button class="btn btn-blue" onclick="swapNames()">T-SWIPE</button>
+                <button class="btn btn-blue" onclick="swapScores()">S-SWIPE</button>
+                <button class="btn btn-orange" onclick="swapFull()">FULL SWAP</button>
+            </div>
             <button class="btn btn-green" style="padding:15px;" onclick="declareWinner()">🏆 DECLARE WINNER</button>
         </div>
     </div>
 
     <div class="card">
-        <div class="header-flex"><span class="header-title">MATCH LIST & WING BOX</span></div>
+        <div class="header-flex">MATCH LIST & WING BOX</div>
         <div class="p-15">
             <div class="grid-2">
                 <div><small>MATCH LIST</small><div id="playingList" class="box-list"></div></div>
@@ -84,15 +78,16 @@
     </div>
 
     <div class="card">
-        <div class="header-flex"><span class="header-title">TOURNAMENT INFO</span></div>
+        <div class="header-flex">SETTINGS</div>
         <div class="p-15">
+            <textarea id="manualTyan" placeholder="Add Teams (Team 1, Team 2...)" style="height:50px; margin-bottom:8px;"></textarea>
+            <button class="btn btn-green" onclick="syncTeams()">ADD TEAMS</button>
+            <hr style="border:0.5px solid #333; margin:15px 0;">
             <input type="text" id="tourName" placeholder="Tournament Name" style="margin-bottom:8px;">
-            <textarea id="tickerText" placeholder="Ticker Message (Patti)..." style="height:50px; margin-bottom:8px;"></textarea>
-            <button class="btn btn-green" onclick="updateInfo()">UPDATE ALL INFO</button>
+            <textarea id="tickerText" placeholder="Ticker Message..." style="height:50px; margin-bottom:8px;"></textarea>
+            <button class="btn btn-orange" onclick="updateInfo()">UPDATE ALL INFO</button>
         </div>
     </div>
-
-</div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetpigeons-default-rtdb.firebaseio.com/" };
@@ -107,21 +102,19 @@
         allTeams = data.teams || []; 
         winnersData = data.winnersData || [];
         
-        // Update Displays
         document.getElementById('dispA').innerText = data.scoreA || 0;
         document.getElementById('dispB').innerText = data.scoreB || 0;
         document.getElementById('tourName').value = data.tourName || "";
         document.getElementById('tickerText').value = data.events || "";
 
-        // Update Toggle Button Visuals
         const sBtn = document.getElementById('scoreVisBtn');
-        sBtn.innerHTML = data.scoreVisible ? `<i class="fas fa-eye"></i> SCOREBOARD: ON` : `<i class="fas fa-eye-slash"></i> SCOREBOARD: OFF`;
-        sBtn.className = data.scoreVisible ? "btn btn-big-toggle btn-green" : "btn btn-big-toggle btn-red";
+        sBtn.innerText = data.scoreVisible ? "SCOREBOARD: ON" : "SCOREBOARD: OFF";
+        sBtn.style.background = data.scoreVisible ? "#238636" : "#da3633";
 
         const tBtn = document.getElementById('tickerVisBtn');
-        tBtn.innerHTML = data.tickerVisible ? `<i class="fas fa-play"></i> TICKER: ON` : `<i class="fas fa-stop"></i> TICKER: OFF`;
-        tBtn.className = data.tickerVisible ? "btn btn-big-toggle btn-green" : "btn btn-big-toggle btn-red";
-        
+        tBtn.innerText = data.tickerVisible ? "TICKER: ON" : "TICKER: OFF";
+        tBtn.style.background = data.tickerVisible ? "#238636" : "#da3633";
+
         renderUI();
     });
 
@@ -133,8 +126,29 @@
         document.getElementById('selA').value = status.nameA || ""; 
         document.getElementById('selB').value = status.nameB || "";
 
-        document.getElementById('playingList').innerHTML = allTeams.map(t => `<div class="list-item">${t}</div>`).join('');
-        document.getElementById('winnerList').innerHTML = winnersData.map(w => `<div class="list-item">🏆 ${w.name} (${w.score})</div>`).join('');
+        document.getElementById('playingList').innerHTML = allTeams.map((t, i) => `
+            <div class="list-item"><span>${t}</span><button class="edit-btn" onclick="editTeam(${i})"><i class="fas fa-edit"></i></button></div>
+        `).join('');
+
+        document.getElementById('winnerList').innerHTML = winnersData.map((w, i) => `
+            <div class="list-item"><span>🏆 ${w.name} (${w.score})</span><button class="edit-btn" onclick="editWinner(${i})"><i class="fas fa-edit"></i></button></div>
+        `).join('');
+    }
+
+    // --- SWIPE FUNCTIONS ---
+    function swapNames() { db.update({ nameA: status.nameB, nameB: status.nameA }); }
+    function swapScores() { db.update({ scoreA: status.scoreB, scoreB: status.scoreA }); }
+    function swapFull() { db.update({ nameA: status.nameB, nameB: status.nameA, scoreA: status.scoreB, scoreB: status.scoreA }); }
+
+    // --- EDIT FUNCTIONS ---
+    function editTeam(idx) {
+        let n = prompt("Edit Team Name:", allTeams[idx]);
+        if(n) { allTeams[idx] = n; db.update({ teams: allTeams }); }
+    }
+    function editWinner(idx) {
+        let n = prompt("Edit Winner Name:", winnersData[idx].name);
+        let s = prompt("Edit Score:", winnersData[idx].score);
+        if(n) { winnersData[idx].name = n; winnersData[idx].score = s; db.update({ winnersData: winnersData }); }
     }
 
     function toggleVis(key) { db.child(key).set(!status[key]); }
@@ -149,21 +163,13 @@
         db.update({ nameA: document.getElementById('selA').value, nameB: document.getElementById('selB').value });
     }
 
-    function updateInfo() {
-        db.update({ 
-            tourName: document.getElementById('tourName').value, 
-            events: document.getElementById('tickerText').value 
-        });
-        alert("Updated!");
-    }
-
     function declareWinner() {
-        const winName = status.scoreA > status.scoreB ? status.nameA : status.nameB;
-        const winScore = status.scoreA > status.scoreB ? status.scoreA : status.scoreB;
+        const winN = status.scoreA > status.scoreB ? status.nameA : status.nameB;
+        const winS = status.scoreA > status.scoreB ? status.scoreA : status.scoreB;
         if(!status.nameA || !status.nameB) return alert("Select teams!");
-        if(confirm(winName + " Won!")) {
+        if(confirm(winN + " Won!")) {
             db.update({ 
-                winnersData: [...winnersData, { name: winName, score: winScore }], 
+                winnersData: [...winnersData, { name: winN, score: winS }], 
                 teams: allTeams.filter(t => t !== status.nameA && t !== status.nameB),
                 scoreA: 0, scoreB: 0, nameA: "", nameB: "", scoreVisible: false
             });
@@ -172,7 +178,7 @@
 
     function promoteWinners() {
         if(winnersData.length === 0) return;
-        if(confirm("Promote to next round?")) {
+        if(confirm("Promote all to next round?")) {
             db.update({ teams: [...allTeams, ...winnersData.map(w => w.name)], winnersData: [] });
         }
     }
@@ -183,6 +189,11 @@
         let list = input.split(/[,\n]/).map(t => t.trim()).filter(t => t !== "");
         db.update({ teams: [...allTeams, ...list] });
         document.getElementById('manualTyan').value = "";
+    }
+
+    function updateInfo() {
+        db.update({ tourName: document.getElementById('tourName').value, events: document.getElementById('tickerText').value });
+        alert("Updated!");
     }
 </script>
 </body>
