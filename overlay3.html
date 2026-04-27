@@ -3,83 +3,83 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Slow Motion Overlay - Manpreet Mudki</title>
+    <title>Double Strip Ticker - Manpreet Mudki</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Arial Black', sans-serif; }
 
-        .main-container {
-            position: absolute; bottom: 30px; left: 50%; transform: translateX(-50%);
-            width: 92%; display: flex; flex-direction: column; gap: 3px;
+        /* MAIN CONTAINER */
+        .overlay-container {
+            position: absolute; bottom: 20px; left: 50%; transform: translateX(-50%);
+            width: 95%; height: 110px; /* Two strips height */
+            display: flex; flex-direction: column; gap: 4px;
         }
 
-        /* TOP STRIP: Container for Score and Flashing Info */
-        .top-strip {
-            height: 65px; background: rgba(0, 0, 0, 0.95); border-radius: 12px 12px 0 0;
-            overflow: hidden; border-bottom: 3px solid #f39c12;
-            position: relative; box-shadow: 0 10px 20px rgba(0,0,0,0.5);
+        /* STRIP 1: SLIDING SCOREBOARD */
+        .strip-top {
+            height: 60px; background: rgba(0, 0, 0, 0.95); border-radius: 8px 8px 0 0;
+            position: relative; overflow: hidden; border-bottom: 2px solid #f39c12;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
 
-        /* Scoreboard Layout (Layer 1) */
-        .score-layout {
+        /* Layer 1: Scoreboard */
+        .layer-score {
             display: flex; width: 100%; height: 100%; align-items: center;
-            position: absolute; transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 1s;
+            position: absolute; transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
         }
-        .t-name { flex: 1; text-align: center; color: white; font-size: 24px; text-transform: uppercase; letter-spacing: 1px; }
-        .t-score { background: #f39c12; color: #000; width: 90px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 45px; font-weight: 900; box-shadow: inset 0 0 15px rgba(0,0,0,0.2); }
-        .vs-box { background: #fff; color: #000; height: 100%; display: flex; align-items: center; padding: 0 12px; font-size: 14px; font-weight: bold; }
+        .t-name { flex: 1; text-align: center; color: white; font-size: 22px; text-transform: uppercase; }
+        .t-score { background: #f39c12; color: #000; width: 80px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; }
+        .vs-box { background: #fff; color: #000; padding: 0 15px; height: 100%; display: flex; align-items: center; font-size: 14px; font-weight: 900; }
 
-        /* Alternative Info Layout (Layer 2 - Active when score is hidden) */
-        .info-flash-layout {
-            width: 100%; height: 100%; background: linear-gradient(90deg, #161b22, #0d1117);
-            color: #f39c12; display: flex; align-items: center; justify-content: center;
-            font-size: 26px; text-transform: uppercase; position: absolute;
-            transform: translateY(100%); transition: transform 1.2s cubic-bezier(0.4, 0, 0.2, 1), opacity 1s;
-            opacity: 0;
+        /* Layer 2: Top Info (Appears when scoreboard slides up) */
+        .layer-info {
+            width: 100%; height: 100%; background: #161b22; color: #f39c12;
+            display: flex; align-items: center; justify-content: center;
+            font-size: 24px; text-transform: uppercase; position: absolute;
+            transform: translateY(100%); transition: transform 1.5s cubic-bezier(0.65, 0, 0.35, 1);
         }
 
-        /* BOTTOM STRIP: Secondary Information */
-        .bottom-strip {
-            height: 45px; background: #f39c12; border-radius: 0 0 12px 12px;
+        /* STRIP 2: CONTINUOUS TICKER (Always visible) */
+        .strip-bottom {
+            height: 40px; background: #f39c12; border-radius: 0 0 8px 8px;
             display: flex; align-items: center; overflow: hidden; color: #000;
         }
-        .label-box { background: #000; color: #fff; height: 100%; padding: 0 20px; display: flex; align-items: center; font-size: 14px; font-weight: 900; letter-spacing: 1px; }
-        .scroll-wrap { flex: 1; padding-left: 30px; font-size: 20px; position: relative; height: 100%; display: flex; align-items: center; }
+        .tag-black { background: #000; color: #fff; padding: 0 20px; height: 100%; display: flex; align-items: center; font-size: 13px; font-weight: bold; z-index: 5; }
+        .ticker-wrap { flex: 1; position: relative; height: 100%; display: flex; align-items: center; padding-left: 20px; }
         
-        .b-text { position: absolute; opacity: 0; transform: translateY(10px); transition: all 0.8s ease; font-weight: 800; }
-        .b-text.active { opacity: 1; transform: translateY(0); }
+        .ticker-text { position: absolute; opacity: 0; transform: translateY(10px); transition: 0.8s; font-weight: 800; font-size: 18px; }
+        .ticker-text.active { opacity: 1; transform: translateY(0); }
 
-        /* ANIMATION TRIGGERS */
-        .show-info .score-layout { transform: translateY(-100%); opacity: 0; }
-        .show-info .info-flash-layout { transform: translateY(0); opacity: 1; }
+        /* ANIMATION TOGGLE */
+        .hide-score .layer-score { transform: translateY(-100%); }
+        .hide-score .layer-info { transform: translateY(0); }
     </style>
 </head>
 <body>
 
-    <div id="main-wrap" class="main-container">
+    <div id="main-wrap" class="overlay-container">
         
-        <div class="top-strip">
-            <div class="score-layout">
+        <div class="strip-top">
+            <div class="layer-score">
                 <div class="t-name" id="nameA">TEAM A</div>
                 <div class="t-score" id="scoreA">0</div>
                 <div class="vs-box">VS</div>
                 <div class="t-score" id="scoreB">0</div>
                 <div class="t-name" id="nameB">TEAM B</div>
             </div>
-            
-            <div class="info-flash-layout" id="top-info-text">
-                LIVE KABADDI CUP 2026 - MUDKI
+            <div class="layer-info" id="top-flash">
+                SPECIAL THANKS TO ALL SPONSORS
             </div>
         </div>
 
-        <div class="bottom-strip">
-            <div class="label-box">LATEST</div>
-            <div class="scroll-wrap">
-                <div class="b-text active" id="b1">🏆 <span id="tour-val">LOADING...</span></div>
-                <div class="b-text" id="b2">💰 PRIZE: <span id="prize-val">0</span></div>
-                <div class="b-text" id="b3">⏭ NEXT: <span id="next-val">TBD</span></div>
-                <div class="b-text" id="b4">📞 HELPLINE: <span id="help-val">---</span></div>
+        <div class="strip-bottom">
+            <div class="tag-black">KABADDI UPDATE</div>
+            <div class="ticker-wrap">
+                <div class="ticker-text active" id="msg1">🏆 <span id="tour-display">TOURNAMENT NAME</span></div>
+                <div class="ticker-text" id="msg2">💰 PRIZE: <span id="prize-display">0</span></div>
+                <div class="ticker-text" id="msg3">⏭ NEXT: <span id="next-display">---</span></div>
+                <div class="ticker-text" id="msg4">📞 HELP: <span id="help-display">---</span></div>
             </div>
         </div>
 
@@ -90,42 +90,42 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("kabaddiMatch");
 
-    // Bottom Strip Rotation (Slow - 5 seconds)
-    let bIdx = 1;
+    // Bottom Ticker Rotation
+    let msgIdx = 1;
     setInterval(() => {
-        document.querySelectorAll('.b-text').forEach(t => t.classList.remove('active'));
-        document.getElementById('b' + bIdx).classList.add('active');
-        bIdx = bIdx >= 4 ? 1 : bIdx + 1;
-    }, 5000);
+        document.querySelectorAll('.ticker-text').forEach(t => t.classList.remove('active'));
+        document.getElementById('msg' + msgIdx).classList.add('active');
+        msgIdx = msgIdx >= 4 ? 1 : msgIdx + 1;
+    }, 4500);
 
-    // Top Strip Alternative Content Rotation (Slow - 7 seconds)
-    const topMsgs = ["JOIN US LIVE ON YOUTUBE", "THANKS TO ALL SPONSORS", "LIKE & SHARE THE STREAM"];
-    let tIdx = 0;
+    // Top Info Rotation (If Score Hidden)
+    const ads = ["SUBSCRIBE OUR CHANNEL", "LIVE KABADDI CUP 2026", "SHARE THIS STREAM"];
+    let adIdx = 0;
     setInterval(() => {
-        tIdx = (tIdx + 1) % topMsgs.length;
-        document.getElementById('top-info-text').innerText = topMsgs[tIdx];
-    }, 7000);
+        adIdx = (adIdx + 1) % ads.length;
+        document.getElementById('top-flash').innerText = ads[adIdx];
+    }, 6000);
 
     db.on("value", (snap) => {
         const data = snap.val() || {};
         const wrap = document.getElementById('main-wrap');
 
-        // Toggle Animation (If scoreVisible is false, show alternative info)
+        // SLOW SLIDE LOGIC: If scoreVisible is false, slide score UP
         if (data.scoreVisible) {
-            wrap.classList.remove('show-info');
+            wrap.classList.remove('hide-score');
         } else {
-            wrap.classList.add('show-info');
+            wrap.classList.add('hide-score');
         }
 
-        // Data Updates
+        // UPDATE CONTENT
         document.getElementById('nameA').innerText = data.nameA || "---";
         document.getElementById('nameB').innerText = data.nameB || "---";
         document.getElementById('scoreA').innerText = data.scoreA || 0;
         document.getElementById('scoreB').innerText = data.scoreB || 0;
-        document.getElementById('tour-val').innerText = data.tourName || "KABADDI CUP";
-        document.getElementById('prize-val').innerText = data.prize || "---";
-        document.getElementById('next-val').innerText = data.nextMatch || "TBD";
-        document.getElementById('help-val').innerText = data.watermark || "---";
+        document.getElementById('tour-display').innerText = data.tourName || "KABADDI CUP";
+        document.getElementById('prize-display').innerText = data.prize || "---";
+        document.getElementById('next-display').innerText = data.nextMatch || "TBD";
+        document.getElementById('help-display').innerText = data.watermark || "---";
     });
 </script>
 </body>
