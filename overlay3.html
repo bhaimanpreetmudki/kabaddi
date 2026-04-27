@@ -1,0 +1,54 @@
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <style>
+        body { margin: 0; overflow: hidden; font-family: 'Arial Black', sans-serif; }
+        .scoreboard {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            display: flex;
+            align-items: center;
+            background: rgba(0,0,0,0.8);
+            border: 3px solid #f39c12;
+            border-radius: 10px;
+            padding: 10px 20px;
+            color: white;
+            transition: 0.5s;
+        }
+        .team { font-size: 24px; text-transform: uppercase; padding: 0 20px; min-width: 150px; text-align: center; }
+        .score { font-size: 40px; color: #f39c12; background: #222; padding: 0 15px; border-radius: 5px; margin: 0 10px; }
+        .vs { font-size: 18px; color: #888; }
+    </style>
+</head>
+<body>
+
+<div id="board" class="scoreboard" style="opacity: 0;">
+    <div id="t1" class="team">TEAM A</div>
+    <div id="s1" class="score">0</div>
+    <div class="vs">VS</div>
+    <div id="s2" class="score">0</div>
+    <div id="t2" class="team">TEAM B</div>
+</div>
+
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+<script>
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database().ref("matchData");
+
+    db.on("value", (snap) => {
+        const data = snap.val();
+        if(data) {
+            document.getElementById('t1').innerText = data.nameA || "TEAM 1";
+            document.getElementById('t2').innerText = data.nameB || "TEAM 2";
+            document.getElementById('s1').innerText = data.scoreA || 0;
+            document.getElementById('s2').innerText = data.scoreB || 0;
+            document.getElementById('board').style.opacity = data.scoreVisible ? "1" : "0";
+        }
+    });
+</script>
+</body>
+</html>
