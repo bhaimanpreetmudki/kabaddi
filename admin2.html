@@ -28,7 +28,6 @@
         .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 160px; overflow-y: auto; padding: 10px; font-size: 13px; margin-top: 5px; }
         .list-item { padding: 8px; border-bottom: 1px solid #222; color: #eee; }
         .match-num { color: #f39c12; font-weight: bold; margin-right: 5px; }
-        .by-text { color: #238636; font-weight: bold; font-style: italic; }
     </style>
 </head>
 <body>
@@ -42,8 +41,8 @@
         </div>
         <div class="p-15">
             <div class="grid-2">
-                <div><small style="color:#f39c12; font-size:9px;">SELECT TEAM 1</small><select id="selA" onchange="updateMatchTeams()"></select></div>
-                <div><small style="color:#f39c12; font-size:9px;">SELECT TEAM 2</small><select id="selB" onchange="updateMatchTeams()"></select></div>
+                <div><small style="color:#f39c12; font-size:9px;">TEAM 1 (LEFT)</small><select id="selA" onchange="updateMatchTeams()"></select></div>
+                <div><small style="color:#f39c12; font-size:9px;">TEAM 2 (RIGHT)</small><select id="selB" onchange="updateMatchTeams()"></select></div>
             </div>
             
             <div style="background:#0d1117; border-radius:10px; padding:15px; border:1px solid #333; margin-bottom:10px;">
@@ -68,7 +67,7 @@
             <div class="grid-3">
                 <button class="btn btn-blue" onclick="swapNames()">T-SWIPE</button>
                 <button class="btn btn-blue" onclick="swapScoreOnly()">S-SWIPE</button>
-                <button class="btn btn-blue" onclick="swapFull()">FULL</button>
+                <button class="btn btn-blue" onclick="swapFull()">FULL SWAP</button>
             </div>
             
             <div class="grid-2">
@@ -122,7 +121,7 @@
                 <input type="text" id="tourName" placeholder="Tournament Name">
                 <input type="text" id="prizeInp" placeholder="Prize Details">
             </div>
-            <textarea id="upcomingInp" placeholder="Upcoming Events / Programs..." style="height:50px;"></textarea>
+            <textarea id="upcomingInp" placeholder="Upcoming Events..." style="height:50px;"></textarea>
             <input type="text" id="wmText" placeholder="Watermark: LIVE MANPREET MUDKI">
         </div>
     </div>
@@ -152,6 +151,7 @@
         document.getElementById('wmText').value = data.watermark || "";
         document.getElementById('scoreVisBtn').innerText = data.scoreVisible ? "HIDE" : "SHOW";
         
+        document.getElementById('manualTyan').value = allTeams.join(', ');
         renderUI();
     });
 
@@ -170,32 +170,38 @@
 
         let html = "";
         let matchCount = 1;
-        
-        // Match List Logic with BY
         for(let i=0; i < allTeams.length; i += 2) {
             let t1 = allTeams[i];
             let t2 = allTeams[i+1];
-            
             if (t2) {
                 html += `<div class="list-item"><span class="match-num">${matchCount}.</span> ${t1} <b style="color:#f39c12">vs</b> ${t2}</div>`;
             } else {
-                // By System: If only one team is left in the list
-                html += `<div class="list-item"><span class="match-num">${matchCount}.</span> ${t1} <span class="by-text">BY (Bypassed to Next Round)</span></div>`;
-                
-                // Auto-move single team to winner list if it's the very last one
-                if (allTeams.length % 2 !== 0 && i === allTeams.length - 1) {
-                    if (!winners.includes(t1)) {
-                        let newWinners = [...winners, t1];
-                        let newTeams = allTeams.filter(t => t !== t1);
-                        db.update({ winners: newWinners, teams: newTeams });
-                    }
-                }
+                html += `<div class="list-item"><span class="match-num">${matchCount}.</span> ${t1} <b style="color:#238636">BY (Next Round)</b></div>`;
             }
             matchCount++;
         }
         document.getElementById('playingList').innerHTML = html;
         document.getElementById('winnerList').innerHTML = winners.map(w => `<div class="list-item">🏆 ${w}</div>`).join('');
     }
+
+    // --- SWIPE LOGIC ---
+    function swapNames() { 
+        db.update({ nameA: status.nameB, nameB: status.nameA }); 
+    }
+    
+    function swapScoreOnly() { 
+        db.update({ scoreA: status.scoreB, scoreB: status.scoreA }); 
+    }
+    
+    function swapFull() { 
+        db.update({ 
+            nameA: status.nameB, 
+            nameB: status.nameA, 
+            scoreA: status.scoreB, 
+            scoreB: status.scoreA 
+        }); 
+    }
+    // -------------------
 
     function syncTeams() {
         let input = document.getElementById('manualTyan').value;
@@ -213,38 +219,31 @@
         db.update({ nameA: document.getElementById('selA').value, nameB: document.getElementById('selB').value });
     }
 
-    function swapNames() { db.update({ nameA: status.nameB, nameB: status.nameA }); }
-    function swapScoreOnly() { db.update({ scoreA: status.scoreB, scoreB: status.scoreA }); }
-    function swapFull() { db.update({ nameA: status.nameB, nameB: status.nameA, scoreA: status.scoreB, scoreB: status.scoreA }); }
     function toggleVis(key) { db.child(key).set(!status[key]); }
 
     function declareWinner() {
         const win = status.scoreA > status.scoreB ? status.nameA : status.nameB;
         const lose = status.scoreA > status.scoreB ? status.nameB : status.nameA;
-        if(!win || !lose) return alert("ਪਹਿਲਾਂ ਦੋਵੇਂ ਟੀਮਾਂ ਚੁਣੋ!");
-        if(confirm(win + " ਨੂੰ ਜੇਤੂ ਐਲਾਨੀਏ?")) {
+        if(!win || !lose) return alert("Select Teams!");
+        if(confirm(win + " Wins?")) {
             db.update({ winners: [...winners, win], teams: allTeams.filter(t => t !== lose && t !== win), scoreA: 0, scoreB: 0, scoreVisible: false });
         }
     }
 
     function updateInfo() {
-        db.update({ 
-            tourName: document.getElementById('tourName').value, 
-            prize: document.getElementById('prizeInp').value, 
-            events: document.getElementById('upcomingInp').value, 
-            watermark: document.getElementById('wmText').value 
-        });
-        alert("ਡਾਟਾ ਸੇਵ ਹੋ ਗਿਆ ਹੈ!");
+        db.update({ tourName: document.getElementById('tourName').value, prize: document.getElementById('prizeInp').value, events: document.getElementById('upcomingInp').value, watermark: document.getElementById('wmText').value });
+        alert("Updated!");
     }
 
     function confirmReset(type) {
-        if(!confirm("ਕੀ ਤੁਸੀਂ ਸਾਰਾ ਡਾਟਾ ਮਿਟਾਉਣਾ ਚਾਹੁੰਦੇ ਹੋ?")) return;
+        if(!confirm("Reset?")) return;
         if(type === 'score') db.update({ scoreA: 0, scoreB: 0 });
         if(type === 'teams') { db.update({ teams: [], winners: [] }); document.getElementById('manualTyan').value = ""; }
     }
 
     function promoteWinners() {
-        if(confirm("ਜੇਤੂ ਟੀਮਾਂ ਨੂੰ ਅਗਲੇ ਰਾਊਂਡ ਲਈ ਪ੍ਰਮੋਟ ਕਰੀਏ?")) {
+        if(winners.length === 0) return alert("No winners to promote!");
+        if(confirm("Promote winners to next round?")) {
             db.update({ teams: [...winners], winners: [] });
         }
     }
