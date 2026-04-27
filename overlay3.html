@@ -1,53 +1,161 @@
 <!DOCTYPE html>
 <html lang="pa">
 <head>
+    <meta charset="UTF-8">
+    <title>Kabaddi Live Overlay - Manpreet Mudki</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Anton&family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; overflow: hidden; font-family: 'Arial Black', sans-serif; }
-        .scoreboard {
+        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Rajdhani', sans-serif; }
+
+        /* SCOREBOARD CONTAINER */
+        #scoreboard {
             position: absolute;
-            bottom: 50px;
+            top: 40px;
             left: 50%;
             transform: translateX(-50%);
+            display: none; /* Controlled by Firebase */
+            flex-direction: row;
+            align-items: center;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+        }
+
+        .team-box {
+            background: rgba(0, 0, 0, 0.85);
+            color: white;
+            padding: 10px 30px;
+            min-width: 200px;
+            text-align: center;
+            font-size: 28px;
+            font-weight: 700;
+            text-transform: uppercase;
+            border-bottom: 4px solid #f39c12;
+            clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);
+        }
+
+        .score-box {
+            background: #f39c12;
+            color: black;
+            font-family: 'Anton', sans-serif;
+            font-size: 45px;
+            padding: 5px 25px;
+            min-width: 70px;
+            text-align: center;
+            margin: 0 -15px;
+            z-index: 2;
+            box-shadow: inset 0 0 10px rgba(0,0,0,0.3);
+            border: 2px solid #fff;
+        }
+
+        .vs-badge {
+            background: #fff;
+            color: #000;
+            font-size: 14px;
+            font-weight: 900;
+            padding: 2px 8px;
+            position: absolute;
+            top: -10px;
+            left: 50%;
+            transform: translateX(-50%);
+            border-radius: 4px;
+        }
+
+        /* TICKER / PATTI */
+        #ticker-container {
+            position: absolute;
+            bottom: 0;
+            width: 100%;
+            height: 50px;
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 3px solid #f39c12;
+            display: none; /* Controlled by Firebase */
+            align-items: center;
+            overflow: hidden;
+        }
+
+        .ticker-label {
+            background: #f39c12;
+            color: black;
+            font-weight: 900;
+            padding: 0 20px;
+            height: 100%;
             display: flex;
             align-items: center;
-            background: rgba(0,0,0,0.8);
-            border: 3px solid #f39c12;
-            border-radius: 10px;
-            padding: 10px 20px;
-            color: white;
-            transition: 0.5s;
+            z-index: 5;
+            text-transform: uppercase;
+            font-size: 20px;
+            position: relative;
         }
-        .team { font-size: 24px; text-transform: uppercase; padding: 0 20px; min-width: 150px; text-align: center; }
-        .score { font-size: 40px; color: #f39c12; background: #222; padding: 0 15px; border-radius: 5px; margin: 0 10px; }
-        .vs { font-size: 18px; color: #888; }
+
+        .ticker-label::after {
+            content: '';
+            position: absolute;
+            right: -20px;
+            border-left: 20px solid #f39c12;
+            border-top: 25px solid transparent;
+            border-bottom: 25px solid transparent;
+        }
+
+        .marquee {
+            white-space: nowrap;
+            font-size: 24px;
+            color: #fff;
+            font-weight: 600;
+            padding-left: 100%;
+            animation: scroll 20s linear infinite;
+        }
+
+        @keyframes scroll {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-150%); }
+        }
+
+        /* ANIMATIONS */
+        .fade-in { animation: fadeIn 0.5s ease-in-out; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(-20px); } to { opacity: 1; transform: translateY(0); } }
+
     </style>
 </head>
 <body>
 
-<div id="board" class="scoreboard" style="opacity: 0;">
-    <div id="t1" class="team">TEAM A</div>
-    <div id="s1" class="score">0</div>
-    <div class="vs">VS</div>
-    <div id="s2" class="score">0</div>
-    <div id="t2" class="team">TEAM B</div>
-</div>
+    <div id="scoreboard" class="fade-in">
+        <div class="vs-badge">LIVE MATCH</div>
+        <div class="team-box" id="teamA">TEAM A</div>
+        <div class="score-box" id="scoreA">0</div>
+        <div class="score-box" id="scoreB">0</div>
+        <div class="team-box" id="teamB">TEAM B</div>
+    </div>
 
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <div id="ticker-container">
+        <div class="ticker-label" id="tourName">KABADDI CUP</div>
+        <div class="marquee" id="tickerText">ਜੀ ਆਇਆਂ ਨੂੰ ਸਾਰੇ ਖੇਡ ਪ੍ਰੇਮੀਆਂ ਨੂੰ... ਲਾਈਵ ਕਬੱਡੀ ਕੱਪ ਦਾ ਆਨੰਦ ਮਾਣੋ।</div>
+    </div>
+
 <script>
-    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    // Firebase Configuration
+    const firebaseConfig = { databaseURL: "https://manpreetpigeons-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database().ref("matchData");
+    const db = firebase.database().ref("kabaddiMatch");
 
     db.on("value", (snap) => {
-        const data = snap.val();
-        if(data) {
-            document.getElementById('t1').innerText = data.nameA || "TEAM 1";
-            document.getElementById('t2').innerText = data.nameB || "TEAM 2";
-            document.getElementById('s1').innerText = data.scoreA || 0;
-            document.getElementById('s2').innerText = data.scoreB || 0;
-            document.getElementById('board').style.opacity = data.scoreVisible ? "1" : "0";
-        }
+        const data = snap.val() || {};
+
+        // Scoreboard Update
+        document.getElementById('teamA').innerText = data.nameA || "TEAM 1";
+        document.getElementById('teamB').innerText = data.nameB || "TEAM 2";
+        document.getElementById('scoreA').innerText = data.scoreA || 0;
+        document.getElementById('scoreB').innerText = data.scoreB || 0;
+        
+        // Show/Hide Scoreboard
+        document.getElementById('scoreboard').style.display = data.scoreVisible ? 'flex' : 'none';
+
+        // Ticker Update
+        document.getElementById('tourName').innerText = data.tourName || "LIVE";
+        document.getElementById('tickerText').innerText = data.events || "Welcome to Live Kabaddi Tournament...";
+        
+        // Show/Hide Ticker
+        document.getElementById('ticker-container').style.display = data.tickerVisible ? 'flex' : 'none';
     });
 </script>
 </body>
