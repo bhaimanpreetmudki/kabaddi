@@ -3,19 +3,19 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kabaddi Admin - Round Control</title>
+    <title>Kabaddi Admin Pro - Manpreet Mudki</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         .card { background: #161b22; width: 100%; max-width: 600px; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 12px; overflow: hidden; }
-        .header { background: #f39c12; color: #000; padding: 8px; text-align: center; font-weight: 900; text-transform: uppercase; font-size: 11px; }
+        
+        .header-flex { background: #f39c12; color: #000; padding: 5px 12px; display: flex; justify-content: space-between; align-items: center; }
+        .header-title { font-weight: 900; text-transform: uppercase; font-size: 11px; }
+        .upd-btn-small { background: #000; color: #fff; border: none; padding: 3px 8px; border-radius: 4px; font-size: 10px; cursor: pointer; font-weight: bold; }
+
         .p-15 { padding: 12px; }
-        
-        /* ROUND BOX STYLE */
-        .round-box { background: #1f6feb; color: white; padding: 10px; border-radius: 8px; text-align: center; margin-bottom: 10px; font-weight: bold; border: 2px solid #fff; }
-        
         .score-top { display: flex; justify-content: space-around; align-items: center; background: #0d1117; padding: 15px; border-radius: 10px; border: 2px solid #f39c12; margin-bottom: 10px; }
         .score-num { font-size: 50px; font-weight: 900; color: #f39c12; }
         
@@ -34,22 +34,30 @@
 <body>
 
 <div class="card">
-    <div class="header">Match Round Settings</div>
+    <div class="header-flex">
+        <div class="header-title">Match Round Settings</div>
+        <button class="upd-btn-small" onclick="updateRound()">Update</button>
+    </div>
     <div class="p-15">
-        <div class="round-box" id="curRoundDisp">ROUND: First Round</div>
-        <select id="roundSel" onchange="updateRound()">
-            <option value="First Round">First Round (ਪਹਿਲਾ ਰਾਊਂਡ)</option>
-            <option value="Second Round">Second Round (ਦੂਜਾ ਰਾਊਂਡ)</option>
-            <option value="Quarter Final">Quarter Final (ਕਵਾਰਟਰ ਫਾਈਨਲ)</option>
-            <option value="Semi Final">Semi Final (ਸੈਮੀ-ਫਾਈਨਲ)</option>
-            <option value="Final Match">Final Match (ਫਾਈਨਲ ਮੈਚ)</option>
-        </select>
-        <input type="text" id="customRound" placeholder="Or Type Custom Round Name..." oninput="updateRound()">
+        <div style="background:#1f6feb; padding:8px; border-radius:6px; text-align:center; margin-bottom:8px; font-weight:bold; font-size:13px;" id="curRoundDisp">ROUND: First Round</div>
+        <div class="grid-2">
+            <select id="roundSel">
+                <option value="First Round">First Round</option>
+                <option value="Second Round">Second Round</option>
+                <option value="Quarter Final">Quarter Final</option>
+                <option value="Semi Final">Semi Final</option>
+                <option value="Final Match">Final Match</option>
+            </select>
+            <input type="text" id="customRound" placeholder="Or Custom Round...">
+        </div>
     </div>
 </div>
 
 <div class="card">
-    <div class="header">Live Match Control</div>
+    <div class="header-flex">
+        <div class="header-title">Live Match Control</div>
+        <button class="upd-btn-small" onclick="toggleVis()">Hide/Show</button>
+    </div>
     <div class="p-15">
         <div class="score-top">
             <div style="text-align:center;">
@@ -64,62 +72,72 @@
                 <div style="display:flex; gap:5px;"><button class="btn btn-green" onclick="changeScore('scoreB', 1)">+</button><button class="btn btn-red" onclick="changeScore('scoreB', -1)">-</button></div>
             </div>
         </div>
-        
         <div class="grid-2">
-            <button class="btn btn-blue" onclick="swapOnlyTeams()">Only Team Swipe</button>
-            <button class="btn btn-blue" onclick="swapWithScore()">Team + Score Swipe</button>
+            <button class="btn btn-blue" onclick="swapOnlyTeams()">Team Swipe</button>
+            <button class="btn btn-blue" onclick="swapWithScore()">Team+Score Swipe</button>
         </div>
         <button class="btn btn-orange" onclick="swapWithScore()">Camera View / Oppo View</button>
-        
         <div class="grid-2">
             <button class="btn btn-red" onclick="resetScores()">Reset Score</button>
-            <button id="visBtn" class="btn btn-blue" onclick="toggleVis()">Show Board</button>
+            <button class="btn btn-green" onclick="declareWinner()">🏆 Declare Winner</button>
         </div>
-        <button class="btn btn-green" onclick="declareWinner()">🏆 Win & Remove Loser</button>
     </div>
 </div>
 
 <div class="card">
-    <div class="header">Brackets & Tournament Info</div>
+    <div class="header-flex">
+        <div class="header-title">Tournament & Upcoming Events</div>
+        <button class="upd-btn-small" onclick="updateDB()">Update</button>
+    </div>
     <div class="p-15">
         <div class="grid-2">
             <div>
-                <small style="color:#f39c12;">1. TYIAN (ADD TEAMS)</small>
-                <textarea id="manualTyan" placeholder="1. Team A vs Team B" style="height:100px;" oninput="updateDB()"></textarea>
+                <small style="color:#f39c12;">1. EVENT & PRIZE</small>
+                <input type="text" id="tourName" placeholder="Tournament Name">
+                <input type="text" id="prizeInp" placeholder="Prize Details">
             </div>
             <div>
                 <small style="color:#f39c12;">2. UPCOMING EVENTS</small>
-                <textarea id="upcomingInp" placeholder="Final Date: 20 May" style="height:100px;" oninput="updateDB()"></textarea>
+                <textarea id="upcomingInp" placeholder="Match Timing or Next Round Info" style="height:78px;"></textarea>
             </div>
         </div>
+    </div>
+</div>
 
-        <div class="grid-2" style="margin-top:10px;">
+<div class="card">
+    <div class="header-flex">
+        <div class="header-title">Lists Management</div>
+        <button class="upd-btn-small" onclick="promoteWinners()">Promote</button>
+    </div>
+    <div class="p-15">
+        <div class="grid-2">
             <div>
-                <small style="color:#f39c12;">3. TEAM LIST</small>
+                <small style="color:#f39c12;">3. TEAM LIST (PLAYING)</small>
                 <div id="playingList" class="box-list"></div>
+                <button class="btn btn-red" style="margin-top:5px; width:100%; font-size:9px;" onclick="resetTeamsOnly()">Reset List</button>
             </div>
             <div>
                 <small style="color:#f39c12;">4. WING BOX (WINNERS)</small>
                 <div id="winnerList" class="box-list"></div>
-                <button class="btn btn-blue" style="width:100%; margin-top:5px;" onclick="promoteWinners()">Promote Winners</button>
             </div>
         </div>
     </div>
 </div>
 
 <div class="card">
-    <div class="header">1 vs 2 Selector</div>
+    <div class="header-flex">
+        <div class="header-title">Settings & Watermark</div>
+        <button class="upd-btn-small" onclick="updateWatermark()">Update</button>
+    </div>
     <div class="p-15">
         <div class="grid-2">
-            <input type="text" id="customA" placeholder="Add Team 1">
-            <input type="text" id="customB" placeholder="Add Team 2">
+            <input type="text" id="customA" placeholder="Team 1">
+            <input type="text" id="customB" placeholder="Team 2">
         </div>
-        <button class="btn btn-orange" onclick="updateAndAddToList()">Add & Start Match</button>
-        <div class="grid-2" style="margin-top:5px;">
-            <select id="selA"></select>
-            <select id="selB"></select>
-        </div>
-        <button class="btn btn-blue" onclick="updateFromSelect()">Start Selected</button>
+        <button class="btn btn-orange" onclick="updateAndAddToList()">Start Match & Add to List</button>
+        <hr style="border:0.5px solid #30363d; margin:10px 0;">
+        <small style="color:#f39c12;">WATERMARK TEXT</small>
+        <input type="text" id="wmText" placeholder="e.g. LIVE MANPREET MUDKI">
     </div>
 </div>
 
@@ -137,24 +155,29 @@
         
         document.getElementById('dispA').innerText = curA; document.getElementById('dispB').innerText = curB;
         document.getElementById('dispNameA').innerText = data.nameA || "TEAM 1"; document.getElementById('dispNameB').innerText = data.nameB || "TEAM 2";
-        document.getElementById('manualTyan').value = data.upcoming || "";
+        document.getElementById('tourName').value = data.tourName || ""; document.getElementById('prizeInp').value = data.prize || "";
         document.getElementById('upcomingInp').value = data.events || "";
+        document.getElementById('wmText').value = data.watermark || "";
         document.getElementById('curRoundDisp').innerText = "ROUND: " + (data.currentRound || "First Round");
-        document.getElementById('visBtn').innerText = sVis ? "Hide Board" : "Show Board";
         renderUI();
     });
+
+    function renderUI() {
+        document.getElementById('playingList').innerHTML = allTeams.map((t, index) => `<div class="list-item">${index+1}. ${t} <i class="fas fa-edit" onclick="editItem('teams', ${index})"></i></div>`).join('');
+        document.getElementById('winnerList').innerHTML = winners.map((w, index) => `<div class="list-item">🏆 ${w} <i class="fas fa-edit" onclick="editItem('winners', ${index})"></i></div>`).join('');
+    }
 
     function updateRound() {
         let val = document.getElementById('customRound').value || document.getElementById('roundSel').value;
         db.update({ currentRound: val });
     }
 
-    function renderUI() {
-        let opt = `<option value="">Select Team</option>`;
-        allTeams.forEach(t => opt += `<option value="${t}">${t}</option>`);
-        document.getElementById('selA').innerHTML = opt; document.getElementById('selB').innerHTML = opt;
-        document.getElementById('playingList').innerHTML = allTeams.map((t, index) => `<div class="list-item">${index+1}. ${t} <i class="fas fa-edit" onclick="editItem('teams', ${index})"></i></div>`).join('');
-        document.getElementById('winnerList').innerHTML = winners.map((w, index) => `<div class="list-item">🏆 ${w} <i class="fas fa-edit" onclick="editItem('winners', ${index})"></i></div>`).join('');
+    function updateDB() {
+        db.update({ tourName: document.getElementById('tourName').value, prize: document.getElementById('prizeInp').value, events: document.getElementById('upcomingInp').value });
+    }
+
+    function updateWatermark() {
+        db.update({ watermark: document.getElementById('wmText').value });
     }
 
     function updateAndAddToList() {
@@ -165,8 +188,6 @@
         }
     }
 
-    function updateFromSelect() { db.update({ nameA: document.getElementById('selA').value, nameB: document.getElementById('selB').value, scoreA: 0, scoreB: 0, scoreVisible: true }); }
-    
     function declareWinner() {
         const win = curA > curB ? document.getElementById('dispNameA').innerText : document.getElementById('dispNameB').innerText;
         const lose = curA > curB ? document.getElementById('dispNameB').innerText : document.getElementById('dispNameA').innerText;
@@ -183,8 +204,8 @@
     function swapWithScore() { db.update({ nameA: document.getElementById('dispNameB').innerText, nameB: document.getElementById('dispNameA').innerText, scoreA: curB, scoreB: curA }); }
     function toggleVis() { db.child('scoreVisible').set(!sVis); }
     function resetScores() { db.update({ scoreA: 0, scoreB: 0 }); }
+    function resetTeamsOnly() { if(confirm("Reset Team List?")) db.child('teams').set([]); }
     function promoteWinners() { if(confirm("Promote Winners?")) db.update({ teams: [...winners], winners: [] }); }
-    function updateDB() { db.update({ upcoming: document.getElementById('manualTyan').value, events: document.getElementById('upcomingInp').value }); }
     function editItem(type, index) {
         let list = type === 'teams' ? allTeams : winners;
         let n = prompt("Edit:", list[index]);
