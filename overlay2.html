@@ -1,116 +1,146 @@
 <!DOCTYPE html>
-<html lang="pa">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Kabaddi Scoreboard Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Arial', sans-serif; }
-
-        /* ਓਵਰਲੇਅ ਦਾ ਮੇਨ ਕੰਟੇਨਰ */
-        .main-ticker-wrapper {
-            position: absolute;
-            bottom: 30px;
-            left: 50%;
-            transform: translateX(-50%);
-            width: 90%;
-            height: 55px;
-            display: flex;
-            align-items: center;
-            filter: drop-shadow(2px 4px 6px rgba(0,0,0,0.5));
+        body { margin: 0; padding: 0; width: 1920px; height: 1080px; background: transparent; font-family: 'Arial', sans-serif; overflow: hidden; position: relative; }
+        
+        /* ⚠ EXPIRY BLOCK */
+        #expiry-notice {
+            position: absolute; top: 0; left: 0; width: 1920px; background: #dc3545; color: white;
+            font-size: 40px; font-weight: bold; text-align: center; padding: 15px 0;
+            z-index: 10000; display: none; text-transform: uppercase;
         }
 
-        /* ਖੱਬੇ ਪਾਸੇ ਵਾਲਾ LIVE ਬਾਕਸ (ਟੇਢਾ ਕੱਟ) */
-        .live-side {
-            background: #007bff;
-            color: white;
-            height: 100%;
-            padding: 0 30px 0 20px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 900;
-            font-style: italic;
-            clip-path: polygon(0 0, 85% 0, 100% 100%, 0% 100%);
-            z-index: 3;
+        /* 📊 SCOREBOARD (Unchanged) */
+        #scoreboard-wrap { position: absolute; top: 60px; right: 80px; display: flex; flex-direction: column; align-items: flex-end; }
+        .main-bar { display: flex; align-items: center; height: 75px; background: rgba(0, 0, 0, 0.95); border-radius: 12px; border: 3px solid #00aeef; padding: 0 15px; box-shadow: 0 10px 20px rgba(0,0,0,0.5); }
+        .s-box { background: linear-gradient(145deg, #00aeef, #005a8d); color: white; font-size: 50px; font-weight: 900; min-width: 90px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 8px; text-shadow: 2px 2px 4px #000; }
+        .name-area { width: 220px; height: 100%; display: flex; align-items: center; overflow: hidden; white-space: nowrap; color: white; font-size: 28px; font-weight: bold; text-transform: uppercase; position: relative; }
+        .team-scroller { display: inline-block; padding-left: 100%; animation: team-scroll 8s linear infinite; }
+        @keyframes team-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+
+        /* 📜 TICKER SYSTEM WITH SLANT DESIGN */
+        #ticker-container {
+            position: absolute; bottom: 0px; left: 0px; width: 1920px; height: 145px; 
+            display: flex; flex-direction: column; z-index: 999;
         }
 
-        /* ਵਿਚਾਲੇ ਵਾਲਾ ਮੈਸੇਜ ਬਾਕਸ */
-        .message-area {
-            background: rgba(15, 17, 19, 0.9);
-            height: 85%;
-            flex-grow: 1;
-            margin-left: -20px;
-            margin-right: -20px;
-            display: flex;
-            align-items: center;
-            border-top: 2px solid #444;
-            border-bottom: 2px solid #444;
-            z-index: 1;
-            overflow: hidden;
+        .ticker-row { display: flex; width: 100%; overflow: hidden; position: relative; }
+        
+        /* Text area - adjustment for slant */
+        .row-text-area { flex: 1; overflow: hidden; white-space: nowrap; display: flex; align-items: center; font-weight: 900; text-transform: uppercase; padding-right: 50px; /* Space for slant */ }
+        
+        /* 📐 TIME BOX WITH TEDI LINE (Slant Design) */
+        .ticker-time-box { 
+            width: 320px; /* Slightly wider to accommodate slant */
+            background: #00aeef; color: white; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 40px; font-weight: 900; text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+            /* This makes the tedi line on the left side */
+            clip-path: polygon(15% 0%, 100% 0%, 100% 100%, 0% 100%);
+            margin-left: -50px; /* Pull it over the text area */
+            z-index: 2; /* Keep it on top of text */
         }
 
-        marquee {
-            color: white;
-            font-size: 20px;
-            font-weight: bold;
-            text-transform: uppercase;
-        }
+        .row-1 { background: rgba(0, 0, 0, 0.95); color: white; height: 60px; font-size: 38px; border-top: 3px solid #00aeef; z-index: 1; } 
+        .row-2 { background: white; color: #b91c1c; height: 42px; font-size: 28px; z-index: 1; } 
+        .row-3 { background: rgba(0, 0, 0, 0.95); color: #ffcc00; height: 43px; font-size: 28px; z-index: 1; }
 
-        /* ਸੱਜੇ ਪਾਸੇ ਵਾਲਾ ਪ੍ਰਾਈਜ਼/ਨੋਟ ਬਾਕਸ */
-        .prize-side {
-            background: #4db8ff;
-            height: 100%;
-            padding: 0 15px 0 30px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
-            z-index: 3;
-            min-width: 80px;
-        }
-
-        .prize-side img {
-            height: 40px;
-            filter: drop-shadow(0px 0px 2px black);
-        }
+        .scroller { display: inline-block; padding-left: 100%; animation: scroll-anim linear infinite; }
+        @keyframes scroll-anim { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
     </style>
 </head>
 <body>
 
-    <div class="main-ticker-wrapper">
-        <div class="live-side">LIVE</div>
+<div id="expiry-notice">⚠ PLAN EXPIRED - RECHARGE NOW ⚠</div>
 
-        <div class="message-area">
-            <marquee id="ticker-text" scrollamount="5">Connecting to database...</marquee>
-        </div>
-
-        <div class="prize-side">
-            <img src="https://cdn-icons-png.flaticon.com/512/2489/2489756.png" alt="prize">
-        </div>
+<div id="scoreboard-wrap">
+    <div class="main-bar">
+        <div class="name-area" id="nA">TEAM 1</div>
+        <div class="s-box" id="sA">0</div>
+        <div style="color:white; font-weight:900; margin:0 15px; font-size:24px;">VS</div>
+        <div class="s-box" id="sB">0</div>
+        <div class="name-area" id="nB">TEAM 2</div>
     </div>
+</div>
+
+<div id="ticker-container">
+    <div class="ticker-row row-1">
+        <div class="row-text-area"><div class="scroller" id="t1"></div></div>
+        <div class="ticker-time-box" id="live-time">00:00:00 AM</div>
+    </div>
+    <div class="ticker-row row-2">
+        <div class="row-text-area"><div class="scroller" id="t2"></div></div>
+    </div>
+    <div class="ticker-row row-3">
+        <div class="row-text-area"><div class="scroller" id="t3"></div></div>
+    </div>
+</div>
 
 <script>
-    const firebaseConfig = { databaseURL: "https://manpreetpigeons-default-rtdb.firebaseio.com/" };
+    // --- Firebase config (unchanged) ---
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     const urlParams = new URLSearchParams(window.location.search);
-    const userID = urlParams.get('id');
+    const userID = urlParams.get('id') || 'demo';
 
-    if(userID) {
-        db.ref('users/' + userID + '/config').on('value', (snapshot) => {
-            const config = snapshot.val();
-            if(config && config.ticker) {
-                document.getElementById('ticker-text').innerText = config.ticker;
-            }
-        });
-    } else {
-        document.getElementById('ticker-text').innerText = "ID NOT FOUND IN URL";
+    // --- ਸਪੀਡ ਕੰਟਰੋਲ ਫੰਕਸ਼ਨ ---
+    function updateTickerWithSpeed(elementId, text) {
+        const el = document.getElementById(elementId);
+        el.innerText = text || "";
+        const pixelsPerSecond = 150; 
+        // 1920 total - 270 visible text area (after slant and margin adjust) = approx 1650
+        const duration = (el.offsetWidth + 1650) / pixelsPerSecond; 
+        el.style.animationDuration = duration + "s";
     }
-</script>
 
+    // --- ਟੀਮ ਨੇਮ ਆਟੋ-ਸਕ੍ਰੋਲ ---
+    function setTeamName(id, txt) {
+        const el = document.getElementById(id);
+        const nameText = txt || "TEAM";
+        if(nameText.length > 12) { 
+            el.innerHTML = `<div class="team-scroller">${nameText}</div>`; 
+        } else { 
+            el.innerHTML = `<div style="width:100%; text-align:center;">${nameText}</div>`; 
+        }
+    }
+
+    // --- ਟਾਈਮ ਅਪਡੇਟ (ਟਿੱਕਰ ਲਈ) ---
+    function updateClock() {
+        const now = new Date();
+        // Updated to show AM/PM more clearly for design
+        document.getElementById('live-time').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    }
+    updateClock(); // Run once immediately
+    setInterval(updateClock, 1000);
+
+    // --- Firebase logic (unchanged) ---
+    db.ref("users/" + userID).on("value", (uSnap) => {
+        const userData = uSnap.val();
+        const now = new Date();
+        if (userData && userData.expiry && now > new Date(userData.expiry)) {
+            document.getElementById('expiry-notice').style.display = "block";
+            document.getElementById('ticker-container').style.display = "none";
+        } else {
+            document.getElementById('expiry-notice').style.display = "none";
+            document.getElementById('ticker-container').style.display = "flex";
+            db.ref("matchData").on("value", (snap) => {
+                const data = snap.val() || {};
+                document.getElementById('sA').innerText = data.scoreA || "0";
+                document.getElementById('sB').innerText = data.scoreB || "0";
+                setTeamName('nA', data.nameA);
+                setTeamName('nB', data.nameB);
+                updateTickerWithSpeed('t1', data.row1Txt);
+                updateTickerWithSpeed('t2', data.row2Txt);
+                updateTickerWithSpeed('t3', data.row3Txt);
+            });
+        }
+    });
+</script>
 </body>
 </html>
