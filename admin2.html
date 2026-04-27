@@ -3,44 +3,48 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kabaddi Pro Admin - Manpreet Mudki</title>
+    <title>Kabaddi Admin Ultimate - Manpreet Mudki</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: #e0e0e0; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: #161b22; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 15px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.6); }
+        body { font-family: 'Segoe UI', sans-serif; background: #0b1118; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: #1a222c; width: 100%; max-width: 550px; border-radius: 12px; border: 1px solid #303e4d; margin-bottom: 12px; overflow: hidden; box-shadow: 0 4px 15px rgba(0,0,0,0.5); }
         .header { background: #f39c12; color: #000; padding: 10px; text-align: center; font-weight: 900; text-transform: uppercase; font-size: 13px; }
         .p-15 { padding: 15px; }
-        input, textarea, select { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 8px; margin-bottom: 8px; box-sizing: border-box; }
-        .btn { border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; margin-bottom: 6px; transition: 0.2s; }
-        .btn:active { transform: scale(0.98); }
-        .btn-blue { background: #1f6feb; color: white; }
-        .btn-green { background: #238636; color: white; }
+        input, textarea, select { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 6px; margin-bottom: 8px; box-sizing: border-box; }
+        .btn { border: none; padding: 10px; border-radius: 6px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; margin-bottom: 5px; font-size: 12px; }
+        .btn-blue { background: #1a73e8; color: white; }
+        .btn-green { background: #2ecc71; color: black; }
         .btn-orange { background: #f39c12; color: black; }
-        .btn-red { background: #da3633; color: white; }
-        .btn-dark { background: #30363d; color: white; }
+        .btn-red { background: #e74c3c; color: white; }
+        .btn-dark { background: #3c4043; color: white; }
         
-        .score-row { display: flex; justify-content: space-around; align-items: center; background: #0d1117; padding: 15px; border-radius: 10px; border: 1px solid #30363d; margin: 10px 0; }
-        .score-num { font-size: 48px; font-weight: 900; color: #f39c12; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .score-row { display: flex; justify-content: space-around; align-items: center; background: #0d1117; padding: 12px; border-radius: 10px; border: 1px solid #30363d; margin: 8px 0; }
+        .score-num { font-size: 40px; font-weight: 900; color: #f39c12; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
         .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 100px; overflow-y: auto; padding: 8px; font-size: 12px; }
     </style>
 </head>
 <body>
 
 <div class="card">
-    <div class="header">Tournament Info & Upcoming</div>
+    <div class="header">Tournament & Prize Setup</div>
     <div class="p-15">
-        <input type="text" id="tourName" placeholder="Tournament Name" oninput="updateDB()">
-        <textarea id="upcomingInp" placeholder="Upcoming Matches (e.g. Semi Final 1: Mudki vs Gill)" oninput="updateDB()"></textarea>
-        <textarea id="bulkTeams" placeholder="Add All Teams (Comma separated)"></textarea>
-        <button class="btn btn-blue" onclick="addBulkTeams()">Save Teams & Info</button>
+        <div class="grid-2">
+            <input type="text" id="tourName" placeholder="Tournament Name" oninput="updateDB()">
+            <input type="text" id="prizeInp" placeholder="Prize (e.g. 1st: 50k)" oninput="updateDB()">
+        </div>
+        <textarea id="bulkTeams" placeholder="Add Teams (Team1, Team2, ...)"></textarea>
+        <div class="grid-2">
+            <button class="btn btn-blue" onclick="addBulkTeams()">Save Teams</button>
+            <button class="btn btn-red" onclick="resetAllTeams()">Reset All Teams</button>
+        </div>
     </div>
 </div>
 
 <div class="card">
-    <div class="header">Live Match Control</div>
+    <div class="header">Live Match & Swap Control</div>
     <div class="p-15">
         <div class="grid-2">
             <select id="selA"></select>
@@ -50,31 +54,40 @@
         
         <div class="score-row">
             <div style="text-align:center;">
-                <div id="dispNameA" style="font-size:12px; color:#888;">TEAM 1</div>
+                <div id="dispNameA" style="font-size:11px; color:#888;">--</div>
                 <div class="score-num" id="dispA">0</div>
                 <div style="display:flex; gap:5px;"><button class="btn btn-green" onclick="changeScore('scoreA', 1)">+</button><button class="btn btn-red" onclick="changeScore('scoreA', -1)">-</button></div>
             </div>
             <div style="font-weight:900;">VS</div>
             <div style="text-align:center;">
-                <div id="dispNameB" style="font-size:12px; color:#888;">TEAM 2</div>
+                <div id="dispNameB" style="font-size:11px; color:#888;">--</div>
                 <div class="score-num" id="dispB">0</div>
                 <div style="display:flex; gap:5px;"><button class="btn btn-green" onclick="changeScore('scoreB', 1)">+</button><button class="btn btn-red" onclick="changeScore('scoreB', -1)">-</button></div>
             </div>
         </div>
 
         <div class="grid-2">
-            <button id="visBtn" class="btn btn-blue" onclick="toggleVis('scoreVisible')">Show Score</button>
-            <button class="btn btn-dark" onclick="swapTeams()">Swipe Teams (Camera View)</button>
+            <button class="btn btn-dark" onclick="swapOnlyTeams()">Swipe Only Names</button>
+            <button class="btn btn-dark" onclick="swapWithScore()">Swipe Name + Score</button>
         </div>
-        <button class="btn btn-dark" onclick="resetScores()">Reset Score Only</button>
-        <button class="btn btn-green" onclick="declareWinner()">🏆 Result (Winner Saves / Loser Leaves)</button>
+        <div class="grid-2">
+            <button id="visBtn" class="btn btn-blue" onclick="toggleVis()">Show Score</button>
+            <button class="btn btn-red" onclick="resetScores()">Reset Score Only</button>
+        </div>
+        <button class="btn btn-green" style="margin-top:5px;" onclick="declareWinner()">🏆 Declare Winner & Add to Taiyan</button>
     </div>
 </div>
 
 <div class="card">
-    <div class="header">Data Lists</div>
+    <div class="header">Winners & Next Round (ਟਾਈਆਂ)</div>
     <div class="p-15">
+        <div class="box-title" style="font-size:12px; margin-bottom:5px;">ਜੇਤੂਆਂ ਵਿੱਚੋਂ ਅਗਲਾ ਮੈਚ ਲਗਾਓ:</div>
         <div class="grid-2">
+            <select id="winSelA"></select>
+            <select id="winSelB"></select>
+        </div>
+        <button class="btn btn-blue" onclick="fixNextMatch()">Fix Next Round</button>
+        <div class="grid-2" style="margin-top:10px;">
             <div><small>WINNER LIST</small><div id="winnerList" class="box-list"></div></div>
             <div><small>PLAYING TEAMS</small><div id="playingList" class="box-list"></div></div>
         </div>
@@ -97,21 +110,25 @@
 
         document.getElementById('dispA').innerText = curA;
         document.getElementById('dispB').innerText = curB;
-        document.getElementById('dispNameA').innerText = data.nameA || "TEAM 1";
-        document.getElementById('dispNameB').innerText = data.nameB || "TEAM 2";
+        document.getElementById('dispNameA').innerText = data.nameA || "--";
+        document.getElementById('dispNameB').innerText = data.nameB || "--";
         document.getElementById('tourName').value = data.tourName || "";
-        document.getElementById('upcomingInp').value = data.upcoming || "";
-        document.getElementById('visBtn').innerText = sVis ? "Hide Score" : "Show Score";
-        document.getElementById('visBtn').style.background = sVis ? "#da3633" : "#1f6feb";
+        document.getElementById('prizeInp').value = data.prize || "";
+        document.getElementById('visBtn').innerText = sVis ? "Hide Scoreboard" : "Show Scoreboard";
         
         renderUI();
     });
 
     function renderUI() {
         let opt = `<option value="">Select Team</option>`;
+        let winOpt = `<option value="">Select Winner</option>`;
         allTeams.forEach(t => opt += `<option value="${t}">${t}</option>`);
+        winners.forEach(w => winOpt += `<option value="${w}">${w}</option>`);
+        
         document.getElementById('selA').innerHTML = opt;
         document.getElementById('selB').innerHTML = opt;
+        document.getElementById('winSelA').innerHTML = winOpt;
+        document.getElementById('winSelB').innerHTML = winOpt;
         document.getElementById('winnerList').innerHTML = winners.map(w => `<div>🏆 ${w}</div>`).join('');
         document.getElementById('playingList').innerHTML = allTeams.map(t => `<div>${t}</div>`).join('');
     }
@@ -126,6 +143,10 @@
         updateDB();
     }
 
+    function resetAllTeams() {
+        if(confirm("Delete All Teams & Winners?")) db.update({ teams: [], winners: [] });
+    }
+
     function updateMatchTeams() {
         db.update({ nameA: document.getElementById('selA').value, nameB: document.getElementById('selB').value, scoreA: 0, scoreB: 0, scoreVisible: true });
     }
@@ -136,23 +157,31 @@
         db.update({ [team]: newVal });
     }
 
-    function swapTeams() {
+    function swapOnlyTeams() {
+        db.update({ nameA: document.getElementById('dispNameB').innerText, nameB: document.getElementById('dispNameA').innerText });
+    }
+
+    function swapWithScore() {
         db.update({ nameA: document.getElementById('dispNameB').innerText, nameB: document.getElementById('dispNameA').innerText, scoreA: curB, scoreB: curA });
     }
 
-    function toggleVis(f) { db.child(f).set(!sVis); }
-    function resetScores() { if(confirm("Reset Score?")) db.update({ scoreA: 0, scoreB: 0 }); }
+    function toggleVis() { db.child('scoreVisible').set(!sVis); }
+    function resetScores() { db.update({ scoreA: 0, scoreB: 0 }); }
 
     function declareWinner() {
         const win = curA > curB ? document.getElementById('dispNameA').innerText : document.getElementById('dispNameB').innerText;
         const lose = curA > curB ? document.getElementById('dispNameB').innerText : document.getElementById('dispNameA').innerText;
-        if(confirm(win + " wins! " + lose + " will be removed?")) {
+        if(confirm(win + " Wins! Remove " + lose + "?")) {
             db.update({ winners: [...new Set([...winners, win])], teams: allTeams.filter(t => t !== lose), scoreVisible: false });
         }
     }
 
+    function fixNextMatch() {
+        db.update({ nameA: document.getElementById('winSelA').value, nameB: document.getElementById('winSelB').value, scoreA: 0, scoreB: 0, scoreVisible: true });
+    }
+
     function updateDB() {
-        db.update({ tourName: document.getElementById('tourName').value, upcoming: document.getElementById('upcomingInp').value });
+        db.update({ tourName: document.getElementById('tourName').value, prize: document.getElementById('prizeInp').value });
     }
 </script>
 </body>
