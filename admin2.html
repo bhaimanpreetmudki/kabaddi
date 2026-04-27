@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Kabaddi Admin - Manpreet Mudki</title>
+    <title>Kabaddi Admin Pro - Manpreet Mudki</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/Sortable/1.14.0/Sortable.min.js"></script>
@@ -13,20 +13,20 @@
         #drag-container { width: 100%; max-width: 600px; }
         .card { background: #161b22; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 12px; overflow: hidden; }
         .header-flex { background: #f39c12; color: #000; padding: 10px 15px; display: flex; justify-content: space-between; align-items: center; cursor: grab; }
-        .header-title { font-weight: 900; text-transform: uppercase; font-size: 11px; }
+        .header-title { font-weight: 900; text-transform: uppercase; font-size: 11px; letter-spacing: 0.5px; }
+        .upd-btn-small { background: #000; color: #fff; border: none; padding: 5px 12px; border-radius: 4px; font-size: 10px; cursor: pointer; font-weight: bold; }
         .p-15 { padding: 15px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin-bottom: 10px; }
-        input, select, textarea { width: 100%; padding: 12px; background: #1c2128; border: 1px solid #30363d; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 14px; }
-        .btn { border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; font-size: 11px; display: flex; align-items: center; justify-content: center; gap: 8px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-bottom: 8px; }
+        input, select, textarea { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: #fff; border-radius: 8px; box-sizing: border-box; font-size: 13px; }
+        .btn { border: none; padding: 12px; border-radius: 8px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; font-size: 10px; display: flex; align-items: center; justify-content: center; gap: 5px; }
         .btn-green { background: #238636; color: white; }
         .btn-red { background: #da3633; color: white; }
         .btn-blue { background: #1f6feb; color: white; }
         .btn-orange { background: #f39c12; color: black; }
-        .score-val { font-size: 50px; font-weight: 900; color: #f39c12; text-align: center; margin: 5px 0; }
-        .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 120px; overflow-y: auto; padding: 8px; font-size: 13px; margin-top: 5px; }
-        .list-item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #222; }
-        .handle { color: #555; margin-right: 8px; }
-        label { font-size: 10px; color: #f39c12; font-weight: bold; display: block; margin-bottom: 4px; }
+        .score-val { font-size: 60px; font-weight: 900; color: #f39c12; text-align: center; line-height: 1; margin: 10px 0; }
+        .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 130px; overflow-y: auto; padding: 8px; font-size: 13px; }
+        .list-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px solid #222; }
     </style>
 </head>
 <body>
@@ -35,69 +35,92 @@
 
     <div class="card">
         <div class="header-flex">
-            <span class="header-title"><i class="fas fa-grip-lines handle"></i> Live Score Control</span>
-            <button id="scoreVisBtn" class="btn btn-green" style="width:auto; padding:4px 10px; font-size:9px;" onclick="toggleVis('scoreVisible')">Show</button>
+            <span class="header-title"><i class="fas fa-grip-lines handle"></i> LIVE SCORE CONTROL</span>
+            <button id="scoreVisBtn" class="upd-btn-small" onclick="toggleVis('scoreVisible')">SHOW</button>
         </div>
         <div class="p-15">
             <div class="grid-2">
-                <div>
-                    <label>SELECT TEAM 1</label>
-                    <select id="selA" onchange="db.update({nameA: this.value})"></select>
-                </div>
-                <div>
-                    <label>SELECT TEAM 2</label>
-                    <select id="selB" onchange="db.update({nameB: this.value})"></select>
-                </div>
+                <div><small style="color:#f39c12; font-size:9px;">SELECT TEAM 1</small><select id="selA" onchange="updateMatchTeams()"></select></div>
+                <div><small style="color:#f39c12; font-size:9px;">SELECT TEAM 2</small><select id="selB" onchange="updateMatchTeams()"></select></div>
             </div>
-            <div class="grid-2" style="text-align:center;">
+            
+            <div class="grid-2" style="background:#0d1117; border-radius:10px; padding:10px; border:1px solid #333;">
                 <div>
                     <div class="score-val" id="dispA">0</div>
-                    <div class="grid-2"><button class="btn btn-green" onclick="changeScore('scoreA', 1)">+</button><button class="btn btn-red" onclick="changeScore('scoreA', -1)">-</button></div>
+                    <div class="grid-2">
+                        <button class="btn btn-green" onclick="changeScore('scoreA', 1)">+</button>
+                        <button class="btn btn-red" onclick="changeScore('scoreA', -1)">-</button>
+                    </div>
                 </div>
                 <div>
                     <div class="score-val" id="dispB">0</div>
-                    <div class="grid-2"><button class="btn btn-green" onclick="changeScore('scoreB', 1)">+</button><button class="btn btn-red" onclick="changeScore('scoreB', -1)">-</button></div>
+                    <div class="grid-2">
+                        <button class="btn btn-green" onclick="changeScore('scoreB', 1)">+</button>
+                        <button class="btn btn-red" onclick="changeScore('scoreB', -1)">-</button>
+                    </div>
                 </div>
             </div>
-            <div class="grid-2">
-                <button class="btn btn-blue" onclick="swapFull()">Full Swipe</button>
-                <button class="btn btn-red" onclick="confirmReset('score')">Reset Score</button>
+
+            <div class="grid-3" style="margin-top:10px;">
+                <button class="btn btn-blue" onclick="swapNames()">T-SWIPE</button>
+                <button class="btn btn-blue" onclick="swapScoreOnly()">S-SWIPE</button>
+                <button class="btn btn-blue" onclick="swapFull()">FULL</button>
             </div>
-            <button class="btn btn-green" onclick="declareWinner()">🏆 Win & Move to Wing Box</button>
+            
+            <div class="grid-2">
+                <button class="btn btn-red" onclick="confirmReset('score')">RESET SCORE</button>
+                <button class="btn btn-green" onclick="declareWinner()">🏆 DECLARE RESULT (WIN & MOVE TO WING BOX)</button>
+            </div>
         </div>
     </div>
 
     <div class="card">
         <div class="header-flex">
-            <span class="header-title"><i class="fas fa-grip-lines handle"></i> Round 2 / Next Match Creator</span>
+            <span class="header-title"><i class="fas fa-grip-lines handle"></i> ROUND 2 / NEXT MATCH CREATOR</span>
         </div>
         <div class="p-15">
-            <label>SELECT TEAMS TO MAKE MATCH</label>
+            <small style="color:#f39c12; font-size:9px;">SELECT TEAMS TO MAKE MATCH</small>
             <div class="grid-2">
-                <select id="matchT1"></select>
-                <select id="matchT2"></select>
+                <select id="winSelA"><option>Select Winner</option></select>
+                <select id="winSelB"><option>Select Winner</option></select>
             </div>
-            <button class="btn btn-orange" onclick="addCustomMatch()">Add This Match to List</button>
+            <button class="btn btn-orange" onclick="addCustomMatch()">ADD THIS MATCH TO LIST</button>
         </div>
     </div>
 
     <div class="card">
         <div class="header-flex">
-            <span class="header-title"><i class="fas fa-grip-lines handle"></i> Team List & Wing Box</span>
-            <button class="btn btn-blue" style="width:auto; padding:4px 10px; font-size:9px;" onclick="promoteWinners()">Promote to List</button>
+            <span class="header-title"><i class="fas fa-grip-lines handle"></i> TEAM LIST & WING BOX</span>
+            <button class="upd-btn-small" style="background:#1f6feb;" onclick="promoteWinners()">PROMOTE TO LIST</button>
         </div>
         <div class="p-15">
             <div class="grid-2">
                 <div>
-                    <label>MAIN MATCH LIST</label>
-                    <textarea id="manualTyan" placeholder="Add Teams..." style="height:50px; font-size:11px;" oninput="syncTeams()"></textarea>
+                    <small style="color:#f39c12; font-size:9px;">ENTER ALL TEAMS (ONE PER LINE)</small>
+                    <textarea id="manualTyan" placeholder="Team 1&#10;Team 2..." style="height:60px;" oninput="syncTeams()"></textarea>
                     <div id="playingList" class="box-list"></div>
                 </div>
                 <div>
-                    <label>WING BOX (WINNERS)</label>
-                    <div id="winnerList" class="box-list" style="height:190px;"></div>
+                    <small style="color:#f39c12; font-size:9px;">WING BOX (WINNERS)</small>
+                    <div id="winnerList" class="box-list" style="height:215px;"></div>
                 </div>
             </div>
+            <button class="btn btn-red" style="margin-top:8px;" onclick="confirmReset('teams')">RESET ALL DATA</button>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="header-flex">
+            <span class="header-title"><i class="fas fa-grip-lines handle"></i> TOURNAMENT INFO & EVENTS</span>
+            <button class="upd-btn-small" onclick="updateInfo()">UPDATE</button>
+        </div>
+        <div class="p-15">
+            <div class="grid-2">
+                <input type="text" id="tourName" placeholder="Tournament Name">
+                <input type="text" id="prizeInp" placeholder="Prize Details">
+            </div>
+            <textarea id="upcomingInp" placeholder="Upcoming Events / Programs..." style="height:50px; margin-bottom:8px;"></textarea>
+            <input type="text" id="wmText" placeholder="Watermark: LIVE MANPREET MUDKI">
         </div>
     </div>
 
@@ -109,42 +132,39 @@
     const db = firebase.database().ref("kabaddiMatch");
 
     let status = {}, allTeams = [], winners = [];
+
     new Sortable(document.getElementById('drag-container'), { animation: 150, handle: '.handle' });
 
     db.on("value", (snap) => {
         const data = snap.val() || {};
-        status = data;
-        allTeams = data.teams || [];
-        winners = data.winners || [];
+        status = data; allTeams = data.teams || []; winners = data.winners || [];
         
         document.getElementById('dispA').innerText = data.scoreA || 0;
         document.getElementById('dispB').innerText = data.scoreB || 0;
-        document.getElementById('manualTyan').value = allTeams.join('\n');
+        document.getElementById('tourName').value = data.tourName || "";
+        document.getElementById('prizeInp').value = data.prize || "";
+        document.getElementById('upcomingInp').value = data.events || "";
+        document.getElementById('wmText').value = data.watermark || "";
+        document.getElementById('scoreVisBtn').innerText = data.scoreVisible ? "HIDE" : "SHOW";
         
-        updateSelectors();
         renderUI();
     });
 
-    function updateSelectors() {
+    function renderUI() {
+        // Dropdowns
         let opt = `<option value="">Select Team</option>`;
         allTeams.forEach(t => opt += `<option value="${t}">${t}</option>`);
-        
-        // ਸਕੋਰ ਸਿਲੈਕਟਰ
-        const sA = document.getElementById('selA'), sB = document.getElementById('selB');
-        sA.innerHTML = opt; sB.innerHTML = opt;
-        sA.value = status.nameA || ""; sB.value = status.nameB || "";
+        document.getElementById('selA').innerHTML = opt; document.getElementById('selB').innerHTML = opt;
+        document.getElementById('selA').value = status.nameA || ""; document.getElementById('selB').value = status.nameB || "";
 
-        // ਰਾਊਂਡ 2 ਸਿਲੈਕਟਰ (ਜੇਤੂਆਂ ਵਿੱਚੋਂ ਮੈਚ ਬਣਾਉਣ ਲਈ)
         let winOpt = `<option value="">Select Winner</option>`;
         winners.forEach(w => winOpt += `<option value="${w}">${w}</option>`);
-        document.getElementById('matchT1').innerHTML = winOpt;
-        document.getElementById('matchT2').innerHTML = winOpt;
-    }
+        document.getElementById('winSelA').innerHTML = winOpt; document.getElementById('winSelB').innerHTML = winOpt;
 
-    function renderUI() {
+        // Auto Match List (1vs2, 3vs4...)
         let html = "";
         for(let i=0; i<allTeams.length; i+=2) {
-            html += `<div class="list-item"><span>${(i/2)+1}. ${allTeams[i]} VS ${allTeams[i+1] || '?'}</span></div>`;
+            html += `<div class="list-item"><span>${allTeams[i]} <b style="color:#f39c12">VS</b> ${allTeams[i+1] || "WAITING"}</span></div>`;
         }
         document.getElementById('playingList').innerHTML = html;
         document.getElementById('winnerList').innerHTML = winners.map(w => `<div class="list-item">🏆 ${w}</div>`).join('');
@@ -155,42 +175,53 @@
         db.update({ teams: list });
     }
 
-    function addCustomMatch() {
-        const t1 = document.getElementById('matchT1').value;
-        const t2 = document.getElementById('matchT2').value;
-        if(t1 && t2) {
-            db.update({ teams: [...allTeams, t1, t2], winners: winners.filter(w => w !== t1 && w !== t2) });
-            alert("Match Added to List!");
-        }
-    }
-
     function changeScore(team, val) {
         let cur = status[team] || 0;
         let newVal = (val > 0) ? (cur === 0 && (status.scoreA+status.scoreB === 0) ? 1.5 : cur + 1) : Math.max(0, cur === 1.5 ? 0 : cur - 1);
         db.update({ [team]: newVal });
     }
 
+    function updateMatchTeams() {
+        db.update({ nameA: document.getElementById('selA').value, nameB: document.getElementById('selB').value });
+    }
+
+    function swapNames() { db.update({ nameA: status.nameB, nameB: status.nameA }); }
+    function swapScoreOnly() { db.update({ scoreA: status.scoreB, scoreB: status.scoreA }); }
+    function swapFull() { db.update({ nameA: status.nameB, nameB: status.nameA, scoreA: status.scoreB, scoreB: status.scoreA }); }
+    function toggleVis(key) { db.child(key).set(!status[key]); }
+
     function declareWinner() {
         const win = status.scoreA > status.scoreB ? status.nameA : status.nameB;
         const lose = status.scoreA > status.scoreB ? status.nameB : status.nameA;
+        if(!win || !lose) return alert("Select Teams First!");
         if(confirm(win + " Wins?")) {
-            db.update({ 
-                winners: [...winners, win], 
-                teams: allTeams.filter(t => t !== win && t !== lose),
-                scoreA: 0, scoreB: 0 
-            });
+            db.update({ winners: [...winners, win], teams: allTeams.filter(t => t !== lose && t !== win), scoreA: 0, scoreB: 0, scoreVisible: false });
         }
+    }
+
+    function updateInfo() {
+        db.update({ tourName: document.getElementById('tourName').value, prize: document.getElementById('prizeInp').value, events: document.getElementById('upcomingInp').value, watermark: document.getElementById('wmText').value });
+        alert("Updated!");
+    }
+
+    function confirmReset(type) {
+        if(!confirm("Are you sure?")) return;
+        if(type === 'score') db.update({ scoreA: 0, scoreB: 0 });
+        if(type === 'teams') { db.update({ teams: [], winners: [] }); document.getElementById('manualTyan').value = ""; }
     }
 
     function promoteWinners() {
-        if(confirm("Move all winners back to Match List?")) {
-            db.update({ teams: [...allTeams, ...winners], winners: [] });
-        }
+        if(confirm("Promote winners to playing list?")) db.update({ teams: [...winners], winners: [] });
     }
 
-    function toggleVis(key) { db.child(key).set(!status[key]); }
-    function confirmReset(type) { if(confirm("Reset?")) db.update({ scoreA: 0, scoreB: 0 }); }
-    function swapFull() { db.update({ nameA: status.nameB, nameB: status.nameA, scoreA: status.scoreB, scoreB: status.scoreA }); }
+    function addCustomMatch() {
+        const t1 = document.getElementById('winSelA').value;
+        const t2 = document.getElementById('winSelB').value;
+        if(t1 && t2) {
+            db.update({ nameA: t1, nameB: t2, scoreA: 0, scoreB: 0, scoreVisible: true });
+            alert("Match Started!");
+        }
+    }
 </script>
 </body>
 </html>
