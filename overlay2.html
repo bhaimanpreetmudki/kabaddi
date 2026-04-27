@@ -14,7 +14,120 @@
             bottom: 30px;
             left: 50%;
             transform: translateX(-50%);
-            width: 90%;
+            width: 90%;<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { margin: 0; padding: 0; width: 1920px; height: 1080px; background: transparent; font-family: 'Arial', sans-serif; overflow: hidden; position: relative; }
+        
+        /* ⚠ EXPIRY BLOCK */
+        #expiry-notice {
+            position: absolute; top: 0; left: 0; width: 1920px; background: #dc3545; color: white;
+            font-size: 40px; font-weight: bold; text-align: center; padding: 15px 0;
+            z-index: 10000; display: none; text-transform: uppercase;
+        }
+
+        /* 📜 3-ROW TICKER SYSTEM */
+        #ticker-container {
+            position: absolute; bottom: 0px; left: 0px; width: 1920px; height: 145px; 
+            display: flex; flex-direction: column; z-index: 999;
+        }
+
+        .ticker-row { display: flex; width: 100%; overflow: hidden; position: relative; }
+        
+        /* ROW 1: LIVE + TICKER + TIME */
+        .row-1 { background: rgba(0, 0, 0, 0.95); color: white; height: 60px; font-size: 38px; border-top: 3px solid #00aeef; }
+        .live-tag { 
+            background: #00aeef; color: white; padding: 0 40px 0 20px; 
+            display: flex; align-items: center; font-weight: 900;
+            clip-path: polygon(0 0, 85% 0, 100% 100%, 0% 100%);
+            z-index: 10;
+        }
+        .live-dot { height: 12px; width: 12px; background: red; border-radius: 50%; margin-right: 10px; animation: blink 1s infinite; }
+        @keyframes blink { 0% { opacity: 1; } 50% { opacity: 0; } 100% { opacity: 1; } }
+
+        .row-text-area { flex: 1; overflow: hidden; white-space: nowrap; display: flex; align-items: center; font-weight: 900; text-transform: uppercase; }
+        
+        /* TIME BOX */
+        .ticker-time-box { 
+            width: 250px; background: #00aeef; color: white; 
+            display: flex; align-items: center; justify-content: center; 
+            font-size: 35px; font-weight: 900;
+            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0% 100%);
+        }
+
+        /* ROW 2 & 3 */
+        .row-2 { background: white; color: #b91c1c; height: 42px; font-size: 28px; } 
+        .row-3 { background: rgba(0, 0, 0, 0.95); color: #ffcc00; height: 43px; font-size: 28px; }
+
+        .scroller { display: inline-block; padding-left: 100%; animation: scroll-anim linear infinite; }
+        @keyframes scroll-anim { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
+    </style>
+</head>
+<body>
+
+<div id="expiry-notice">⚠ PLAN EXPIRED - RECHARGE NOW ⚠</div>
+
+<div id="ticker-container">
+    <div class="ticker-row row-1">
+        <div class="live-tag"><span class="live-dot"></span>LIVE</div>
+        <div class="row-text-area"><div class="scroller" id="t1"></div></div>
+        <div class="ticker-time-box" id="live-time">00:00:00</div>
+    </div>
+    
+    <div class="ticker-row row-2">
+        <div class="row-text-area"><div class="scroller" id="t2"></div></div>
+    </div>
+    
+    <div class="ticker-row row-3">
+        <div class="row-text-area"><div class="scroller" id="t3"></div></div>
+    </div>
+</div>
+
+<script>
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database();
+
+    const urlParams = new URLSearchParams(window.location.search);
+    const userID = urlParams.get('id') || 'demo';
+
+    function updateTickerWithSpeed(elementId, text) {
+        const el = document.getElementById(elementId);
+        el.innerText = text || "";
+        const pixelsPerSecond = 120; // ਸਪੀਡ ਇੱਥੋਂ ਘਟਾ-ਵਧਾ ਸਕਦੇ ਹੋ
+        const duration = (el.offsetWidth + 1600) / pixelsPerSecond;
+        el.style.animationDuration = duration + "s";
+    }
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('live-time').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: true });
+    }
+    setInterval(updateClock, 1000);
+
+    db.ref("users/" + userID).on("value", (uSnap) => {
+        const userData = uSnap.val();
+        const now = new Date();
+        if (userData && now > new Date(userData.expiry)) {
+            document.getElementById('expiry-notice').style.display = "block";
+            document.getElementById('ticker-container').style.display = "none";
+        } else {
+            document.getElementById('expiry-notice').style.display = "none";
+            db.ref("matchData").on("value", (snap) => {
+                const data = snap.val() || {};
+                updateTickerWithSpeed('t1', data.row1Txt);
+                updateTickerWithSpeed('t2', data.row2Txt);
+                updateTickerWithSpeed('t3', data.row3Txt);
+            });
+        }
+    });
+</script>
+</body>
+</html>
             height: 55px;
             display: flex;
             align-items: center;
