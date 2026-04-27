@@ -41,8 +41,8 @@
         </div>
         <div class="p-15">
             <div class="grid-2">
-                <div><small style="color:#f39c12; font-size:9px;">TEAM 1 (LEFT)</small><select id="selA" onchange="updateMatchTeams()"></select></div>
-                <div><small style="color:#f39c12; font-size:9px;">TEAM 2 (RIGHT)</small><select id="selB" onchange="updateMatchTeams()"></select></div>
+                <div><small style="color:#f39c12; font-size:9px;">SELECT TEAM 1</small><select id="selA" onchange="updateMatchTeams()"></select></div>
+                <div><small style="color:#f39c12; font-size:9px;">SELECT TEAM 2</small><select id="selB" onchange="updateMatchTeams()"></select></div>
             </div>
             
             <div style="background:#0d1117; border-radius:10px; padding:15px; border:1px solid #333; margin-bottom:10px;">
@@ -67,7 +67,7 @@
             <div class="grid-3">
                 <button class="btn btn-blue" onclick="swapNames()">T-SWIPE</button>
                 <button class="btn btn-blue" onclick="swapScoreOnly()">S-SWIPE</button>
-                <button class="btn btn-blue" onclick="swapFull()">FULL SWAP</button>
+                <button class="btn btn-blue" onclick="swapFull()">FULL</button>
             </div>
             
             <div class="grid-2">
@@ -98,7 +98,7 @@
         <div class="p-15">
             <div class="grid-2">
                 <div>
-                    <small style="color:#f39c12; font-size:9px;">ADD TEAMS (Separate by , or Enter)</small>
+                    <small style="color:#f39c12; font-size:9px;">TEAM LIST (CURRENT)</small>
                     <textarea id="manualTyan" placeholder="Team 1, Team 2..." style="height:60px;" oninput="syncTeams()"></textarea>
                     <div id="playingList" class="box-list"></div>
                 </div>
@@ -152,6 +152,7 @@
         document.getElementById('scoreVisBtn').innerText = data.scoreVisible ? "HIDE" : "SHOW";
         
         document.getElementById('manualTyan').value = allTeams.join(', ');
+
         renderUI();
     });
 
@@ -184,25 +185,6 @@
         document.getElementById('winnerList').innerHTML = winners.map(w => `<div class="list-item">🏆 ${w}</div>`).join('');
     }
 
-    // --- SWIPE LOGIC ---
-    function swapNames() { 
-        db.update({ nameA: status.nameB, nameB: status.nameA }); 
-    }
-    
-    function swapScoreOnly() { 
-        db.update({ scoreA: status.scoreB, scoreB: status.scoreA }); 
-    }
-    
-    function swapFull() { 
-        db.update({ 
-            nameA: status.nameB, 
-            nameB: status.nameA, 
-            scoreA: status.scoreB, 
-            scoreB: status.scoreA 
-        }); 
-    }
-    // -------------------
-
     function syncTeams() {
         let input = document.getElementById('manualTyan').value;
         let list = input.split(/[,\n]/).map(t => t.trim()).filter(t => t !== "");
@@ -219,6 +201,9 @@
         db.update({ nameA: document.getElementById('selA').value, nameB: document.getElementById('selB').value });
     }
 
+    function swapNames() { db.update({ nameA: status.nameB, nameB: status.nameA }); }
+    function swapScoreOnly() { db.update({ scoreA: status.scoreB, scoreB: status.scoreA }); }
+    function swapFull() { db.update({ nameA: status.nameB, nameB: status.nameA, scoreA: status.scoreB, scoreB: status.scoreA }); }
     function toggleVis(key) { db.child(key).set(!status[key]); }
 
     function declareWinner() {
@@ -242,17 +227,31 @@
     }
 
     function promoteWinners() {
-        if(winners.length === 0) return alert("No winners to promote!");
-        if(confirm("Promote winners to next round?")) {
-            db.update({ teams: [...winners], winners: [] });
-        }
+        if(winners.length === 0) return alert("No winners!");
+        if(confirm("Promote winners?")) db.update({ teams: [...winners], winners: [] });
     }
 
+    // FIXED: Now adds the match to the Match List/Team List and sets it to live
     function addCustomMatch() {
         const t1 = document.getElementById('winSelA').value;
         const t2 = document.getElementById('winSelB').value;
         if(t1 && t2) {
-            db.update({ nameA: t1, nameB: t2, scoreA: 0, scoreB: 0, scoreVisible: true });
+            // Remove these teams from Winners and add to current Teams list
+            let newWinners = winners.filter(w => w !== t1 && w !== t2);
+            let newTeams = [...allTeams, t1, t2];
+            
+            db.update({ 
+                nameA: t1, 
+                nameB: t2, 
+                scoreA: 0, 
+                scoreB: 0, 
+                scoreVisible: true,
+                winners: newWinners,
+                teams: newTeams
+            });
+            alert("Match Added to List & Set Live!");
+        } else {
+            alert("Please select two winners!");
         }
     }
 </script>
