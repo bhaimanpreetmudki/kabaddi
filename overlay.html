@@ -14,86 +14,47 @@
             z-index: 10000; display: none; text-transform: uppercase;
         }
 
-        /* 📺 LOGO ANIMATION */
-        #logo-container { position: absolute; top: 20px; left: 40px; z-index: 999; }
-        #main-logo {
-            height: 180px; width: auto; 
-            filter: drop-shadow(2px 4px 8px rgba(0,0,0,0.6));
-            animation: logo-flip 10s infinite ease-in-out; 
-        }
-        @keyframes logo-flip {
-            0%, 80% { transform: perspective(1000px) rotateY(0deg); }
-            90% { transform: perspective(1000px) rotateY(180deg); }
-            100% { transform: perspective(1000px) rotateY(360deg); }
-        }
-
         /* 📊 SCOREBOARD */
-        #scoreboard { 
-            position: absolute; top: 60px; right: 80px; display: flex; flex-direction: column; align-items: center; 
-            transition: 0.7s ease; 
-        }
-        .main-bar { 
-            display: flex; align-items: center; height: 75px; background: rgba(0, 0, 0, 0.9); 
-            border-radius: 12px; border: 3px solid #00aeef; padding: 0 15px; 
-        }
-        .s-box { 
-            background: linear-gradient(145deg, #00aeef, #005a8d); color: white; 
-            font-size: 50px; font-weight: 900; min-width: 90px; height: 60px; 
-            display: flex; align-items: center; justify-content: center; border-radius: 8px;
-            text-shadow: 2px 2px 4px #000;
-        }
+        #scoreboard { position: absolute; top: 60px; right: 80px; display: flex; flex-direction: column; align-items: center; transition: 0.7s ease; }
+        .main-bar { display: flex; align-items: center; height: 75px; background: rgba(0, 0, 0, 0.9); border-radius: 12px; border: 3px solid #00aeef; padding: 0 15px; }
+        .s-box { background: linear-gradient(145deg, #00aeef, #005a8d); color: white; font-size: 50px; font-weight: 900; min-width: 90px; height: 60px; display: flex; align-items: center; justify-content: center; border-radius: 8px; text-shadow: 2px 2px 4px #000; }
         .name-area { width: 220px; color: white; font-size: 30px; font-weight: bold; text-align: center; text-transform: uppercase; }
-        .vs-circle { background: white; color: black; width: 40px; height: 40px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-weight: 900; margin: 0 15px; }
 
         /* 📜 3-LINE TICKER SYSTEM */
-        #ticker-wrap {
-            position: absolute; bottom: 0px; left: 0px; width: 1920px; height: 145px; 
-            display: flex; flex-direction: column; z-index: 999;
-        }
+        #ticker-wrap { position: absolute; bottom: 0px; left: 0px; width: 1920px; height: 145px; display: flex; flex-direction: column; z-index: 999; }
         .row-text { display: flex; align-items: center; font-weight: 900; text-transform: uppercase; width: 100%; overflow: hidden; white-space: nowrap; }
         
         .row-1 { background: rgba(0, 0, 0, 0.95); color: white; height: 60px; font-size: 38px; border-top: 3px solid #00aeef; } 
         .row-2 { background: white; color: #b91c1c; height: 42px; font-size: 28px; } 
         .row-3 { background: rgba(0, 0, 0, 0.95); color: #ffcc00; height: 43px; font-size: 28px; }
 
-        .scroller { display: inline-block; padding-left: 100%; animation: scroll-anim linear infinite; }
-
-        /* ⚙️ SPEED CONTROL (ਸੈਕਿੰਡ ਬਦਲ ਕੇ ਸਪੀਡ ਸੈੱਟ ਕਰੋ) */
-        #c1 .scroller { animation-duration: 33s; } /* Line 1 Speed */
-        #c2 .scroller { animation-duration: 20s; } /* Line 2 Speed */
-        #c3 .scroller { animation-duration: 20s; } /* Line 3 Speed */
-
+        /* SCROLLER ANIMATION - Duration JS ਨਾਲ ਸੈੱਟ ਹੋਵੇਗੀ */
+        .scroller { 
+            display: inline-block; 
+            padding-left: 100%; 
+            animation: scroll-anim linear infinite; 
+        }
         @keyframes scroll-anim { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
-
-        /* 🕒 CLOCK */
-        .box-time { background: #00aeef; color: white; padding: 5px 20px; font-size: 30px; font-weight: 900; position: absolute; bottom: 145px; right: 0; border-radius: 10px 0 0 0; }
     </style>
 </head>
 <body>
 
-<div id="expiry-notice">⚠ PLAN EXPIRED - RECHARGE TO REMOVE THIS BLOCK ⚠</div>
-
-<div id="logo-container">
-    <img id="main-logo" src="https://raw.githubusercontent.com/4kjunctionofficial-code/Manpreetteam/main/taqdeer%20tv.png">
-</div>
+<div id="expiry-notice">⚠ PLAN EXPIRED - RECHARGE NOW ⚠</div>
 
 <div id="scoreboard">
     <div class="main-bar">
         <div class="name-area" id="nA">TEAM 1</div>
         <div class="s-box" id="sA">0</div>
-        <div class="vs-circle">VS</div>
+        <div style="color:white; font-weight:900; margin:0 15px;">VS</div>
         <div class="s-box" id="sB">0</div>
         <div class="name-area" id="nB">TEAM 2</div>
     </div>
-    <div style="color:white; margin-top:10px; font-size:20px; font-weight:bold;" id="round">LIVE MATCH</div>
 </div>
 
-<div class="box-time" id="live-time">00:00 AM</div>
-
 <div id="ticker-wrap">
-    <div class="row-text row-1" id="c1"><div class="scroller" id="t1">WELCOME TO LIVE KABADDI TOURNAMENT 2026</div></div>
-    <div class="row-text row-2" id="c2"><div class="scroller" id="t2">SUBSCRIBE OUR YOUTUBE CHANNEL FOR LIVE UPDATES</div></div>
-    <div class="row-text row-3" id="c3"><div class="scroller" id="t3">LIKE, SHARE AND SUPPORT THE KABADDI GAMES</div></div>
+    <div class="row-text row-1" id="c1"><div class="scroller" id="t1"></div></div>
+    <div class="row-text row-2" id="c2"><div class="scroller" id="t2"></div></div>
+    <div class="row-text row-3" id="c3"><div class="scroller" id="t3"></div></div>
 </div>
 
 <script>
@@ -104,7 +65,26 @@
     const urlParams = new URLSearchParams(window.location.search);
     const userID = urlParams.get('id') || 'demo';
 
-    // Main Listener
+    // --- ਸਪੀਡ ਫਿਕਸ ਕਰਨ ਵਾਲਾ ਫੰਕਸ਼ਨ ---
+    function updateTickerWithSpeed(elementId, text) {
+        const el = document.getElementById(elementId);
+        if (!text || text.trim() === "") {
+            el.innerText = "";
+            return;
+        }
+        
+        el.innerText = text;
+        
+        // ⚙️ ਸਪੀਡ ਸੈਟਿੰਗ: 150 ਮਤਲਬ ਨੋਰਮਲ, 200 ਮਤਲਬ ਤੇਜ਼, 100 ਮਤਲਬ ਹੌਲੀ
+        const pixelsPerSecond = 160; 
+        const textWidth = el.offsetWidth;
+        const containerWidth = 1920;
+        
+        // ਆਪਣੇ ਆਪ ਸਹੀ ਸੈਕਿੰਡ ਕੱਢਣਾ
+        const duration = (textWidth + containerWidth) / pixelsPerSecond;
+        el.style.animationDuration = duration + "s";
+    }
+
     db.ref("users/" + userID).on("value", (uSnap) => {
         const userData = uSnap.val();
         const now = new Date();
@@ -112,31 +92,27 @@
 
         if (now > expiry) {
             document.getElementById('expiry-notice').style.display = "block";
-            document.body.style.opacity = "0.5";
+            document.getElementById('ticker-wrap').style.display = "none";
         } else {
             document.getElementById('expiry-notice').style.display = "none";
-            document.body.style.opacity = "1";
+            document.getElementById('ticker-wrap').style.display = "flex";
 
             db.ref("matchData").on("value", (snap) => {
                 const data = snap.val() || {};
+                
+                // ਸਕੋਰ ਅਪਡੇਟ
                 document.getElementById('sA').innerText = data.scoreA || "0";
                 document.getElementById('sB').innerText = data.scoreB || "0";
                 document.getElementById('nA').innerText = data.nameA || "TEAM 1";
                 document.getElementById('nB').innerText = data.nameB || "TEAM 2";
-                document.getElementById('round').innerText = data.round || "LIVE MATCH";
-                document.getElementById('t1').innerText = data.row1Txt || "WELCOME TO LIVE KABADDI";
-                document.getElementById('t2').innerText = data.row2Txt || "SUBSCRIBE OUR CHANNEL";
-                document.getElementById('t3').innerText = data.row3Txt || "LIKE & SHARE";
+
+                // ਟਿੱਕਰ ਅਪਡੇਟ (with Auto Speed)
+                updateTickerWithSpeed('t1', data.row1Txt || "WELCOME TO LIVE KABADDI");
+                updateTickerWithSpeed('t2', data.row2Txt || "SUBSCRIBE OUR CHANNEL");
+                updateTickerWithSpeed('t3', data.row3Txt || "LIKE & SHARE");
             });
         }
     });
-
-    // Time Function
-    function updateTime() {
-        const now = new Date();
-        document.getElementById('live-time').innerText = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
-    }
-    setInterval(updateTime, 1000); updateTime();
 </script>
 </body>
 </html>
