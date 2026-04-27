@@ -26,8 +26,10 @@
         .btn-orange { background: #f39c12; color: black; }
         .score-val { font-size: 60px; font-weight: 900; color: #f39c12; text-align: center; line-height: 1; margin: 10px 0; }
         .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; height: 160px; overflow-y: auto; padding: 10px; font-size: 13px; margin-top: 5px; }
-        .list-item { padding: 8px; border-bottom: 1px solid #222; color: #eee; }
+        .list-item { padding: 8px; border-bottom: 1px solid #222; color: #eee; display: flex; justify-content: space-between; }
         .match-num { color: #f39c12; font-weight: bold; margin-right: 5px; }
+        .live-score-small { color: #f39c12; font-weight: bold; background: #222; padding: 2px 6px; border-radius: 4px; font-size: 11px; }
+        .win-tag { color: #238636; font-weight: bold; font-size: 10px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -41,8 +43,8 @@
         </div>
         <div class="p-15">
             <div class="grid-2">
-                <div><small style="color:#f39c12; font-size:9px;">SELECT TEAM 1</small><select id="selA" onchange="updateMatchTeams()"></select></div>
-                <div><small style="color:#f39c12; font-size:9px;">SELECT TEAM 2</small><select id="selB" onchange="updateMatchTeams()"></select></div>
+                <div><small style="color:#f39c12; font-size:9px;">TEAM 1 (LEFT)</small><select id="selA" onchange="updateMatchTeams()"></select></div>
+                <div><small style="color:#f39c12; font-size:9px;">TEAM 2 (RIGHT)</small><select id="selB" onchange="updateMatchTeams()"></select></div>
             </div>
             
             <div style="background:#0d1117; border-radius:10px; padding:15px; border:1px solid #333; margin-bottom:10px;">
@@ -113,7 +115,7 @@
 
     <div class="card">
         <div class="header-flex">
-            <span class="header-title"><i class="fas fa-grip-lines handle"></i> TOURNAMENT INFO & EVENTS</span>
+            <span class="header-title"><i class="fas fa-grip-lines handle"></i> TOURNAMENT INFO</span>
             <button class="upd-btn-small" onclick="updateInfo()">UPDATE ALL</button>
         </div>
         <div class="p-15">
@@ -152,7 +154,6 @@
         document.getElementById('scoreVisBtn').innerText = data.scoreVisible ? "HIDE" : "SHOW";
         
         document.getElementById('manualTyan').value = allTeams.join(', ');
-
         renderUI();
     });
 
@@ -169,20 +170,32 @@
         document.getElementById('winSelA').innerHTML = winOpt; 
         document.getElementById('winSelB').innerHTML = winOpt;
 
+        // Render Tyian List with LIVE Score
         let html = "";
         let matchCount = 1;
         for(let i=0; i < allTeams.length; i += 2) {
             let t1 = allTeams[i];
             let t2 = allTeams[i+1];
+            
+            let scoreStr = "";
+            // If these teams are currently live, show their score
+            if ((t1 === status.nameA && t2 === status.nameB) || (t1 === status.nameB && t2 === status.nameA)) {
+                scoreStr = `<span class="live-score-small">${status.scoreA} - ${status.scoreB}</span>`;
+            }
+
             if (t2) {
-                html += `<div class="list-item"><span class="match-num">${matchCount}.</span> ${t1} <b style="color:#f39c12">vs</b> ${t2}</div>`;
+                html += `<div class="list-item"><span><span class="match-num">${matchCount}.</span> ${t1} vs ${t2}</span> ${scoreStr}</div>`;
             } else {
-                html += `<div class="list-item"><span class="match-num">${matchCount}.</span> ${t1} <b style="color:#238636">BY (Next Round)</b></div>`;
+                html += `<div class="list-item"><span><span class="match-num">${matchCount}.</span> ${t1}</span> <b style="color:#238636; font-size:10px;">BY</b></div>`;
             }
             matchCount++;
         }
         document.getElementById('playingList').innerHTML = html;
-        document.getElementById('winnerList').innerHTML = winners.map(w => `<div class="list-item">🏆 ${w}</div>`).join('');
+
+        // Render Winner List with "Winner" tag
+        document.getElementById('winnerList').innerHTML = winners.map(w => 
+            `<div class="list-item"><span>🏆 ${w}</span> <span class="win-tag">Winner</span></div>`
+        ).join('');
     }
 
     function syncTeams() {
@@ -210,8 +223,14 @@
         const win = status.scoreA > status.scoreB ? status.nameA : status.nameB;
         const lose = status.scoreA > status.scoreB ? status.nameB : status.nameA;
         if(!win || !lose) return alert("Select Teams!");
-        if(confirm(win + " Wins?")) {
-            db.update({ winners: [...winners, win], teams: allTeams.filter(t => t !== lose && t !== win), scoreA: 0, scoreB: 0, scoreVisible: false });
+        if(confirm(win + " ਨੂੰ ਜੇਤੂ ਐਲਾਨੀਏ?")) {
+            db.update({ 
+                winners: [...winners, win], 
+                teams: allTeams.filter(t => t !== lose && t !== win), 
+                scoreA: 0, 
+                scoreB: 0, 
+                scoreVisible: false 
+            });
         }
     }
 
@@ -231,27 +250,13 @@
         if(confirm("Promote winners?")) db.update({ teams: [...winners], winners: [] });
     }
 
-    // FIXED: Now adds the match to the Match List/Team List and sets it to live
     function addCustomMatch() {
         const t1 = document.getElementById('winSelA').value;
         const t2 = document.getElementById('winSelB').value;
         if(t1 && t2) {
-            // Remove these teams from Winners and add to current Teams list
             let newWinners = winners.filter(w => w !== t1 && w !== t2);
             let newTeams = [...allTeams, t1, t2];
-            
-            db.update({ 
-                nameA: t1, 
-                nameB: t2, 
-                scoreA: 0, 
-                scoreB: 0, 
-                scoreVisible: true,
-                winners: newWinners,
-                teams: newTeams
-            });
-            alert("Match Added to List & Set Live!");
-        } else {
-            alert("Please select two winners!");
+            db.update({ nameA: t1, nameB: t2, scoreA: 0, scoreB: 0, scoreVisible: true, winners: newWinners, teams: newTeams });
         }
     }
 </script>
