@@ -3,11 +3,11 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Admin - Large Ties & Reordered</title>
+    <title>Tournament Admin - Professional Secure</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #333; padding: 10px; margin: 0; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 10px; margin: 0; }
         .card { background: #fff; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; max-width: 900px; margin-left: auto; margin-right: auto; }
         .header { background: #1a73e8; color: white; padding: 12px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 13px; }
         .content { padding: 15px; }
@@ -15,95 +15,84 @@
         .std-input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 12px; box-sizing: border-box; font-size: 15px; }
         .btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; width: 100%; border: 2px solid transparent; }
         
-        /* Effect States */
-        .btn-active { border: 2px solid #000 !important; font-weight: 900 !important; font-size: 16px; background: #fff !important; color: #000 !important; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        .btn-active { border: 2px solid #000 !important; font-weight: 900 !important; background: #fff !important; color: #000 !important; }
         .btn-ticker { background: #ff5722; color: white; margin-bottom: 15px; height: 50px; font-size: 16px; }
         .btn-add { background: #28a745; color: white; margin-bottom: 15px; }
-        .btn-mode { background: #eee; color: #333; }
-        .btn-update { background: #1a73e8; color: white; height: 55px; font-size: 16px; }
-        .btn-win { background: #ffc107; color: #000; font-size: 13px; padding: 10px 18px; border-radius: 6px; border: 1px solid #d39e00; font-weight: bold; }
+        .btn-update { background: #1a73e8; color: white; font-size: 16px; }
+        .btn-mode { background: #eee; color: #333; font-size: 12px; }
+        .btn-win { background: #ffc107; color: #000; font-size: 13px; padding: 10px; border-radius: 6px; font-weight: bold; width: auto; }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
+        .grid-effects { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
         
-        .box-list { background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; min-height: 250px; padding: 10px; max-height: 450px; overflow-y: auto; }
-        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 5px solid #1a73e8; box-shadow: 0 2px 4px rgba(0,0,0,0.08); font-size: 15px; font-weight: 600; }
+        .box-list { background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; min-height: 250px; padding: 10px; max-height: 400px; overflow-y: auto; }
+        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 5px solid #1a73e8; box-shadow: 0 2px 4px rgba(0,0,0,0.08); font-size: 15px; }
         
-        .label-title { font-size: 12px; font-weight: bold; color: #555; margin-bottom: 6px; display: block; text-transform: uppercase; }
-        hr { border: 0; border-top: 2px solid #eee; margin: 20px 0; }
-        
-        /* Large Select for Ties */
-        .large-select { height: 55px; border-radius: 8px; border: 2px solid #1a73e8; width: 100%; padding: 0 10px; font-size: 16px; font-weight: bold; background: #fdfdfd; }
+        .label-title { font-size: 11px; font-weight: bold; color: #555; margin-bottom: 6px; display: block; text-transform: uppercase; }
+        .large-select { height: 55px; border-radius: 8px; border: 2px solid #1a73e8; width: 100%; font-size: 16px; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- 1. TEAM MANAGEMENT (TOP) -->
+    <!-- 1. TEAM MANAGEMENT (Direct Add) -->
     <div class="card">
         <div class="header">Team Management</div>
         <div class="content">
-            <textarea id="bulkTeams" class="std-input" style="height: 65px;" placeholder="ਟੀਮਾਂ ਲਿਖੋ (e.g. 1-2, 3-4)"></textarea>
+            <textarea id="bulkTeams" class="std-input" style="height: 60px;" placeholder="ਟੀਮਾਂ ਲਿਖੋ..."></textarea>
             <button class="btn btn-add" onclick="addBulkTeams()">Add Teams</button>
             <div class="grid-2">
-                <div>
-                    <span class="label-title" style="color: #d93025;">Playing Box</span>
-                    <div id="playingList" class="box-list"></div>
-                </div>
-                <div>
-                    <span class="label-title" style="color: #188038;">Winners Box</span>
-                    <div id="winnerList" class="box-list"></div>
-                </div>
+                <div><span class="label-title">Playing</span><div id="playingList" class="box-list"></div></div>
+                <div><span class="label-title">Winners</span><div id="winnerList" class="box-list"></div></div>
             </div>
         </div>
     </div>
 
-    <!-- 2. TIES SETUP (NOW LARGER) -->
+    <!-- 2. TIES SETUP (Direct Update) -->
     <div class="card">
         <div class="header" style="background: #6f42c1;">Next Match Tie Setup</div>
         <div class="content">
-            <span class="label-title">Select Winners for Next Match</span>
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
                 <select id="tie1" class="large-select"><option>Select Team 1</option></select>
                 <select id="tie2" class="large-select"><option>Select Team 2</option></select>
             </div>
-            <button class="btn btn-update" onclick="updateTie()">Update Next Match Tie (1 VS 2)</button>
+            <button class="btn btn-update" onclick="updateTie()">Update Next Match Tie</button>
         </div>
     </div>
 
-    <!-- 3. TOURNAMENT INFO (REORDERED) -->
+    <!-- 3. WATERMARK & EFFECTS (With Confirmation) -->
     <div class="card">
-        <div class="header" style="background:#343a40;">Ticker Information</div>
+        <div class="header" style="background: #2c3e50;">Watermark & Effects (Secure)</div>
         <div class="content">
-            <span class="label-title">Tournament Name</span>
-            <input type="text" id="tourName" class="std-input" placeholder="e.g. Kabaddi Cup 2026" oninput="updateDB()">
-
-            <span class="label-title">Prize List</span>
-            <input type="text" id="prizeList" class="std-input" placeholder="1st: 51k, 2nd: 31k..." oninput="updateDB()">
-
-            <span class="label-title">WhatsApp / Call Number</span>
-            <input type="text" id="contactInfo" class="std-input" placeholder="e.g. WhatsApp: 98XXX-XXXXX" oninput="updateDB()">
-            
-            <hr>
-            
             <span class="label-title">Watermark Text</span>
             <div style="display:flex; gap:10px;">
-                <input type="text" id="wmText" class="std-input" placeholder="Enter Brand/Name..." style="margin:0;">
-                <button class="btn btn-update" style="width:120px; height: 45px;" onclick="updateWM()">Set WM</button>
+                <input type="text" id="wmText" class="std-input" placeholder="Brand Name..." style="margin:0;">
+                <button class="btn btn-update" style="width:120px;" onclick="confirmAction('wm')">Update</button>
+            </div>
+            
+            <div class="grid-effects">
+                <button id="btn-scroll" class="btn btn-mode" onclick="confirmAction('effect', 'scroll')">SCROLL</button>
+                <button id="btn-blink" class="btn btn-mode" onclick="confirmAction('effect', 'blink')">BLINK</button>
+                <button id="btn-fullscreen" class="btn btn-mode" onclick="confirmAction('effect', 'fullscreen')">F-SCREEN</button>
             </div>
         </div>
     </div>
 
-    <!-- 4. TICKER CONTROLS -->
+    <!-- 4. TICKER INFO (With Confirmation) -->
     <div class="card">
-        <div class="header" style="background:#2c3e50;">Display Controls</div>
+        <div class="header" style="background:#444;">Ticker Info & Visibility (Secure)</div>
         <div class="content">
-            <button id="tickerToggleBtn" class="btn btn-ticker" onclick="toggleTicker()">Ticker: ON/OFF</button>
+            <button id="tickerToggleBtn" class="btn btn-ticker" onclick="confirmAction('vis')">Ticker: ON/OFF</button>
+            
+            <span class="label-title">Tournament Name</span>
+            <input type="text" id="tourName" class="std-input">
 
-            <div class="grid-3">
-                <button id="btn-scroll" class="btn btn-mode" onclick="setEffect('scroll')">Scroll</button>
-                <button id="btn-blink" class="btn btn-mode" onclick="setEffect('blink')">Blink</button>
-                <button id="btn-fullscreen" class="btn btn-mode" onclick="setEffect('fullscreen')">F-Screen</button>
-            </div>
+            <span class="label-title">Prize List</span>
+            <input type="text" id="prizeList" class="std-input">
+
+            <span class="label-title">WhatsApp / Call No.</span>
+            <input type="text" id="contactInfo" class="std-input">
+
+            <button class="btn btn-update" style="background: #333;" onclick="confirmAction('info')">Update All Ticker Info</button>
         </div>
     </div>
 
@@ -115,29 +104,34 @@
     let tickerStatus = true;
     let effectStates = { scroll: false, blink: false, fullscreen: false };
 
-    function updateDB() {
-        db.update({
-            tournamentName: document.getElementById('tourName').value,
-            prizes: document.getElementById('prizeList').value,
-            contact: document.getElementById('contactInfo').value
-        });
+    // --- SECURE CONFIRMATION SYSTEM ---
+    function confirmAction(type, subType = null) {
+        let msg = "ਕੀ ਤੁਸੀਂ ਯਕੀਨੀ ਤੌਰ 'ਤੇ ਅਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?";
+        if(type === 'vis') msg = "ਕੀ ਤੁਸੀਂ ਟਿੱਕਰ ਦੀ ਵਿਜ਼ੀਬਿਲਟੀ (Show/Hide) ਬਦਲਣਾ ਚਾਹੁੰਦੇ ਹੋ?";
+        if(type === 'effect') msg = `ਕੀ ਤੁਸੀਂ ${subType} ਮੋਡ ਨੂੰ ਬਦਲਣਾ ਚਾਹੁੰਦੇ ਹੋ?`;
+
+        if (confirm(msg)) {
+            if (type === 'info') {
+                db.update({
+                    tournamentName: document.getElementById('tourName').value,
+                    prizes: document.getElementById('prizeList').value,
+                    contact: document.getElementById('contactInfo').value
+                });
+                alert("ਜਾਣਕਾਰੀ ਅਪਡੇਟ ਹੋ ਗਈ ਹੈ!");
+            } else if (type === 'wm') {
+                db.update({ watermarkText: document.getElementById('wmText').value });
+                alert("ਵਾਟਰਮਾਰਕ ਅਪਡੇਟ ਹੋ ਗਿਆ ਹੈ!");
+            } else if (type === 'vis') {
+                tickerStatus = !tickerStatus;
+                db.child('tickerVis').set(tickerStatus);
+            } else if (type === 'effect') {
+                effectStates[subType] = !effectStates[subType];
+                db.child('effects').child(subType).set(effectStates[subType]);
+            }
+        }
     }
 
-    function updateWM() {
-        db.update({ watermarkText: document.getElementById('wmText').value });
-        alert("Watermark Updated!");
-    }
-
-    function toggleTicker() {
-        tickerStatus = !tickerStatus;
-        db.child('tickerVis').set(tickerStatus);
-    }
-
-    function setEffect(effect) {
-        effectStates[effect] = !effectStates[effect];
-        db.child('effects').child(effect).set(effectStates[effect]);
-    }
-
+    // --- DIRECT ACTIONS (No Confirmation) ---
     function addBulkTeams() {
         const input = document.getElementById('bulkTeams').value;
         if(!input) return;
@@ -151,6 +145,18 @@
         document.getElementById('bulkTeams').value = "";
     }
 
+    function updateTie() {
+        const t1 = document.getElementById('tie1').value;
+        const t2 = document.getElementById('tie2').value;
+        if (t1 && t2) {
+            db.update({ currentMatchTie: t1 + " VS " + t2 });
+            alert("Match Tie Updated!");
+        } else {
+            alert("Please select both teams!");
+        }
+    }
+
+    // --- DATA SYNC ---
     db.on("value", (snap) => {
         const data = snap.val() || {};
         document.getElementById('tourName').value = data.tournamentName || "";
@@ -196,17 +202,6 @@
             opts += `<option value="${w.name}">${w.name}</option>`;
         });
         s1.innerHTML = opts; s2.innerHTML = opts;
-    }
-
-    function updateTie() {
-        const t1 = document.getElementById('tie1').value;
-        const t2 = document.getElementById('tie2').value;
-        if(t1 && t2) {
-            db.update({ currentMatchTie: t1 + " VS " + t2 });
-            alert("Tie Updated: " + t1 + " VS " + t2);
-        } else {
-            alert("Please select both teams!");
-        }
     }
 </script>
 </body>
