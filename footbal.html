@@ -1,24 +1,146 @@
-<!-- Overlay ਵਾਲੇ ਹਿੱਸੇ ਵਿੱਚ ਸਿਰਫ ਸਕ੍ਰਿਪਟ ਅਤੇ ਸਟਾਈਲ ਅਪਡੇਟ ਕਰੋ -->
-<style>
-    /* ਟਾਈਮ ਉਦੋਂ ਹੀ ਦਿਖੇਗਾ ਜਦੋਂ timerRunning true ਹੋਵੇਗਾ */
-    #timer-wrap { display: none; width: 130px; background: #27ae60; height: 100%; flex-direction: column; align-items: center; justify-content: center; border-left: 3px solid rgba(0,0,0,0.3); }
-    .timer-active { display: flex !important; }
-</style>
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <meta charset="UTF-8">
+    <title>Admin Control - Manpreet Singh</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: sans-serif; background: #0b0d0f; color: white; padding: 15px; }
+        .card { background: #16191c; border-radius: 12px; border: 1px solid #333; margin-bottom: 12px; padding: 15px; text-align: center; }
+        .header { background: #27ae60; padding: 8px; margin: -15px -15px 15px -15px; border-radius: 12px 12px 0 0; font-weight: bold; font-size: 14px; }
+        .team-row { display: flex; gap: 10px; }
+        .team-box { flex: 1; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #222; }
+        input, select { width: 100%; padding: 10px; background: #000; border: 1px solid #444; color: white; border-radius: 5px; margin-bottom: 8px; box-sizing: border-box; }
+        .score-display { font-size: 45px; font-weight: bold; color: #2ecc71; margin: 10px 0; }
+        .btn-group { display: flex; gap: 5px; margin-top: 5px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .btn-plus { background: #2ecc71; } .btn-minus { background: #34495e; }
+        .btn-yellow { background: #f1c40f; color: #000; } .btn-red { background: #e74c3c; }
+        .timer-display { font-size: 35px; color: #f1c40f; font-family: monospace; background: #000; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; }
+        .reset-all { background: #e74c3c; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 15px; cursor: pointer; border: none; color: white; }
+    </style>
+</head>
+<body>
+
+    <button class="reset-all" onclick="resetAll()">⚠️ RESET ALL MATCH</button>
+
+    <!-- Timer Control -->
+    <div class="card">
+        <div class="header" style="background:#2980b9;">TIMER CONTROL</div>
+        <div id="timerDisplay" class="timer-display">00:00</div>
+        
+        <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <input type="number" id="setTimeInput" placeholder="Min (eg. 15)" style="margin:0;">
+            <button class="btn" style="background:#8e44ad; flex:0.4;" onclick="applyTime()">SET</button>
+        </div>
+
+        <div class="btn-group">
+            <button class="btn" style="background: #27ae60;" onclick="startTimer()">START</button>
+            <button class="btn" style="background: #e67e22;" onclick="pauseTimer()">PAUSE</button>
+            <button class="btn" style="background: #34495e;" onclick="resetTimer()">RESET</button>
+        </div>
+    </div>
+
+    <!-- Match Settings -->
+    <div class="card">
+        <div class="header" style="background:#8e44ad;">MATCH INFO</div>
+        <div class="team-row">
+            <select id="roundInput" onchange="updateDB()">
+                <option value="LEAGUE MATCH">LEAGUE MATCH</option>
+                <option value="SEMI FINAL">SEMI FINAL</option>
+                <option value="FINAL">FINAL</option>
+            </select>
+            <select id="halfInput" onchange="updateDB()">
+                <option value="1ST HALF">1ST HALF</option>
+                <option value="2ND HALF">2ND HALF</option>
+            </select>
+        </div>
+    </div>
+
+    <!-- Score & Cards -->
+    <div class="card">
+        <div class="header">SCORE & CARDS</div>
+        <div class="team-row">
+            <div class="team-box">
+                <input type="text" id="nameA" placeholder="TEAM A" oninput="updateDB()">
+                <div class="score-display" id="dispA">0</div>
+                <div class="btn-group">
+                    <button class="btn btn-minus" onclick="changeVal('scoreA', -1)">-</button>
+                    <button class="btn btn-plus" onclick="changeVal('scoreA', 1)">+</button>
+                </div>
+                <div class="btn-group" style="margin-top:15px;">
+                    <button class="btn btn-yellow">Y</button>
+                    <button class="btn btn-red">R</button>
+                </div>
+            </div>
+
+            <div class="team-box">
+                <input type="text" id="nameB" placeholder="TEAM B" oninput="updateDB()">
+                <div class="score-display" id="dispB">0</div>
+                <div class="btn-group">
+                    <button class="btn btn-minus" onclick="changeVal('scoreB', -1)">-</button>
+                    <button class="btn btn-plus" onclick="changeVal('scoreB', 1)">+</button>
+                </div>
+                <div class="btn-group" style="margin-top:15px;">
+                    <button class="btn btn-yellow">Y</button>
+                    <button class="btn btn-red">R</button>
+                </div>
+            </div>
+        </div>
+    </div>
 
 <script>
-    db.on("value", (snap) => {
-        const d = snap.val(); if(!d) return;
-        
-        // ਟਾਈਮ ਸਿਰਫ START ਹੋਣ ਤੇ ਦਿਖਾਓ
-        const tWrap = document.getElementById('timer-wrap');
-        if(d.timerRunning) { tWrap.classList.add('timer-active'); } 
-        else { tWrap.classList.remove('timer-active'); }
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database().ref("matchData");
+    let current = {}; let timerInt;
 
-        // Countdown Timer Logic
-        let s = d.matchSeconds || 0;
-        let m = Math.floor(s/60);
-        let sc = s%60;
-        document.getElementById('time-val').innerText = (m<10?"0"+m:m)+":"+(sc<10?"0"+sc:sc);
-        document.getElementById('period-val').innerText = d.currentHalf || "MATCH";
+    db.on("value", (snap) => {
+        current = snap.val() || {};
+        document.getElementById('dispA').innerText = current.scoreA || 0;
+        document.getElementById('dispB').innerText = current.scoreB || 0;
+        document.getElementById('nameA').value = current.nameA || "";
+        document.getElementById('nameB').value = current.nameB || "";
+        document.getElementById('roundInput').value = current.currentRound || "LEAGUE MATCH";
+        document.getElementById('halfInput').value = current.currentHalf || "1ST HALF";
+        
+        let s = current.matchSeconds || 0;
+        let m = Math.floor(s/60); let sc = s%60;
+        document.getElementById('timerDisplay').innerText = (m<10?"0"+m:m) + ":" + (sc<10?"0"+sc:sc);
+
+        if(current.timerRunning && !timerInt) {
+            timerInt = setInterval(() => {
+                if(current.matchSeconds > 0) {
+                    db.update({ matchSeconds: current.matchSeconds - 1 });
+                } else {
+                    db.update({ timerRunning: false });
+                }
+            }, 1000);
+        }
+        if(!current.timerRunning) { clearInterval(timerInt); timerInt = null; }
     });
+
+    function applyTime() {
+        let mins = document.getElementById('setTimeInput').value;
+        if(mins > 0) db.update({ matchSeconds: mins * 60, timerRunning: false });
+    }
+    function changeVal(key, val) { 
+        let nv = (current[key] || 0) + val;
+        db.update({ [key]: nv < 0 ? 0 : nv });
+    }
+    function startTimer() { db.update({ timerRunning: true }); }
+    function pauseTimer() { db.update({ timerRunning: false }); }
+    function resetTimer() { db.update({ matchSeconds: 0, timerRunning: false }); }
+    function updateDB() {
+        db.update({
+            nameA: document.getElementById('nameA').value,
+            nameB: document.getElementById('nameB').value,
+            currentRound: document.getElementById('roundInput').value,
+            currentHalf: document.getElementById('halfInput').value
+        });
+    }
+    function resetAll() { if(confirm("ਕੀ ਸਭ ਕੁਝ ਜ਼ੀਰੋ ਕਰਨਾ ਹੈ?")) db.set({ scoreA:0, scoreB:0, matchSeconds:0, timerRunning:false, nameA:"", nameB:"", currentRound:"LEAGUE MATCH", currentHalf:"1ST HALF" }); }
 </script>
+</body>
+</html>
