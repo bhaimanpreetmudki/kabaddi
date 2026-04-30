@@ -1,63 +1,132 @@
 <!DOCTYPE html>
 <html>
 <head>
-    <title>Admin Control Panel</title>
+    <title>Advanced Admin Control</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: sans-serif; background: #1a1a1a; color: white; padding: 20px; }
-        .card { background: #2d2d2d; padding: 20px; border-radius: 10px; margin-bottom: 20px; }
-        button { padding: 10px 20px; cursor: pointer; border: none; border-radius: 5px; font-weight: bold; }
+        body { font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; background: #121212; color: #e0e0e0; padding: 20px; display: flex; flex-wrap: wrap; gap: 20px; justify-content: center; }
+        
+        /* Box Styling */
+        .admin-card { background: #1e1e1e; border: 1px solid #333; border-radius: 12px; padding: 20px; width: 350px; box-shadow: 0 8px 16px rgba(0,0,0,0.5); }
+        h3 { margin-top: 0; color: #27ae60; border-bottom: 1px solid #333; padding-bottom: 10px; text-transform: uppercase; font-size: 16px; }
+
+        .row { display: flex; flex-direction: column; gap: 10px; margin-bottom: 15px; }
+        label { font-size: 13px; color: #aaa; }
+
+        input, select { background: #2a2a2a; border: 1px solid #444; color: white; padding: 10px; border-radius: 6px; outline: none; }
+        input:focus { border-color: #27ae60; }
+
+        /* Buttons */
+        .btn-group { display: flex; gap: 10px; align-items: center; }
+        button { flex: 1; padding: 12px; border: none; border-radius: 6px; font-weight: bold; cursor: pointer; transition: 0.3s; }
+        
         .btn-plus { background: #27ae60; color: white; }
-        .btn-minus { background: #e74c3c; color: white; }
-        select, input { padding: 8px; border-radius: 5px; border: 1px solid #444; background: #333; color: white; }
+        .btn-plus:hover { background: #219150; }
+        
+        .btn-minus { background: #c0392b; color: white; flex: 0.4; }
+        .btn-minus:hover { background: #a93226; }
+
+        .btn-update { background: #2980b9; color: white; width: 100%; margin-top: 10px; }
+        
+        .score-display { font-size: 30px; font-weight: bold; color: white; min-width: 40px; text-align: center; }
     </style>
 </head>
 <body>
 
-    <div class="card">
-        <h2>Match Info</h2>
-        <label>Round:</label>
-        <select id="roundInput" onchange="sendData()">
-            <option value="Round 1">Round 1</option>
-            <option value="Round 2">Round 2</option>
-            <option value="Quarter Final">Quarter Final</option>
-            <option value="Semi Final">Semi Final</option>
-            <option value="Final">Final</option>
-        </select>
-
-        <label style="margin-left: 15px;">Half/Period:</label>
-        <select id="halfInput" onchange="sendData()">
-            <option value="1ST HALF">1st Half</option>
-            <option value="2ND HALF">2nd Half</option>
-            <option value="EXTRA TIME">Extra Time</option>
-            <option value="PENALTIES">Penalties</option>
-        </select>
+    <!-- Box 1: Match Status -->
+    <div class="admin-card">
+        <h3>Match Information</h3>
+        <div class="row">
+            <label>Current Round</label>
+            <select id="roundInput" onchange="sendMatchSettings()">
+                <option value="Round 1">Round 1</option>
+                <option value="Round 2">Round 2</option>
+                <option value="Quarter Final">Quarter Final</option>
+                <option value="Semi Final">Semi Final</option>
+                <option value="Final">Final</option>
+            </select>
+        </div>
+        <div class="row">
+            <label>Half / Period</label>
+            <select id="halfInput" onchange="sendMatchSettings()">
+                <option value="1ST HALF">1st Half</option>
+                <option value="2ND HALF">2nd Half</option>
+                <option value="EXTRA TIME">Extra Time</option>
+                <option value="PENALTIES">Penalties</option>
+            </select>
+        </div>
     </div>
 
-    <div class="card">
-        <h2>Scores</h2>
-        <button class="btn-plus" onclick="changeScore('scoreA', 1)">Team A +</button>
-        <button class="btn-minus" onclick="changeScore('scoreA', -1)">-</button>
-        <span style="margin: 0 30px;">VS</span>
-        <button class="btn-plus" onclick="changeScore('scoreB', 1)">Team B +</button>
-        <button class="btn-minus" onclick="changeScore('scoreB', -1)">-</button>
+    <!-- Box 2: Team A Control -->
+    <div class="admin-card">
+        <h3>Team A (Left Side)</h3>
+        <div class="row">
+            <label>Team Name</label>
+            <input type="text" id="nameA" placeholder="Enter Team A Name">
+        </div>
+        <div class="row">
+            <label>Score Control</label>
+            <div class="btn-group">
+                <button class="btn-minus" onclick="changeScore('scoreA', -1)">-</button>
+                <div class="score-display" id="dispA">0</div>
+                <button class="btn-plus" onclick="changeScore('scoreA', 1)">+</button>
+            </div>
+        </div>
+        <button class="btn-update" onclick="updateTeamNames()">Update Name</button>
+    </div>
+
+    <!-- Box 3: Team B Control -->
+    <div class="admin-card">
+        <h3>Team B (Right Side)</h3>
+        <div class="row">
+            <label>Team Name</label>
+            <input type="text" id="nameB" placeholder="Enter Team B Name">
+        </div>
+        <div class="row">
+            <label>Score Control</label>
+            <div class="btn-group">
+                <button class="btn-minus" onclick="changeScore('scoreB', -1)">-</button>
+                <div class="score-display" id="dispB">0</div>
+                <button class="btn-plus" onclick="changeScore('scoreB', 1)">+</button>
+            </div>
+        </div>
+        <button class="btn-update" onclick="updateTeamNames()">Update Name</button>
     </div>
 
 <script>
+    // Firebase Setup
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("matchData");
 
-    function sendData() {
+    // Real-time Data Sync
+    db.on("value", (snap) => {
+        const d = snap.val(); if(!d) return;
+        document.getElementById('dispA').innerText = d.scoreA || 0;
+        document.getElementById('dispB').innerText = d.scoreB || 0;
+        document.getElementById('nameA').value = d.nameA || "";
+        document.getElementById('nameB').value = d.nameB || "";
+        document.getElementById('roundInput').value = d.currentRound || "Round 1";
+        document.getElementById('halfInput').value = d.currentHalf || "1ST HALF";
+    });
+
+    function changeScore(team, val) {
+        db.child(team).transaction(c => (c || 0) + val);
+    }
+
+    function updateTeamNames() {
+        db.update({
+            nameA: document.getElementById('nameA').value,
+            nameB: document.getElementById('nameB').value
+        });
+    }
+
+    function sendMatchSettings() {
         db.update({
             currentRound: document.getElementById('roundInput').value,
             currentHalf: document.getElementById('halfInput').value
         });
-    }
-
-    function changeScore(team, val) {
-        db.child(team).transaction(c => (c || 0) + val);
     }
 </script>
 </body>
