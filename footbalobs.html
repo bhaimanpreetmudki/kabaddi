@@ -2,69 +2,81 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Smart Football Overlay</title>
+    <title>Professional 3D Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { margin: 0; padding: 0; font-family: 'Arial Black', sans-serif; color: white; width: 1920px; height: 1080px; overflow: hidden; }
         
+        /* Main Scoreboard */
         #scoreboard { 
             position: absolute; top: 50px; left: 50px; display: flex; align-items: center; 
-            background: rgba(0,0,0,0.8); border-radius: 8px; height: 75px;
+            background: rgba(0,0,0,0.85); border-radius: 8px; height: 75px;
             transform: translateX(-150%); transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
             box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden;
         }
         .show-board { transform: translateX(0) !important; }
 
-        /* Team Sections */
-        .team-sec { display: flex; align-items: center; height: 100%; transition: background 0.5s; }
-        .t-name { font-size: 28px; padding: 0 25px; min-width: 140px; text-align: center; text-transform: uppercase; }
-        .score { font-size: 50px; padding: 0 30px; line-height: 75px; font-weight: 900; background: rgba(0,0,0,0.2); }
-
-        /* Timer Section */
-        #timer-sec { 
+        .team-sec { display: flex; align-items: center; height: 100%; transition: 0.5s; }
+        .t-name { font-size: 26px; padding: 0 25px; min-width: 130px; text-align: center; text-transform: uppercase; }
+        .score { font-size: 48px; padding: 0 30px; line-height: 75px; font-weight: 900; background: rgba(0,0,0,0.2); }
+        
+        #timer { 
             background: #27ae60; padding: 0 20px; font-size: 32px; height: 100%; 
-            display: none; align-items: center; min-width: 110px; 
-            border-left: 3px solid rgba(0,0,0,0.3); font-family: monospace;
+            display: none; align-items: center; min-width: 110px; border-left: 3px solid rgba(0,0,0,0.3);
         }
         .timer-active { display: flex !important; }
 
-        /* Penalty UI */
-        #penalty-box {
-            position: absolute; top: 135px; left: 50px; background: rgba(0,0,0,0.95);
-            padding: 15px 25px; border-radius: 10px; border-bottom: 5px solid #e67e22;
-            display: none; min-width: 400px;
+        /* 3D Penalty Strip */
+        #penalty-strip {
+            position: absolute; top: 125px; left: 50px; height: 55px; 
+            background: linear-gradient(180deg, #222 0%, #000 100%);
+            display: none; align-items: center; border-radius: 0 0 12px 12px;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.4); border: 1px solid #333;
         }
-        .p-row { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; }
-        .ball-box { display: flex; gap: 10px; }
-        .ball { width: 22px; height: 22px; border-radius: 50%; background: #333; border: 1px solid #555; }
-        .ball.goal { background: #2ecc71; border: none; box-shadow: 0 0 12px #2ecc71; }
-        .ball.miss { background: #e74c3c; border: none; box-shadow: 0 0 12px #e74c3c; }
+        .p-sec { display: flex; align-items: center; padding: 0 20px; height: 100%; min-width: 240px; }
+        
+        /* Auto-Scrolling Name */
+        .scroll-wrap { width: 110px; overflow: hidden; white-space: nowrap; font-size: 18px; }
+        .scroll-text { display: inline-block; }
+        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-150%); } }
+
+        /* 3D Balls */
+        .balls { display: flex; gap: 8px; }
+        .ball { 
+            width: 18px; height: 18px; border-radius: 50%; 
+            background: radial-gradient(circle, #555 0%, #111 100%); border: 1px solid #444; 
+        }
+        .ball.goal { background: radial-gradient(circle, #2ecc71 0%, #1b5e20 100%); border: none; box-shadow: 0 0 10px #2ecc71; }
+        .ball.miss { background: radial-gradient(circle, #e74c3c 0%, #b71c1c 100%); border: none; box-shadow: 0 0 10px #e74c3c; }
+
+        .sep { color: #444; font-size: 25px; font-weight: bold; padding: 0 10px; }
     </style>
 </head>
 <body>
 
     <div id="scoreboard">
-        <!-- Team A -->
         <div id="secA" class="team-sec">
-            <div class="t-name" id="nameA">HOME</div>
+            <div class="t-name" id="nameA">TEAM A</div>
             <div class="score" id="scoreA">0</div>
         </div>
-
-        <!-- Team B -->
         <div id="secB" class="team-sec">
             <div class="score" id="scoreB">0</div>
-            <div class="t-name" id="nameB">AWAY</div>
+            <div class="t-name" id="nameB">TEAM B</div>
         </div>
-
-        <!-- Timer -->
-        <div id="timer-sec">00:00</div>
+        <div id="timer">00:00</div>
     </div>
 
-    <div id="penalty-box">
-        <div style="text-align:center; font-size:14px; color:#e67e22; margin-bottom:10px;">PENALTY SHOOTOUT</div>
-        <div class="p-row"><span id="pNameA">HOME</span><div class="ball-box" id="ballsA"></div></div>
-        <div class="p-row"><span id="pNameB">AWAY</span><div class="ball-box" id="ballsB"></div></div>
+    <div id="penalty-strip">
+        <div class="p-sec" id="psA">
+            <div class="scroll-wrap"><div class="scroll-text" id="pnA">TEAM A</div></div>
+            <div class="balls" id="pbA"></div>
+        </div>
+        <div class="sep">/</div>
+        <div class="p-sec" id="psB">
+            <div class="balls" id="pbB"></div>
+            <div class="scroll-wrap" style="margin-left:15px;"><div class="scroll-text" id="pnB">TEAM B</div></div>
+        </div>
     </div>
 
 <script>
@@ -72,65 +84,57 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("matchData");
 
-    // ਰੰਗ ਦੇ ਹਿਸਾਬ ਨਾਲ ਅੱਖਰਾਂ ਦਾ ਰੰਗ ਚਿੱਟਾ ਜਾਂ ਕਾਲਾ ਚੁਣਨ ਲਈ ਫੰਕਸ਼ਨ
-    function getContrastYIQ(hexcolor){
-        hexcolor = hexcolor.replace("#", "");
-        var r = parseInt(hexcolor.substr(0,2),16);
-        var g = parseInt(hexcolor.substr(2,2),16);
-        var b = parseInt(hexcolor.substr(4,2),16);
-        var yiq = ((r*299)+(g*587)+(b*114))/1000;
-        return (yiq >= 128) ? 'black' : 'white';
+    function getTextCol(hex){
+        hex = hex.replace("#","");
+        let r=parseInt(hex.substr(0,2),16), g=parseInt(hex.substr(2,2),16), b=parseInt(hex.substr(4,2),16);
+        return ((r*299)+(g*587)+(b*114))/1000 >= 128 ? 'black' : 'white';
     }
 
     db.on("value", (snap) => {
         const d = snap.val(); if(!d) return;
 
-        // Board Show/Hide
         document.getElementById('scoreboard').classList.toggle('show-board', d.showBoard !== false);
+        
+        // Team Styles
+        const cA = d.teamColorA || "#ff0000", cB = d.teamColorB || "#0000ff";
+        document.getElementById('secA').style.backgroundColor = cA;
+        document.getElementById('secA').style.color = getTextCol(cA);
+        document.getElementById('secB').style.backgroundColor = cB;
+        document.getElementById('secB').style.color = getTextCol(cB);
 
-        // Team A Styling & Data
-        const colorA = d.teamColorA || "#ff0000";
-        const secA = document.getElementById('secA');
-        secA.style.backgroundColor = colorA;
-        secA.style.color = getContrastYIQ(colorA);
-        document.getElementById('nameA').innerText = d.nameA || "HOME";
-        document.getElementById('scoreA').innerText = d.scoreA || 0;
+        document.getElementById('nameA').innerText = d.nameA; document.getElementById('nameB').innerText = d.nameB;
+        document.getElementById('scoreA').innerText = d.scoreA; document.getElementById('scoreB').innerText = d.scoreB;
 
-        // Team B Styling & Data
-        const colorB = d.teamColorB || "#0000ff";
-        const secB = document.getElementById('secB');
-        secB.style.backgroundColor = colorB;
-        secB.style.color = getContrastYIQ(colorB);
-        document.getElementById('nameB').innerText = d.nameB || "AWAY";
-        document.getElementById('scoreB').innerText = d.scoreB || 0;
-
-        // Timer Logic (ਸਿਰਫ ਚੱਲਣ ਤੇ ਜਾਂ ਟਾਈਮ ਹੋਣ ਤੇ ਦਿਖੇਗਾ)
-        const timerSec = document.getElementById('timer-sec');
+        // Timer
+        const tBox = document.getElementById('timer');
         if(d.timerRunning || d.matchSeconds > 0) {
-            timerSec.classList.add('timer-active');
-            let s = d.matchSeconds || 0; 
-            let m = Math.floor(s/60); 
-            let sec = s%60;
-            timerSec.innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
-        } else {
-            timerSec.classList.remove('timer-active');
-        }
+            tBox.classList.add('timer-active');
+            let s=d.matchSeconds||0, m=Math.floor(s/60), sc=s%60;
+            tBox.innerText = (m<10?"0"+m:m)+":"+(sc<10?"0"+sc:sc);
+        } else { tBox.classList.remove('timer-active'); }
 
-        // Penalty Box
-        document.getElementById('penalty-box').style.display = d.penaltyMode ? 'block' : 'none';
-        document.getElementById('pNameA').innerText = d.nameA;
-        document.getElementById('pNameB').innerText = d.nameB;
-        renderBalls('A', d.pListA || []);
-        renderBalls('B', d.pListB || []);
+        // Penalty Mode
+        const pStrip = document.getElementById('penalty-strip');
+        if(d.penaltyMode) {
+            pStrip.style.display = 'flex';
+            document.getElementById('psA').style.borderLeft = `6px solid ${cA}`;
+            document.getElementById('psB').style.borderRight = `6px solid ${cB}`;
+            
+            const nA = d.nameA || "", nB = d.nameB || "";
+            document.getElementById('pnA').innerText = nA; document.getElementById('pnB').innerText = nB;
+            
+            // Auto Scroll If long
+            document.getElementById('pnA').style.animation = nA.length > 8 ? "scroll 5s linear infinite" : "none";
+            document.getElementById('pnB').style.animation = nB.length > 8 ? "scroll 5s linear infinite" : "none";
+
+            renderBalls('pbA', d.pListA || []);
+            renderBalls('pbB', d.pListB || []);
+        } else { pStrip.style.display = 'none'; }
     });
 
-    function renderBalls(team, list) {
-        let html = '';
-        for(let i=0; i<5; i++) {
-            let status = list[i] || ''; 
-            html += `<div class="ball ${status}"></div>`;
-        }
-        document.getElementById('balls' + team).innerHTML = html;
+    function renderBalls(id, list) {
+        let h = ''; for(let i=0; i<5; i++) h += `<div class="ball ${list[i]||''}"></div>`;
+        document.getElementById(id).innerHTML = h;
     }
 </script>
 </body>
