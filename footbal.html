@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>FootyStats - Penalty Box</title>
+    <style>
+        :root {
+            --bg-color: #050a0f;
+            --card-bg: #111827;
+            --accent: #4ade80;
+            --penalty-color: #f43f5e;
+            --text-main: #f1f5f9;
+        }
+
+        body {
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            display: flex;
+            justify-content: center;
+            padding: 20px;
+        }
+
+        .container { width: 100%; max-width: 600px; }
+
+        .setup-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.5);
+            border: 1px solid #1f2937;
+            margin-bottom: 20px;
+        }
+
+        .section-title { font-size: 14px; color: #94a3b8; margin: 15px 0 10px; font-weight: bold; text-transform: uppercase; }
+
+        /* Scoring Styles */
+        .live-score-box {
+            display: flex;
+            justify-content: space-around;
+            align-items: center;
+            background: #0f172a;
+            padding: 20px;
+            border-radius: 15px;
+            border: 2px solid #1f2937;
+        }
+
+        .score-num { font-size: 50px; font-weight: 900; color: var(--accent); }
+        .timer-display { font-family: monospace; font-size: 32px; color: #fbbf24; text-align: center; margin-bottom: 10px; }
+
+        /* Penalty Box Styles */
+        .penalty-container {
+            background: #1e293b;
+            padding: 15px;
+            border-radius: 10px;
+            margin-top: 20px;
+            border: 1px dashed var(--penalty-color);
+            display: none; /* ਸ਼ੁਰੂ ਵਿੱਚ ਲੁਕਿਆ ਹੋਵੇਗਾ */
+        }
+
+        .penalty-grid {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+
+        .shot-trackers { display: flex; gap: 5px; }
+
+        .dot {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            background: #374151;
+            border: 1px solid #4b5563;
+        }
+
+        .dot.scored { background: var(--accent); border-color: var(--accent); }
+        .dot.missed { background: var(--penalty-color); border-color: var(--penalty-color); }
+
+        .btn-main {
+            width: 100%;
+            background: var(--accent);
+            color: #050a0f;
+            padding: 12px;
+            border: none;
+            border-radius: 8px;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 10px;
+        }
+
+        .btn-penalty-toggle {
+            background: var(--penalty-color);
+            color: white;
+            font-size: 12px;
+        }
+
+        .shot-btns { display: flex; gap: 5px; }
+        .btn-shot { padding: 5px 10px; font-size: 10px; cursor: pointer; border-radius: 4px; border: none; }
+        
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    
+    <!-- Setup -->
+    <div id="setupPage" class="setup-card">
+        <h2 style="color:var(--accent)">Football Setup</h2>
+        <input type="text" id="teamA" placeholder="Home Team" style="width:100%; padding:10px; margin-bottom:10px; background:#0f172a; color:white; border:1px solid #374151;">
+        <input type="text" id="teamB" placeholder="Away Team" style="width:100%; padding:10px; margin-bottom:10px; background:#0f172a; color:white; border:1px solid #374151;">
+        <button class="btn-main" onclick="startMatch()">START MATCH</button>
+    </div>
+
+    <!-- Scoring -->
+    <div id="scoringPage" class="hidden">
+        <div class="setup-card">
+            <div class="timer-display" id="timer">00:00</div>
+            
+            <div class="live-score-box">
+                <div style="text-align:center">
+                    <span class="score-num" id="scoreA">0</span>
+                    <div id="labelA" style="font-size:12px; color:#94a3b8">TEAM A</div>
+                </div>
+                <div style="font-weight:bold; color:#374151">VS</div>
+                <div style="text-align:center">
+                    <span class="score-num" id="scoreB">0</span>
+                    <div id="labelB" style="font-size:12px; color:#94a3b8">TEAM B</div>
+                </div>
+            </div>
+
+            <div style="display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:15px;">
+                <button class="btn-main" onclick="updateScore('A')">GOAL HOME ⚽</button>
+                <button class="btn-main" onclick="updateScore('B')">GOAL AWAY ⚽</button>
+            </div>
+
+            <!-- Penalty Toggle Button -->
+            <button class="btn-main btn-penalty-toggle" onclick="togglePenaltyBox()">SHOW PENALTY BOX (ਸ਼ੂਟਆਊਟ)</button>
+
+            <!-- Penalty Box -->
+            <div id="penaltyBox" class="penalty-container">
+                <div class="section-title" style="color:var(--penalty-color)">Penalty Shootout</div>
+                
+                <!-- Team A Penalties -->
+                <div class="penalty-grid">
+                    <span id="pNameA" style="font-size:12px">Home:</span>
+                    <div class="shot-trackers" id="shotsA">
+                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                    </div>
+                    <div class="shot-btns">
+                        <button class="btn-shot scored" style="background:var(--accent)" onclick="recordPenalty('A', true)">✅</button>
+                        <button class="btn-shot missed" style="background:var(--penalty-color)" onclick="recordPenalty('A', false)">❌</button>
+                    </div>
+                </div>
+
+                <!-- Team B Penalties -->
+                <div class="penalty-grid">
+                    <span id="pNameB" style="font-size:12px">Away:</span>
+                    <div class="shot-trackers" id="shotsB">
+                        <div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div><div class="dot"></div>
+                    </div>
+                    <div class="shot-btns">
+                        <button class="btn-shot scored" style="background:var(--accent)" onclick="recordPenalty('B', true)">✅</button>
+                        <button class="btn-shot missed" style="background:var(--penalty-color)" onclick="recordPenalty('B', false)">❌</button>
+                    </div>
+                </div>
+            </div>
+
+            <button class="btn-main" style="background:#334155; color:white" onclick="location.reload()">Reset</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let goalsA = 0, goalsB = 0;
+    let penIndexA = 0, penIndexB = 0;
+
+    function startMatch() {
+        const tA = document.getElementById('teamA').value || "HOME";
+        const tB = document.getElementById('teamB').value || "AWAY";
+        document.getElementById('setupPage').classList.add('hidden');
+        document.getElementById('scoringPage').classList.remove('hidden');
+        document.getElementById('labelA').innerText = tA;
+        document.getElementById('labelB').innerText = tB;
+        document.getElementById('pNameA').innerText = tA + ":";
+        document.getElementById('pNameB').innerText = tB + ":";
+        
+        let sec = 0;
+        setInterval(() => {
+            sec++;
+            let m = Math.floor(sec/60), s = sec%60;
+            document.getElementById('timer').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
+        }, 1000);
+    }
+
+    function updateScore(team) {
+        if(team === 'A') document.getElementById('scoreA').innerText = ++goalsA;
+        else document.getElementById('scoreB').innerText = ++goalsB;
+    }
+
+    function togglePenaltyBox() {
+        const box = document.getElementById('penaltyBox');
+        box.style.display = (box.style.display === 'block') ? 'none' : 'block';
+    }
+
+    function recordPenalty(team, scored) {
+        const container = document.getElementById(team === 'A' ? 'shotsA' : 'shotsB');
+        let index = team === 'A' ? penIndexA : penIndexB;
+        
+        if(index < 5) {
+            const dots = container.getElementsByClassName('dot');
+            dots[index].classList.add(scored ? 'scored' : 'missed');
+            if(team === 'A') penIndexA++; else penIndexB++;
+        }
+    }
+</script>
+
+</body>
+</html>
