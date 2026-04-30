@@ -3,100 +3,73 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Ticker Admin</title>
+    <title>Tournament Ticker Admin - White Mode</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; padding: 15px; margin: 0; }
-        .card { background: #161b22; border-radius: 10px; border: 1px solid #30363d; margin-bottom: 15px; overflow: hidden; }
-        .header { background: #238636; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; text-transform: uppercase; }
-        .content { padding: 15px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #1c1e21; padding: 15px; margin: 0; }
+        .card { background: #ffffff; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 20px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); overflow: hidden; max-width: 800px; margin-left: auto; margin-right: auto; }
+        .header { background: #1a73e8; color: white; padding: 12px; text-align: center; font-weight: bold; text-transform: uppercase; letter-spacing: 1px; }
+        .content { padding: 20px; }
         
-        .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; margin-bottom: 10px; box-sizing: border-box; }
-        .btn { padding: 10px; border: none; border-radius: 5px; cursor: pointer; font-weight: bold; text-transform: uppercase; width: 100%; margin-top: 5px; }
-        .btn-add { background: #238636; color: white; }
-        .btn-win { background: #f1c40f; color: black; font-size: 11px; width: auto; padding: 5px 10px; }
-        .btn-update { background: #1f6feb; color: white; }
-        .btn-bypass { background: #8957e5; color: white; font-size: 11px; width: auto; padding: 5px 10px; }
-
-        .list-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 5px; min-height: 150px; padding: 10px; max-height: 300px; overflow-y: auto; }
-        .team-item { display: flex; justify-content: space-between; align-items: center; background: #161b22; padding: 8px; margin-bottom: 5px; border-radius: 4px; font-size: 13px; }
+        .std-input { width: 100%; padding: 12px; background: #fff; border: 2px solid #ddd; color: #333; border-radius: 8px; margin-bottom: 12px; box-sizing: border-box; font-size: 15px; }
+        .std-input:focus { border-color: #1a73e8; outline: none; }
         
-        .match-setup { display: flex; gap: 10px; align-items: center; margin-top: 15px; background: #1c2128; padding: 10px; border-radius: 8px; }
-        select { flex: 1; padding: 10px; background: #0d1117; color: white; border: 1px solid #30363d; border-radius: 5px; }
-        .vs-text { font-weight: bold; color: #f1c40f; }
+        .btn { padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; }
+        .btn-add { background: #28a745; color: white; width: 100%; }
+        .btn-add:hover { background: #218838; }
+        .btn-win { background: #ffc107; color: #000; font-size: 11px; padding: 6px 12px; border-radius: 4px; }
+        .btn-bypass { background: #6f42c1; color: white; font-size: 11px; padding: 6px 12px; border-radius: 4px; }
+        
+        .list-container { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; margin-top: 10px; }
+        .box-list { background: #f8f9fa; border: 2px solid #eee; border-radius: 8px; min-height: 300px; padding: 10px; max-height: 500px; overflow-y: auto; }
+        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px; margin-bottom: 8px; border-radius: 6px; border-left: 5px solid #1a73e8; box-shadow: 0 2px 4px rgba(0,0,0,0.05); font-weight: 600; }
+        
+        .label-title { font-size: 13px; font-weight: bold; color: #5f6368; margin-bottom: 5px; display: block; }
+        .help-text { font-size: 11px; color: #d93025; margin-bottom: 10px; display: block; }
     </style>
 </head>
 <body>
 
-    <!-- 1. Tournament Info & Ticker -->
+    <!-- 1. Tournament Info -->
     <div class="card">
         <div class="header">Tournament Ticker Settings</div>
         <div class="content">
-            <input type="text" id="tourName" class="std-input" placeholder="Tournament Name (e.g. Kabaddi Cup 2026)" oninput="updateTicker()">
-            <input type="text" id="prizeList" class="std-input" placeholder="Prize List (1st: 51000, 2nd: 31000...)" oninput="updateTicker()">
-            <input type="text" id="nextEvent" class="std-input" placeholder="Next Event (e.g. Final Match at 5 PM)" oninput="updateTicker()">
+            <span class="label-title">Tournament Name</span>
+            <input type="text" id="tourName" class="std-input" placeholder="e.g. Kabaddi Cup 2026" oninput="updateTicker()">
+            <span class="label-title">Prize List</span>
+            <input type="text" id="prizeList" class="std-input" placeholder="1st: 51000, 2nd: 31000" oninput="updateTicker()">
+            <span class="label-title">Special Announcement / Next Event</span>
+            <input type="text" id="nextEvent" class="std-input" placeholder="Final match at 5:00 PM" oninput="updateTicker()">
         </div>
     </div>
 
-    <!-- 2. Team Entry & Active List -->
+    <!-- 2. Team Entry (Multiple Support) -->
     <div class="card">
-        <div class="header">Team Management (1st Round Entry)</div>
+        <div class="header">Team Management</div>
         <div class="content">
-            <div style="display: flex; gap: 5px;">
-                <input type="text" id="newTeamName" class="std-input" placeholder="Enter Team Name">
-                <button class="btn btn-add" style="width: 100px; height: 40px;" onclick="addTeam()">ADD</button>
-            </div>
+            <span class="label-title">Bulk Team Entry</span>
+            <span class="help-text">* Paired entry likho: 1-2, 3-4, 5-6 (ਇਹ ਆਪਣੇ ਆਪ vs ਬਣਾ ਦੇਵੇਗਾ)</span>
+            <textarea id="bulkTeams" class="std-input" style="height: 80px;" placeholder="Example: TeamA-TeamB, TeamC-TeamD"></textarea>
+            <button class="btn btn-add" onclick="addBulkTeams()">ADD ALL TEAMS TO PLAYING BOX</button>
             
             <div class="list-container">
                 <div>
-                    <span style="font-size: 12px; color: #8b949e;">PLAYING TEAMS</span>
+                    <span class="label-title" style="color: #d93025;">PLAYING BOX (Current Round)</span>
                     <div id="playingList" class="box-list"></div>
                 </div>
                 <div>
-                    <span style="font-size: 12px; color: #2ecc71;">WINNER BOX (NEXT ROUND)</span>
+                    <span class="label-title" style="color: #188038;">WINNER BOX (Next Round)</span>
                     <div id="winnerList" class="box-list"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. Match Ties (Selection) -->
-    <div class="card">
-        <div class="header">Match Ties (Next Match Update)</div>
-        <div class="content">
-            <div class="match-setup">
-                <select id="selectT1"><option>Select Team 1</option></select>
-                <span class="vs-text">VS</span>
-                <select id="selectT2"><option>Select Team 2</option></select>
-            </div>
-            <button class="btn btn-update" onclick="setNextMatch()">UPDATE NEXT MATCH (1 VS 2)</button>
-        </div>
-    </div>
-
 <script>
-    // Firebase Setup
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("tickerData");
-
-    let teams = [];
-    let winners = [];
-
-    // Load Data
-    db.on("value", (snap) => {
-        const data = snap.val() || {};
-        document.getElementById('tourName').value = data.tournamentName || "";
-        document.getElementById('prizeList').value = data.prizes || "";
-        document.getElementById('nextEvent').value = data.nextEvent || "";
-        
-        teams = data.teamList ? Object.values(data.teamList) : [];
-        winners = data.winnerList ? Object.values(data.winnerList) : [];
-        
-        renderLists();
-        updateSelects();
-    });
 
     function updateTicker() {
         db.update({
@@ -106,74 +79,73 @@
         });
     }
 
-    function addTeam() {
-        const name = document.getElementById('newTeamName').value;
-        if(!name) return;
-        const newRef = db.child('teamList').push();
-        newRef.set({ id: newRef.key, name: name });
-        document.getElementById('newTeamName').value = "";
+    // Multiple Team Add Logic
+    function addBulkTeams() {
+        const input = document.getElementById('bulkTeams').value;
+        if(!input) return;
+
+        // Split by comma
+        const pairs = input.split(',');
+
+        pairs.forEach(pair => {
+            const cleanPair = pair.trim();
+            if(cleanPair) {
+                // Change hyphen to 'vs' for display
+                const matchName = cleanPair.replace('-', ' vs ');
+                const newRef = db.child('teamList').push();
+                newRef.set({ id: newRef.key, name: matchName });
+            }
+        });
+
+        document.getElementById('bulkTeams').value = "";
     }
 
+    db.on("value", (snap) => {
+        const data = snap.val() || {};
+        document.getElementById('tourName').value = data.tournamentName || "";
+        document.getElementById('prizeList').value = data.prizes || "";
+        document.getElementById('nextEvent').value = data.nextEvent || "";
+        
+        renderLists(data.teamList, data.winnerList);
+    });
+
     function moveToWin(id, name) {
-        // Remove from playing
         db.child('teamList').child(id).remove();
-        // Add to winner
         const winRef = db.child('winnerList').push();
         winRef.set({ id: winRef.key, name: name });
     }
 
-    function bypassTeam(id, name) {
-        // If team is already in winner, this could be a direct bypass to next round logic
-        alert(name + " is Bypassed to next round!");
+    function bypassToWin(id, name) {
+        // Just an alert for now, can be expanded to logic
+        alert(name + " has been Bypassed!");
     }
 
-    function renderLists() {
+    function renderLists(teamList, winnerList) {
         const pList = document.getElementById('playingList');
         const wList = document.getElementById('winnerList');
         pList.innerHTML = "";
         wList.innerHTML = "";
 
-        teams.forEach(t => {
-            pList.innerHTML += `<div class="team-item">${t.name} <button class="btn-win" onclick="moveToWin('${t.id}', '${t.name}')">WIN</button></div>`;
-        });
+        if(teamList) {
+            Object.values(teamList).forEach(t => {
+                pList.innerHTML += `
+                <div class="team-item">
+                    <span>${t.name}</span>
+                    <button class="btn-win" onclick="moveToWin('${t.id}', '${t.name}')">WINNER</button>
+                </div>`;
+            });
+        }
 
-        winners.forEach(w => {
-            wList.innerHTML += `<div class="team-item">${w.name} <button class="btn-bypass" onclick="bypassTeam('${w.id}', '${w.name}')">BYPASS</button></div>`;
-        });
+        if(winnerList) {
+            Object.values(winnerList).forEach(w => {
+                wList.innerHTML += `
+                <div class="team-item">
+                    <span>${w.name}</span>
+                    <button class="btn-bypass" onclick="bypassToWin('${w.id}', '${w.name}')">BYPASS</button>
+                </div>`;
+            });
+        }
     }
-
-    function updateSelects() {
-        const s1 = document.getElementById('selectT1');
-        const s2 = document.getElementById('selectT2');
-        let options = `<option value="">Select Team</option>`;
-        
-        // Winners are available for next round matches
-        winners.forEach(w => {
-            options += `<option value="${w.name}">${w.name}</option>`;
-        });
-        
-        s1.innerHTML = options;
-        s2.innerHTML = options;
-    }
-
-    function setNextMatch() {
-        const t1 = document.getElementById('selectT1').value;
-        const t2 = document.getElementById('selectT2').value;
-        if(!t1 || !t2) { alert("Please select both teams!"); return; }
-        
-        db.update({
-            currentMatch: t1 + " VS " + t2,
-            nextEvent: "Upcoming: " + t1 + " VS " + t2
-        });
-        alert("Next Match Updated in Ticker!");
-    }
-
-    // Function to prevent selecting same team in both boxes
-    document.getElementById('selectT1').addEventListener('change', function() {
-        let val = this.value;
-        // Logic to hide this from selectT2 can be added here
-    });
-
 </script>
 </body>
 </html>
