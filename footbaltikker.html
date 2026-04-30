@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Admin - Clean Layout</title>
+    <title>Tournament Admin - Professional Layout</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -21,18 +21,17 @@
         .btn-mode { background: #eee; color: #333; font-size: 12px; }
         .btn-active { border: 2px solid #000 !important; font-weight: 900 !important; background: #fff !important; color: #000 !important; }
         
-        /* Win Button - Only Icon */
-        .btn-win-circle { background: #ffc107; color: #000; border-radius: 50%; width: 40px; height: 40px; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        .btn-win-circle { background: #ffc107; color: #000; border-radius: 50%; width: 36px; height: 36px; border: none; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .grid-effects { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
         
-        .box-list { background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; min-height: 200px; padding: 10px; max-height: 400px; overflow-y: auto; }
-        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 5px solid #1a73e8; }
+        .box-list { background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; min-height: 180px; padding: 10px; max-height: 350px; overflow-y: auto; }
+        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px; margin-bottom: 8px; border-radius: 8px; border-left: 5px solid #1a73e8; box-shadow: 0 2px 4px rgba(0,0,0,0.05); }
         
         .label-title { font-size: 11px; font-weight: bold; color: #555; margin-bottom: 6px; display: block; text-transform: uppercase; }
-        .match-label { color: #666; font-weight: bold; font-size: 11px; display: block; }
-        .large-select { height: 55px; border-radius: 8px; border: 2px solid #1a73e8; width: 100%; font-size: 16px; font-weight: bold; }
+        .match-num { font-size: 10px; color: #888; font-weight: bold; display: block; }
+        .large-select { height: 50px; border-radius: 8px; border: 2px solid #1a73e8; width: 100%; font-size: 15px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -41,43 +40,54 @@
     <div class="card">
         <div class="header">Team Management</div>
         <div class="content">
-            <textarea id="bulkTeams" class="std-input" style="height: 60px;" placeholder="ਟੀਮਾਂ ਪਾਓ (e.g. 1-2, 3-4)"></textarea>
-            <button class="btn btn-add" onclick="addBulkTeams()">Add Teams</button>
+            <textarea id="bulkTeams" class="std-input" style="height: 60px;" placeholder="ਟੀਮਾਂ ਪਾਓ (e.g. Team A-Team B, Team C-Team D)"></textarea>
+            <button class="btn btn-add" onclick="addBulkTeams()">Add Teams to Playing List</button>
             <div class="grid-2">
-                <div><span class="label-title">Playing List</span><div id="playingList" class="box-list"></div></div>
-                <div><span class="label-title">Winners Box</span><div id="winnerList" class="box-list"></div></div>
+                <div><span class="label-title">Current Playing</span><div id="playingList" class="box-list"></div></div>
+                <div><span class="label-title">Winners (Scoreboard Ready)</span><div id="winnerList" class="box-list"></div></div>
             </div>
         </div>
     </div>
 
-    <!-- 2. NEXT EVENTS -->
+    <!-- 2. MATCH TIES (NOW UNDER TEAM LIST) -->
     <div class="card">
-        <div class="header" style="background: #8e44ad;">Next Events</div>
-        <div class="content">
-            <textarea id="nextEvents" class="std-input" style="height: 60px;" placeholder="ਹੋਰ ਜਗ੍ਹਾ ਹੋਣ ਵਾਲੇ ਪ੍ਰੋਗਰਾਮ..."></textarea>
-            <button class="btn btn-update" style="background: #732d91;" onclick="confirmAction('events')">Update Events</button>
-        </div>
-    </div>
-
-    <!-- 3. TIES & NEXT PROGRAM -->
-    <div class="card">
-        <div class="header" style="background: #6f42c1;">Match Ties & Live Next</div>
+        <div class="header" style="background: #6f42c1;">Scoreboard: Match Tie Setup</div>
         <div class="content">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
                 <select id="tie1" class="large-select"></select>
                 <select id="tie2" class="large-select"></select>
             </div>
-            <button class="btn btn-update" style="margin-bottom:15px;" onclick="updateTie()">Update Match Tie</button>
-            <input type="text" id="nextProg" class="std-input" placeholder="ਇਸ ਟੂਰਨਾਮੈਂਟ ਦਾ ਅਗਲਾ ਪ੍ਰੋਗਰਾਮ...">
-            <button class="btn btn-update" style="background: #e67e22;" onclick="confirmAction('nextProg')">Update Next Program</button>
+            <button class="btn btn-update" onclick="updateTie()">Set Live Match Tie</button>
+        </div>
+    </div>
+
+    <!-- 3. TICKER & EVENTS INFO -->
+    <div class="card">
+        <div class="header" style="background:#444;">Ticker Info & Next Events</div>
+        <div class="content">
+            <button id="tickerToggleBtn" class="btn btn-ticker" onclick="confirmAction('vis')">Ticker: ON/OFF</button>
+            
+            <span class="label-title">Tournament Name</span>
+            <input type="text" id="tourName" class="std-input">
+            
+            <span class="label-title">Prizes & Contact</span>
+            <div class="grid-2">
+                <input type="text" id="prizeList" class="std-input" placeholder="Prizes">
+                <input type="text" id="contactInfo" class="std-input" placeholder="Contact">
+            </div>
+
+            <span class="label-title">External Events (Next Programs)</span>
+            <textarea id="nextEvents" class="std-input" style="height: 60px;" placeholder="ਹੋਰ ਜਗ੍ਹਾ ਹੋਣ ਵਾਲੇ ਪ੍ਰੋਗਰਾਮ..."></textarea>
+            
+            <button class="btn btn-update" style="background: #333;" onclick="confirmAction('info')">Update Ticker & Events</button>
         </div>
     </div>
 
     <!-- 4. WATERMARK & EFFECTS -->
     <div class="card">
-        <div class="header" style="background: #2c3e50;">Watermark & Effects</div>
+        <div class="header" style="background: #2c3e50;">Watermark & Display Effects</div>
         <div class="content">
-            <div style="display:flex; gap:10px;">
+            <div style="display:flex; gap:10px; margin-bottom:10px;">
                 <input type="text" id="wmText" class="std-input" placeholder="Brand Name..." style="margin:0;">
                 <button class="btn btn-update" style="width:100px;" onclick="confirmAction('wm')">Set</button>
             </div>
@@ -86,18 +96,6 @@
                 <button id="btn-blink" class="btn btn-mode" onclick="confirmAction('effect', 'blink')">BLINK</button>
                 <button id="btn-fullscreen" class="btn btn-mode" onclick="confirmAction('effect', 'fullscreen')">F-SCREEN</button>
             </div>
-        </div>
-    </div>
-
-    <!-- 5. TICKER INFO -->
-    <div class="card">
-        <div class="header" style="background:#444;">Ticker Info & Visibility</div>
-        <div class="content">
-            <button id="tickerToggleBtn" class="btn btn-ticker" onclick="confirmAction('vis')">Ticker: ON/OFF</button>
-            <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
-            <input type="text" id="prizeList" class="std-input" placeholder="Prizes">
-            <input type="text" id="contactInfo" class="std-input" placeholder="Contact">
-            <button class="btn btn-update" style="background: #333;" onclick="confirmAction('info')">Update Ticker Info</button>
         </div>
     </div>
 
@@ -110,13 +108,23 @@
     let effectStates = { scroll: false, blink: false, fullscreen: false };
 
     function confirmAction(type, subType = null) {
-        if (confirm("ਕੀ ਤੁਸੀਂ ਅਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
-            if (type === 'info') db.update({ tournamentName: tourName.value, prizes: prizeList.value, contact: contactInfo.value });
-            else if (type === 'events') db.update({ externalEvents: nextEvents.value });
-            else if (type === 'nextProg') db.update({ nextProgram: nextProg.value });
-            else if (type === 'wm') db.update({ watermarkText: wmText.value });
-            else if (type === 'vis') { tickerStatus = !tickerStatus; db.child('tickerVis').set(tickerStatus); }
-            else if (type === 'effect') { effectStates[subType] = !effectStates[subType]; db.child('effects').child(subType).set(effectStates[subType]); }
+        if (confirm("ਕੀ ਤੁਸੀਂ ਬਦਲਾਅ ਸੇਵ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
+            if (type === 'info') {
+                db.update({ 
+                    tournamentName: tourName.value, 
+                    prizes: prizeList.value, 
+                    contact: contactInfo.value,
+                    externalEvents: nextEvents.value 
+                });
+            } else if (type === 'wm') {
+                db.update({ watermarkText: wmText.value });
+            } else if (type === 'vis') {
+                tickerStatus = !tickerStatus;
+                db.child('tickerVis').set(tickerStatus);
+            } else if (type === 'effect') {
+                effectStates[subType] = !effectStates[subType];
+                db.child('effects').child(subType).set(effectStates[subType]);
+            }
         }
     }
 
@@ -138,7 +146,10 @@
     }
 
     function updateTie() {
-        if (tie1.value && tie2.value) db.update({ currentMatchTie: tie1.value + " VS " + tie2.value });
+        if (tie1.value && tie2.value) {
+            db.update({ currentMatchTie: tie1.value + " VS " + tie2.value });
+            alert("Scoreboard Tie Updated!");
+        }
     }
 
     db.on("value", (snap) => {
@@ -147,11 +158,10 @@
         prizeList.value = data.prizes || "";
         contactInfo.value = data.contact || "";
         wmText.value = data.watermarkText || "";
-        nextProg.value = data.nextProgram || "";
         nextEvents.value = data.externalEvents || "";
         tickerStatus = !!data.tickerVis;
         tickerToggleBtn.style.background = tickerStatus ? "#28a745" : "#dc3545";
-        tickerToggleBtn.innerText = tickerStatus ? "Ticker: SHOWING" : "Ticker: HIDDEN";
+        tickerToggleBtn.innerText = tickerStatus ? "Ticker: ON" : "Ticker: OFF";
 
         const effects = data.effects || {};
         ['scroll', 'blink', 'fullscreen'].forEach(e => {
@@ -163,7 +173,7 @@
     });
 
     function moveToWin(id, name, matchNum) {
-        if (confirm(`ਕੀ ${name} ਜਿੱਤ ਗਈ ਹੈ?`)) {
+        if (confirm(`ਕੀ ਤੁਸੀਂ ${name} ਨੂੰ ਜੇਤੂ ਘੋਸ਼ਿਤ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?`)) {
             db.child('teamList').child(id).remove();
             const ref = db.child('winnerList').push();
             ref.set({ id: ref.key, name: name, matchNum: matchNum });
@@ -171,15 +181,16 @@
     }
 
     function renderLists(teamList, winnerList) {
-        playingList.innerHTML = ""; winnerListDiv = document.getElementById('winnerList');
-        winnerListDiv.innerHTML = "";
+        const pList = document.getElementById('playingList');
+        const wList = document.getElementById('winnerList');
+        pList.innerHTML = ""; wList.innerHTML = "";
         let opts = `<option value="">Select Team</option>`;
 
         if(teamList) Object.values(teamList).forEach(t => {
-            playingList.innerHTML += `<div class="team-item"><div><span class="match-label">Match ${t.matchNum}</span><b>${t.name}</b></div><button class="btn-win-circle" onclick="moveToWin('${t.id}', '${t.name}', '${t.matchNum}')">✔</button></div>`;
+            pList.innerHTML += `<div class="team-item"><div><span class="match-num">Match ${t.matchNum}</span><b>${t.name}</b></div><button class="btn-win-circle" onclick="moveToWin('${t.id}', '${t.name}', '${t.matchNum}')">✔</button></div>`;
         });
         if(winnerList) Object.values(winnerList).forEach(w => {
-            winnerListDiv.innerHTML += `<div class="team-item"><div><span class="match-label">Match ${w.matchNum} Winner</span><b>${w.name}</b></div><span style="color:#28a745; font-size:20px;">★</span></div>`;
+            wList.innerHTML += `<div class="team-item"><div><span class="match-num">Match ${w.matchNum}</span><b>${w.name}</b></div><span style="color:#28a745; font-weight:bold;">WINNER</span></div>`;
             opts += `<option value="${w.name}">${w.name}</option>`;
         });
         tie1.innerHTML = opts; tie2.innerHTML = opts;
