@@ -3,45 +3,43 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Admin - Professional Mode</title>
+    <title>Tournament & Upcoming Events Admin</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; color: #1c1e21; padding: 10px; margin: 0; }
-        .card { background: #ffffff; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 20px; box-shadow: 0 4px 10px rgba(0,0,0,0.05); overflow: hidden; max-width: 900px; margin-left: auto; margin-right: auto; }
-        .header { background: #1a73e8; color: white; padding: 12px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 14px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f4f7f6; color: #333; padding: 10px; margin: 0; }
+        .card { background: #fff; border-radius: 10px; border: 1px solid #ddd; margin-bottom: 15px; box-shadow: 0 2px 8px rgba(0,0,0,0.05); overflow: hidden; max-width: 850px; margin-left: auto; margin-right: auto; }
+        .header { background: #1a73e8; color: white; padding: 10px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 13px; }
         .content { padding: 15px; }
         
-        .std-input { width: 100%; padding: 10px; background: #fff; border: 2px solid #eee; color: #333; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box; font-size: 14px; }
-        .std-input:focus { border-color: #1a73e8; outline: none; }
-        
-        .btn { padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.2s; width: 100%; }
-        .btn-add { background: #28a745; color: white; margin-bottom: 15px; }
-        .btn-win { background: #ffc107; color: #000; font-size: 10px; padding: 5px 10px; border-radius: 4px; }
+        .std-input { width: 100%; padding: 10px; background: #fff; border: 1px solid #ccc; color: #333; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box; font-size: 14px; }
+        .btn { padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; width: 100%; transition: 0.2s; }
+        .btn-add { background: #28a745; color: white; margin-bottom: 10px; }
+        .btn-win { background: #f1c40f; color: #000; font-size: 10px; padding: 4px 8px; border-radius: 4px; border: none; cursor: pointer; }
         .btn-update { background: #1a73e8; color: white; }
         
         .list-container { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
-        .box-list { background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; min-height: 250px; padding: 10px; max-height: 400px; overflow-y: auto; }
-        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px; margin-bottom: 8px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.03); border-left: 4px solid #1a73e8; }
+        .box-list { background: #fafafa; border: 1px solid #eee; border-radius: 6px; min-height: 200px; padding: 8px; max-height: 350px; overflow-y: auto; }
+        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 8px; margin-bottom: 6px; border-radius: 4px; border: 1px solid #eee; font-size: 13px; font-weight: 500; }
         
-        .label-title { font-size: 12px; font-weight: bold; color: #5f6368; margin-bottom: 4px; display: block; text-transform: uppercase; }
-        .ties-box { background: #fff3cd; border: 1px solid #ffeeba; padding: 15px; border-radius: 8px; margin-top: 10px; }
-        select { width: 100%; padding: 10px; margin-bottom: 10px; border-radius: 6px; border: 1px solid #ddd; }
+        .label-title { font-size: 11px; font-weight: bold; color: #666; margin-bottom: 4px; display: block; text-transform: uppercase; }
+        .info-box { background: #e8f0fe; padding: 10px; border-radius: 6px; margin-bottom: 10px; border: 1px solid #c2d7fa; }
+        select { width: 100%; padding: 8px; border-radius: 4px; border: 1px solid #ccc; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
     <!-- 1. TEAM MANAGEMENT (TOP) -->
     <div class="card">
-        <div class="header">Team Management (Entry & Winners)</div>
+        <div class="header" style="background: #2c3e50;">Team Management & Winners</div>
         <div class="content">
-            <span class="label-title">Bulk Entry (Example: Team1-Team2, Team3-Team4)</span>
-            <textarea id="bulkTeams" class="std-input" style="height: 60px;" placeholder="ਟੀਮਾਂ ਦੇ ਜੋੜੇ ਲਿਖੋ..."></textarea>
-            <button class="btn btn-add" onclick="addBulkTeams()">Add Teams to Playing Box</button>
+            <span class="label-title">Bulk Entry (e.g. Team1-Team2, Team3-Team4)</span>
+            <textarea id="bulkTeams" class="std-input" style="height: 50px;" placeholder="ਟੀਮਾਂ ਦੇ ਨਾਮ ਇੱਥੇ ਪਾਓ..."></textarea>
+            <button class="btn btn-add" onclick="addBulkTeams()">Add to Playing Box</button>
             
             <div class="list-container">
                 <div>
-                    <span class="label-title" style="color: #d93025;">Playing Teams (Round 1)</span>
+                    <span class="label-title" style="color: #d93025;">Playing Teams</span>
                     <div id="playingList" class="box-list"></div>
                 </div>
                 <div>
@@ -52,41 +50,40 @@
         </div>
     </div>
 
-    <!-- 2. NEXT EVENTS & TIES -->
+    <!-- 2. TIES & CURRENT TOURNAMENT TICKER -->
     <div class="card">
-        <div class="header" style="background: #6f42c1;">Next Matches & Ties Setup</div>
+        <div class="header">Current Match Ties & Ticker</div>
         <div class="content">
-            <div class="ties-box">
-                <span class="label-title">Select Teams for Next Tie (1 VS 2)</span>
-                <div style="display: grid; grid-template-columns: 1fr 40px 1fr; align-items: center; gap: 10px;">
-                    <select id="tie1"><option value="">Select Team 1</option></select>
+            <div class="info-box">
+                <span class="label-title">Next Match Tie (From Winner Box)</span>
+                <div style="display: grid; grid-template-columns: 1fr 30px 1fr; align-items: center; gap: 10px;">
+                    <select id="tie1"><option value="">Team 1</option></select>
                     <span style="text-align:center; font-weight:bold;">VS</span>
-                    <select id="tie2"><option value="">Select Team 2</option></select>
+                    <select id="tie2"><option value="">Team 2</option></select>
                 </div>
-                <button class="btn btn-update" onclick="updateNextMatch()">Update Next Match Tie</button>
+                <button class="btn btn-update" onclick="updateNextMatch()">Update Match Tie</button>
             </div>
-            
-            <div style="margin-top: 15px;">
-                <span class="label-title">Upcoming Programs / Events List</span>
-                <textarea id="nextEventsList" class="std-input" style="height: 60px;" placeholder="Example: Semi Final 1 at 4:00 PM, Final Match at 6:00 PM" oninput="updateTickerData()"></textarea>
+
+            <div class="list-container">
+                <div>
+                    <span class="label-title">Tournament Name</span>
+                    <input type="text" id="tourName" class="std-input" placeholder="Current Tournament" oninput="updateDB()">
+                </div>
+                <div>
+                    <span class="label-title">Prize List</span>
+                    <input type="text" id="prizeList" class="std-input" placeholder="1st, 2nd, 3rd Prizes" oninput="updateDB()">
+                </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. TOURNAMENT TICKER SETTINGS (BOTTOM) -->
+    <!-- 3. UPCOMING PROGRAMS (HOR JGA DE PROGRAM) -->
     <div class="card">
-        <div class="header" style="background: #343a40;">Tournament Ticker Settings</div>
+        <div class="header" style="background: #6f42c1;">Upcoming Programs (Other Locations)</div>
         <div class="content">
-            <div class="list-container">
-                <div>
-                    <span class="label-title">Tournament Name</span>
-                    <input type="text" id="tourName" class="std-input" placeholder="e.g. Kabaddi Cup" oninput="updateTickerData()">
-                </div>
-                <div>
-                    <span class="label-title">Prize List</span>
-                    <input type="text" id="prizeList" class="std-input" placeholder="1st: 51k, 2nd: 31k" oninput="updateTickerData()">
-                </div>
-            </div>
+            <span class="label-title">Hor jga hon wale program/Tournaments</span>
+            <textarea id="upcomingEvents" class="std-input" style="height: 80px;" placeholder="Example: 15 May - Moga Cup, 20 May - Bathinda Tournament..." oninput="updateDB()"></textarea>
+            <p style="font-size: 11px; color: #777;">* ਇੱਥੇ ਉਹ ਜਾਣਕਾਰੀ ਪਾਓ ਜੋ ਦੂਜੀਆਂ ਜਗ੍ਹਾਵਾਂ 'ਤੇ ਹੋਣ ਵਾਲੇ ਟੂਰਨਾਮੈਂਟਾਂ ਬਾਰੇ ਹੈ।</p>
         </div>
     </div>
 
@@ -95,11 +92,11 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("tickerData");
 
-    function updateTickerData() {
+    function updateDB() {
         db.update({
             tournamentName: document.getElementById('tourName').value,
             prizes: document.getElementById('prizeList').value,
-            nextEvents: document.getElementById('nextEventsList').value
+            upcomingOther: document.getElementById('upcomingEvents').value
         });
     }
 
@@ -108,10 +105,10 @@
         if(!input) return;
         const pairs = input.split(',');
         pairs.forEach(pair => {
-            const cleanPair = pair.trim().replace('-', ' vs ');
-            if(cleanPair) {
+            const clean = pair.trim().replace('-', ' vs ');
+            if(clean) {
                 const newRef = db.child('teamList').push();
-                newRef.set({ id: newRef.key, name: cleanPair });
+                newRef.set({ id: newRef.key, name: clean });
             }
         });
         document.getElementById('bulkTeams').value = "";
@@ -121,7 +118,7 @@
         const data = snap.val() || {};
         document.getElementById('tourName').value = data.tournamentName || "";
         document.getElementById('prizeList').value = data.prizes || "";
-        document.getElementById('nextEventsList').value = data.nextEvents || "";
+        document.getElementById('upcomingEvents').value = data.upcomingOther || "";
         renderLists(data.teamList, data.winnerList);
     });
 
@@ -148,7 +145,7 @@
 
         if(winnerList) {
             Object.values(winnerList).forEach(w => {
-                wList.innerHTML += `<div class="team-item"><span>${w.name}</span> <span style="color:green; font-size:10px;">WINNER</span></div>`;
+                wList.innerHTML += `<div class="team-item"><span>${w.name}</span> <span style="color:green; font-size:10px;">✔ WINNER</span></div>`;
                 options += `<option value="${w.name}">${w.name}</option>`;
             });
         }
@@ -158,10 +155,9 @@
     function updateNextMatch() {
         const t1 = document.getElementById('tie1').value;
         const t2 = document.getElementById('tie2').value;
-        if(!t1 || !t2) { alert("ਦੋਵੇਂ ਟੀਮਾਂ ਚੁਣੋ!"); return; }
-        const nextMatch = t1 + " VS " + t2;
-        db.update({ currentMatchTie: nextMatch });
-        alert("Next Match updated: " + nextMatch);
+        if(!t1 || !t2) { alert("Please select teams!"); return; }
+        db.update({ currentMatchTie: t1 + " VS " + t2 });
+        alert("Ticker Updated: " + t1 + " VS " + t2);
     }
 </script>
 </body>
