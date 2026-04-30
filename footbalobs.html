@@ -2,84 +2,117 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Football Overlay Fixed</title>
+    <title>Football Overlay Complete</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Arial Black', sans-serif; color: white; width: 1920px; height: 1080px; }
-        #scoreboard { position: absolute; top: 50px; left: 50px; display: flex; align-items: center; background: rgba(0,0,0,0.85); border-radius: 8px; transform: translateX(-150%); transition: 0.8s ease-in-out; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
+        body { margin: 0; padding: 0; font-family: 'Arial Black', sans-serif; color: white; width: 1920px; height: 1080px; overflow: hidden; }
+        
+        #scoreboard { 
+            position: absolute; top: 50px; left: 50px; display: flex; align-items: center; 
+            background: rgba(0,0,0,0.9); border-radius: 8px; height: 70px;
+            transform: translateX(-150%); transition: 0.8s; box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+        }
         .show-board { transform: translateX(0) !important; }
-        .team-color { width: 12px; height: 60px; }
-        .team-name { font-size: 28px; padding: 0 20px; min-width: 120px; text-align: center; text-transform: uppercase; }
-        .score { font-size: 40px; background: rgba(255,255,255,0.1); padding: 0 25px; line-height: 60px; font-weight: 900; }
-        #timeDisp { display: none; background: #27ae60; padding: 0 20px; height: 60px; align-items: center; font-size: 28px; border-left: 2px solid rgba(0,0,0,0.2); }
-        .show-timer { display: flex !important; }
-        #goal-anim { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); z-index: 100; backdrop-filter: blur(8px); }
-        .goal-text { font-size: 180px; text-shadow: 0 0 30px #27ae60; animation: bounce 0.4s infinite alternate; }
-        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
-        #penalty-box { position: absolute; top: 110px; left: 50px; background: rgba(0,0,0,0.95); border-bottom: 5px solid #e67e22; border-radius: 0 0 10px 10px; display: none; padding: 15px 25px; min-width: 350px; }
-        .pen-row { display: flex; justify-content: space-between; font-size: 20px; margin: 5px 0; }
-        #card-pop { position: absolute; top: 220px; left: 50px; padding: 15px 35px; font-size: 32px; border-radius: 5px; display: none; }
+
+        .t-color { width: 12px; height: 100%; }
+        .t-name { font-size: 30px; padding: 0 25px; min-width: 140px; text-align: center; text-transform: uppercase; }
+        .score { font-size: 45px; background: rgba(255,255,255,0.1); padding: 0 30px; line-height: 70px; font-weight: 900; }
+        #timer { background: #27ae60; padding: 0 20px; font-size: 30px; height: 100%; display: flex; align-items: center; min-width: 100px; border-left: 2px solid rgba(0,0,0,0.3); }
+
+        /* Penalty UI */
+        #penalty-box {
+            position: absolute; top: 130px; left: 50px; background: rgba(0,0,0,0.95);
+            padding: 15px 25px; border-radius: 10px; border-bottom: 5px solid #e67e22;
+            display: none; min-width: 380px;
+        }
+        .p-row { display: flex; justify-content: space-between; align-items: center; margin: 12px 0; }
+        .p-name { font-size: 22px; width: 120px; }
+        .ball-box { display: flex; gap: 10px; }
+        .ball { 
+            width: 22px; height: 22px; border-radius: 50%; background: #333; 
+            border: 1px solid #555; transition: 0.3s;
+        }
+        .ball.goal { background: #2ecc71; border: none; box-shadow: 0 0 12px #2ecc71; }
+        .ball.miss { background: #e74c3c; border: none; box-shadow: 0 0 12px #e74c3c; }
+
+        /* Goal Anim */
+        #goal-anim { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.8); z-index: 100; }
+        .goal-text { font-size: 150px; text-shadow: 0 0 40px #27ae60; }
     </style>
 </head>
 <body>
+
     <div id="scoreboard">
-        <div id="cBoxA" class="team-color"></div>
-        <div class="team-name" id="nameA">HOME</div>
+        <div id="cBoxA" class="t-color"></div>
+        <div class="t-name" id="nameA">HOME</div>
         <div class="score" id="scoreA">0</div>
-        <div class="score" id="scoreB" style="border-left: 1px solid rgba(255,255,255,0.1);">0</div>
-        <div class="team-name" id="nameB">AWAY</div>
-        <div id="cBoxB" class="team-color"></div>
-        <div id="timeDisp">00:00</div>
+        <div class="score" id="scoreB" style="border-left:1px solid #444;">0</div>
+        <div class="t-name" id="nameB">AWAY</div>
+        <div id="cBoxB" class="t-color"></div>
+        <div id="timer">00:00</div>
     </div>
+
     <div id="penalty-box">
-        <div style="text-align:center; font-size:12px; color:#e67e22; margin-bottom:8px;">PENALTY SHOOTOUT</div>
-        <div class="pen-row"><b><span id="pNameA">TEAM A</span></b> <span id="pScoreA" style="color:#f1c40f;">0/0</span></div>
-        <div class="pen-row"><b><span id="pNameB">TEAM B</span></b> <span id="pScoreB" style="color:#f1c40f;">0/0</span></div>
+        <div style="text-align:center; font-size:14px; color:#e67e22; margin-bottom:10px;">PENALTY SHOOTOUT</div>
+        <div class="p-row">
+            <span class="p-name" id="pNameA">HOME</span>
+            <div class="ball-box" id="ballsA"></div>
+        </div>
+        <div class="p-row">
+            <span class="p-name" id="pNameB">AWAY</span>
+            <div class="ball-box" id="ballsB"></div>
+        </div>
     </div>
-    <div id="goal-anim"><div style="text-align:center;"><div class="goal-text">GOAL!!!</div><div id="goalTeam" style="font-size: 60px; color:#f1c40f; text-transform:uppercase;">TEAM</div></div></div>
-    <div id="card-pop"></div>
+
+    <div id="goal-anim"><div style="text-align:center;"><div class="goal-text">GOAL!!!</div><div id="gTeam" style="font-size:50px; color:#f1c40f;">TEAM</div></div></div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("matchData");
-    let lastG = 0, lastC = 0;
+    let lastG = 0;
+
     db.on("value", (snap) => {
         const d = snap.val(); if(!d) return;
+
+        // Scoreboard
         document.getElementById('scoreboard').classList.toggle('show-board', d.showBoard !== false);
         document.getElementById('nameA').innerText = d.nameA || "HOME";
         document.getElementById('nameB').innerText = d.nameB || "AWAY";
         document.getElementById('scoreA').innerText = d.scoreA || 0;
         document.getElementById('scoreB').innerText = d.scoreB || 0;
-        document.getElementById('cBoxA').style.background = d.teamColorA;
-        document.getElementById('cBoxB').style.background = d.teamColorB;
-        const timeBox = document.getElementById('timeDisp');
-        if(d.timerRunning || d.matchSeconds > 0) {
-            timeBox.classList.add('show-timer');
-            let s = d.matchSeconds || 0; let m = Math.floor(s/60); let sec = s%60;
-            timeBox.innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
-        } else { timeBox.classList.remove('show-timer'); }
+        document.getElementById('cBoxA').style.background = d.teamColorA || "#ff0000";
+        document.getElementById('cBoxB').style.background = d.teamColorB || "#0000ff";
+
+        // Timer
+        let s = d.matchSeconds || 0; let m = Math.floor(s/60); let sec = s%60;
+        document.getElementById('timer').innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
+
+        // Penalties
         document.getElementById('penalty-box').style.display = d.penaltyMode ? 'block' : 'none';
         document.getElementById('pNameA').innerText = d.nameA;
         document.getElementById('pNameB').innerText = d.nameB;
-        document.getElementById('pScoreA').innerText = (d.pScoreA || 0) + " Goals (" + (d.pAttA || 0) + " Att)";
-        document.getElementById('pScoreB').innerText = (d.pScoreB || 0) + " Goals (" + (d.pAttB || 0) + " Att)";
+        renderBalls('A', d.pListA || []);
+        renderBalls('B', d.pListB || []);
+
+        // Goal Anim
         if(d.goalTrigger && d.goalTrigger > lastG) {
             const ga = document.getElementById('goal-anim');
-            document.getElementById('goalTeam').innerText = d.lastGoalTeam || "";
-            ga.style.display = 'flex'; setTimeout(() => ga.style.display = 'none', 4000);
+            document.getElementById('gTeam').innerText = d.lastGoalTeam || "";
+            ga.style.display = 'flex'; setTimeout(() => ga.style.display = 'none', 3500);
             lastG = d.goalTrigger;
         }
-        if(d.cardTime && d.cardTime > lastC) {
-            const cp = document.getElementById('card-pop');
-            cp.innerText = (d.lastCardType === 'yellow' ? '🟨 YELLOW CARD: ' : '🟥 RED CARD: ') + d.lastCardPlayer;
-            cp.style.background = d.lastCardType === 'yellow' ? '#f1c40f' : '#e74c3c';
-            cp.style.color = d.lastCardType === 'yellow' ? 'black' : 'white';
-            cp.style.display = 'block'; setTimeout(() => cp.style.display = 'none', 4500);
-            lastC = d.cardTime;
-        }
     });
+
+    function renderBalls(team, list) {
+        let html = '';
+        for(let i=0; i<5; i++) {
+            let status = list[i] || ''; // 'goal' or 'miss'
+            html += `<div class="ball ${status}"></div>`;
+        }
+        document.getElementById('balls' + team).innerHTML = html;
+    }
 </script>
 </body>
 </html>
