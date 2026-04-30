@@ -3,163 +3,160 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manpreet Match Admin</title>
+    <title>Manpreet Admin - Large List</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0d1117; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: #161b22; width: 100%; max-width: 450px; border-radius: 10px; border: 1px solid #30363d; overflow: hidden; margin-bottom: 12px; }
-        .header { background: #238636; color: white; padding: 10px; text-align: center; font-weight: bold; font-size: 14px; text-transform: uppercase; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: #161b22; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #30363d; margin-bottom: 15px; overflow: hidden; }
+        .header { background: #238636; padding: 12px; text-align: center; font-weight: bold; font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
         
-        .teams-container { display: flex; padding: 15px; gap: 10px; background: #0d1117; align-items: center; justify-content: center; }
-        .team-box { flex: 1; text-align: center; }
-        .score-val { font-size: 45px; font-weight: 900; color: #2ecc71; margin: 5px 0; }
+        /* Scoreboard Section */
+        .team-row { display: flex; padding: 20px; gap: 15px; align-items: center; background: #0d1117; }
+        .score-box { flex: 1; text-align: center; }
+        .score-num { font-size: 50px; font-weight: 900; color: #2ecc71; margin: 10px 0; }
+        .std-input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; font-size: 15px; }
+        .btn-pm { width: 45%; padding: 12px; border: none; border-radius: 5px; color: white; font-size: 22px; cursor: pointer; font-weight: bold; }
         
-        .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; }
-        .btn-update { background: #1a73e8; color: white; padding: 12px; border-radius: 6px; border:none; cursor:pointer; width:100%; font-weight:bold; }
+        /* BIGGER TEAM LIST BOX */
+        .list-container { padding: 15px; background: #161b22; }
+        .match-list-item { 
+            background: #0d1117; 
+            padding: 18px; /* ਵੱਡੀ ਪੈਡਿੰਗ */
+            margin-bottom: 12px; 
+            border-radius: 8px; 
+            border-left: 6px solid #1a73e8; 
+            display: flex; 
+            justify-content: space-between; 
+            align-items: center;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+        .match-text { font-size: 18px; font-weight: bold; color: #e6edf3; }
+        .match-id { color: #f1c40f; margin-right: 8px; font-size: 14px; }
         
-        .btn-pm { border: none; color: white; padding: 8px; border-radius: 5px; font-size: 20px; cursor: pointer; width: 45%; }
-        .card-btn { padding: 8px; border-radius: 4px; border: none; font-weight: bold; cursor: pointer; color: white; font-size: 11px; }
-
-        .match-item { background: #1c2128; padding: 12px; margin-bottom: 8px; border-radius: 6px; border-left: 5px solid #1f6feb; display: flex; justify-content: space-between; align-items: center; }
-        .match-info { flex: 1; }
-        .match-name { font-weight: bold; font-size: 15px; color: #58a6ff; }
-        .match-no { color: #8b949e; font-size: 12px; display: block; }
+        .set-btn { 
+            background: #238636; 
+            color: white; 
+            border: none; 
+            padding: 10px 18px; 
+            border-radius: 6px; 
+            cursor: pointer; 
+            font-size: 14px; 
+            font-weight: bold;
+            text-transform: uppercase;
+        }
+        .btn-update { background: #1a73e8; color: white; padding: 15px; border: none; border-radius: 6px; width: 100%; font-weight: bold; cursor: pointer; font-size: 16px; }
+        .vis-btn { padding: 10px 25px; border-radius: 6px; border: none; cursor: pointer; color: white; font-weight: bold; font-size: 14px; }
     </style>
 </head>
 <body>
 
-    <!-- 1. LIVE SCORE BOARD -->
+    <!-- 1. SCORE CONTROL -->
     <div class="card">
-        <div class="header">Live Match Score</div>
-        <div class="teams-container">
-            <div class="team-box">
-                <input type="text" id="nameA" class="std-input" placeholder="Team 1" oninput="updateMatchDB()" style="text-align:center;">
-                <div class="score-val" id="dispA">0</div>
-                <div style="display:flex; justify-content: space-around;">
+        <div class="header">Live Match Control</div>
+        <div class="team-row">
+            <div class="score-box">
+                <input type="text" id="nameA" class="std-input" placeholder="Team 1" oninput="updateDB()">
+                <div class="score-num" id="dispA">0</div>
+                <div style="display:flex; justify-content: space-between;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
                 </div>
             </div>
-            
-            <div style="font-weight:bold; font-size:20px; color:#30363d;">VS</div>
-
-            <div class="team-box">
-                <input type="text" id="nameB" class="std-input" placeholder="Team 2" oninput="updateMatchDB()" style="text-align:center;">
-                <div class="score-val" id="dispB">0</div>
-                <div style="display:flex; justify-content: space-around;">
+            <div style="font-weight:bold; color:#30363d; font-size: 20px;">VS</div>
+            <div class="score-box">
+                <input type="text" id="nameB" class="std-input" placeholder="Team 2" oninput="updateDB()">
+                <div class="score-num" id="dispB">0</div>
+                <div style="display:flex; justify-content: space-between;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
                 </div>
             </div>
         </div>
-        <div style="padding: 10px; background: #161b22; text-align: center;">
-            <button id="visBtn" class="card-btn" style="background:#238636; width: 80px;" onclick="toggleVis()">SHOW</button>
-            <button class="card-btn" style="background:#333; width: 80px;" onclick="resetScore()">RESET</button>
+        <div style="padding:15px; text-align:center; background: #161b22; border-top: 1px solid #30363d;">
+            <button id="visBtn" class="vis-btn" onclick="toggleVis()">SHOW</button>
+            <button class="vis-btn" style="background:#333; margin-left:10px;" onclick="resetScore()">RESET</button>
         </div>
     </div>
 
-    <!-- 2. MATCH SCHEDULER -->
+    <!-- 2. BIGGER MATCH SCHEDULER -->
     <div class="card">
-        <div class="header" style="background: #1f6feb;">Match Schedule (2 Team/Match)</div>
-        <div style="padding: 15px;">
-            <label style="font-size: 11px; color: #8b949e;">Format: Team1-Team2, Team3-Team4</label>
-            <textarea id="matchInput" class="std-input" style="height: 70px;" placeholder="Mudki-Gill, Fzr-Fdk..."></textarea>
-            <button class="btn-update" onclick="saveMatches()">Save Match List</button>
+        <div class="header" style="background:#1a73e8;">Match Scheduler (Wadda Box)</div>
+        <div class="list-container">
+            <label style="font-size: 12px; color: #8b949e; display: block; margin-bottom: 5px;">Format: Team1-Team2, Team3-Team4</label>
+            <textarea id="matchInput" class="std-input" style="height:100px; font-size: 16px;" placeholder="Mudki-Gill, Fzr-Fdk..."></textarea>
+            <button class="btn-update" onclick="saveMatches()">SAVE ALL MATCHES</button>
             
-            <div id="matchList" style="margin-top: 15px;">
-                <!-- Matches will appear here -->
+            <div id="displayList" style="margin-top:20px; max-height: 400px; overflow-y: auto;">
+                <!-- Matches will appear here in BIG size -->
             </div>
         </div>
     </div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
-    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     
-    const matchRef = firebase.database().ref("matchData");
-    const tickerRef = firebase.database().ref("tickerData");
+    const mRef = firebase.database().ref("matchData");
+    const tRef = firebase.database().ref("tickerData");
 
     let curA = 0, curB = 0, sVis = true;
 
-    // --- SAVE MATCHES (2 TEAMS PER MATCH) ---
+    // --- SAVE LOGIC ---
     function saveMatches() {
-        const input = document.getElementById('matchInput').value;
-        if(!input) return;
+        const val = document.getElementById('matchInput').value;
+        if(!val) return;
 
-        // ਕੌਮੇ (,) ਨਾਲ ਮੈਚਾਂ ਨੂੰ ਵੱਖ ਕਰੋ
-        let matchPairs = input.split(',').map(m => m.trim()).filter(m => m !== "");
-        let finalMatches = [];
+        let pairs = val.split(',').map(p => p.trim()).filter(p => p !== "");
+        let list = [];
 
-        matchPairs.forEach((pair, index) => {
-            // ਡੈਸ਼ (-) ਨਾਲ 2 ਟੀਮਾਂ ਨੂੰ ਵੱਖ ਕਰੋ
-            let teams = pair.split('-').map(t => t.trim());
-            let t1 = teams[0] || "Team A";
-            let t2 = teams[1] || "Team B";
-
-            finalMatches.push({
-                id: index + 1,
-                display: t1 + " VS " + t2,
-                team1: t1,
-                team2: t2
-            });
+        pairs.forEach((p, i) => {
+            let teams = p.split('-').map(t => t.trim());
+            list.push({ id: i+1, t1: teams[0] || "Team 1", t2: teams[1] || "Team 2" });
         });
 
-        tickerRef.child('nextMatchList').set(finalMatches);
+        tRef.child('nextMatchList').set(list);
         document.getElementById('matchInput').value = "";
     }
 
-    // --- DISPLAY LIST ---
-    tickerRef.child('nextMatchList').on('value', (snap) => {
-        const listDiv = document.getElementById('matchList');
-        listDiv.innerHTML = "";
+    // --- RENDER BIG LIST ---
+    tRef.child('nextMatchList').on('value', snap => {
+        const div = document.getElementById('displayList');
+        div.innerHTML = "";
         const data = snap.val() || [];
-        
         data.forEach(m => {
-            listDiv.innerHTML += `
-                <div class="match-item">
-                    <div class="match-info">
-                        <span class="match-no">Match #${m.id}</span>
-                        <span class="match-name">${m.display}</span>
+            div.innerHTML += `
+                <div class="match-list-item">
+                    <div class="match-text">
+                        <span class="match-id">#${m.id}</span> ${m.t1} <span style="color:#58a6ff;">VS</span> ${m.t2}
                     </div>
-                    <button class="card-btn" style="background:#238636;" onclick="setLive('${m.team1}', '${m.team2}')">SET LIVE</button>
+                    <button class="set-btn" onclick="setLive('${m.t1}', '${m.t2}')">SET LIVE</button>
                 </div>`;
         });
     });
 
-    // --- SET MATCH LIVE ---
     function setLive(t1, t2) {
         if(confirm("ਕੀ ਇਹ ਮੈਚ ਲਾਈਵ ਕਰਨਾ ਹੈ?")) {
-            matchRef.update({
-                nameA: t1,
-                nameB: t2,
-                scoreA: 0,
-                scoreB: 0,
-                scoreVisible: true
-            });
-            tickerRef.update({ currentMatchTie: t1 + " VS " + t2 });
+            mRef.update({ nameA: t1, nameB: t2, scoreA: 0, scoreB: 0, scoreVisible: true });
+            tRef.update({ currentMatchTie: t1 + " VS " + t2 });
         }
     }
 
-    // --- CORE SCOREBOARD FUNCTIONS ---
-    function updateMatchDB() {
-        matchRef.update({
-            nameA: document.getElementById('nameA').value,
-            nameB: document.getElementById('nameB').value
-        });
+    // --- SYSTEM FUNCTIONS ---
+    function updateDB() {
+        mRef.update({ nameA: document.getElementById('nameA').value, nameB: document.getElementById('nameB').value });
     }
 
-    function changeScore(team, val) {
-        let current = (team === 'scoreA' ? curA : curB);
-        matchRef.update({ [team]: Math.max(0, current + val) });
+    function changeScore(team, v) {
+        let old = (team === 'scoreA' ? curA : curB);
+        mRef.update({ [team]: Math.max(0, old + v) });
     }
 
-    function toggleVis() { matchRef.child('scoreVisible').set(!sVis); }
-    function resetScore() { if(confirm("Reset Score?")) matchRef.update({ scoreA: 0, scoreB: 0 }); }
+    function toggleVis() { mRef.child('scoreVisible').set(!sVis); }
+    function resetScore() { if(confirm("Reset Score to 0-0?")) mRef.update({ scoreA: 0, scoreB: 0 }); }
 
-    // --- FIREBASE SYNC ---
-    matchRef.on("value", (snap) => {
+    mRef.on("value", snap => {
         const d = snap.val() || {};
         curA = d.scoreA || 0; curB = d.scoreB || 0; sVis = !!d.scoreVisible;
         document.getElementById('dispA').innerText = curA;
