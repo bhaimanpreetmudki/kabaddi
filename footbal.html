@@ -2,80 +2,83 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Football Admin Pro - Swap Fixed</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Full Admin Panel - Swap & Penalty</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: #16191c; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #333; overflow: hidden; margin-bottom: 12px; box-sizing: border-box; }
-        .header { background: #27ae60; color: white; padding: 8px; text-align: center; font-weight: bold; font-size: 13px; text-transform: uppercase; }
-        .teams-container { display: flex; padding: 10px; gap: 8px; background: #1a1d21; }
-        .team-box { flex: 1; text-align: center; background: #111; padding: 10px; border-radius: 10px; border: 1px solid #222; }
-        .team-input { width: 95%; padding: 8px; background: #000; border: 1px solid #333; color: white; border-radius: 4px; text-align: center; margin-bottom: 5px; font-weight: bold; font-size: 13px; box-sizing: border-box; }
-        .score-display { font-size: 50px; font-weight: 900; color: white; margin: 5px 0; }
-        .btn-group { display: flex; gap: 4px; margin-bottom: 5px; }
-        .btn-action { flex: 1; padding: 12px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; font-size: 12px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; }
+        .card { background: #16191c; border-radius: 12px; border: 1px solid #333; margin-bottom: 12px; padding: 15px; }
+        .header { background: #27ae60; padding: 10px; text-align: center; font-weight: bold; margin: -15px -15px 15px -15px; border-radius: 12px 12px 0 0; }
+        .team-row { display: flex; gap: 10px; margin-bottom: 15px; }
+        .team-box { flex: 1; text-align: center; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #222; }
+        input { width: 90%; padding: 8px; background: #000; border: 1px solid #333; color: white; border-radius: 4px; text-align: center; margin-bottom: 5px; }
+        .score-display { font-size: 45px; font-weight: 900; margin: 10px 0; color: #2ecc71; }
+        .btn-group { display: flex; gap: 5px; margin-top: 5px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; font-size: 14px; }
         .btn-plus { background: #2ecc71; } .btn-minus { background: #34495e; }
         .btn-yellow { background: #f1c40f; color: black; } .btn-red { background: #e74c3c; }
-        .timer-display { font-size: 30px; color: #2ecc71; text-align: center; font-family: monospace; font-weight: bold; padding: 8px; background: #000; border-radius: 8px; border: 1px solid #222; margin-bottom: 10px; }
-        .card-history { margin-top: 10px; background: #000; border-radius: 4px; padding: 5px; min-height: 40px; text-align: left; border: 1px dashed #444; }
-        .c-tag { display: inline-block; margin: 2px; padding: 2px 6px; border-radius: 3px; font-size: 10px; font-weight: bold; }
-        .y-tag { background: #f1c40f; color: black; } .r-tag { background: #e74c3c; color: white; }
+        .btn-swap { background: #8e44ad; width: 100%; padding: 15px; margin: 10px 0; }
+        .timer-display { font-size: 35px; color: #f1c40f; text-align: center; font-family: monospace; font-weight: bold; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div style="width: 100%; max-width: 500px;">
-    <!-- Timer -->
+    <!-- 1. Match Info & Timer -->
     <div class="card">
-        <div style="padding: 15px;">
-            <div style="display: flex; gap: 10px; margin-bottom: 10px;">
-                <div style="flex: 1;"><label style="font-size: 10px; color: #888;">MATCH MINS</label><input type="number" id="matchMins" class="team-input" value="45" oninput="updateDB()"></div>
-                <div style="flex: 1;"><label style="font-size: 10px; color: #888;">CLOCK</label><div id="timerDisplay" class="timer-display">00:00</div></div>
-            </div>
-            <div class="btn-group">
-                <button id="startBtn" class="btn-action" style="background: #27ae60;" onclick="startTimer()">START</button>
-                <button id="pauseBtn" class="btn-action" style="background: #e67e22;" onclick="pauseTimer()">PAUSE</button>
-                <button class="btn-action" style="background: #34495e;" onclick="resetTimer()">RESET TIME</button>
-            </div>
-            <button id="boardToggle" class="btn-action" style="width:100%; margin-top:8px; background:#2980b9;" onclick="toggleBoard()">Board ON/OFF</button>
+        <div class="header">TIME & MATCH SETTINGS</div>
+        <div id="timerDisplay" class="timer-display">00:00</div>
+        <div class="btn-group">
+            <button class="btn" style="background: #27ae60;" onclick="startTimer()">START</button>
+            <button class="btn" style="background: #e67e22;" onclick="pauseTimer()">PAUSE</button>
+            <button class="btn" style="background: #34495e;" onclick="resetTimer()">RESET</button>
         </div>
+        <button class="btn" style="background:#2980b9; width:100%; margin-top:10px;" onclick="toggleBoard()">BOARD ON/OFF</button>
     </div>
 
-    <!-- Teams -->
+    <!-- 2. Score & Swap -->
     <div class="card">
-        <div class="header">Match Controller</div>
-        <div class="teams-container">
+        <div class="header">SCORE & TEAMS</div>
+        <div class="team-row">
             <div class="team-box">
-                <input type="text" id="nameA" class="team-input" placeholder="Team A" oninput="updateDB()">
-                <input type="color" id="colorA" style="width:100%; margin-bottom:5px;" oninput="updateDB()">
+                <input type="text" id="nameA" placeholder="Team A" oninput="updateDB()">
+                <input type="color" id="colorA" oninput="updateDB()" style="height:30px;">
                 <div class="score-display" id="dispA">0</div>
-                <div class="btn-group"><button class="btn-action btn-minus" onclick="changeVal('scoreA', -1)">-</button><button class="btn-action btn-plus" onclick="changeVal('scoreA', 1)">+</button></div>
-                <input type="text" id="pInputA" class="team-input" placeholder="No/Name" style="background:#222;">
-                <div class="btn-group"><button class="btn-action btn-yellow" onclick="giveCard('A', 'yellow')">YEL</button><button class="btn-action btn-red" onclick="giveCard('A', 'red')">RED</button></div>
-                <div class="card-history" id="histA"></div>
+                <div class="btn-group"><button class="btn btn-minus" onclick="changeVal('scoreA', -1)">-</button><button class="btn btn-plus" onclick="changeVal('scoreA', 1)">+</button></div>
             </div>
             <div class="team-box">
-                <input type="text" id="nameB" class="team-input" placeholder="Team B" oninput="updateDB()">
-                <input type="color" id="colorB" style="width:100%; margin-bottom:5px;" oninput="updateDB()">
+                <input type="text" id="nameB" placeholder="Team B" oninput="updateDB()">
+                <input type="color" id="colorB" oninput="updateDB()" style="height:30px;">
                 <div class="score-display" id="dispB">0</div>
-                <div class="btn-group"><button class="btn-action btn-minus" onclick="changeVal('scoreB', -1)">-</button><button class="btn-action btn-plus" onclick="changeVal('scoreB', 1)">+</button></div>
-                <input type="text" id="pInputB" class="team-input" placeholder="No/Name" style="background:#222;">
-                <div class="btn-group"><button class="btn-action btn-yellow" onclick="giveCard('B', 'yellow')">YEL</button><button class="btn-action btn-red" onclick="giveCard('B', 'red')">RED</button></div>
-                <div class="card-history" id="histB"></div>
+                <div class="btn-group"><button class="btn btn-minus" onclick="changeVal('scoreB', -1)">-</button><button class="btn btn-plus" onclick="changeVal('scoreB', 1)">+</button></div>
             </div>
         </div>
-        
-        <div style="padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-            <!-- SWAP BUTTON BACK HERE -->
-            <button class="btn-action" style="background:#8e44ad; padding: 15px;" onclick="swapTeams()">🔄 SWAP TEAMS (Left <-> Right)</button>
-            <button id="pToggleBtn" class="btn-action" style="background:#e67e22;" onclick="togglePenaltyMode()">⚽ PENALTY BOX</button>
-        </div>
+        <button class="btn btn-swap" onclick="swapTeams()">🔄 SWAP TEAMS (Half-Time)</button>
     </div>
-    
-    <button class="btn-action" style="background:#c0392b; width:100%; padding:15px; margin-top:10px;" onclick="resetFullMatch()">RESET FULL MATCH</button>
-</div>
+
+    <!-- 3. Penalty Box -->
+    <div class="card">
+        <div class="header" style="background:#e67e22;">PENALTY SHOOTOUT</div>
+        <div class="team-row">
+            <div class="team-box">
+                <div id="pNameA" style="font-weight:bold; margin-bottom:5px;">TEAM A</div>
+                <div class="btn-group">
+                    <button class="btn" style="background:#27ae60;" onclick="addPenalty('A', 'goal')">GOAL</button>
+                    <button class="btn" style="background:#e74c3c;" onclick="addPenalty('A', 'miss')">MISS</button>
+                </div>
+                <button class="btn" style="background:#444; font-size:10px; margin-top:5px;" onclick="clearPen('A')">RESET PEN A</button>
+            </div>
+            <div class="team-box">
+                <div id="pNameB" style="font-weight:bold; margin-bottom:5px;">TEAM B</div>
+                <div class="btn-group">
+                    <button class="btn" style="background:#27ae60;" onclick="addPenalty('B', 'goal')">GOAL</button>
+                    <button class="btn" style="background:#e74c3c;" onclick="addPenalty('B', 'miss')">MISS</button>
+                </div>
+                <button class="btn" style="background:#444; font-size:10px; margin-top:5px;" onclick="clearPen('B')">RESET PEN B</button>
+            </div>
+        </div>
+        <button class="btn" id="pToggleBtn" style="background:#d35400; width:100%;" onclick="togglePenaltyMode()">SHOW PENALTY ON OVERLAY</button>
+    </div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
@@ -83,71 +86,54 @@
     const db = firebase.database().ref("matchData");
     let current = {}; let timerInt;
 
-    function loadData() {
-        db.on("value", (snap) => {
-            current = snap.val() || {};
-            document.getElementById('dispA').innerText = current.scoreA || 0;
-            document.getElementById('dispB').innerText = current.scoreB || 0;
-            document.getElementById('nameA').value = current.nameA || "";
-            document.getElementById('nameB').value = current.nameB || "";
-            document.getElementById('colorA').value = current.teamColorA || "#ff0000";
-            document.getElementById('colorB').value = current.teamColorB || "#0000ff";
-            document.getElementById('matchMins').value = current.matchDuration || 45;
-            
-            let s = current.matchSeconds || 0; let m = Math.floor(s/60); let sec = s%60;
-            document.getElementById('timerDisplay').innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
+    db.on("value", (snap) => {
+        current = snap.val() || {};
+        document.getElementById('dispA').innerText = current.scoreA || 0;
+        document.getElementById('dispB').innerText = current.scoreB || 0;
+        document.getElementById('nameA').value = current.nameA || "";
+        document.getElementById('nameB').value = current.nameB || "";
+        document.getElementById('pNameA').innerText = current.nameA || "TEAM A";
+        document.getElementById('pNameB').innerText = current.nameB || "TEAM B";
+        document.getElementById('colorA').value = current.teamColorA || "#ff0000";
+        document.getElementById('colorB').value = current.teamColorB || "#0000ff";
+        document.getElementById('pToggleBtn').innerText = current.penaltyMode ? "HIDE PENALTY OVERLAY" : "SHOW PENALTY OVERLAY";
+        
+        let s = current.matchSeconds || 0; let m = Math.floor(s/60); let sec = s%60;
+        document.getElementById('timerDisplay').innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
 
-            if(current.timerRunning && !timerInt) timerInt = setInterval(() => db.update({ matchSeconds: (current.matchSeconds || 0) + 1 }), 1000);
-            if(!current.timerRunning) { clearInterval(timerInt); timerInt = null; }
-
-            updateHistUI('A', current.cardsA || []); updateHistUI('B', current.cardsB || []);
-        });
-    }
-
-    function swapTeams() {
-        if(!confirm("ਕੀ ਤੁਸੀਂ ਟੀਮਾਂ ਦੀ ਸਾਈਡ ਬਦਲਣਾ ਚਾਹੁੰਦੇ ਹੋ?")) return;
-        db.update({
-            nameA: current.nameB || "AWAY",
-            nameB: current.nameA || "HOME",
-            scoreA: current.scoreB || 0,
-            scoreB: current.scoreA || 0,
-            teamColorA: current.teamColorB || "#0000ff",
-            teamColorB: current.teamColorA || "#ff0000",
-            cardsA: current.cardsB || [],
-            cardsB: current.cardsA || []
-        });
-    }
-
-    function updateHistUI(team, cards) {
-        let html = '<div style="color:#555; font-size:9px;">CARDS:</div>';
-        cards.forEach(c => { html += `<span class="c-tag ${c.type==='yellow'?'y-tag':'r-tag'}">${c.p}</span>`; });
-        document.getElementById('hist' + team).innerHTML = html;
-    }
-
-    function giveCard(team, type) {
-        const p = document.getElementById('pInput' + team).value; if(!p) return;
-        let tCards = current['cards' + team] || [];
-        let isYellow = tCards.filter(c => c.p === p && c.type === 'yellow').length;
-        let finalT = (type === 'yellow' && isYellow >= 1) ? 'red' : type;
-        tCards.push({ p: p, type: finalT });
-        db.update({ ['cards' + team]: tCards, lastCardPlayer: p, lastCardType: finalT, cardTime: Date.now() });
-        document.getElementById('pInput' + team).value = "";
-    }
+        if(current.timerRunning && !timerInt) timerInt = setInterval(() => db.update({ matchSeconds: (current.matchSeconds || 0) + 1 }), 1000);
+        if(!current.timerRunning) { clearInterval(timerInt); timerInt = null; }
+    });
 
     function changeVal(key, val) { 
         let nv = (current[key] || 0) + val;
-        db.update({ [key]: nv < 0 ? 0 : nv, goalTrigger: val > 0 ? Date.now() : 0, lastGoalTeam: (key === 'scoreA' ? (current.nameA || "HOME") : (current.nameB || "AWAY")) });
+        db.update({ [key]: nv < 0 ? 0 : nv, goalTrigger: val > 0 ? Date.now() : 0, lastGoalTeam: (key === 'scoreA' ? current.nameA : current.nameB) });
     }
 
+    function swapTeams() {
+        if(!confirm("ਬਦਲਣਾ ਹੈ?")) return;
+        db.update({
+            nameA: current.nameB, nameB: current.nameA,
+            scoreA: current.scoreB, scoreB: current.scoreA,
+            teamColorA: current.teamColorB, teamColorB: current.teamColorA,
+            pListA: current.pListB || [], pListB: current.pListA || []
+        });
+    }
+
+    function addPenalty(team, type) {
+        let list = current['pList' + team] || [];
+        if(list.length >= 5) return;
+        list.push(type);
+        db.update({ ['pList' + team]: list });
+    }
+
+    function clearPen(team) { db.update({ ['pList' + team]: [] }); }
     function startTimer() { db.update({ timerRunning: true }); }
     function pauseTimer() { db.update({ timerRunning: false }); }
     function resetTimer() { db.update({ matchSeconds: 0, timerRunning: false }); }
     function toggleBoard() { db.update({ showBoard: current.showBoard === false }); }
     function togglePenaltyMode() { db.update({ penaltyMode: !current.penaltyMode }); }
-    function updateDB() { db.update({ nameA: document.getElementById('nameA').value, nameB: document.getElementById('nameB').value, teamColorA: document.getElementById('colorA').value, teamColorB: document.getElementById('colorB').value, matchDuration: document.getElementById('matchMins').value }); }
-    function resetFullMatch() { if(confirm("ਕੀ ਤੁਸੀਂ ਸਾਰਾ ਡਾਟਾ ਰੀਸੈੱਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) db.set({ scoreA: 0, scoreB: 0, matchSeconds: 0, timerRunning: false, showBoard: true, penaltyMode: false, cardsA: [], cardsB: [], pScoreA: 0, pAttA: 0, pScoreB: 0, pAttB: 0, nameA: "HOME", nameB: "AWAY", teamColorA: "#ff0000", teamColorB: "#0000ff" }); }
-    
-    loadData();
+    function updateDB() { db.update({ nameA: document.getElementById('nameA').value, nameB: document.getElementById('nameB').value, teamColorA: document.getElementById('colorA').value, teamColorB: document.getElementById('colorB').value }); }
 </script>
 </body>
 </html>
