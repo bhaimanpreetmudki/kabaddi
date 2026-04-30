@@ -2,186 +2,354 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Admin - Score & Ticker</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Ultimate Admin - Score & Ticker</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 10px; margin: 0; }
-        .card { background: #fff; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; max-width: 900px; margin-left: auto; margin-right: auto; }
-        .header { background: #1a73e8; color: white; padding: 12px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 13px; }
-        .content { padding: 15px; }
+        /* Combined CSS Styles */
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: #161b22; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #30363d; overflow: hidden; margin-bottom: 12px; box-sizing: border-box; }
+        .header { background: #238636; color: white; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
         
-        .std-input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 12px; box-sizing: border-box; font-size: 15px; }
-        .btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; width: 100%; }
-        
-        .btn-add { background: #28a745; color: white; margin-bottom: 15px; }
-        .btn-update { background: #1a73e8; color: white; font-size: 16px; }
-        .btn-ticker { background: #ff5722; color: white; margin-bottom: 15px; height: 50px; font-size: 16px; }
-        .btn-mode { background: #eee; color: #333; font-size: 12px; }
-        .btn-active { border: 2px solid #000 !important; font-weight: 900 !important; background: #fff !important; color: #000 !important; }
-        
-        /* Score Specific */
-        .score-box { background: #fff1f1; border: 2px solid #e91e63; padding: 10px; border-radius: 8px; text-align: center; font-size: 20px; font-weight: bold; color: #e91e63; }
-        
-        .btn-win-circle { background: #ffc107; color: #000; border-radius: 50%; width: 40px; height: 40px; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; box-shadow: 0 2px 4px rgba(0,0,0,0.2); }
+        /* Scoreboard Specific */
+        .teams-container { display: flex; padding: 10px; gap: 5px; background: #0d1117; align-items: center; }
+        .team-box { flex: 2; text-align: center; padding: 10px; border-radius: 8px; background: #161b22; border-top: 4px solid #fff; }
+        .mid-controls { flex: 1; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .score-val { font-size: 38px; font-weight: 900; color: #2ecc71; margin: 2px 0; }
+        .btn-pm { border: none; color: white; padding: 5px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 2px; }
+        .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 9px; flex: 1; width: 100%; }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        /* General Inputs */
+        .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
+        .label-text, .label-title { font-size: 10px; color: #8b949e; display: block; margin-top: 5px; text-align: left; text-transform: uppercase; font-weight: bold; }
+
+        /* Ticker Specific */
+        .content { padding: 15px; }
+        .btn-add { background: #238636; color: white; margin-bottom: 15px; padding: 12px; border-radius: 6px; border:none; cursor:pointer; width:100%; font-weight:bold; }
+        .btn-update { background: #1a73e8; color: white; padding: 12px; border-radius: 6px; border:none; cursor:pointer; width:100%; font-weight:bold; margin-bottom: 10px;}
+        .btn-ticker { background: #ff5722; color: white; margin-bottom: 15px; height: 50px; font-size: 16px; border-radius: 6px; border:none; width:100%; font-weight:bold; cursor:pointer; }
+        .btn-mode { background: #30363d; color: white; font-size: 12px; padding: 10px; border: none; border-radius: 4px; cursor: pointer; }
+        .btn-active { border: 2px solid #fff !important; background: #238636 !important; }
+        .btn-win-circle { background: #ffc107; color: #000; border-radius: 50%; width: 35px; height: 35px; border: none; font-size: 18px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .grid-effects { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .flex-row { display: flex; gap: 5px; margin-top: 8px; }
         
-        .box-list { background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; min-height: 200px; padding: 10px; max-height: 400px; overflow-y: auto; }
-        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 5px solid #1a73e8; }
+        .box-list { background: #0d1117; border: 1px solid #30363d; border-radius: 8px; min-height: 150px; padding: 10px; max-height: 300px; overflow-y: auto; }
+        .team-item { display: flex; justify-content: space-between; align-items: center; background: #161b22; padding: 10px; margin-bottom: 8px; border-radius: 8px; border-left: 5px solid #1a73e8; }
         
-        .label-title { font-size: 11px; font-weight: bold; color: #555; margin-bottom: 6px; display: block; text-transform: uppercase; }
-        .match-label { color: #666; font-weight: bold; font-size: 11px; display: block; }
-        .large-select { height: 55px; border-radius: 8px; border: 2px solid #1a73e8; width: 100%; font-size: 16px; font-weight: bold; }
+        #penaltyControlSection { display: none; background: #1c2128; padding: 15px; border-top: 3px solid #f39c12; }
+        .large-select { height: 45px; border-radius: 6px; border: 1px solid #30363d; width: 100%; background: #0d1117; color: white; font-weight: bold; }
     </style>
 </head>
 <body>
 
-    <!-- 1. LIVE SCORE MANAGEMENT (NEW) -->
+<div id="main-content" style="width: 100%; max-width: 500px;">
+    
+    <!-- 1. MAIN SCOREBOARD (Code 1) -->
     <div class="card">
-        <div class="header" style="background: #e91e63;">Live Score Board</div>
-        <div class="content">
-            <div class="grid-2">
-                <div>
-                    <span class="label-title">Team A Name</span>
-                    <input type="text" id="scoreTeamA" class="std-input" placeholder="Team A">
-                    <input type="number" id="pointsA" class="std-input score-box" value="0">
+        <div class="header"><i class="fas fa-futbol"></i> Scoreboard & Quick Actions</div>
+        <div class="teams-container">
+            <div class="team-box" id="boxA">
+                <input type="color" id="colorA" value="#ffffff" oninput="updateMatchDB()" style="width:100%; height:18px; border:none; cursor:pointer;">
+                <input type="text" id="nameA" class="std-input" placeholder="Home Team" oninput="updateMatchDB()">
+                <div class="score-val" id="dispA">0</div>
+                <div style="display:flex; margin-bottom:5px;">
+                    <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
+                    <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
                 </div>
-                <div>
-                    <span class="label-title">Team B Name</span>
-                    <input type="text" id="scoreTeamB" class="std-input" placeholder="Team B">
-                    <input type="number" id="pointsB" class="std-input score-box" value="0">
+                <input type="text" id="playerA" class="std-input" placeholder="No" style="border-color:#f1c40f;">
+                <div class="grid-2">
+                    <button class="card-btn" style="background:#f1c40f; color:000;" onclick="handleCard('A', 'Yellow')">YC</button>
+                    <button class="card-btn" style="background:#e74c3c;" onclick="handleCard('A', 'Red')">RC</button>
                 </div>
             </div>
-            <button class="btn btn-update" style="background: #e91e63;" onclick="updateScore()">Update Live Score</button>
+
+            <div class="mid-controls">
+                <button id="visBtn" class="card-btn" style="background:#238636;" onclick="toggleVis('scoreVisible')">SHOW</button>
+                <button class="card-btn" style="background:#333;" onclick="resetOnlyScore()">RESET</button>
+                <div style="font-weight:bold; color:#444;">VS</div>
+            </div>
+
+            <div class="team-box" id="boxB">
+                <input type="color" id="colorB" value="#ffffff" oninput="updateMatchDB()" style="width:100%; height:18px; border:none; cursor:pointer;">
+                <input type="text" id="nameB" class="std-input" placeholder="Away Team" oninput="updateMatchDB()">
+                <div class="score-val" id="dispB">0</div>
+                <div style="display:flex; margin-bottom:5px;">
+                    <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
+                    <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
+                </div>
+                <input type="text" id="playerB" class="std-input" placeholder="No" style="border-color:#f1c40f;">
+                <div class="grid-2">
+                    <button class="card-btn" style="background:#f1c40f; color:000;" onclick="handleCard('B', 'Yellow')">YC</button>
+                    <button class="card-btn" style="background:#e74c3c;" onclick="handleCard('B', 'Red')">RC</button>
+                </div>
+            </div>
         </div>
     </div>
 
-    <!-- 2. TEAM MANAGEMENT -->
+    <!-- 2. MATCH INFO (Code 1) -->
     <div class="card">
-        <div class="header">Team Management</div>
+        <div class="header"><i class="fas fa-info-circle"></i> Match Information</div>
+        <div style="padding:12px; background:#0d1117;">
+            <div class="grid-2">
+                <div style="text-align:center; border-right: 1px solid #333; padding-right:10px;">
+                    <div id="timerShow" style="font-size:32px; color:#f1c40f; font-family:monospace;">00:00</div>
+                    <div class="flex-row">
+                        <button class="card-btn" style="background:#238636;" onclick="startTimer()">Start</button>
+                        <button class="card-btn" style="background:#f39c12;" onclick="pauseTimer()">Pause</button>
+                        <button class="card-btn" style="background:#333;" onclick="resetTimer()">00</button>
+                    </div>
+                    <span class="label-text">Duration</span>
+                    <input type="text" id="matchDuration" class="std-input" placeholder="e.g. 20m" oninput="updateMatchDB()">
+                </div>
+                <div style="padding-left:5px;">
+                    <span class="label-text" style="color:#2ecc71;">Match Round</span>
+                    <input type="text" id="matchRound" class="std-input" placeholder="Semi-Final" oninput="updateMatchDB()">
+                    <span class="label-text" style="color:#f1c40f;">Match Half</span>
+                    <input type="text" id="roundInp" class="std-input" placeholder="1st Half" oninput="updateMatchDB()">
+                    <div class="flex-row">
+                        <button class="card-btn" style="background:#30363d; font-size:8px;" onclick="setHalf('1st Half')">1st Half</button>
+                        <button class="card-btn" style="background:#30363d; font-size:8px;" onclick="setHalf('2nd Half')">2nd Half</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. PENALTY SHOOTOUT (Code 1) -->
+    <div class="card">
+        <div class="header" style="background:#f39c12; color:000;">Penalty Shootout</div>
+        <div style="padding:10px; display:flex; gap:5px;">
+            <button id="pVisBtn" class="card-btn" style="background:#f39c12; color:000;" onclick="togglePenaltyVis()">Show Penalty</button>
+            <button class="card-btn" style="background:#333;" onclick="resetPenaltyOnly()">Reset Penalty</button>
+        </div>
+        <div id="penaltyControlSection">
+            <div class="grid-2">
+                <div>
+                    <input type="text" id="pA" class="std-input" readonly style="text-align:center;">
+                    <div class="flex-row">
+                        <button class="card-btn" style="background:#2ecc71;" onclick="addPenalty('pA', '✅')">Goal</button>
+                        <button class="card-btn" style="background:#555;" onclick="addPenalty('pA', '❌')">Miss</button>
+                    </div>
+                </div>
+                <div>
+                    <input type="text" id="pB" class="std-input" readonly style="text-align:center;">
+                    <div class="flex-row">
+                        <button class="card-btn" style="background:#2ecc71;" onclick="addPenalty('pB', '✅')">Goal</button>
+                        <button class="card-btn" style="background:#555;" onclick="addPenalty('pB', '❌')">Miss</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. TEAM MANAGEMENT (Code 2) -->
+    <div class="card">
+        <div class="header" style="background:#1a73e8;">Team Management & Lists</div>
         <div class="content">
             <textarea id="bulkTeams" class="std-input" style="height: 60px;" placeholder="ਟੀਮਾਂ ਪਾਓ (e.g. 1-2, 3-4)"></textarea>
-            <button class="btn btn-add" onclick="addBulkTeams()">Add Teams</button>
+            <button class="btn-add" onclick="addBulkTeams()">Add Teams</button>
             <div class="grid-2">
-                <div><span class="label-title">Playing List</span><div id="playingList" class="box-list"></div></div>
-                <div><span class="label-title">Winners Box</span><div id="winnerList" class="box-list"></div></div>
+                <div><span class="label-title">Playing</span><div id="playingList" class="box-list"></div></div>
+                <div><span class="label-title">Winners</span><div id="winnerList" class="box-list"></div></div>
             </div>
         </div>
     </div>
 
-    <!-- 3. NEXT EVENTS -->
+    <!-- 5. TIES & NEXT PROGRAM (Code 2) -->
     <div class="card">
-        <div class="header" style="background: #8e44ad;">Next Events</div>
+        <div class="header" style="background: #6f42c1;">Match Ties & Next</div>
         <div class="content">
-            <textarea id="nextEvents" class="std-input" style="height: 60px;" placeholder="ਹੋਰ ਜਗ੍ਹਾ ਹੋਣ ਵਾਲੇ ਪ੍ਰੋਗਰਾਮ..."></textarea>
-            <button class="btn btn-update" style="background: #732d91;" onclick="confirmAction('events')">Update Events</button>
-        </div>
-    </div>
-
-    <!-- 4. TIES & NEXT PROGRAM -->
-    <div class="card">
-        <div class="header" style="background: #6f42c1;">Match Ties & Live Next</div>
-        <div class="content">
-            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+            <div class="grid-2" style="margin-bottom:10px;">
                 <select id="tie1" class="large-select"></select>
                 <select id="tie2" class="large-select"></select>
             </div>
-            <button class="btn btn-update" style="margin-bottom:15px;" onclick="updateTie()">Update Match Tie</button>
-            <input type="text" id="nextProg" class="std-input" placeholder="ਇਸ ਟੂਰਨਾਮੈਂਟ ਦਾ ਅਗਲਾ ਪ੍ਰੋਗਰਾਮ...">
-            <button class="btn btn-update" style="background: #e67e22;" onclick="confirmAction('nextProg')">Update Next Program</button>
+            <button class="btn-update" onclick="updateTie()">Update Match Tie</button>
+            <input type="text" id="nextProg" class="std-input" placeholder="ਅਗਲਾ ਪ੍ਰੋਗਰਾਮ...">
+            <button class="btn-update" style="background: #e67e22;" onclick="confirmTickerAction('nextProg')">Update Next Program</button>
         </div>
     </div>
 
-    <!-- 5. WATERMARK & EFFECTS -->
-    <div class="card">
-        <div class="header" style="background: #2c3e50;">Watermark & Effects</div>
-        <div class="content">
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="wmText" class="std-input" placeholder="Brand Name..." style="margin:0;">
-                <button class="btn btn-update" style="width:100px;" onclick="confirmAction('wm')">Set</button>
-            </div>
-            <div class="grid-effects">
-                <button id="btn-scroll" class="btn btn-mode" onclick="confirmAction('effect', 'scroll')">SCROLL</button>
-                <button id="btn-blink" class="btn btn-mode" onclick="confirmAction('effect', 'blink')">BLINK</button>
-                <button id="btn-fullscreen" class="btn btn-mode" onclick="confirmAction('effect', 'fullscreen')">F-SCREEN</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 6. TICKER INFO -->
+    <!-- 6. TICKER & EFFECTS (Code 2) -->
     <div class="card">
         <div class="header" style="background:#444;">Ticker Info & Visibility</div>
         <div class="content">
-            <button id="tickerToggleBtn" class="btn btn-ticker" onclick="confirmAction('vis')">Ticker: ON/OFF</button>
+            <button id="tickerToggleBtn" class="btn-ticker" onclick="confirmTickerAction('vis')">Ticker: ON/OFF</button>
             <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
             <input type="text" id="prizeList" class="std-input" placeholder="Prizes">
             <input type="text" id="contactInfo" class="std-input" placeholder="Contact">
-            <button class="btn btn-update" style="background: #333;" onclick="confirmAction('info')">Update Ticker Info</button>
+            <textarea id="nextEvents" class="std-input" style="height: 50px;" placeholder="External Events..."></textarea>
+            <button class="btn-update" style="background: #333;" onclick="confirmTickerAction('info')">Update Ticker Info</button>
+            
+            <div class="label-title">Watermark</div>
+            <div style="display:flex; gap:5px; margin-bottom:10px;">
+                <input type="text" id="wmText" class="std-input" placeholder="Brand Name" style="margin:0;">
+                <button class="btn-update" style="width:80px; margin:0;" onclick="confirmTickerAction('wm')">Set</button>
+            </div>
+            
+            <div class="grid-effects">
+                <button id="btn-scroll" class="btn-mode" onclick="confirmTickerAction('effect', 'scroll')">SCROLL</button>
+                <button id="btn-blink" class="btn-mode" onclick="confirmTickerAction('effect', 'blink')">BLINK</button>
+                <button id="btn-fullscreen" class="btn-mode" onclick="confirmTickerAction('effect', 'fullscreen')">F-SCREEN</button>
+            </div>
         </div>
     </div>
 
+    <!-- SYSTEM RESET -->
+    <div class="card">
+        <div style="padding:10px;">
+            <input type="text" id="eventInp" class="std-input" placeholder="Goal Scorer / Event" oninput="updateMatchDB()">
+            <button class="card-btn" style="background:#e74c3c; padding:12px; font-size:12px;" onclick="fullReset()">RESET EVERYTHING</button>
+        </div>
+    </div>
+
+</div>
+
 <script>
+    // --- FIREBASE INITIALIZATION ---
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database().ref("tickerData");
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    
+    const matchRef = firebase.database().ref("matchData");
+    const tickerRef = firebase.database().ref("tickerData");
 
-    let tickerStatus = true;
-    let effectStates = { scroll: false, blink: false, fullscreen: false };
+    // --- CODE 1 LOGIC (MATCH & SCORE) ---
+    let curA = 0, curB = 0, seconds = 0, timerInterval = null, sVis = true, pVis = false;
+    let yellowCounts = {};
 
-    // Update Live Score
-    function updateScore() {
-        db.update({
-            teamAName: scoreTeamA.value,
-            teamBName: scoreTeamB.value,
-            scoreA: pointsA.value,
-            scoreB: pointsB.value
+    function updateMatchDB() {
+        matchRef.update({
+            nameA: document.getElementById('nameA').value,
+            nameB: document.getElementById('nameB').value,
+            colorA: document.getElementById('colorA').value,
+            colorB: document.getElementById('colorB').value,
+            penaltyA: document.getElementById('pA').value,
+            penaltyB: document.getElementById('pB').value,
+            lastEvent: document.getElementById('eventInp').value,
+            matchRound: document.getElementById('matchRound').value,
+            round: document.getElementById('roundInp').value,
+            duration: document.getElementById('matchDuration').value,
+            matchTime: document.getElementById('timerShow').innerText
         });
     }
 
-    function confirmAction(type, subType = null) {
+    function changeScore(team, val) {
+        let current = (team === 'scoreA' ? curA : curB);
+        matchRef.update({ [team]: Math.max(0, current + val) });
+    }
+
+    function handleCard(team, type) {
+        let pDetail = document.getElementById('player' + team).value;
+        if(!pDetail) { alert("Enter Player No!"); return; }
+        let key = team + "_" + pDetail;
+        if(type === 'Yellow') {
+            yellowCounts[key] = (yellowCounts[key] || 0) + 1;
+            document.getElementById('eventInp').value = (yellowCounts[key] >= 2 ? "RED (2nd Yellow): " : "Yellow Card: ") + pDetail;
+        } else {
+            document.getElementById('eventInp').value = "Red Card: " + pDetail;
+        }
+        updateMatchDB();
+    }
+
+    function startTimer() {
+        if (timerInterval) return;
+        timerInterval = setInterval(() => {
+            seconds++;
+            let m = Math.floor(seconds / 60), s = seconds % 60;
+            let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+            document.getElementById('timerShow').innerText = timeStr;
+            matchRef.child('matchTime').set(timeStr);
+        }, 1000);
+    }
+    function pauseTimer() { clearInterval(timerInterval); timerInterval = null; updateMatchDB(); }
+    function resetTimer() { seconds = 0; document.getElementById('timerShow').innerText = "00:00"; matchRef.child('matchTime').set("00:00"); }
+    function setHalf(val) { document.getElementById('roundInp').value = val; updateMatchDB(); }
+    function addPenalty(id, icon) {
+        let inp = document.getElementById(id);
+        let count = (inp.value.match(/✅|❌/g) || []).length;
+        if(count >= 5) { alert("Max 5 Penalties!"); return; }
+        inp.value = inp.value + icon;
+        updateMatchDB();
+    }
+    function togglePenaltyVis() { matchRef.child('penaltyVisible').set(!pVis); }
+    function toggleVis(field) { matchRef.child(field).set(!sVis); }
+    function resetPenaltyOnly() { matchRef.update({ penaltyA: "", penaltyB: "" }); }
+    function resetOnlyScore() { if(confirm("Reset Score?")) matchRef.update({ scoreA: 0, scoreB: 0 }); }
+    function fullReset() {
+        if(confirm("Reset Everything?")) {
+            yellowCounts = {}; seconds = 0; pauseTimer();
+            matchRef.update({ scoreA: 0, scoreB: 0, penaltyA: "", penaltyB: "", matchTime: "00:00", penaltyVisible: false, lastEvent: "" });
+        }
+    }
+
+    // --- CODE 2 LOGIC (TICKER & TEAMS) ---
+    let tickerStatus = true;
+    let effectStates = { scroll: false, blink: false, fullscreen: false };
+
+    function confirmTickerAction(type, subType = null) {
         if (confirm("ਕੀ ਤੁਸੀਂ ਅਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
-            if (type === 'info') db.update({ tournamentName: tourName.value, prizes: prizeList.value, contact: contactInfo.value });
-            else if (type === 'events') db.update({ externalEvents: nextEvents.value });
-            else if (type === 'nextProg') db.update({ nextProgram: nextProg.value });
-            else if (type === 'wm') db.update({ watermarkText: wmText.value });
-            else if (type === 'vis') { tickerStatus = !tickerStatus; db.child('tickerVis').set(tickerStatus); }
-            else if (type === 'effect') { effectStates[subType] = !effectStates[subType]; db.child('effects').child(subType).set(effectStates[subType]); }
+            if (type === 'info') tickerRef.update({ tournamentName: tourName.value, prizes: prizeList.value, contact: contactInfo.value, externalEvents: nextEvents.value });
+            else if (type === 'nextProg') tickerRef.update({ nextProgram: nextProg.value });
+            else if (type === 'wm') tickerRef.update({ watermarkText: wmText.value });
+            else if (type === 'vis') { tickerStatus = !tickerStatus; tickerRef.child('tickerVis').set(tickerStatus); }
+            else if (type === 'effect') { effectStates[subType] = !effectStates[subType]; tickerRef.child('effects').child(subType).set(effectStates[subType]); }
         }
     }
 
     function addBulkTeams() {
         const input = document.getElementById('bulkTeams').value;
         if(!input) return;
-        db.child('teamList').once('value', (snap) => {
+        tickerRef.child('teamList').once('value', (snap) => {
             let count = snap.numChildren();
             input.split(',').forEach(p => {
                 const name = p.trim().replace('-', ' vs ');
-                if(name) {
-                    count++;
-                    const ref = db.child('teamList').push();
-                    ref.set({ id: ref.key, name: name, matchNum: count });
-                }
+                if(name) { count++; const ref = tickerRef.child('teamList').push(); ref.set({ id: ref.key, name: name, matchNum: count }); }
             });
         });
         document.getElementById('bulkTeams').value = "";
     }
 
-    function updateTie() {
-        if (tie1.value && tie2.value) {
-            db.update({ currentMatchTie: tie1.value + " VS " + tie2.value });
-            // Auto-fill score names for convenience
-            scoreTeamA.value = tie1.value;
-            scoreTeamB.value = tie2.value;
+    function updateTie() { if (tie1.value && tie2.value) tickerRef.update({ currentMatchTie: tie1.value + " VS " + tie2.value }); }
+
+    function moveToWin(id, name, matchNum) {
+        if (confirm(`ਕੀ ${name} ਜਿੱਤ ਗਈ ਹੈ?`)) {
+            tickerRef.child('teamList').child(id).remove();
+            tickerRef.child('winnerList').push().set({ id: id, name: name, matchNum: matchNum });
         }
     }
 
-    db.on("value", (snap) => {
+    // --- SYNC DATA FROM FIREBASE ---
+    matchRef.on("value", (snap) => {
         const data = snap.val() || {};
-        
-        // Ticker Sync
+        curA = data.scoreA || 0; curB = data.scoreB || 0;
+        sVis = !!data.scoreVisible; pVis = !!data.penaltyVisible;
+        document.getElementById('dispA').innerText = curA;
+        document.getElementById('dispB').innerText = curB;
+        document.getElementById('nameA').value = data.nameA || "";
+        document.getElementById('nameB').value = data.nameB || "";
+        document.getElementById('colorA').value = data.colorA || "#ffffff";
+        document.getElementById('colorB').value = data.colorB || "#ffffff";
+        document.getElementById('pA').value = data.penaltyA || "";
+        document.getElementById('pB').value = data.penaltyB || "";
+        document.getElementById('matchRound').value = data.matchRound || "";
+        document.getElementById('roundInp').value = data.round || "";
+        document.getElementById('matchDuration').value = data.duration || "";
+        document.getElementById('eventInp').value = data.lastEvent || "";
+        if(!timerInterval) document.getElementById('timerShow').innerText = data.matchTime || "00:00";
+        document.getElementById('boxA').style.borderTopColor = data.colorA;
+        document.getElementById('boxB').style.borderTopColor = data.colorB;
+        document.getElementById('visBtn').innerText = sVis ? "HIDE" : "SHOW";
+        document.getElementById('visBtn').style.background = sVis ? "#da3633" : "#238636";
+        document.getElementById('penaltyControlSection').style.display = pVis ? "block" : "none";
+        document.getElementById('pVisBtn').innerText = pVis ? "Hide Penalty" : "Show Penalty";
+    });
+
+    tickerRef.on("value", (snap) => {
+        const data = snap.val() || {};
         tourName.value = data.tournamentName || "";
         prizeList.value = data.prizes || "";
         contactInfo.value = data.contact || "";
@@ -189,43 +357,25 @@
         nextProg.value = data.nextProgram || "";
         nextEvents.value = data.externalEvents || "";
         tickerStatus = !!data.tickerVis;
-        tickerToggleBtn.style.background = tickerStatus ? "#28a745" : "#dc3545";
+        tickerToggleBtn.style.background = tickerStatus ? "#238636" : "#da3633";
         tickerToggleBtn.innerText = tickerStatus ? "Ticker: SHOWING" : "Ticker: HIDDEN";
-
-        // Score Sync
-        scoreTeamA.value = data.teamAName || "";
-        scoreTeamB.value = data.teamBName || "";
-        pointsA.value = data.scoreA || 0;
-        pointsB.value = data.scoreB || 0;
-
         const effects = data.effects || {};
         ['scroll', 'blink', 'fullscreen'].forEach(e => {
             effectStates[e] = !!effects[e];
-            document.getElementById('btn-' + e).className = effectStates[e] ? 'btn btn-mode btn-active' : 'btn btn-mode';
+            document.getElementById('btn-' + e).className = effectStates[e] ? 'btn-mode btn-active' : 'btn-mode';
         });
-
-        renderLists(data.teamList, data.winnerList);
+        renderTeamLists(data.teamList, data.winnerList);
     });
 
-    function moveToWin(id, name, matchNum) {
-        if (confirm(`ਕੀ ${name} ਜਿੱਤ ਗਈ ਹੈ?`)) {
-            db.child('teamList').child(id).remove();
-            const ref = db.child('winnerList').push();
-            ref.set({ id: ref.key, name: name, matchNum: matchNum });
-        }
-    }
-
-    function renderLists(teamList, winnerList) {
-        playingList.innerHTML = ""; 
-        const winnerListDiv = document.getElementById('winnerList');
+    function renderTeamLists(teamList, winnerList) {
+        playingList.innerHTML = ""; winnerListDiv = document.getElementById('winnerList');
         winnerListDiv.innerHTML = "";
         let opts = `<option value="">Select Team</option>`;
-
         if(teamList) Object.values(teamList).forEach(t => {
-            playingList.innerHTML += `<div class="team-item"><div><span class="match-label">Match ${t.matchNum}</span><b>${t.name}</b></div><button class="btn-win-circle" onclick="moveToWin('${t.id}', '${t.name}', '${t.matchNum}')">✔</button></div>`;
+            playingList.innerHTML += `<div class="team-item"><div><span style="font-size:9px; color:#8b949e;">M-${t.matchNum}</span><br><b>${t.name}</b></div><button class="btn-win-circle" onclick="moveToWin('${t.id}', '${t.name}', '${t.matchNum}')">✔</button></div>`;
         });
         if(winnerList) Object.values(winnerList).forEach(w => {
-            winnerListDiv.innerHTML += `<div class="team-item"><div><span class="match-label">Match ${w.matchNum} Winner</span><b>${w.name}</b></div><span style="color:#28a745; font-size:20px;">★</span></div>`;
+            winnerListDiv.innerHTML += `<div class="team-item"><div><span style="font-size:9px; color:#8b949e;">Winner</span><br><b>${w.name}</b></div><span style="color:#2ecc71;">★</span></div>`;
             opts += `<option value="${w.name}">${w.name}</option>`;
         });
         tie1.innerHTML = opts; tie2.innerHTML = opts;
