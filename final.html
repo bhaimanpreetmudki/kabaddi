@@ -34,10 +34,10 @@
         
         #penaltyControlSection { display: none; background: #1c2128; padding: 15px; border-top: 3px solid #f39c12; }
 
-        /* Schedule List Styling */
-        .match-list-item { background: #0d1117; padding: 8px; margin-bottom: 5px; border-radius: 6px; border-left: 4px solid #1a73e8; display: flex; justify-content: space-between; align-items: center; }
-        .match-text { font-size: 12px; font-weight: bold; color: #e6edf3; }
-        .set-btn { background: #238636; color: white; border: none; padding: 5px 10px; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; }
+        /* Schedule List Layout */
+        .match-list-item { display: flex; justify-content: space-between; align-items: center; background: #1c2128; margin-bottom: 5px; padding: 8px; border-radius: 5px; border-left: 4px solid #1a73e8; }
+        .match-text { font-size: 12px; font-weight: bold; }
+        .set-btn { border: none; border-radius: 4px; cursor: pointer; font-size: 10px; font-weight: bold; color: white; }
     </style>
 </head>
 <body>
@@ -86,7 +86,7 @@
         </div>
     </div>
 
-    <!-- 2. MATCH INFO -->
+    <!-- 2. MATCH INFO (Timer & Rounds) -->
     <div class="card">
         <div class="header"><i class="fas fa-info-circle"></i> Match Information</div>
         <div style="padding:12px; background:#0d1117;">
@@ -142,46 +142,35 @@
         </div>
     </div>
 
-    <!-- NEW: NEXT MATCH SCHEDULE (ਜੋੜਿਆ ਗਿਆ) -->
+    <!-- 4. NEXT MATCH SCHEDULE (2 BOXES) -->
     <div class="card">
         <div class="header" style="background: #1a73e8;"><i class="fas fa-calendar-alt"></i> Next Match Schedule</div>
         <div class="content">
-            <textarea id="matchInput" class="std-input" style="height: 60px;" placeholder="ਟੀਮ1-ਟੀਮ2, ਟੀਮ3-ਟੀਮ4 (ਕਾਮੇ ਨਾਲ ਅਲੱਗ ਕਰੋ)"></textarea>
-            <button class="btn-update" onclick="saveMatches()">Update Schedule List</button>
-            <div id="displayList" style="max-height: 200px; overflow-y: auto;"></div>
+            <div class="grid-2" style="margin-bottom: 10px;">
+                <div>
+                    <span class="label-text">Team 1</span>
+                    <input type="text" id="schTeamA" class="std-input" placeholder="ਟੀਮ A" style="margin-bottom: 0;">
+                </div>
+                <div>
+                    <span class="label-text">Team 2</span>
+                    <input type="text" id="schTeamB" class="std-input" placeholder="ਟੀਮ B" style="margin-bottom: 0;">
+                </div>
+            </div>
+            <button class="btn-update" onclick="saveMatches()">Add To Schedule List</button>
+            <div id="displayList" style="max-height: 200px; overflow-y: auto; background: #0d1117; border-radius: 6px; padding: 5px;"></div>
         </div>
     </div>
 
-    <!-- 4. MATCH TIE -->
-    <div class="card">
-        <div class="header" style="background: #6f42c1;">Current Match Tie</div>
-        <div class="content">
-            <input type="text" id="tieInput" class="std-input" placeholder="Team A vs Team B">
-            <button class="btn-update" onclick="updateTieManual()">Update Match Tie</button>
-        </div>
-    </div>
-
-    <!-- 5. TICKER INFO & NEXT PROGRAM -->
+    <!-- 5. TICKER INFO -->
     <div class="card">
         <div class="header" style="background:#444;">Ticker Info & Next Program</div>
         <div class="content">
             <button id="tickerToggleBtn" class="btn-ticker" onclick="confirmTickerAction('vis')">Ticker: ON/OFF</button>
-            
-            <span class="label-title">Tournament & Prize</span>
+            <span class="label-title">Tournament Details</span>
             <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
             <input type="text" id="prizeList" class="std-input" placeholder="Prizes">
-            <input type="text" id="contactInfo" class="std-input" placeholder="Contact">
-            
-            <span class="label-title" style="color:#e67e22;">Next Program</span>
-            <input type="text" id="nextProg" class="std-input" placeholder="ਅਗਲਾ ਪ੍ਰੋਗਰਾਮ...">
-            
-            <button class="btn-update" style="background: #238636;" onclick="confirmTickerAction('info')">Update All Ticker Info</button>
-            
-            <div class="label-title">Watermark</div>
-            <div style="display:flex; gap:5px; margin-bottom:10px;">
-                <input type="text" id="wmText" class="std-input" placeholder="Brand Name" style="margin:0;">
-                <button class="btn-update" style="width:80px; margin:0;" onclick="confirmTickerAction('wm')">Set</button>
-            </div>
+            <input type="text" id="nextProg" class="std-input" placeholder="Next Program...">
+            <button class="btn-update" style="background: #238636;" onclick="confirmTickerAction('info')">Update Ticker Info</button>
             
             <div class="grid-effects">
                 <button id="btn-scroll" class="btn-mode" onclick="confirmTickerAction('effect', 'scroll')">SCROLL</button>
@@ -191,27 +180,28 @@
         </div>
     </div>
 
-    <!-- SYSTEM RESET -->
+    <!-- RESET SYSTEM -->
     <div class="card">
         <div style="padding:10px;">
-            <button class="card-btn" style="background:#e74c3c; padding:12px; font-size:12px;" onclick="fullReset()">RESET EVERYTHING</button>
+            <button class="card-btn" style="background:#da3633; padding:12px;" onclick="fullReset()">RESET EVERYTHING</button>
         </div>
     </div>
 
 </div>
 
 <script>
+    // Firebase Setup
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
-    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
     
     const matchRef = firebase.database().ref("matchData");
     const tickerRef = firebase.database().ref("tickerData");
 
     let curA = 0, curB = 0, seconds = 0, timerInterval = null, sVis = true, pVis = false;
-    let yellowCounts = {};
     let tickerStatus = true;
     let effectStates = { scroll: false, blink: false, fullscreen: false };
 
+    // Update Functions
     function updateMatchDB() {
         matchRef.update({
             nameA: document.getElementById('nameA').value,
@@ -232,54 +222,54 @@
         matchRef.update({ [team]: Math.max(0, current + val) });
     }
 
-    function handleCard(team, type) {
-        let pDetail = document.getElementById('player' + team).value;
-        if(!pDetail) { alert("Enter Player No!"); return; }
-        let key = team + "_" + pDetail;
-        let eventMsg = "";
-        if(type === 'Yellow') {
-            yellowCounts[key] = (yellowCounts[key] || 0) + 1;
-            eventMsg = (yellowCounts[key] >= 2 ? "RED (2nd Yellow): " : "Yellow Card: ") + pDetail;
-        } else {
-            eventMsg = "Red Card: " + pDetail;
-        }
-        matchRef.child('lastEvent').set(eventMsg);
-    }
-
-    // --- SCHEDULE LOGIC ---
+    // Schedule Functions
     function saveMatches() {
-        const val = document.getElementById('matchInput').value;
-        if(!val) return;
-        let pairs = val.split(',').map(p => p.trim()).filter(p => p !== "");
-        let list = pairs.map((p, i) => {
-            let teams = p.split('-').map(t => t.trim());
-            return { id: i+1, t1: teams[0] || "Team 1", t2: teams[1] || "Team 2" };
+        const t1 = document.getElementById('schTeamA').value;
+        const t2 = document.getElementById('schTeamB').value;
+        if(!t1 || !t2) return alert("Fill both teams!");
+        tickerRef.child('nextMatchList').once('value', snap => {
+            let list = snap.val() || [];
+            if(!Array.isArray(list)) list = [];
+            list.push({ t1, t2 });
+            tickerRef.child('nextMatchList').set(list);
+            document.getElementById('schTeamA').value = "";
+            document.getElementById('schTeamB').value = "";
         });
-        tickerRef.child('nextMatchList').set(list);
-        document.getElementById('matchInput').value = "";
     }
 
     tickerRef.child('nextMatchList').on('value', snap => {
         const div = document.getElementById('displayList');
         div.innerHTML = "";
         const data = snap.val() || [];
-        data.forEach(m => {
+        data.forEach((m, i) => {
             div.innerHTML += `
                 <div class="match-list-item">
                     <span class="match-text">${m.t1} VS ${m.t2}</span>
-                    <button class="set-btn" onclick="setLive('${m.t1}', '${m.t2}')">Set Live</button>
+                    <div style="display:flex; gap:5px;">
+                        <button class="set-btn" style="background:#238636; padding:4px 8px;" onclick="setLive('${m.t1}', '${m.t2}')">LIVE</button>
+                        <button class="set-btn" style="background:#da3633; padding:4px 8px;" onclick="deleteMatch(${i})">X</button>
+                    </div>
                 </div>`;
         });
     });
 
+    function deleteMatch(index) {
+        tickerRef.child('nextMatchList').once('value', snap => {
+            let list = snap.val() || [];
+            list.splice(index, 1);
+            tickerRef.child('nextMatchList').set(list);
+        });
+    }
+
     function setLive(t1, t2) {
-        if(confirm(`Set ${t1} VS ${t2} to Scoreboard?`)) {
-            matchRef.update({ nameA: t1, nameB: t2, scoreA: 0, scoreB: 0, scoreVisible: true });
+        if(confirm(`Set ${t1} vs ${t2} live?`)) {
+            matchRef.update({ nameA: t1, nameB: t2, scoreA: 0, scoreB: 0, scoreVisible: true, matchTime: "00:00" });
             tickerRef.update({ currentMatchTie: t1 + " VS " + t2 });
             window.scrollTo({ top: 0, behavior: 'smooth' });
         }
     }
 
+    // Timer & Controls
     function startTimer() {
         if (timerInterval) return;
         timerInterval = setInterval(() => {
@@ -290,15 +280,12 @@
             matchRef.child('matchTime').set(timeStr);
         }, 1000);
     }
-    function pauseTimer() { clearInterval(timerInterval); timerInterval = null; updateMatchDB(); }
+    function pauseTimer() { clearInterval(timerInterval); timerInterval = null; }
     function resetTimer() { seconds = 0; document.getElementById('timerShow').innerText = "00:00"; matchRef.child('matchTime').set("00:00"); }
-    function setHalf(val) { document.getElementById('roundInp').value = val; updateMatchDB(); }
     
     function addPenalty(id, icon) {
         let inp = document.getElementById(id);
-        let count = (inp.value.match(/✅|❌/g) || []).length;
-        if(count >= 5) { alert("Max 5 Penalties!"); return; }
-        inp.value = inp.value + icon;
+        inp.value += icon;
         updateMatchDB();
     }
     
@@ -306,39 +293,22 @@
     function toggleVis(field) { matchRef.child(field).set(!sVis); }
     function resetPenaltyOnly() { matchRef.update({ penaltyA: "", penaltyB: "" }); }
     function resetOnlyScore() { if(confirm("Reset Score?")) matchRef.update({ scoreA: 0, scoreB: 0 }); }
-    
+    function setHalf(val) { document.getElementById('roundInp').value = val; updateMatchDB(); }
+
     function fullReset() {
-        if(confirm("Reset Everything?")) {
-            yellowCounts = {}; seconds = 0; pauseTimer();
-            matchRef.update({ scoreA: 0, scoreB: 0, penaltyA: "", penaltyB: "", matchTime: "00:00", penaltyVisible: false, lastEvent: "" });
+        if(confirm("Full Reset?")) {
+            matchRef.update({ scoreA: 0, scoreB: 0, penaltyA: "", penaltyB: "", matchTime: "00:00", penaltyVisible: false });
+            resetTimer();
         }
     }
 
     function confirmTickerAction(type, subType = null) {
-        if (confirm("ਕੀ ਤੁਸੀਂ ਅਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
-            if (type === 'info') {
-                tickerRef.update({ 
-                    tournamentName: tourName.value, 
-                    prizes: prizeList.value, 
-                    contact: contactInfo.value,
-                    nextProgram: nextProg.value 
-                });
-            }
-            else if (type === 'wm') tickerRef.update({ watermarkText: wmText.value });
-            else if (type === 'vis') { tickerStatus = !tickerStatus; tickerRef.child('tickerVis').set(tickerStatus); }
-            else if (type === 'effect') { effectStates[subType] = !effectStates[subType]; tickerRef.child('effects').child(subType).set(effectStates[subType]); }
-        }
+        if (type === 'info') tickerRef.update({ tournamentName: tourName.value, prizes: prizeList.value, nextProgram: nextProg.value });
+        else if (type === 'vis') { tickerStatus = !tickerStatus; tickerRef.child('tickerVis').set(tickerStatus); }
+        else if (type === 'effect') { effectStates[subType] = !effectStates[subType]; tickerRef.child('effects').child(subType).set(effectStates[subType]); }
     }
 
-    function updateTieManual() {
-        const tieVal = document.getElementById('tieInput').value;
-        if (tieVal) {
-            tickerRef.update({ currentMatchTie: tieVal });
-            alert("Match Tie Updated!");
-        }
-    }
-
-    // Sync Data
+    // Sync from Database
     matchRef.on("value", (snap) => {
         const data = snap.val() || {};
         curA = data.scoreA || 0; curB = data.scoreB || 0;
@@ -347,33 +317,23 @@
         document.getElementById('dispB').innerText = curB;
         document.getElementById('nameA').value = data.nameA || "";
         document.getElementById('nameB').value = data.nameB || "";
-        document.getElementById('colorA').value = data.colorA || "#ffffff";
-        document.getElementById('colorB').value = data.colorB || "#ffffff";
         document.getElementById('pA').value = data.penaltyA || "";
         document.getElementById('pB').value = data.penaltyB || "";
         document.getElementById('matchRound').value = data.matchRound || "";
         document.getElementById('roundInp').value = data.round || "";
-        document.getElementById('matchDuration').value = data.duration || "";
         if(!timerInterval) document.getElementById('timerShow').innerText = data.matchTime || "00:00";
-        document.getElementById('boxA').style.borderTopColor = data.colorA;
-        document.getElementById('boxB').style.borderTopColor = data.colorB;
-        document.getElementById('visBtn').innerText = sVis ? "HIDE" : "SHOW";
         document.getElementById('visBtn').style.background = sVis ? "#da3633" : "#238636";
+        document.getElementById('visBtn').innerText = sVis ? "HIDE" : "SHOW";
         document.getElementById('penaltyControlSection').style.display = pVis ? "block" : "none";
-        document.getElementById('pVisBtn').innerText = pVis ? "Hide Penalty" : "Show Penalty";
     });
 
     tickerRef.on("value", (snap) => {
         const data = snap.val() || {};
         tourName.value = data.tournamentName || "";
         prizeList.value = data.prizes || "";
-        contactInfo.value = data.contact || "";
-        wmText.value = data.watermarkText || "";
         nextProg.value = data.nextProgram || "";
-        document.getElementById('tieInput').value = data.currentMatchTie || "";
         tickerStatus = !!data.tickerVis;
         tickerToggleBtn.style.background = tickerStatus ? "#238636" : "#da3633";
-        tickerToggleBtn.innerText = tickerStatus ? "Ticker: SHOWING" : "Ticker: HIDDEN";
         const effects = data.effects || {};
         ['scroll', 'blink', 'fullscreen'].forEach(e => {
             effectStates[e] = !!effects[e];
