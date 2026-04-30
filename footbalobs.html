@@ -2,7 +2,7 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Professional 3D Overlay</title>
+    <title>Professional Silver 3D Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -11,15 +11,20 @@
         /* Main Scoreboard */
         #scoreboard { 
             position: absolute; top: 50px; left: 50px; display: flex; align-items: center; 
-            background: rgba(0,0,0,0.85); border-radius: 8px; height: 75px;
+            background: rgba(0,0,0,0.9); border-radius: 8px; height: 75px;
             transform: translateX(-150%); transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5); overflow: hidden;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.6); overflow: hidden;
         }
         .show-board { transform: translateX(0) !important; }
 
-        .team-sec { display: flex; align-items: center; height: 100%; transition: 0.5s; }
-        .t-name { font-size: 26px; padding: 0 25px; min-width: 130px; text-align: center; text-transform: uppercase; }
-        .score { font-size: 48px; padding: 0 30px; line-height: 75px; font-weight: 900; background: rgba(0,0,0,0.2); }
+        .team-sec { display: flex; align-items: center; height: 100%; transition: 0.5s; position: relative; }
+        
+        /* Auto-Scrolling for Long Names */
+        .name-wrap { width: 150px; overflow: hidden; white-space: nowrap; text-align: center; font-size: 26px; padding: 0 15px; }
+        .scroll-text { display: inline-block; min-width: 100%; }
+        @keyframes scrollName { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
+        .score { font-size: 48px; padding: 0 25px; line-height: 75px; font-weight: 900; background: rgba(0,0,0,0.3); min-width: 60px; text-align: center; }
         
         #timer { 
             background: #27ae60; padding: 0 20px; font-size: 32px; height: 100%; 
@@ -27,55 +32,57 @@
         }
         .timer-active { display: flex !important; }
 
-        /* 3D Penalty Strip */
+        /* Silver 3D Penalty Strip */
         #penalty-strip {
-            position: absolute; top: 125px; left: 50px; height: 55px; 
-            background: linear-gradient(180deg, #222 0%, #000 100%);
+            position: absolute; top: 125px; left: 50px; height: 50px; 
+            background: linear-gradient(180deg, #e0e0e0 0%, #a0a0a0 100%); /* Silver Background */
             display: none; align-items: center; border-radius: 0 0 12px 12px;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.4); border: 1px solid #333;
+            box-shadow: 0 8px 15px rgba(0,0,0,0.4); border: 1px solid #fff;
+            color: #222; /* Dark text for silver background */
         }
-        .p-sec { display: flex; align-items: center; padding: 0 20px; height: 100%; min-width: 240px; }
+        .p-sec { display: flex; align-items: center; padding: 0 15px; height: 100%; }
         
-        /* Auto-Scrolling Name */
-        .scroll-wrap { width: 110px; overflow: hidden; white-space: nowrap; font-size: 18px; }
-        .scroll-text { display: inline-block; }
-        @keyframes scroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-150%); } }
-
         /* 3D Balls */
-        .balls { display: flex; gap: 8px; }
+        .balls { display: flex; gap: 6px; }
         .ball { 
-            width: 18px; height: 18px; border-radius: 50%; 
-            background: radial-gradient(circle, #555 0%, #111 100%); border: 1px solid #444; 
+            width: 20px; height: 20px; border-radius: 50%; 
+            background: radial-gradient(circle, #888 0%, #333 100%); border: 1px solid #666; 
         }
-        .ball.goal { background: radial-gradient(circle, #2ecc71 0%, #1b5e20 100%); border: none; box-shadow: 0 0 10px #2ecc71; }
-        .ball.miss { background: radial-gradient(circle, #e74c3c 0%, #b71c1c 100%); border: none; box-shadow: 0 0 10px #e74c3c; }
+        .ball.goal { background: radial-gradient(circle, #2ecc71 0%, #1b5e20 100%); border: none; box-shadow: 0 0 8px #2ecc71; }
+        .ball.miss { background: radial-gradient(circle, #e74c3c 0%, #b71c1c 100%); border: none; box-shadow: 0 0 8px #e74c3c; }
 
-        .sep { color: #444; font-size: 25px; font-weight: bold; padding: 0 10px; }
+        .divider { font-size: 30px; font-weight: bold; color: #444; padding: 0 10px; }
     </style>
 </head>
 <body>
 
     <div id="scoreboard">
+        <!-- Team A -->
         <div id="secA" class="team-sec">
-            <div class="t-name" id="nameA">TEAM A</div>
+            <div class="name-wrap"><div class="scroll-text" id="nameA">TEAM A</div></div>
             <div class="score" id="scoreA">0</div>
         </div>
+
+        <!-- Team B -->
         <div id="secB" class="team-sec">
             <div class="score" id="scoreB">0</div>
-            <div class="t-name" id="nameB">TEAM B</div>
+            <div class="name-wrap"><div class="scroll-text" id="nameB">TEAM B</div></div>
         </div>
+
+        <!-- Timer -->
         <div id="timer">00:00</div>
     </div>
 
+    <!-- Silver Penalty Box -->
     <div id="penalty-strip">
         <div class="p-sec" id="psA">
-            <div class="scroll-wrap"><div class="scroll-text" id="pnA">TEAM A</div></div>
             <div class="balls" id="pbA"></div>
         </div>
-        <div class="sep">/</div>
+        
+        <div class="divider">/</div>
+        
         <div class="p-sec" id="psB">
             <div class="balls" id="pbB"></div>
-            <div class="scroll-wrap" style="margin-left:15px;"><div class="scroll-text" id="pnB">TEAM B</div></div>
         </div>
     </div>
 
@@ -84,7 +91,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("matchData");
 
-    function getTextCol(hex){
+    function getContrast(hex){
         hex = hex.replace("#","");
         let r=parseInt(hex.substr(0,2),16), g=parseInt(hex.substr(2,2),16), b=parseInt(hex.substr(4,2),16);
         return ((r*299)+(g*587)+(b*114))/1000 >= 128 ? 'black' : 'white';
@@ -93,17 +100,26 @@
     db.on("value", (snap) => {
         const d = snap.val(); if(!d) return;
 
-        document.getElementById('scoreboard').classList.toggle('show-board', d.showBoard !== false);
+        const board = document.getElementById('scoreboard');
+        board.classList.toggle('show-board', d.showBoard !== false);
         
-        // Team Styles
+        // Dynamic Colors
         const cA = d.teamColorA || "#ff0000", cB = d.teamColorB || "#0000ff";
-        document.getElementById('secA').style.backgroundColor = cA;
-        document.getElementById('secA').style.color = getTextCol(cA);
-        document.getElementById('secB').style.backgroundColor = cB;
-        document.getElementById('secB').style.color = getTextCol(cB);
+        const secA = document.getElementById('secA'), secB = document.getElementById('secB');
+        
+        secA.style.backgroundColor = cA; secA.style.color = getContrast(cA);
+        secB.style.backgroundColor = cB; secB.style.color = getContrast(cB);
 
-        document.getElementById('nameA').innerText = d.nameA; document.getElementById('nameB').innerText = d.nameB;
-        document.getElementById('scoreA').innerText = d.scoreA; document.getElementById('scoreB').innerText = d.scoreB;
+        // Names & Scores
+        const nA = d.nameA || "TEAM A", nB = d.nameB || "TEAM B";
+        document.getElementById('nameA').innerText = nA;
+        document.getElementById('nameB').innerText = nB;
+        document.getElementById('scoreA').innerText = d.scoreA || 0;
+        document.getElementById('scoreB').innerText = d.scoreB || 0;
+
+        // Auto Scroll Check
+        document.getElementById('nameA').style.animation = nA.length > 9 ? "scrollName 5s linear infinite" : "none";
+        document.getElementById('nameB').style.animation = nB.length > 9 ? "scrollName 5s linear infinite" : "none";
 
         // Timer
         const tBox = document.getElementById('timer');
@@ -113,20 +129,13 @@
             tBox.innerText = (m<10?"0"+m:m)+":"+(sc<10?"0"+sc:sc);
         } else { tBox.classList.remove('timer-active'); }
 
-        // Penalty Mode
+        // Silver Penalty Logic
         const pStrip = document.getElementById('penalty-strip');
         if(d.penaltyMode) {
             pStrip.style.display = 'flex';
-            document.getElementById('psA').style.borderLeft = `6px solid ${cA}`;
-            document.getElementById('psB').style.borderRight = `6px solid ${cB}`;
+            // Match the width of the scoreboard
+            pStrip.style.width = (board.offsetWidth) + "px";
             
-            const nA = d.nameA || "", nB = d.nameB || "";
-            document.getElementById('pnA').innerText = nA; document.getElementById('pnB').innerText = nB;
-            
-            // Auto Scroll If long
-            document.getElementById('pnA').style.animation = nA.length > 8 ? "scroll 5s linear infinite" : "none";
-            document.getElementById('pnB').style.animation = nB.length > 8 ? "scroll 5s linear infinite" : "none";
-
             renderBalls('pbA', d.pListA || []);
             renderBalls('pbB', d.pListB || []);
         } else { pStrip.style.display = 'none'; }
