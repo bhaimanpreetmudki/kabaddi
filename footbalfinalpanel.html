@@ -3,62 +3,77 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Admin - Plain List</title>
+    <title>Tournament Admin - Final Layout</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #fff; padding: 20px; margin: 0; }
+        body { font-family: 'Arial Black', sans-serif; background: #fff; padding: 20px; margin: 0; text-transform: uppercase; }
         
-        /* ਟੀਮ ਲਿਸਟ ਦਾ ਡਿਜ਼ਾਈਨ */
-        .list-section { margin-top: 20px; }
-        .team-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 19px; font-weight: 500; }
+        /* ਟੀਮ ਲਿਸਟ ਸਟਾਈਲ - ਬਿਲਕੁਲ ਸਿੱਧੀ */
+        .list-section { margin-top: 10px; width: 100%; }
+        .team-row { padding: 12px 0; border-bottom: 2px solid #eee; font-size: 22px; font-weight: 900; color: #000; }
         
-        /* ਇਨਪੁਟ ਅਤੇ ਬਟਨ */
-        .std-input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 10px; font-size: 16px; }
-        .btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; text-transform: uppercase; }
-        .btn-add { background: #28a745; color: white; }
-        .btn-update { background: #1a73e8; color: white; margin-top: 10px; }
-        .btn-declare { background: #ff5722; color: white; height: 50px; font-size: 18px; margin-top: 15px; }
+        /* ਇਨਪੁਟ */
+        .std-input { width: 100%; padding: 15px; border: 3px solid #000; border-radius: 4px; margin-bottom: 10px; font-size: 18px; text-transform: uppercase; font-weight: bold; }
         
-        .btn-win-circle { background: #ffc107; color: #000; border-radius: 50%; width: 35px; height: 35px; border: none; font-size: 18px; cursor: pointer; }
+        /* ਬਟਨ */
+        .btn { border: none; border-radius: 4px; cursor: pointer; font-weight: 900; text-transform: uppercase; display: block; }
+        .btn-add { background: #28a745; color: white; width: 100%; padding: 15px; font-size: 16px; margin-bottom: 20px; }
 
+        /* ਵੱਡਾ ਬਟਨ (WADDA) */
+        .btn-declare { background: #ff5722; color: white; width: 100%; height: 80px; font-size: 28px; border: 4px solid #000; box-shadow: 0 5px 0 #000; margin-top: 15px; }
+        .btn-declare:active { transform: translateY(4px); box-shadow: none; }
+
+        /* ਛੋਟਾ ਬਟਨ (SHOTA) */
+        .btn-pending { background: #1a73e8; color: white; width: 180px; padding: 10px; font-size: 12px; margin-bottom: 15px; pointer-events: none; }
+        
+        /* ਬਾਕੀ ਬਾਕਸਾਂ ਲਈ ਸਟਾਈਲ */
+        .admin-box { margin-top: 40px; padding: 20px; border: 3px solid #000; background: #f9f9f9; border-radius: 8px; }
+        h4 { margin: 0 0 15px 0; color: #000; font-size: 18px; text-decoration: underline; }
+        select { width: 100%; padding: 15px; border: 3px solid #000; border-radius: 4px; font-weight: 900; font-size: 20px; text-transform: uppercase; background: #fff; }
+        
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
-        h4 { margin-bottom: 10px; color: #666; text-transform: uppercase; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
-        select { width: 100%; padding: 10px; border: 2px solid #1a73e8; border-radius: 6px; font-weight: bold; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-    <textarea id="bulkTeams" class="std-input" style="height: 60px;" placeholder="ਟੀਮਾਂ ਲਿਖੋ (Mudki-Gill, Fzr-Fdk)"></textarea>
-    <button class="btn btn-add" onclick="addBulkTeams()">Add Teams</button>
+    <textarea id="bulkTeams" class="std-input" style="height: 80px;" placeholder="ENTER TEAMS (MUDKI-GILL, FZR-FDK)"></textarea>
+    <button class="btn btn-add" onclick="addBulkTeams()">ADD TEAMS TO LIST</button>
 
     <div class="grid-2">
         <div class="list-section">
-            <h4>Pending Result</h4>
+            <button class="btn btn-pending">PENDING RESULT</button>
             <div id="playingList"></div>
         </div>
         <div class="list-section">
-            <h4>Declare Result</h4>
+            <button class="btn btn-pending" style="background:#28a745;">WINNERS BOX</button>
             <div id="winnerList"></div>
         </div>
     </div>
 
-    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+    <hr style="margin: 40px 0; border: 2px solid #000;">
 
     <select id="winnerSelect"></select>
-    <button class="btn btn-declare" onclick="declareFinalResult()">Declare Final Result</button>
+    <button class="btn btn-declare" onclick="declareFinalResult()">DECLARE RESULT</button>
 
-    <div style="margin-top: 30px;">
-        <h4>Scoreboard & Ticker</h4>
+    <div class="admin-box">
+        <h4>SCOREBOARD MATCH TIE</h4>
         <div class="grid-2">
             <select id="tie1"></select>
             <select id="tie2"></select>
         </div>
-        <button class="btn btn-update" onclick="updateTie()">Set Live Match</button>
+        <button class="btn btn-add" style="background:#1a73e8; margin-top:15px;" onclick="updateTie()">UPDATE LIVE MATCH ON SCOREBOARD</button>
+    </div>
 
-        <input type="text" id="tourName" class="std-input" placeholder="Tournament Name" style="margin-top: 20px;">
-        <textarea id="nextEvents" class="std-input" style="height: 50px;" placeholder="Next Events..."></textarea>
-        <button class="btn btn-update" style="background: #333;" onclick="saveTicker()">Save Settings</button>
+    <div class="admin-box" style="background: #fff;">
+        <h4>TICKER & TOURNAMENT INFO</h4>
+        <label style="font-size: 12px; font-weight: bold;">TOURNAMENT NAME</label>
+        <input type="text" id="tourName" class="std-input" placeholder="TOURNAMENT NAME">
+        
+        <label style="font-size: 12px; font-weight: bold;">NEXT EVENTS (INFO)</label>
+        <textarea id="nextEvents" class="std-input" style="height: 60px;" placeholder="NEXT EVENTS DETAIL"></textarea>
+        
+        <button class="btn btn-add" style="background: #333;" onclick="saveTicker()">SAVE ALL SETTINGS</button>
     </div>
 
 <script>
@@ -69,14 +84,14 @@
     function addBulkTeams() {
         const input = document.getElementById('bulkTeams').value;
         if(!input) return;
+        
         db.child('teamList').once('value', (snap) => {
-            let count = snap.numChildren();
+            let nextIdx = snap.numChildren() + 1;
             input.split(',').forEach(p => {
-                const name = p.trim().replace('-', ' vs ');
+                const name = p.trim().replace('-', ' VS ').toUpperCase();
                 if(name) {
-                    count++;
-                    const ref = db.child('teamList').push();
-                    ref.set({ id: ref.key, name: name, matchIdx: count });
+                    db.child('teamList').push().set({ name: name, matchIdx: nextIdx });
+                    nextIdx++;
                 }
             });
         });
@@ -85,24 +100,28 @@
 
     function declareFinalResult() {
         const win = document.getElementById('winnerSelect').value;
-        if(!win) return alert("Select Team!");
+        if(!win) return alert("SELECT TEAM FIRST!");
+        
+        db.child('winnerList').push().set({ name: win });
         db.update({ finalWinner: win });
-        alert("Declared: " + win);
+        alert("RESULT DECLARED SUCCESSFULLY!");
     }
 
     function updateTie() {
         const t1 = document.getElementById('tie1').value;
         const t2 = document.getElementById('tie2').value;
-        if(t1 && t2) db.update({ currentMatchTie: t1 + " VS " + t2 });
-        alert("Tie Updated!");
+        if(t1 && t2) {
+            db.update({ currentMatchTie: t1 + " VS " + t2 });
+            alert("SCOREBOARD UPDATED!");
+        }
     }
 
     function saveTicker() {
         db.update({ 
-            tournamentName: document.getElementById('tourName').value, 
-            externalEvents: document.getElementById('nextEvents').value 
+            tournamentName: document.getElementById('tourName').value.toUpperCase(), 
+            externalEvents: document.getElementById('nextEvents').value.toUpperCase() 
         });
-        alert("Saved!");
+        alert("SETTINGS SAVED!");
     }
 
     db.on("value", (snap) => {
@@ -112,13 +131,6 @@
         renderUI(data.teamList, data.winnerList);
     });
 
-    function moveToWin(id, name, idx) {
-        if(confirm(name + " Won?")) {
-            db.child('teamList').child(id).remove();
-            db.child('winnerList').push().set({ name: name, matchIdx: idx });
-        }
-    }
-
     function renderUI(teamList, winnerList) {
         const pList = document.getElementById('playingList');
         const wList = document.getElementById('winnerList');
@@ -127,28 +139,23 @@
         const tie2 = document.getElementById('tie2');
 
         pList.innerHTML = ""; wList.innerHTML = "";
-        let opts = `<option value="">Select Team</option>`;
+        let opts = `<option value="">SELECT TEAM</option>`;
 
         if(teamList) {
+            let i = 1;
             Object.values(teamList).forEach(t => {
-                pList.innerHTML += `
-                    <div class="team-row">
-                        <div>${t.matchIdx}, ${t.name}</div>
-                        <button class="btn-win-circle" onclick="moveToWin('${t.id}', '${t.name}', '${t.matchIdx}')">✔</button>
-                    </div>`;
+                pList.innerHTML += `<div class="team-row">${i}, ${t.name}</div>`;
+                opts += `<option value="${t.name}">${t.name}</option>`;
+                i++;
             });
         }
 
         if(winnerList) {
             Object.values(winnerList).forEach(w => {
-                wList.innerHTML += `
-                    <div class="team-row">
-                        <div style="color: green;">${w.matchIdx}, ${w.name}</div>
-                        <span>★</span>
-                    </div>`;
-                opts += `<option value="${w.name}">${w.name}</option>`;
+                wList.innerHTML += `<div class="team-row" style="color: #28a745;">${w.name} ★</div>`;
             });
         }
+        
         wSelect.innerHTML = opts; tie1.innerHTML = opts; tie2.innerHTML = opts;
     }
 </script>
