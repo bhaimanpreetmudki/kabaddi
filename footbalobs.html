@@ -2,70 +2,65 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Goal Flash Overlay</title>
+    <title>Professional Football Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { margin: 0; padding: 0; font-family: 'Arial Black', sans-serif; color: white; width: 1920px; height: 1080px; overflow: hidden; }
         
-        /* Goal Animation Style */
+        /* Goal Animation */
         #goal-overlay {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             display: none; align-items: center; justify-content: center;
             z-index: 999; pointer-events: none;
-            background: radial-gradient(circle, rgba(255,255,255,0.3) 0%, rgba(0,0,0,0) 70%);
         }
         .goal-text {
-            font-size: 150px; font-weight: 900; font-style: italic;
-            text-shadow: 0 0 50px rgba(0,0,0,0.8), 0 0 20px #fff;
-            animation: goalPop 1s ease-out infinite alternate;
+            font-size: 200px; font-weight: 900; font-style: italic;
+            text-shadow: 0 0 40px rgba(0,0,0,0.8), 0 0 20px #fff;
+            animation: goalPop 0.8s ease-out infinite alternate;
         }
-        @keyframes goalPop {
-            0% { transform: scale(1); opacity: 0.8; }
-            100% { transform: scale(1.2); opacity: 1; }
-        }
-        .flash-active { animation: screenFlash 0.5s ease-in-out 3; }
-        @keyframes screenFlash { 
-            0% { background: rgba(255,255,255,0); }
-            50% { background: rgba(255,255,255,0.4); }
-            100% { background: rgba(255,255,255,0); }
-        }
+        @keyframes goalPop { 0% { transform: scale(1); } 100% { transform: scale(1.15); } }
+        
+        .flash-active { animation: screenFlash 0.4s ease-in-out 3; }
+        @keyframes screenFlash { 0%, 100% { background: transparent; } 50% { background: rgba(255,255,255,0.3); } }
 
-        /* Scoreboard & Other Styles (Previous styles preserved) */
+        /* Scoreboard */
         #scoreboard { 
             position: absolute; top: 50px; left: 50px; display: flex; align-items: center; 
             background: rgba(0,0,0,0.9); border-radius: 8px; height: 75px;
             transform: translateX(-150%); transition: 0.8s; box-shadow: 0 10px 30px rgba(0,0,0,0.6); overflow: hidden;
         }
         .show-board { transform: translateX(0) !important; }
-        .team-sec { display: flex; align-items: center; height: 100%; transition: 0.5s; }
-        .name-wrap { width: 150px; overflow: hidden; white-space: nowrap; text-align: center; font-size: 26px; padding: 0 15px; }
+
+        .team-sec { display: flex; align-items: center; height: 100%; min-width: 220px; transition: 0.5s; }
+        
+        .name-wrap { flex-grow: 1; overflow: hidden; white-space: nowrap; text-align: center; font-size: 26px; padding: 0 15px; }
         .scroll-text { display: inline-block; min-width: 100%; }
         @keyframes scrollName { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
+
         .score { font-size: 48px; padding: 0 25px; line-height: 75px; font-weight: 900; background: rgba(0,0,0,0.3); min-width: 60px; text-align: center; }
-        #timer { background: #27ae60; padding: 0 20px; font-size: 32px; height: 100%; display: none; align-items: center; border-left: 3px solid rgba(0,0,0,0.3); }
+        
+        #timer { background: #27ae60; padding: 0 20px; font-size: 32px; height: 100%; display: none; align-items: center; min-width: 110px; border-left: 3px solid rgba(0,0,0,0.3); }
         .timer-active { display: flex !important; }
 
-        /* Silver Penalty */
+        /* Silver Penalty Strip */
         #penalty-strip {
             position: absolute; top: 125px; left: 50px; height: 50px; 
             background: linear-gradient(180deg, #e0e0e0 0%, #a0a0a0 100%);
-            display: none; align-items: center; border-radius: 0 0 12px 12px;
-            box-shadow: 0 8px 15px rgba(0,0,0,0.4); border: 1px solid #fff;
+            display: none; align-items: center; justify-content: space-between;
+            border-radius: 0 0 12px 12px; box-shadow: 0 8px 15px rgba(0,0,0,0.4); border: 1px solid #fff;
         }
-        .balls { display: flex; gap: 6px; padding: 0 20px; }
-        .ball { width: 20px; height: 20px; border-radius: 50%; background: radial-gradient(circle, #888 0%, #333 100%); border: 1px solid #666; }
+        .p-sec { display: flex; align-items: center; padding: 0 20px; }
+        .balls { display: flex; gap: 8px; }
+        .ball { width: 22px; height: 22px; border-radius: 50%; background: radial-gradient(circle, #888 0%, #333 100%); border: 1px solid #666; }
         .ball.goal { background: radial-gradient(circle, #2ecc71 0%, #1b5e20 100%); box-shadow: 0 0 8px #2ecc71; border:none; }
         .ball.miss { background: radial-gradient(circle, #e74c3c 0%, #b71c1c 100%); box-shadow: 0 0 8px #e74c3c; border:none; }
-        .divider { font-size: 30px; font-weight: bold; color: #444; }
+        .divider { font-size: 28px; font-weight: bold; color: #444; }
     </style>
 </head>
 <body>
 
-    <!-- Goal Flash Overlay -->
-    <div id="goal-overlay">
-        <div class="goal-text" id="goal-msg">GOAL!</div>
-    </div>
+    <div id="goal-overlay"><div class="goal-text" id="goal-msg">GOAL!</div></div>
 
     <div id="scoreboard">
         <div id="secA" class="team-sec">
@@ -80,9 +75,9 @@
     </div>
 
     <div id="penalty-strip">
-        <div id="pbA" class="balls"></div>
+        <div class="p-sec"><div id="pbA" class="balls"></div></div>
         <div class="divider">/</div>
-        <div id="pbB" class="balls"></div>
+        <div class="p-sec"><div id="pbB" class="balls"></div></div>
     </div>
 
 <script>
@@ -95,26 +90,39 @@
     db.on("value", (snap) => {
         const d = snap.val(); if(!d) return;
 
-        // Scoreboard Control
         const board = document.getElementById('scoreboard');
         board.classList.toggle('show-board', d.showBoard !== false);
         
-        // Colors & Data
         const cA = d.teamColorA || "#ff0000", cB = d.teamColorB || "#0000ff";
         document.getElementById('secA').style.backgroundColor = cA;
         document.getElementById('secB').style.backgroundColor = cB;
-        document.getElementById('nameA').innerText = d.nameA;
-        document.getElementById('nameB').innerText = d.nameB;
-        document.getElementById('scoreA').innerText = d.scoreA;
-        document.getElementById('scoreB').innerText = d.scoreB;
+        
+        const nA = d.nameA || "TEAM A", nB = d.nameB || "TEAM B";
+        document.getElementById('nameA').innerText = nA;
+        document.getElementById('nameB').innerText = nB;
+        document.getElementById('scoreA').innerText = d.scoreA || 0;
+        document.getElementById('scoreB').innerText = d.scoreB || 0;
 
-        // Goal Flash Logic
+        // Auto Scroll
+        document.getElementById('nameA').style.animation = nA.length > 10 ? "scrollName 5s linear infinite" : "none";
+        document.getElementById('nameB').style.animation = nB.length > 10 ? "scrollName 5s linear infinite" : "none";
+
+        // Goal Animation (Just "GOAL!")
         if(d.goalTrigger && d.goalTrigger > lastGoalTime) {
             lastGoalTime = d.goalTrigger;
-            showGoalAnimation(d.lastGoalTeam, (d.lastGoalTeam === d.nameA ? cA : cB));
+            const flashColor = (d.lastGoalTeam === d.nameA ? cA : cB);
+            const overlay = document.getElementById('goal-overlay');
+            const msg = document.getElementById('goal-msg');
+            msg.style.color = flashColor;
+            overlay.style.display = 'flex';
+            document.body.classList.add('flash-active');
+            setTimeout(() => { 
+                overlay.style.display = 'none'; 
+                document.body.classList.remove('flash-active');
+            }, 3000);
         }
 
-        // Timer & Penalty (As before)
+        // Timer
         const tBox = document.getElementById('timer');
         if(d.timerRunning || d.matchSeconds > 0) {
             tBox.classList.add('timer-active');
@@ -122,6 +130,7 @@
             tBox.innerText = (m<10?"0"+m:m)+":"+(sc<10?"0"+sc:sc);
         } else { tBox.classList.remove('timer-active'); }
 
+        // Penalty Layout
         const pStrip = document.getElementById('penalty-strip');
         if(d.penaltyMode) {
             pStrip.style.display = 'flex';
@@ -130,21 +139,6 @@
             renderBalls('pbB', d.pListB || []);
         } else { pStrip.style.display = 'none'; }
     });
-
-    function showGoalAnimation(teamName, color) {
-        const overlay = document.getElementById('goal-overlay');
-        const msg = document.getElementById('goal-msg');
-        
-        msg.innerText = teamName + " GOAL!";
-        msg.style.color = color;
-        overlay.style.display = 'flex';
-        document.body.classList.add('flash-active');
-
-        setTimeout(() => {
-            overlay.style.display = 'none';
-            document.body.classList.remove('flash-active');
-        }, 3000); // 3 ਸੈਕਿੰਡ ਲਈ ਐਨੀਮੇਸ਼ਨ ਚੱਲੇਗੀ
-    }
 
     function renderBalls(id, list) {
         let h = ''; for(let i=0; i<5; i++) h += `<div class="ball ${list[i]||''}"></div>`;
