@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Admin - Custom Controls</title>
+    <title>Tournament Admin - Large Ties & Reordered</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -12,25 +12,28 @@
         .header { background: #1a73e8; color: white; padding: 12px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 13px; }
         .content { padding: 15px; }
         
-        .std-input { width: 100%; padding: 10px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 10px; box-sizing: border-box; font-size: 14px; }
-        .btn { padding: 10px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; width: 100%; border: 2px solid transparent; }
+        .std-input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 12px; box-sizing: border-box; font-size: 15px; }
+        .btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; width: 100%; border: 2px solid transparent; }
         
-        /* Button States */
-        .btn-active { border: 2px solid #000 !important; font-weight: 900 !important; font-size: 16px; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
-        .btn-ticker { background: #ff5722; color: white; margin-bottom: 15px; }
+        /* Effect States */
+        .btn-active { border: 2px solid #000 !important; font-weight: 900 !important; font-size: 16px; background: #fff !important; color: #000 !important; box-shadow: inset 0 0 10px rgba(0,0,0,0.2); }
+        .btn-ticker { background: #ff5722; color: white; margin-bottom: 15px; height: 50px; font-size: 16px; }
         .btn-add { background: #28a745; color: white; margin-bottom: 15px; }
         .btn-mode { background: #eee; color: #333; }
-        .btn-update { background: #1a73e8; color: white; }
-        .btn-win { background: #ffc107; color: #000; font-size: 10px; padding: 4px 8px; border-radius: 4px; border: none; }
+        .btn-update { background: #1a73e8; color: white; height: 55px; font-size: 16px; }
+        .btn-win { background: #ffc107; color: #000; font-size: 13px; padding: 10px 18px; border-radius: 6px; border: 1px solid #d39e00; font-weight: bold; }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 10px; }
         
-        .box-list { background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; min-height: 180px; padding: 10px; max-height: 300px; overflow-y: auto; }
-        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 8px; margin-bottom: 6px; border-radius: 6px; border-left: 4px solid #1a73e8; box-shadow: 0 1px 3px rgba(0,0,0,0.1); font-size: 13px; }
+        .box-list { background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; min-height: 250px; padding: 10px; max-height: 450px; overflow-y: auto; }
+        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 5px solid #1a73e8; box-shadow: 0 2px 4px rgba(0,0,0,0.08); font-size: 15px; font-weight: 600; }
         
-        .label-title { font-size: 11px; font-weight: bold; color: #555; margin-bottom: 4px; display: block; text-transform: uppercase; }
-        hr { border: 0; border-top: 1px solid #eee; margin: 15px 0; }
+        .label-title { font-size: 12px; font-weight: bold; color: #555; margin-bottom: 6px; display: block; text-transform: uppercase; }
+        hr { border: 0; border-top: 2px solid #eee; margin: 20px 0; }
+        
+        /* Large Select for Ties */
+        .large-select { height: 55px; border-radius: 8px; border: 2px solid #1a73e8; width: 100%; padding: 0 10px; font-size: 16px; font-weight: bold; background: #fdfdfd; }
     </style>
 </head>
 <body>
@@ -39,72 +42,67 @@
     <div class="card">
         <div class="header">Team Management</div>
         <div class="content">
-            <textarea id="bulkTeams" class="std-input" style="height: 50px;" placeholder="ਟੀਮਾਂ ਲਿਖੋ (e.g. 1-2, 3-4)"></textarea>
+            <textarea id="bulkTeams" class="std-input" style="height: 65px;" placeholder="ਟੀਮਾਂ ਲਿਖੋ (e.g. 1-2, 3-4)"></textarea>
             <button class="btn btn-add" onclick="addBulkTeams()">Add Teams</button>
             <div class="grid-2">
                 <div>
-                    <span class="label-title">Playing Box</span>
+                    <span class="label-title" style="color: #d93025;">Playing Box</span>
                     <div id="playingList" class="box-list"></div>
                 </div>
                 <div>
-                    <span class="label-title">Winner Box</span>
+                    <span class="label-title" style="color: #188038;">Winners Box</span>
                     <div id="winnerList" class="box-list"></div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 2. TICKER CONTROLS -->
+    <!-- 2. TIES SETUP (NOW LARGER) -->
     <div class="card">
-        <div class="header" style="background:#2c3e50;">Ticker & Display Controls</div>
+        <div class="header" style="background: #6f42c1;">Next Match Tie Setup</div>
         <div class="content">
-            <!-- Single Toggle Button -->
+            <span class="label-title">Select Winners for Next Match</span>
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                <select id="tie1" class="large-select"><option>Select Team 1</option></select>
+                <select id="tie2" class="large-select"><option>Select Team 2</option></select>
+            </div>
+            <button class="btn btn-update" onclick="updateTie()">Update Next Match Tie (1 VS 2)</button>
+        </div>
+    </div>
+
+    <!-- 3. TOURNAMENT INFO (REORDERED) -->
+    <div class="card">
+        <div class="header" style="background:#343a40;">Ticker Information</div>
+        <div class="content">
+            <span class="label-title">Tournament Name</span>
+            <input type="text" id="tourName" class="std-input" placeholder="e.g. Kabaddi Cup 2026" oninput="updateDB()">
+
+            <span class="label-title">Prize List</span>
+            <input type="text" id="prizeList" class="std-input" placeholder="1st: 51k, 2nd: 31k..." oninput="updateDB()">
+
+            <span class="label-title">WhatsApp / Call Number</span>
+            <input type="text" id="contactInfo" class="std-input" placeholder="e.g. WhatsApp: 98XXX-XXXXX" oninput="updateDB()">
+            
+            <hr>
+            
+            <span class="label-title">Watermark Text</span>
+            <div style="display:flex; gap:10px;">
+                <input type="text" id="wmText" class="std-input" placeholder="Enter Brand/Name..." style="margin:0;">
+                <button class="btn btn-update" style="width:120px; height: 45px;" onclick="updateWM()">Set WM</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. TICKER CONTROLS -->
+    <div class="card">
+        <div class="header" style="background:#2c3e50;">Display Controls</div>
+        <div class="content">
             <button id="tickerToggleBtn" class="btn btn-ticker" onclick="toggleTicker()">Ticker: ON/OFF</button>
 
             <div class="grid-3">
                 <button id="btn-scroll" class="btn btn-mode" onclick="setEffect('scroll')">Scroll</button>
                 <button id="btn-blink" class="btn btn-mode" onclick="setEffect('blink')">Blink</button>
                 <button id="btn-fullscreen" class="btn btn-mode" onclick="setEffect('fullscreen')">F-Screen</button>
-            </div>
-
-            <hr>
-            
-            <span class="label-title">Watermark Text</span>
-            <div style="display:flex; gap:10px;">
-                <input type="text" id="wmText" class="std-input" placeholder="Enter Watermark Name..." style="margin:0;">
-                <button class="btn btn-update" style="width:120px;" onclick="updateWM()">Update</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 3. INFO SETTINGS -->
-    <div class="card">
-        <div class="header" style="background:#343a40;">Tournament Details</div>
-        <div class="content">
-            <div class="grid-2">
-                <div>
-                    <span class="label-title">Next Tie</span>
-                    <div style="display:flex; gap:5px;">
-                        <select id="tie1" class="std-input" style="margin:0;"><option>Team 1</option></select>
-                        <select id="tie2" class="std-input" style="margin:0;"><option>Team 2</option></select>
-                        <button class="btn btn-update" style="width:60px;" onclick="updateTie()">Go</button>
-                    </div>
-                </div>
-                <div>
-                    <span class="label-title">Tournament Name</span>
-                    <input type="text" id="tourName" class="std-input" oninput="updateDB()">
-                </div>
-            </div>
-
-            <div class="grid-2" style="margin-top:10px;">
-                <div>
-                    <span class="label-title">Prize List</span>
-                    <input type="text" id="prizeList" class="std-input" oninput="updateDB()">
-                </div>
-                <div>
-                    <span class="label-title">WhatsApp/Call</span>
-                    <input type="text" id="contactInfo" class="std-input" placeholder="Number..." oninput="updateDB()">
-                </div>
             </div>
         </div>
     </div>
@@ -133,22 +131,11 @@
     function toggleTicker() {
         tickerStatus = !tickerStatus;
         db.child('tickerVis').set(tickerStatus);
-        const btn = document.getElementById('tickerToggleBtn');
-        btn.innerText = tickerStatus ? "Ticker: SHOWING" : "Ticker: HIDDEN";
-        btn.style.background = tickerStatus ? "#28a745" : "#dc3545";
     }
 
     function setEffect(effect) {
         effectStates[effect] = !effectStates[effect];
         db.child('effects').child(effect).set(effectStates[effect]);
-        
-        // UI Bold Logic
-        const btn = document.getElementById('btn-' + effect);
-        if(effectStates[effect]) {
-            btn.classList.add('btn-active');
-        } else {
-            btn.classList.remove('btn-active');
-        }
     }
 
     function addBulkTeams() {
@@ -171,13 +158,11 @@
         document.getElementById('contactInfo').value = data.contact || "";
         document.getElementById('wmText').value = data.watermarkText || "";
         
-        // Sync Ticker Button
         tickerStatus = !!data.tickerVis;
         const tBtn = document.getElementById('tickerToggleBtn');
         tBtn.innerText = tickerStatus ? "Ticker: SHOWING" : "Ticker: HIDDEN";
         tBtn.style.background = tickerStatus ? "#28a745" : "#dc3545";
 
-        // Sync Effects
         const effects = data.effects || {};
         ['scroll', 'blink', 'fullscreen'].forEach(e => {
             effectStates[e] = !!effects[e];
@@ -204,10 +189,10 @@
         let opts = `<option value="">Select Team</option>`;
 
         if(teamList) Object.values(teamList).forEach(t => {
-            pList.innerHTML += `<div class="team-item"><span>${t.name}</span><button class="btn-win" onclick="moveToWin('${t.id}', '${t.name}')">W</button></div>`;
+            pList.innerHTML += `<div class="team-item"><span>${t.name}</span><button class="btn-win" onclick="moveToWin('${t.id}', '${t.name}')">WIN</button></div>`;
         });
         if(winnerList) Object.values(winnerList).forEach(w => {
-            wList.innerHTML += `<div class="team-item"><span>${w.name}</span><span style="color:green;">✔</span></div>`;
+            wList.innerHTML += `<div class="team-item"><span>${w.name}</span><span style="color:#28a745; font-size: 24px;">✔</span></div>`;
             opts += `<option value="${w.name}">${w.name}</option>`;
         });
         s1.innerHTML = opts; s2.innerHTML = opts;
@@ -216,7 +201,12 @@
     function updateTie() {
         const t1 = document.getElementById('tie1').value;
         const t2 = document.getElementById('tie2').value;
-        if(t1 && t2) db.update({ currentMatchTie: t1 + " VS " + t2 });
+        if(t1 && t2) {
+            db.update({ currentMatchTie: t1 + " VS " + t2 });
+            alert("Tie Updated: " + t1 + " VS " + t2);
+        } else {
+            alert("Please select both teams!");
+        }
     }
 </script>
 </body>
