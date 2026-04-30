@@ -1,81 +1,24 @@
 <!DOCTYPE html>
-<html lang="pa">
+<html>
 <head>
     <meta charset="UTF-8">
-    <title>Football Pro Overlay - Manpreet Mudki</title>
+    <title>Overlay Pro</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Arial Black', sans-serif; height: 1080px; width: 1920px; color: white; }
-        
-        /* ਮੇਨ ਸਕੋਰਬੋਰਡ */
-        #scoreboard {
-            position: absolute;
-            top: 50px;
-            left: 50px;
-            display: flex;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.8);
-            border-radius: 8px;
-            overflow: hidden;
-            border-bottom: 5px solid rgba(255,255,255,0.2);
-            transform: translateX(-150%);
-            transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
-            box-shadow: 0 10px 30px rgba(0,0,0,0.5);
-        }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Arial Black', sans-serif; color: white; width: 1920px; height: 1080px; }
+        #scoreboard { position: absolute; top: 50px; left: 50px; display: flex; align-items: center; background: rgba(0,0,0,0.85); border-radius: 8px; transform: translateX(-150%); transition: 0.8s ease-in-out; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-bottom: 4px solid rgba(255,255,255,0.1); }
         .show-board { transform: translateX(0) !important; }
-
         .team-color { width: 12px; height: 60px; }
-        .team-name { font-size: 28px; padding: 0 20px; min-width: 120px; text-align: center; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
-        .score { font-size: 40px; background: rgba(255,255,255,0.1); padding: 0 25px; line-height: 60px; font-weight: 900; min-width: 50px; text-align: center; }
-        .timer-box { background: #27ae60; padding: 0 20px; height: 60px; display: flex; align-items: center; font-size: 28px; color: white; border-left: 2px solid rgba(0,0,0,0.2); }
-
-        /* ਪੈਨਲਟੀ ਬਾਕਸ ਓਵਰਲੇਅ */
-        #penalty-overlay {
-            position: absolute;
-            top: 120px;
-            left: 50px;
-            background: rgba(230, 126, 34, 0.9);
-            padding: 10px 20px;
-            border-radius: 0 0 10px 10px;
-            display: none;
-            font-size: 20px;
-            animation: slideDown 0.5s ease forwards;
-        }
-        @keyframes slideDown { from { transform: translateY(-20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
-
-        /* ਗੋਲ ਐਨੀਮੇਸ਼ਨ */
-        #goal-anim {
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            display: none;
-            justify-content: center; align-items: center;
-            background: rgba(0,0,0,0.5);
-            backdrop-filter: blur(8px);
-            z-index: 1000;
-        }
-        .goal-box { text-align: center; animation: bounce 0.5s infinite alternate; }
-        .goal-text { font-size: 200px; font-style: italic; text-shadow: 0 0 30px #27ae60, 0 0 60px #27ae60; }
-        .goal-sub { font-size: 60px; color: #f1c40f; margin-top: -40px; background: black; padding: 10px 40px; border-radius: 50px; }
-
-        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.1); } }
-
-        /* ਕਾਰਡ ਅਲਰਟ */
-        #card-pop {
-            position: absolute;
-            top: 200px; left: 50px;
-            padding: 20px 40px;
-            font-size: 35px;
-            border-radius: 10px;
-            display: none;
-            animation: popIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
-        }
-        @keyframes popIn { from { transform: scale(0.5); opacity: 0; } to { transform: scale(1); opacity: 1; } }
+        .team-name { font-size: 28px; padding: 0 20px; min-width: 120px; text-align: center; }
+        .score { font-size: 40px; background: rgba(255,255,255,0.1); padding: 0 25px; line-height: 60px; font-weight: 900; }
+        #timeDisp { display: none; background: #27ae60; padding: 0 20px; height: 60px; align-items: center; font-size: 28px; border-left: 2px solid rgba(0,0,0,0.2); }
+        .show-timer { display: flex !important; }
+        #card-pop { position: absolute; top: 120px; left: 50px; padding: 15px 30px; font-size: 25px; border-radius: 5px; display: none; animation: pop 0.5s ease; }
+        @keyframes pop { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
     </style>
 </head>
 <body>
-
-    <!-- Main Scoreboard -->
     <div id="scoreboard">
         <div id="cBoxA" class="team-color"></div>
         <div class="team-name" id="nameA">HOME</div>
@@ -83,92 +26,42 @@
         <div class="score" id="scoreB" style="border-left: 1px solid rgba(255,255,255,0.1);">0</div>
         <div class="team-name" id="nameB">AWAY</div>
         <div id="cBoxB" class="team-color"></div>
-        <div class="timer-box" id="timeDisp">00:00</div>
+        <div id="timeDisp">00:00</div>
     </div>
-
-    <!-- Penalty Shootout Box -->
-    <div id="penalty-overlay">
-        ⚽ PENALTIES: <span id="pA">0/0</span> — <span id="pB">0/0</span>
-    </div>
-
-    <!-- Full Screen Goal Animation -->
-    <div id="goal-anim">
-        <div class="goal-box">
-            <div class="goal-text">GOAL!!!</div>
-            <div class="goal-sub" id="gTeam">TEAM NAME</div>
-        </div>
-    </div>
-
-    <!-- Card Alert Popup -->
     <div id="card-pop"></div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("matchData");
-
-    let oldScoreA = 0, oldScoreB = 0, oldCardTime = 0;
+    let lastT = 0;
 
     db.on("value", (snap) => {
-        const d = snap.val();
-        if(!d) return;
-
-        // Show/Hide Board
-        const sb = document.getElementById('scoreboard');
-        if(d.showBoard !== false) sb.classList.add('show-board');
-        else sb.classList.remove('show-board');
-
-        // Names & Colors
+        const d = snap.val(); if(!d) return;
+        document.getElementById('scoreboard').classList.toggle('show-board', d.showBoard !== false);
         document.getElementById('nameA').innerText = d.nameA || "HOME";
         document.getElementById('nameB').innerText = d.nameB || "AWAY";
-        document.getElementById('cBoxA').style.background = d.teamColorA || "#ff0000";
-        document.getElementById('cBoxB').style.background = d.teamColorB || "#0000ff";
-
-        // Scores & Timer
         document.getElementById('scoreA').innerText = d.scoreA || 0;
         document.getElementById('scoreB').innerText = d.scoreB || 0;
-        
-        let s = d.matchSeconds || 0;
-        let m = Math.floor(s/60); let sec = s%60;
-        document.getElementById('timeDisp').innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
+        document.getElementById('cBoxA').style.background = d.teamColorA;
+        document.getElementById('cBoxB').style.background = d.teamColorB;
 
-        // Goal Animation Trigger
-        if(d.scoreA > oldScoreA) triggerGoal(d.nameA);
-        if(d.scoreB > oldScoreB) triggerGoal(d.nameB);
-        oldScoreA = d.scoreA || 0; oldScoreB = d.scoreB || 0;
+        const timeBox = document.getElementById('timeDisp');
+        if(d.timerRunning || (d.matchSeconds > 0)) {
+            timeBox.classList.add('show-timer');
+            let s = d.matchSeconds || 0; let m = Math.floor(s/60); let sec = s%60;
+            timeBox.innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
+        } else { timeBox.classList.remove('show-timer'); }
 
-        // Card Pop-up Trigger
-        if(d.cardTime && d.cardTime > oldCardTime) {
-            showCard(d.lastCardPlayer, d.lastCardType);
-            oldCardTime = d.cardTime;
-        }
-
-        // Penalty Stats
-        const penBox = document.getElementById('penalty-overlay');
-        if(d.penaltyMode) {
-            penBox.style.display = 'block';
-            document.getElementById('pA').innerText = (d.pScoreA || 0) + "/" + (d.pAttemptA || 0);
-            document.getElementById('pB').innerText = (d.pScoreB || 0) + "/" + (d.pAttemptB || 0);
-        } else {
-            penBox.style.display = 'none';
+        if(d.cardTime && d.cardTime > lastT) {
+            const cp = document.getElementById('card-pop');
+            cp.innerText = (d.lastCardType==='yellow'?'🟨 ':'🟥 ') + d.lastCardPlayer;
+            cp.style.background = d.lastCardType==='yellow'?'#f1c40f':'#e74c3c';
+            cp.style.color = d.lastCardType==='yellow'?'black':'white';
+            cp.style.display = 'block'; setTimeout(()=>cp.style.display='none', 4000);
+            lastT = d.cardTime;
         }
     });
-
-    function triggerGoal(tName) {
-        const g = document.getElementById('goal-anim');
-        document.getElementById('gTeam').innerText = tName;
-        g.style.display = 'flex';
-        setTimeout(() => g.style.display = 'none', 4000);
-    }
-
-    function showCard(player, type) {
-        const cp = document.getElementById('card-pop');
-        cp.innerText = (type==='yellow'?'🟨 YELLOW CARD: ':'🟥 RED CARD: ') + player;
-        cp.style.background = type==='yellow'?'#f1c40f':'#e74c3c';
-        cp.style.color = type==='yellow'?'black':'white';
-        cp.style.display = 'block';
-        setTimeout(() => cp.style.display = 'none', 4000);
-    }
 </script>
 </body>
 </html>
