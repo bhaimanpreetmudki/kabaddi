@@ -3,28 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Admin Panel - All Buttons Fixed</title>
+    <title>Final Admin Panel - Manpreet Singh</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; }
         .card { background: #16191c; border-radius: 12px; border: 1px solid #333; margin-bottom: 12px; padding: 15px; box-sizing: border-box; }
-        .header { background: #27ae60; padding: 10px; text-align: center; font-weight: bold; margin: -15px -15px 15px -15px; border-radius: 12px 12px 0 0; font-size: 14px; }
-        .team-row { display: flex; gap: 10px; margin-bottom: 10px; }
+        .header { background: #27ae60; padding: 8px; text-align: center; font-weight: bold; margin: -15px -15px 15px -15px; border-radius: 12px 12px 0 0; font-size: 13px; }
+        .team-row { display: flex; gap: 8px; margin-bottom: 10px; }
         .team-box { flex: 1; text-align: center; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #222; }
-        input { width: 95%; padding: 8px; background: #000; border: 1px solid #333; color: white; border-radius: 4px; text-align: center; margin-bottom: 5px; box-sizing: border-box; }
-        .score-display { font-size: 40px; font-weight: 900; margin: 5px 0; color: #2ecc71; }
+        input { width: 100%; padding: 8px; background: #000; border: 1px solid #333; color: white; border-radius: 4px; text-align: center; margin-bottom: 5px; box-sizing: border-box; }
+        .score-display { font-size: 45px; font-weight: 900; margin: 5px 0; color: #2ecc71; }
         .btn-group { display: flex; gap: 4px; margin-top: 5px; }
-        .btn { flex: 1; padding: 10px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; font-size: 13px; text-transform: uppercase; }
         .btn-plus { background: #2ecc71; } .btn-minus { background: #34495e; }
         .btn-yellow { background: #f1c40f; color: black; } .btn-red { background: #e74c3c; }
-        .btn-swap { background: #8e44ad; width: 100%; padding: 12px; margin: 10px 0; font-size: 14px; }
-        .timer-display { font-size: 30px; color: #f1c40f; text-align: center; font-family: monospace; font-weight: bold; background: #000; padding: 8px; border-radius: 8px; margin-bottom: 10px; }
+        .timer-display { font-size: 35px; color: #f1c40f; text-align: center; font-family: monospace; font-weight: bold; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
+        .reset-btn { background: #e74c3c; width: 100%; padding: 15px; font-size: 16px; margin-bottom: 10px; border-radius: 10px; border: none; color: white; font-weight: bold; cursor: pointer; }
     </style>
 </head>
 <body>
 
-    <!-- 1. Timer Control -->
+    <button class="reset-btn" onclick="resetAll()">⚠️ RESET ALL (NEW MATCH)</button>
+
     <div class="card">
         <div id="timerDisplay" class="timer-display">00:00</div>
         <div class="btn-group">
@@ -32,72 +33,69 @@
             <button class="btn" style="background: #e67e22;" onclick="pauseTimer()">PAUSE</button>
             <button class="btn" style="background: #34495e;" onclick="resetTimer()">RESET TIME</button>
         </div>
-        <button class="btn" style="background:#2980b9; width:100%; margin-top:8px;" onclick="toggleBoard()">BOARD ON/OFF</button>
+        <button class="btn" style="background:#2980b9; width:100%; margin-top:10px;" onclick="toggleBoard()">BOARD ON/OFF</button>
     </div>
 
-    <!-- 2. Main Score & Cards -->
     <div class="card">
-        <div class="header">SCORE & CARDS</div>
+        <div class="header">LIVE SCORE & CARDS</div>
         <div class="team-row">
             <!-- Team A -->
             <div class="team-box">
                 <input type="text" id="nameA" placeholder="Team A" oninput="updateDB()">
-                <input type="color" id="colorA" oninput="updateDB()" style="height:25px; cursor:pointer;">
+                <input type="color" id="colorA" oninput="updateDB()" style="height:30px;">
                 <div class="score-display" id="dispA">0</div>
                 <div class="btn-group">
                     <button class="btn btn-minus" onclick="changeVal('scoreA', -1)">-</button>
                     <button class="btn btn-plus" onclick="changeVal('scoreA', 1)">+</button>
                 </div>
-                <!-- Card Buttons Back Here -->
-                <div style="margin-top:10px; font-size:10px; color:#888;">PLAYER NAME/NO</div>
-                <input type="text" id="pInputA" placeholder="Player Info" style="font-size:11px;">
-                <div class="btn-group">
-                    <button class="btn btn-yellow" onclick="giveCard('A', 'yellow')">YELLOW</button>
-                    <button class="btn btn-red" onclick="giveCard('A', 'red')">RED</button>
+                <div style="margin-top:15px;">
+                    <input type="text" id="pInputA" placeholder="Player Name/No" style="font-size:11px;">
+                    <div class="btn-group">
+                        <button class="btn btn-yellow" onclick="giveCard('A', 'yellow')">Y</button>
+                        <button class="btn btn-red" onclick="giveCard('A', 'red')">R</button>
+                    </div>
                 </div>
             </div>
-
             <!-- Team B -->
             <div class="team-box">
                 <input type="text" id="nameB" placeholder="Team B" oninput="updateDB()">
-                <input type="color" id="colorB" oninput="updateDB()" style="height:25px; cursor:pointer;">
+                <input type="color" id="colorB" oninput="updateDB()" style="height:30px;">
                 <div class="score-display" id="dispB">0</div>
                 <div class="btn-group">
                     <button class="btn btn-minus" onclick="changeVal('scoreB', -1)">-</button>
                     <button class="btn btn-plus" onclick="changeVal('scoreB', 1)">+</button>
                 </div>
-                <!-- Card Buttons Back Here -->
-                <div style="margin-top:10px; font-size:10px; color:#888;">PLAYER NAME/NO</div>
-                <input type="text" id="pInputB" placeholder="Player Info" style="font-size:11px;">
-                <div class="btn-group">
-                    <button class="btn btn-yellow" onclick="giveCard('B', 'yellow')">YELLOW</button>
-                    <button class="btn btn-red" onclick="giveCard('B', 'red')">RED</button>
+                <div style="margin-top:15px;">
+                    <input type="text" id="pInputB" placeholder="Player Name/No" style="font-size:11px;">
+                    <div class="btn-group">
+                        <button class="btn btn-yellow" onclick="giveCard('B', 'yellow')">Y</button>
+                        <button class="btn btn-red" onclick="giveCard('B', 'red')">R</button>
+                    </div>
                 </div>
             </div>
         </div>
-        <button class="btn btn-swap" onclick="swapTeams()">🔄 SWAP SIDES</button>
+        <button class="btn" style="background:#8e44ad; width:100%;" onclick="swapTeams()">🔄 SWAP SIDES</button>
     </div>
 
-    <!-- 3. Penalty Control -->
     <div class="card">
-        <div class="header" style="background:#d35400;">PENALTY SHOOTOUT</div>
+        <div class="header" style="background:#d35400;">PENALTY CONTROL</div>
         <div class="team-row">
             <div class="team-box">
                 <div class="btn-group">
-                    <button class="btn" style="background:#2ecc71;" onclick="addPenalty('A', 'goal')">GOAL</button>
+                    <button class="btn" style="background:#27ae60;" onclick="addPenalty('A', 'goal')">GOAL</button>
                     <button class="btn" style="background:#e74c3c;" onclick="addPenalty('A', 'miss')">MISS</button>
                 </div>
-                <button class="btn" style="background:#444; font-size:9px; margin-top:5px;" onclick="clearPen('A')">RESET A</button>
+                <button class="btn" style="background:#444; font-size:10px; margin-top:5px;" onclick="clearPen('A')">RESET A</button>
             </div>
             <div class="team-box">
                 <div class="btn-group">
-                    <button class="btn" style="background:#2ecc71;" onclick="addPenalty('B', 'goal')">GOAL</button>
+                    <button class="btn" style="background:#27ae60;" onclick="addPenalty('B', 'goal')">GOAL</button>
                     <button class="btn" style="background:#e74c3c;" onclick="addPenalty('B', 'miss')">MISS</button>
                 </div>
-                <button class="btn" style="background:#444; font-size:9px; margin-top:5px;" onclick="clearPen('B')">RESET B</button>
+                <button class="btn" style="background:#444; font-size:10px; margin-top:5px;" onclick="clearPen('B')">RESET B</button>
             </div>
         </div>
-        <button class="btn" id="pToggleBtn" style="background:#e67e22; width:100%;" onclick="togglePenaltyMode()">SHOW PENALTY ON OVERLAY</button>
+        <button class="btn" id="pToggleBtn" style="background:#e67e22; width:100%;" onclick="togglePenaltyMode()">SHOW PENALTY OVERLAY</button>
     </div>
 
 <script>
@@ -114,11 +112,9 @@
         document.getElementById('nameB').value = current.nameB || "";
         document.getElementById('colorA').value = current.teamColorA || "#ff0000";
         document.getElementById('colorB').value = current.teamColorB || "#0000ff";
-        document.getElementById('pToggleBtn').innerText = current.penaltyMode ? "HIDE PENALTY OVERLAY" : "SHOW PENALTY OVERLAY";
-        
+        document.getElementById('pToggleBtn').innerText = current.penaltyMode ? "HIDE PENALTY" : "SHOW PENALTY";
         let s = current.matchSeconds || 0; let m = Math.floor(s/60); let sec = s%60;
         document.getElementById('timerDisplay').innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
-
         if(current.timerRunning && !timerInt) timerInt = setInterval(() => db.update({ matchSeconds: (current.matchSeconds || 0) + 1 }), 1000);
         if(!current.timerRunning) { clearInterval(timerInt); timerInt = null; }
     });
@@ -127,31 +123,9 @@
         let nv = (current[key] || 0) + val;
         db.update({ [key]: nv < 0 ? 0 : nv, goalTrigger: val > 0 ? Date.now() : 0, lastGoalTeam: (key === 'scoreA' ? current.nameA : current.nameB) });
     }
-
-    function giveCard(team, type) {
-        const p = document.getElementById('pInput' + team).value;
-        if(!p) { alert("ਪਲੇਅਰ ਦਾ ਨਾਮ ਜਾਂ ਨੰਬਰ ਲਿਖੋ!"); return; }
-        db.update({ lastCardPlayer: p, lastCardType: type, cardTime: Date.now() });
-        document.getElementById('pInput' + team).value = "";
-    }
-
-    function swapTeams() {
-        if(!confirm("ਕੀ ਤੁਸੀਂ ਸਾਈਡ ਬਦਲਣਾ ਚਾਹੁੰਦੇ ਹੋ?")) return;
-        db.update({
-            nameA: current.nameB, nameB: current.nameA,
-            scoreA: current.scoreB, scoreB: current.scoreA,
-            teamColorA: current.teamColorB, teamColorB: current.teamColorA,
-            pListA: current.pListB || [], pListB: current.pListA || []
-        });
-    }
-
-    function addPenalty(team, type) {
-        let list = current['pList' + team] || [];
-        if(list.length >= 5) return;
-        list.push(type);
-        db.update({ ['pList' + team]: list });
-    }
-
+    function resetAll() { if(confirm("ਕੀ ਸਭ ਕੁਝ ਜ਼ੀਰੋ ਕਰਨਾ ਹੈ?")) db.update({ scoreA: 0, scoreB: 0, matchSeconds: 0, timerRunning: false, pListA: [], pListB: [], penaltyMode: false }); }
+    function swapTeams() { db.update({ nameA: current.nameB, nameB: current.nameA, scoreA: current.scoreB, scoreB: current.scoreA, teamColorA: current.teamColorB, teamColorB: current.teamColorA, pListA: current.pListB || [], pListB: current.pListA || [] }); }
+    function addPenalty(team, type) { let list = current['pList' + team] || []; if(list.length < 5) { list.push(type); db.update({ ['pList' + team]: list }); } }
     function clearPen(team) { db.update({ ['pList' + team]: [] }); }
     function startTimer() { db.update({ timerRunning: true }); }
     function pauseTimer() { db.update({ timerRunning: false }); }
