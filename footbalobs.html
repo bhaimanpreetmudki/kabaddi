@@ -2,20 +2,30 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Overlay Pro</title>
+    <title>Football Overlay Fixed</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Arial Black', sans-serif; color: white; width: 1920px; height: 1080px; }
-        #scoreboard { position: absolute; top: 50px; left: 50px; display: flex; align-items: center; background: rgba(0,0,0,0.85); border-radius: 8px; transform: translateX(-150%); transition: 0.8s ease-in-out; box-shadow: 0 10px 30px rgba(0,0,0,0.5); border-bottom: 4px solid rgba(255,255,255,0.1); }
+        
+        #scoreboard { position: absolute; top: 50px; left: 50px; display: flex; align-items: center; background: rgba(0,0,0,0.85); border-radius: 8px; transform: translateX(-150%); transition: 0.8s ease-in-out; }
         .show-board { transform: translateX(0) !important; }
+
         .team-color { width: 12px; height: 60px; }
         .team-name { font-size: 28px; padding: 0 20px; min-width: 120px; text-align: center; }
         .score { font-size: 40px; background: rgba(255,255,255,0.1); padding: 0 25px; line-height: 60px; font-weight: 900; }
         #timeDisp { display: none; background: #27ae60; padding: 0 20px; height: 60px; align-items: center; font-size: 28px; border-left: 2px solid rgba(0,0,0,0.2); }
         .show-timer { display: flex !important; }
-        #card-pop { position: absolute; top: 120px; left: 50px; padding: 15px 30px; font-size: 25px; border-radius: 5px; display: none; animation: pop 0.5s ease; }
-        @keyframes pop { from { transform: scale(0.5); opacity:0; } to { transform: scale(1); opacity:1; } }
+
+        /* Goal Animation */
+        #goal-anim { position: fixed; top: 0; left: 0; width: 100%; height: 100%; display: none; justify-content: center; align-items: center; background: rgba(0,0,0,0.7); z-index: 100; backdrop-filter: blur(5px); }
+        .goal-text { font-size: 150px; text-shadow: 0 0 20px #27ae60; animation: bounce 0.5s infinite alternate; }
+        @keyframes bounce { from { transform: scale(1); } to { transform: scale(1.2); } }
+
+        /* Penalty Box */
+        #penalty-box { position: absolute; top: 120px; left: 50px; background: #e67e22; padding: 10px 20px; border-radius: 0 0 10px 10px; display: none; font-size: 22px; }
+
+        #card-pop { position: absolute; top: 200px; left: 50px; padding: 15px 30px; font-size: 30px; border-radius: 5px; display: none; }
     </style>
 </head>
 <body>
@@ -23,22 +33,37 @@
         <div id="cBoxA" class="team-color"></div>
         <div class="team-name" id="nameA">HOME</div>
         <div class="score" id="scoreA">0</div>
-        <div class="score" id="scoreB" style="border-left: 1px solid rgba(255,255,255,0.1);">0</div>
+        <div class="score" id="scoreB">0</div>
         <div class="team-name" id="nameB">AWAY</div>
         <div id="cBoxB" class="team-color"></div>
         <div id="timeDisp">00:00</div>
     </div>
+
+    <div id="penalty-box">⚽ PENALTY KICKS IN PROGRESS</div>
+
+    <div id="goal-anim">
+        <div style="text-align:center;">
+            <div class="goal-text">GOAL!!!</div>
+            <div id="goalTeam" style="font-size: 50px; color:#f1c40f;">TEAM</div>
+        </div>
+    </div>
+
     <div id="card-pop"></div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("matchData");
-    let lastT = 0;
+    
+    let lastGoal = 0, lastCard = 0;
 
     db.on("value", (snap) => {
         const d = snap.val(); if(!d) return;
+
+        // Board Toggle
         document.getElementById('scoreboard').classList.toggle('show-board', d.showBoard !== false);
+        
+        // Data Sync
         document.getElementById('nameA').innerText = d.nameA || "HOME";
         document.getElementById('nameB').innerText = d.nameB || "AWAY";
         document.getElementById('scoreA').innerText = d.scoreA || 0;
@@ -46,20 +71,35 @@
         document.getElementById('cBoxA').style.background = d.teamColorA;
         document.getElementById('cBoxB').style.background = d.teamColorB;
 
+        // Timer
         const timeBox = document.getElementById('timeDisp');
-        if(d.timerRunning || (d.matchSeconds > 0)) {
+        if(d.timerRunning || d.matchSeconds > 0) {
             timeBox.classList.add('show-timer');
             let s = d.matchSeconds || 0; let m = Math.floor(s/60); let sec = s%60;
             timeBox.innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
         } else { timeBox.classList.remove('show-timer'); }
 
-        if(d.cardTime && d.cardTime > lastT) {
+        // Penalty Box
+        document.getElementById('penalty-box').style.display = d.penaltyMode ? 'block' : 'none';
+
+        // Goal Animation
+        if(d.goalTrigger && d.goalTrigger > lastGoal) {
+            const ga = document.getElementById('goal-anim');
+            document.getElementById('goalTeam').innerText = d.lastGoalTeam || "";
+            ga.style.display = 'flex';
+            setTimeout(() => ga.style.display = 'none', 4000);
+            lastGoal = d.goalTrigger;
+        }
+
+        // Card Pop
+        if(d.cardTime && d.cardTime > lastCard) {
             const cp = document.getElementById('card-pop');
-            cp.innerText = (d.lastCardType==='yellow'?'🟨 ':'🟥 ') + d.lastCardPlayer;
-            cp.style.background = d.lastCardType==='yellow'?'#f1c40f':'#e74c3c';
-            cp.style.color = d.lastCardType==='yellow'?'black':'white';
-            cp.style.display = 'block'; setTimeout(()=>cp.style.display='none', 4000);
-            lastT = d.cardTime;
+            cp.innerText = (d.lastCardType === 'yellow' ? '🟨 YELLOW CARD: ' : '🟥 RED CARD: ') + d.lastCardPlayer;
+            cp.style.background = d.lastCardType === 'yellow' ? '#f1c40f' : '#e74c3c';
+            cp.style.color = d.lastCardType === 'yellow' ? 'black' : 'white';
+            cp.style.display = 'block';
+            setTimeout(() => cp.style.display = 'none', 4000);
+            lastCard = d.cardTime;
         }
     });
 </script>
