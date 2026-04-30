@@ -2,232 +2,214 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pro Streamer - Football Control</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Football Admin - Manpreet Mudki</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --primary: #00ff88;
-            --secondary: #00d4ff;
-            --danger: #ff4757;
-            --bg: #080a0f;
-            --glass: rgba(255, 255, 255, 0.03);
-            --border: rgba(255, 255, 255, 0.1);
-        }
-
-        body {
-            font-family: 'Inter', 'Segoe UI', sans-serif;
-            background-color: var(--bg);
-            background-image: 
-                radial-gradient(at 0% 0%, rgba(0, 255, 136, 0.05) 0px, transparent 50%),
-                radial-gradient(at 100% 100%, rgba(0, 212, 255, 0.05) 0px, transparent 50%);
-            color: white;
-            margin: 0;
-            display: flex;
-            justify-content: center;
-            min-height: 100vh;
-            padding: 20px;
-        }
-
-        .main-card {
-            width: 100%;
-            max-width: 550px;
-            background: var(--glass);
-            backdrop-filter: blur(20px);
-            border: 1px solid var(--border);
-            border-radius: 32px;
-            padding: 30px;
-            box-shadow: 0 40px 100px rgba(0,0,0,0.8);
-        }
-
-        h2 { text-align: center; font-size: 20px; text-transform: uppercase; letter-spacing: 3px; color: var(--primary); margin-bottom: 30px; }
-
-        /* Setup Design */
-        .setup-group { position: relative; margin-bottom: 20px; }
-        .setup-group input {
-            width: 100%;
-            padding: 15px 20px;
-            background: rgba(0,0,0,0.5);
-            border: 1px solid var(--border);
-            border-radius: 16px;
-            color: white;
-            font-size: 16px;
-            box-sizing: border-box;
-            transition: 0.3s;
-        }
-        .setup-group input:focus { border-color: var(--primary); outline: none; box-shadow: 0 0 15px rgba(0,255,136,0.2); }
-
-        /* Scoring Dashboard */
-        .header-info { display: flex; justify-content: space-between; align-items: center; margin-bottom: 25px; }
-        #timer { font-family: 'Courier New', monospace; font-size: 28px; color: var(--secondary); font-weight: bold; text-shadow: 0 0 10px rgba(0,212,255,0.4); }
-        .match-badge { background: var(--danger); padding: 4px 12px; border-radius: 8px; font-size: 10px; font-weight: 900; }
-
-        .scoreboard-v2 {
-            display: grid;
-            grid-template-columns: 1fr 60px 1fr;
-            gap: 20px;
-            align-items: center;
-            background: rgba(0,0,0,0.4);
-            padding: 25px;
-            border-radius: 24px;
-            border: 1px solid var(--border);
-        }
-
-        .team-box { text-align: center; }
-        .goal-count { font-size: 72px; font-weight: 900; margin: 5px 0; background: linear-gradient(to bottom, #fff, #888); -webkit-background-clip: text; -webkit-text-fill-color: transparent; }
-        .team-name { font-size: 12px; font-weight: bold; color: #94a3b8; text-transform: uppercase; letter-spacing: 1px; }
-
-        .vs-circle {
-            width: 50px; height: 50px; background: var(--bg); border: 1px solid var(--border);
-            border-radius: 50%; display: flex; align-items: center; justify-content: center;
-            font-size: 14px; font-weight: bold; color: var(--border);
-        }
-
-        /* Controls */
-        .action-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; margin-top: 25px; }
-        .btn-goal {
-            background: linear-gradient(135deg, var(--primary), #00b894);
-            color: #000; font-weight: 900; border: none; padding: 18px;
-            border-radius: 16px; cursor: pointer; transition: 0.3s;
-        }
-        .btn-goal:hover { transform: translateY(-3px); box-shadow: 0 10px 20px rgba(0,255,136,0.3); }
-
-        /* Penalty Section */
-        .penalty-premium {
-            margin-top: 30px;
-            background: rgba(255, 68, 68, 0.05);
-            border: 1px solid rgba(255, 68, 68, 0.1);
-            border-radius: 20px;
-            padding: 20px;
-        }
-
-        .p-row { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; }
-        .p-dots { display: flex; gap: 8px; }
-        .p-dot { width: 12px; height: 12px; border-radius: 3px; background: rgba(255,255,255,0.05); border: 1px solid var(--border); transition: 0.4s; }
-        .p-dot.hit { background: var(--primary); box-shadow: 0 0 10px var(--primary); border: none; }
-        .p-dot.miss { background: var(--danger); box-shadow: 0 0 10px var(--danger); border: none; }
-
-        .p-btns button {
-            background: #1a1f2c; color: white; border: 1px solid var(--border);
-            padding: 6px 12px; border-radius: 8px; cursor: pointer; font-size: 14px;
-        }
-
-        .btn-reset { width: 100%; background: none; border: 1px solid var(--border); color: #555; padding: 10px; margin-top: 20px; cursor: pointer; border-radius: 12px; font-size: 12px; }
-        .hidden { display: none !important; }
-
-        /* Animations */
-        @keyframes goalScale {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); color: var(--primary); }
-            100% { transform: scale(1); }
-        }
-        .animate-goal { animation: goalScale 0.5s ease-in-out; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0f1113; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; min-height: 100vh; }
+        
+        /* COMMON STYLES */
+        .status-bar { background: #1a1d21; border: 1px solid #333; padding: 12px; border-radius: 10px; display: flex; justify-content: space-between; margin-bottom: 10px; border-left: 5px solid #2ecc71; align-items: center; width: 100%; max-width: 500px; box-sizing: border-box; }
+        .card { background: #1a1d21; width: 100%; max-width: 500px; border-radius: 15px; border: 1px solid #333; overflow: hidden; margin-bottom: 20px; box-sizing: border-box;}
+        .header { background: #2ecc71; color: black; padding: 12px; text-align: center; font-size: 16px; font-weight: bold; text-transform: uppercase; }
+        
+        /* FOOTBALL SCOREBOARD */
+        .teams-container { display: flex; padding: 15px; gap: 10px; border-bottom: 1px solid #333; }
+        .team-box { flex: 1; display: flex; flex-direction: column; align-items: center; }
+        .team-input { width: 95%; padding: 8px; border: 1px solid #444; background: #0d1117; color: white; border-radius: 6px; font-size: 14px; font-weight: bold; margin-bottom: 8px; text-align: center; }
+        .score-val { font-size: 55px; font-weight: 900; color: #fff; margin: 5px 0; }
+        
+        /* BUTTONS */
+        .btn-group { display: flex; width: 100%; gap: 5px; margin-top: 5px; }
+        .btn-pm { border: none; color: white; padding: 10px; border-radius: 6px; font-size: 20px; font-weight: bold; cursor: pointer; flex: 1; }
+        .btn-plus { background: #28a745; } .btn-minus { background: #444; }
+        
+        /* CARDS & PENALTIES */
+        .extra-controls { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; padding: 10px 15px; background: #111; }
+        .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: 900; cursor: pointer; font-size: 11px; }
+        .y-card { background: #f1c40f; color: black; }
+        .r-card { background: #e74c3c; color: white; }
+        
+        .settings-section { padding: 15px; background: #111; box-sizing: border-box; }
+        textarea, .std-input { width: 100%; padding: 10px; border: 1px solid #444; background: #0d1117; color: white; border-radius: 6px; font-size: 14px; margin-bottom: 12px; resize: none; box-sizing: border-box; }
+        
+        .controls { padding: 15px; display: flex; flex-direction: column; gap: 8px; }
+        .btn-full { border: none; color: white; padding: 12px; border-radius: 8px; font-size: 14px; font-weight: bold; cursor: pointer; text-transform: uppercase; width: 100%; }
+        .btn-blue { background: #1a73e8; } .btn-yellow { background: #fbbc05; color: #000; } .btn-red { background: #ea4335; } .btn-dark { background: #333; }
+        .hidden { display: none; }
     </style>
 </head>
 <body>
 
-<div class="main-card">
-    <!-- Setup View -->
-    <div id="view-setup">
-        <h2>Match Engine v3.0</h2>
-        <div class="setup-group"><input type="text" id="inputA" placeholder="Home Team Name (e.g. Real Madrid)"></div>
-        <div class="setup-group"><input type="text" id="inputB" placeholder="Away Team Name (e.g. Barcelona)"></div>
-        <button class="btn-goal" style="width:100%" onclick="launchMatch()">LAUNCH DASHBOARD</button>
+<div id="login-box" style="max-width:400px; margin:80px auto; text-align:center; background:#1a1d21; padding:25px; border-radius:15px; border:1px solid #333;">
+    <h2 style="color:#2ecc71; font-weight:900;">FOOTBALL ADMIN</h2>
+    <input type="password" id="adminPass" placeholder="ਪਾਸਵਰਡ ਭਰੋ..." style="width:100%; padding:12px; background:#0d1117; border:1px solid #444; color:white; border-radius:8px; margin-bottom:15px;">
+    <button onclick="handleManualLogin()" class="btn-full btn-yellow">ENTER CONTROL</button>
+</div>
+
+<div id="main-content" style="display:none; width: 100%; max-width: 500px;">
+    <div class="status-bar">
+        <div style="font-weight: bold; color: #2ecc71;"><i class="fas fa-circle"></i> LIVE ENGINE</div>
+        <div style="text-align: right;"><span style="font-size:10px; color:#888;">EXPIRY:</span><br><div id="expDisp" class="status-val" style="font-weight: 900;">--</div></div>
     </div>
 
-    <!-- Live View -->
-    <div id="view-live" class="hidden">
-        <div class="header-info">
-            <div class="match-badge">LIVE MATCH</div>
-            <div id="timer">00:00</div>
-        </div>
-
-        <div class="scoreboard-v2">
-            <div class="team-box">
-                <div class="team-name" id="nameA">HOME</div>
-                <div class="goal-count" id="countA">0</div>
-            </div>
-            <div class="vs-circle">VS</div>
-            <div class="team-box">
-                <div class="team-name" id="nameB">AWAY</div>
-                <div class="goal-count" id="countB">0</div>
-            </div>
-        </div>
-
-        <div class="action-grid">
-            <button class="btn-goal" onclick="score('A')">HOME GOAL ⚽</button>
-            <button class="btn-goal" onclick="score('B')">AWAY GOAL ⚽</button>
-        </div>
-
-        <!-- Penalty Section -->
-        <div class="penalty-premium">
-            <div style="font-size: 10px; font-weight: bold; color: var(--danger); margin-bottom: 15px; letter-spacing: 2px;">PENALTY SHOOTOUT TRACKER</div>
-            
-            <div class="p-row">
-                <div class="p-dots" id="p-dotsA">
-                    <div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div>
+    <div id="admin-controls-wrapper">
+        <div class="card">
+            <div class="header">Football Score Control</div>
+            <div class="teams-container">
+                <div class="team-box">
+                    <input type="text" id="nameA" class="team-input" placeholder="HOME TEAM" oninput="updateDB()">
+                    <div class="score-val" id="dispA">0</div>
+                    <div class="btn-group">
+                        <button class="btn-pm btn-minus" onclick="changeScore('scoreA', -1)">-</button>
+                        <button class="btn-pm btn-plus" onclick="changeScore('scoreA', 1)">+</button>
+                    </div>
                 </div>
-                <div class="p-btns">
-                    <button onclick="recordP('A', true)">✅</button>
-                    <button onclick="recordP('A', false)">❌</button>
+                <div style="display:flex; align-items:center; font-weight:bold; color:#444; font-size: 20px;">-</div>
+                <div class="team-box">
+                    <input type="text" id="nameB" class="team-input" placeholder="AWAY TEAM" oninput="updateDB()">
+                    <div class="score-val" id="dispB">0</div>
+                    <div class="btn-group">
+                        <button class="btn-pm btn-minus" onclick="changeScore('scoreB', -1)">-</button>
+                        <button class="btn-pm btn-plus" onclick="changeScore('scoreB', 1)">+</button>
+                    </div>
                 </div>
             </div>
 
-            <div class="p-row">
-                <div class="p-dots" id="p-dotsB">
-                    <div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div><div class="p-dot"></div>
+            <!-- CARDS SYSTEM -->
+            <div class="extra-controls">
+                <div style="display:flex; gap:5px; flex-direction:column;">
+                    <button class="card-btn y-card" onclick="updatePenalty('yellowA')">YELLOW CARD</button>
+                    <button class="card-btn r-card" onclick="updatePenalty('redA')">RED CARD</button>
                 </div>
-                <div class="p-btns">
-                    <button onclick="recordP('B', true)">✅</button>
-                    <button onclick="recordP('B', false)">❌</button>
+                <div style="display:flex; gap:5px; flex-direction:column;">
+                    <button class="card-btn y-card" onclick="updatePenalty('yellowB')">YELLOW CARD</button>
+                    <button class="card-btn r-card" onclick="updatePenalty('redB')">RED CARD</button>
                 </div>
+            </div>
+
+            <div class="controls">
+                <div style="display:flex; gap:10px;">
+                    <input type="text" id="timeInp" class="std-input" style="text-align:center; flex:1;" placeholder="TIME (e.g. 45:00)" oninput="updateDB()">
+                    <input type="text" id="extraTimeInp" class="std-input" style="text-align:center; flex:1;" placeholder="ADD. TIME (+5)" oninput="updateDB()">
+                </div>
+                <button id="visBtn" class="btn-full btn-red" onclick="toggleVis('scoreVisible')">Show/Hide Scoreboard</button>
+                <button class="btn-full btn-dark" onclick="resetScores()">Reset Match</button>
             </div>
         </div>
 
-        <button class="btn-reset" onclick="location.reload()">TERMINATE MATCH & RESET</button>
+        <div class="card">
+            <div class="header">Ticker & Match Info</div>
+            <div class="settings-section">
+                <input type="text" id="roundInp" class="std-input" placeholder="Match Info (e.g. Group Stage / Final)" oninput="updateDB()">
+                <textarea id="row1Inp" rows="2" placeholder="Ticker Line 1 (Goal Scorers etc.)" oninput="updateDB()"></textarea>
+                <button id="tickVisBtn" class="btn-full btn-blue" onclick="toggleVis('tickerVisible')">Show/Hide Ticker</button>
+            </div>
+        </div>
+        <button onclick="logout()" style="width:100%; padding:10px; background:none; border:none; color:#555; font-size:11px;">LOGOUT</button>
     </div>
 </div>
 
 <script>
-    let state = { goalsA: 0, goalsB: 0, pA: 0, pB: 0 };
+    // --- FIREBASE CONFIG ---
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database().ref("matchData");
+    const userRef = firebase.database().ref("users");
 
-    function launchMatch() {
-        const a = document.getElementById('inputA').value || "HOME";
-        const b = document.getElementById('inputB').value || "AWAY";
-        
-        document.getElementById('nameA').innerText = a;
-        document.getElementById('nameB').innerText = b;
-        
-        document.getElementById('view-setup').classList.add('hidden');
-        document.getElementById('view-live').classList.remove('hidden');
+    const urlParams = new URLSearchParams(window.location.search);
+    const userID = urlParams.get('id') || 'default';
+    let curA = 0, curB = 0, sVis = true, tVis = true;
+    let isExpired = false;
 
-        let s = 0;
-        setInterval(() => {
-            s++;
-            let m = Math.floor(s/60), sec = s%60;
-            document.getElementById('timer').innerText = `${m<10?'0'+m:m}:${sec<10?'0'+sec:sec}`;
-        }, 1000);
+    window.onload = function() {
+        const savedPass = localStorage.getItem('admin_pass_score_' + userID);
+        if(savedPass) checkLogin(savedPass);
     }
 
-    function score(t) {
-        const el = document.getElementById('count' + t);
-        if(t === 'A') state.goalsA++; else state.goalsB++;
-        el.innerText = t === 'A' ? state.goalsA : state.goalsB;
-        
-        // Animation
-        el.classList.add('animate-goal');
-        setTimeout(() => el.classList.remove('animate-goal'), 500);
+    function handleManualLogin() {
+        const pass = document.getElementById('adminPass').value;
+        checkLogin(pass);
     }
 
-    function recordP(t, hit) {
-        const dots = document.getElementById('p-dots' + t).children;
-        let idx = t === 'A' ? state.pA : state.pB;
-        
-        if(idx < 5) {
-            dots[idx].classList.add(hit ? 'hit' : 'miss');
-            if(t === 'A') state.pA++; else state.pB++;
+    function checkLogin(pass) {
+        userRef.child(userID).once('value', snap => {
+            const userData = snap.val();
+            if(userData && userData.password === pass) {
+                localStorage.setItem('admin_pass_score_' + userID, pass);
+                const expiryDate = new Date(userData.expiry);
+                document.getElementById('login-box').style.display = "none";
+                document.getElementById('main-content').style.display = "block";
+                document.getElementById('expDisp').innerText = expiryDate.toLocaleDateString();
+                loadMatchData();
+            } else {
+                alert("Incorrect Password!");
+            }
+        });
+    }
+
+    function loadMatchData() {
+        db.on("value", (snap) => {
+            const data = snap.val();
+            if(data) {
+                curA = parseInt(data.scoreA) || 0; curB = parseInt(data.scoreB) || 0;
+                sVis = !!data.scoreVisible; tVis = !!data.tickerVisible;
+                
+                document.getElementById('dispA').innerText = curA;
+                document.getElementById('dispB').innerText = curB;
+                document.getElementById('nameA').value = data.nameA || "";
+                document.getElementById('nameB').value = data.nameB || "";
+                document.getElementById('timeInp').value = data.matchTime || "";
+                document.getElementById('extraTimeInp').value = data.extraTime || "";
+                document.getElementById('roundInp').value = data.round || "";
+                document.getElementById('row1Inp').value = data.row1Txt || "";
+                
+                updateBtnUI('visBtn', sVis, "Scoreboard");
+                updateBtnUI('tickVisBtn', tVis, "Ticker");
+            }
+        });
+    }
+
+    function updateBtnUI(id, val, text) {
+        const btn = document.getElementById(id);
+        if(btn) {
+            btn.innerText = val ? "Hide " + text : "Show " + text;
+            btn.style.background = val ? "#dc3545" : "#28a745";
         }
     }
-</script>
 
+    function changeScore(team, val) {
+        let current = (team === 'scoreA' ? curA : curB);
+        let newVal = current + val;
+        if (newVal < 0) newVal = 0;
+        db.update({ [team]: newVal });
+    }
+
+    function updateDB() {
+        db.update({
+            nameA: document.getElementById('nameA').value,
+            nameB: document.getElementById('nameB').value,
+            matchTime: document.getElementById('timeInp').value,
+            extraTime: document.getElementById('extraTimeInp').value,
+            round: document.getElementById('roundInp').value,
+            row1Txt: document.getElementById('row1Inp').value
+        });
+    }
+
+    function toggleVis(field) {
+        let val = (field === 'scoreVisible') ? sVis : tVis;
+        db.child(field).set(!val);
+    }
+
+    function resetScores() {
+        if(confirm("Reset Full Match Data?")) {
+            db.update({ scoreA: 0, scoreB: 0, matchTime: "00:00", extraTime: "", round: "" });
+        }
+    }
+
+    function logout() { localStorage.removeItem('admin_pass_score_' + userID); location.reload(); }
+</script>
 </body>
 </html>
