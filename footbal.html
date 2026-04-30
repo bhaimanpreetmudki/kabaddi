@@ -3,128 +3,137 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Football Smart Admin - Manpreet Mudki</title>
+    <title>Football Ultimate Admin - Manpreet Mudki</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         .card { background: #161b22; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #30363d; overflow: hidden; margin-bottom: 15px; box-sizing: border-box; }
-        .header { background: #238636; color: white; padding: 10px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 14px; }
+        .header { background: #238636; color: white; padding: 10px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; }
         
-        .teams-container { display: flex; padding: 15px; gap: 10px; background: #0d1117; }
-        .team-box { flex: 1; text-align: center; padding: 10px; border-radius: 8px; background: #161b22; border-top: 5px solid #fff; }
-        .score-val { font-size: 45px; font-weight: 900; color: #2ecc71; margin: 5px 0; }
+        .teams-container { display: flex; padding: 10px; gap: 8px; background: #0d1117; }
+        .team-box { flex: 1; text-align: center; padding: 10px; border-radius: 8px; background: #161b22; border-top: 4px solid #fff; }
+        .score-val { font-size: 40px; font-weight: 900; color: #2ecc71; margin: 5px 0; }
         
-        .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 6px; box-sizing: border-box; margin-top: 5px; }
-        .btn-pm { border: none; color: white; padding: 10px; border-radius: 6px; font-size: 20px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 2px; }
-        
-        .card-btn { padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 11px; flex: 1; }
+        .std-input { width: 100%; padding: 8px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-top: 5px; font-size: 13px; }
+        .player-input { border-color: #f1c40f; color: #f1c40f; font-weight: bold; } /* Player detail special style */
+
+        .btn-pm { border: none; color: white; padding: 8px; border-radius: 5px; font-size: 18px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 2px; }
+        .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 10px; flex: 1; transition: 0.2s; }
+        .card-btn:active { transform: scale(0.95); }
+
         .yellow-card { background: #f1c40f; color: black; }
         .red-card { background: #e74c3c; }
-        .btn-goal { background: #2ecc71; color: white; margin-top: 5px; }
-        .btn-miss { background: #95a5a6; color: white; margin-top: 5px; }
+        .btn-goal { background: #2ecc71; }
+        .btn-miss { background: #555; }
 
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin-top: 8px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-top: 6px; }
         .flex-row { display: flex; gap: 5px; margin-top: 10px; }
         
-        .penalty-section { background: #1c2128; padding: 15px; border-top: 2px solid #f39c12; }
+        #penaltyControlSection { display: none; background: #1c2128; padding: 15px; border-top: 3px solid #f39c12; }
     </style>
 </head>
 <body>
 
 <div id="main-content" style="width: 100%; max-width: 500px;">
     
-    <!-- TIMER CONTROL -->
+    <!-- TIMER -->
     <div class="card">
-        <div class="header"><i class="fas fa-clock"></i> Live Timer</div>
-        <div style="padding:15px; text-align:center;">
-            <div id="timerShow" style="font-size:40px; color:#f1c40f; font-weight:bold;">00:00</div>
+        <div class="header"><i class="fas fa-stopwatch"></i> Match Timer</div>
+        <div style="padding:15px; text-align:center; background:#0d1117;">
+            <div id="timerShow" style="font-size:35px; color:#f1c40f; font-family: monospace;">00:00</div>
             <div class="flex-row">
-                <button class="card-btn" style="background:#238636;" onclick="startTimer()">START</button>
-                <button class="card-btn" style="background:#f39c12;" onclick="pauseTimer()">PAUSE</button>
-                <button class="card-btn" style="background:#da3633;" onclick="resetTimer()">RESET</button>
+                <button class="card-btn" style="background:#238636;" onclick="startTimer()">Start</button>
+                <button class="card-btn" style="background:#f39c12;" onclick="pauseTimer()">Pause</button>
+                <button class="card-btn" style="background:#333;" onclick="resetTimer()">Reset Time</button>
             </div>
         </div>
     </div>
 
-    <!-- SCOREBOARD & CARDS -->
+    <!-- MAIN SCOREBOARD -->
     <div class="card">
-        <div class="header"><i class="fas fa-futbol"></i> Match Score & Cards</div>
+        <div class="header"><i class="fas fa-futbol"></i> Score & Player Cards</div>
         <div class="teams-container">
             <!-- Team A -->
             <div class="team-box" id="boxA">
-                <input type="color" id="colorA" value="#ffffff" oninput="updateDB()" style="width:100%; height:25px; border:none; background:none;">
-                <input type="text" id="nameA" class="std-input" placeholder="Home" oninput="updateDB()">
+                <input type="color" id="colorA" value="#ffffff" oninput="updateDB()" style="width:100%; height:20px; border:none; cursor:pointer;">
+                <input type="text" id="nameA" class="std-input" placeholder="Home Team" oninput="updateDB()">
                 <div class="score-val" id="dispA">0</div>
-                <div style="display:flex;">
+                <div style="display:flex; margin-bottom:8px;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
                 </div>
+                <!-- Player Detail for Card -->
+                <input type="text" id="playerA" class="std-input player-input" placeholder="Player No/Name">
                 <div class="grid-2">
-                    <button class="card-btn yellow-card" onclick="handleCard('A', 'Yellow')">YC</button>
-                    <button class="card-btn red-card" onclick="handleCard('A', 'Red')">RC</button>
+                    <button class="card-btn yellow-card" onclick="handleCard('A', 'Yellow')">Yellow</button>
+                    <button class="card-btn red-card" onclick="handleCard('A', 'Red')">Red</button>
                 </div>
             </div>
 
             <!-- Team B -->
             <div class="team-box" id="boxB">
-                <input type="color" id="colorB" value="#ffffff" oninput="updateDB()" style="width:100%; height:25px; border:none; background:none;">
-                <input type="text" id="nameB" class="std-input" placeholder="Away" oninput="updateDB()">
+                <input type="color" id="colorB" value="#ffffff" oninput="updateDB()" style="width:100%; height:20px; border:none; cursor:pointer;">
+                <input type="text" id="nameB" class="std-input" placeholder="Away Team" oninput="updateDB()">
                 <div class="score-val" id="dispB">0</div>
-                <div style="display:flex;">
+                <div style="display:flex; margin-bottom:8px;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
                 </div>
+                <!-- Player Detail for Card -->
+                <input type="text" id="playerB" class="std-input player-input" placeholder="Player No/Name">
                 <div class="grid-2">
-                    <button class="card-btn yellow-card" onclick="handleCard('B', 'Yellow')">YC</button>
-                    <button class="card-btn red-card" onclick="handleCard('B', 'Red')">RC</button>
+                    <button class="card-btn yellow-card" onclick="handleCard('B', 'Yellow')">Yellow</button>
+                    <button class="card-btn red-card" onclick="handleCard('B', 'Red')">Red</button>
                 </div>
             </div>
+        </div>
+    </div>
+
+    <!-- PENALTY CONTROL -->
+    <div class="card">
+        <div class="header" style="background:#f39c12; color:000;"><i class="fas fa-trophy"></i> Penalty Shootout</div>
+        <div style="padding:10px;">
+            <button id="pVisBtn" class="card-btn" style="background:#f39c12; color:black; width:100%;" onclick="togglePenaltyVis()">Show Penalty Box</button>
         </div>
         
-        <!-- Quick Actions -->
-        <div style="padding:10px; display:flex; gap:5px; background:#0d1117;">
-            <button class="card-btn" style="background:#1f6feb;" onclick="swapTeams()"><i class="fas fa-exchange-alt"></i> SWIPE TEAMS</button>
-            <button class="card-btn" style="background:#333;" onclick="resetMatch()"><i class="fas fa-redo"></i> RESET SCORE</button>
-        </div>
-    </div>
-
-    <!-- PENALTY BOX CONTROL -->
-    <div class="card">
-        <div class="header" style="background:#f39c12; color:black;"><i class="fas fa-list-ol"></i> Penalty Shootout</div>
-        <div style="padding:10px; text-align:center;">
-            <button id="pVisBtn" class="card-btn" style="background:#f39c12; color:black; width:100%;" onclick="togglePenaltyVis()">SHOW PENALTY OVERLAY</button>
-        </div>
-        <div class="penalty-section">
+        <div id="penaltyControlSection">
             <div class="grid-2">
                 <div>
-                    <span style="font-size:11px;">TEAM A:</span>
+                    <span style="font-size:10px;">TEAM A PENALTY</span>
                     <input type="text" id="pA" class="std-input" oninput="updateDB()">
-                    <div style="display:flex; gap:2px;">
-                        <button class="card-btn btn-goal" onclick="addPenalty('pA', '✅')">GOAL</button>
-                        <button class="card-btn btn-miss" onclick="addPenalty('pA', '❌')">MISS</button>
+                    <div class="flex-row">
+                        <button class="card-btn btn-goal" onclick="addPenalty('pA', '✅')">Goal</button>
+                        <button class="card-btn btn-miss" onclick="addPenalty('pA', '❌')">Miss</button>
                     </div>
                 </div>
                 <div>
-                    <span style="font-size:11px;">TEAM B:</span>
+                    <span style="font-size:10px;">TEAM B PENALTY</span>
                     <input type="text" id="pB" class="std-input" oninput="updateDB()">
-                    <div style="display:flex; gap:2px;">
-                        <button class="card-btn btn-goal" onclick="addPenalty('pB', '✅')">GOAL</button>
-                        <button class="card-btn btn-miss" onclick="addPenalty('pB', '❌')">MISS</button>
+                    <div class="flex-row">
+                        <button class="card-btn btn-goal" onclick="addPenalty('pB', '✅')">Goal</button>
+                        <button class="card-btn btn-miss" onclick="addPenalty('pB', '❌')">Miss</button>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- SHOW/HIDE & EVENTS -->
+    <!-- SYSTEM ACTIONS -->
     <div class="card">
-        <div class="header">Main Controls</div>
+        <div class="header" style="background:#333;">System Controls</div>
         <div style="padding:15px;">
-            <button id="visBtn" class="card-btn" style="background:#da3633; width:100%; margin-bottom:10px;" onclick="toggleVis('scoreVisible')">HIDE SCOREBOARD</button>
-            <input type="text" id="eventInp" class="std-input" placeholder="Live Event (e.g. Goal by No. 10)" oninput="updateDB()">
-            <input type="text" id="roundInp" class="std-input" placeholder="Match Round (1st Half)" oninput="updateDB()">
+            <div class="grid-2">
+                <button id="visBtn" class="card-btn" style="background:#da3633;" onclick="toggleVis('scoreVisible')">Hide Score</button>
+                <button class="card-btn" style="background:#1f6feb;" onclick="swapTeams()">Swap Teams</button>
+            </div>
+            <button class="card-btn" style="background:#e74c3c; width:100%; margin-top:10px; padding:12px;" onclick="fullReset()">
+                <i class="fas fa-trash-alt"></i> RESET ALL (Score, Penalty, Time)
+            </button>
+            
+            <input type="text" id="eventInp" class="std-input" placeholder="Live Event (Goal by...)" oninput="updateDB()" style="margin-top:15px;">
+            <input type="text" id="roundInp" class="std-input" placeholder="Round (e.g. Semi Final)" oninput="updateDB()">
         </div>
     </div>
 </div>
@@ -135,7 +144,7 @@
     const db = firebase.database().ref("matchData");
 
     let curA = 0, curB = 0, seconds = 0, timerInterval = null, sVis = true, pVis = false;
-    let playerYellowCards = {}; // ਪਲੇਅਰ ਦੇ ਕਾਰਡ ਟਰੈਕ ਕਰਨ ਲਈ
+    let yellowCounts = {};
 
     function loadData() {
         db.on("value", (snap) => {
@@ -154,14 +163,18 @@
                 document.getElementById('pB').value = data.penaltyB || "";
                 document.getElementById('eventInp').value = data.lastEvent || "";
                 document.getElementById('roundInp').value = data.round || "";
+                
                 if(!timerInterval) document.getElementById('timerShow').innerText = data.matchTime || "00:00";
-
                 document.getElementById('boxA').style.borderTopColor = data.colorA;
                 document.getElementById('boxB').style.borderTopColor = data.colorB;
                 
-                document.getElementById('visBtn').innerText = sVis ? "HIDE SCOREBOARD" : "SHOW SCOREBOARD";
+                // Toggle Button Text
+                document.getElementById('visBtn').innerText = sVis ? "Hide Score" : "Show Score";
                 document.getElementById('visBtn').style.background = sVis ? "#da3633" : "#238636";
-                document.getElementById('pVisBtn').innerText = pVis ? "HIDE PENALTY OVERLAY" : "SHOW PENALTY OVERLAY";
+                
+                // Penalty Panel Visibility
+                document.getElementById('penaltyControlSection').style.display = pVis ? "block" : "none";
+                document.getElementById('pVisBtn').innerText = pVis ? "Hide Penalty Box" : "Show Penalty Box";
             }
         });
     }
@@ -180,27 +193,27 @@
         });
     }
 
-    // --- SMART CARD LOGIC ---
+    // --- CARD LOGIC ---
     function handleCard(team, type) {
-        let pNum = prompt("Enter Player Jersey Number:");
-        if(!pNum) return;
-        let key = team + "_" + pNum;
-
+        let pDetail = document.getElementById('player' + team).value;
+        if(!pDetail) { alert("Please enter player number/name first!"); return; }
+        
+        let key = team + "_" + pDetail;
         if(type === 'Yellow') {
-            playerYellowCards[key] = (playerYellowCards[key] || 0) + 1;
-            if(playerYellowCards[key] >= 2) {
-                alert("Player " + pNum + " has 2 Yellows. Now RED CARD!");
-                document.getElementById('eventInp').value = "RED CARD: Team " + team + " (No." + pNum + ")";
+            yellowCounts[key] = (yellowCounts[key] || 0) + 1;
+            if(yellowCounts[key] >= 2) {
+                alert("Player " + pDetail + " received 2nd Yellow! Automatic RED.");
+                document.getElementById('eventInp').value = "RED CARD (2nd Yellow): " + pDetail;
             } else {
-                document.getElementById('eventInp').value = "YELLOW CARD: Team " + team + " (No." + pNum + ")";
+                document.getElementById('eventInp').value = "YELLOW CARD: " + pDetail;
             }
         } else {
-            document.getElementById('eventInp').value = "RED CARD: Team " + team + " (No." + pNum + ")";
+            document.getElementById('eventInp').value = "RED CARD: " + pDetail;
         }
         updateDB();
     }
 
-    // --- PENALTY BUTTONS ---
+    // --- PENALTY CONTROL ---
     function addPenalty(id, icon) {
         let inp = document.getElementById(id);
         inp.value = inp.value + icon;
@@ -211,21 +224,35 @@
         db.child('penaltyVisible').set(!pVis);
     }
 
-    // --- ACTIONS ---
+    // --- SYSTEM ACTIONS ---
     function changeScore(team, val) {
         let current = (team === 'scoreA' ? curA : curB);
-        let newVal = current + val; if(newVal < 0) newVal = 0;
+        let newVal = Math.max(0, current + val);
         db.update({ [team]: newVal });
     }
 
     function swapTeams() {
         let nA = document.getElementById('nameA').value;
         let nB = document.getElementById('nameB').value;
-        db.update({ nameA: nB, nameB: nA, scoreA: curB, scoreB: curA });
+        let cA = document.getElementById('colorA').value;
+        let cB = document.getElementById('colorB').value;
+        db.update({ nameA: nB, nameB: nA, colorA: cB, colorB: cA, scoreA: curB, scoreB: curA });
     }
 
-    function resetMatch() {
-        if(confirm("Reset Score?")) db.update({ scoreA: 0, scoreB: 0 });
+    function fullReset() {
+        if(confirm("Are you sure? This will reset Score, Penalty and Time!")) {
+            yellowCounts = {};
+            pauseTimer();
+            seconds = 0;
+            document.getElementById('timerShow').innerText = "00:00";
+            db.update({ 
+                scoreA: 0, scoreB: 0, 
+                penaltyA: "", penaltyB: "", 
+                matchTime: "00:00", 
+                lastEvent: "Match Reset",
+                penaltyVisible: false
+            });
+        }
     }
 
     function toggleVis(field) { db.child(field).set(!sVis); }
@@ -242,7 +269,7 @@
         }, 1000);
     }
     function pauseTimer() { clearInterval(timerInterval); timerInterval = null; updateDB(); }
-    function resetTimer() { pauseTimer(); seconds = 0; document.getElementById('timerShow').innerText = "00:00"; db.child('matchTime').set("00:00"); }
+    function resetTimer() { seconds = 0; document.getElementById('timerShow').innerText = "00:00"; db.child('matchTime').set("00:00"); }
 
     loadData();
 </script>
