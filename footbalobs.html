@@ -1,0 +1,177 @@
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <meta charset="UTF-8">
+    <title>Football Overlay with Goal Animation</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Arial Black', sans-serif; height: 1080px; width: 1920px; }
+        
+        /* ਮੇਨ ਸਕੋਰਬੋਰਡ */
+        #scoreboard {
+            position: absolute;
+            top: 40px;
+            left: 50px;
+            display: flex;
+            align-items: center;
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            padding: 5px 20px;
+            border-radius: 5px;
+            border-bottom: 4px solid #27ae60;
+            transform: translateX(-150%);
+            transition: 0.8s ease-in-out;
+            z-index: 10;
+        }
+        .show { transform: translateX(0) !important; }
+
+        .team { font-size: 26px; text-transform: uppercase; padding: 0 15px; }
+        .score { font-size: 38px; background: #27ae60; padding: 0 20px; border-radius: 4px; margin: 0 10px; min-width: 40px; text-align: center; }
+        .timer-box { padding-left: 20px; border-left: 2px solid #333; margin-left: 10px; }
+        .time { font-size: 26px; color: #f1c40f; display: block; }
+        .half { font-size: 12px; color: #aaa; text-transform: uppercase; }
+
+        /* GOAL ਐਨੀਮੇਸ਼ਨ ਸਕ੍ਰੀਨ */
+        #goal-overlay {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            display: none;
+            justify-content: center;
+            align-items: center;
+            flex-direction: column;
+            z-index: 100;
+            background: rgba(0,0,0,0.3);
+            backdrop-filter: blur(5px);
+        }
+
+        .goal-text {
+            font-size: 180px;
+            color: #fff;
+            text-shadow: 0 0 20px #27ae60, 0 0 40px #27ae60;
+            font-style: italic;
+            animation: goalBounce 0.6s infinite alternate;
+        }
+
+        .goal-team {
+            font-size: 60px;
+            color: #f1c40f;
+            background: rgba(0,0,0,0.8);
+            padding: 10px 50px;
+            border-radius: 50px;
+            margin-top: -30px;
+            border: 5px solid #fff;
+        }
+
+        @keyframes goalBounce {
+            from { transform: scale(1) rotate(-2deg); }
+            to { transform: scale(1.1) rotate(2deg); }
+        }
+
+        /* Card Popup (Same as before) */
+        #card-alert {
+            position: absolute;
+            top: 150px;
+            left: 50px;
+            padding: 20px 40px;
+            border-radius: 10px;
+            font-size: 35px;
+            font-weight: bold;
+            display: none;
+            z-index: 50;
+            animation: popIn 0.5s ease forwards;
+        }
+        .yellow-card-bg { background: #f1c40f; color: black; }
+        .red-card-bg { background: #e74c3c; color: white; }
+        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+    </style>
+</head>
+<body>
+
+    <div id="scoreboard">
+        <div class="team" id="nameA">HOME</div>
+        <div class="score" id="scoreA">0</div>
+        <div class="score" id="scoreB">0</div>
+        <div class="team" id="nameB">AWAY</div>
+        <div class="timer-box">
+            <span class="half" id="halfText">1st Half</span>
+            <span class="time" id="timeDisp">00:00</span>
+        </div>
+    </div>
+
+    <!-- Goal Popup -->
+    <div id="goal-overlay">
+        <div class="goal-text">GOAL!!!</div>
+        <div class="goal-team" id="celebrateTeam">TEAM NAME</div>
+    </div>
+
+    <!-- Card Popup -->
+    <div id="card-alert"></div>
+
+<script>
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database().ref("matchData");
+
+    let lastScoreA = 0;
+    let lastScoreB = 0;
+    let lastCardTime = 0;
+
+    db.on("value", (snap) => {
+        const data = snap.val();
+        if(!data) return;
+
+        // Scoreboard Display
+        const sb = document.getElementById('scoreboard');
+        if(data.showBoard !== false) sb.classList.add('show');
+        else sb.classList.remove('show');
+
+        document.getElementById('nameA').innerText = data.nameA || "HOME";
+        document.getElementById('nameB').innerText = data.nameB || "AWAY";
+        document.getElementById('timeDisp').innerText = data.matchTime || "00:00";
+        document.getElementById('halfText').innerText = data.half || "1st Half";
+
+        // Goal Logic: ਜੇ ਸਕੋਰ ਵਧਿਆ ਹੈ
+        if(data.scoreA > lastScoreA) {
+            triggerGoal(data.nameA || "HOME");
+        } else if(data.scoreB > lastScoreB) {
+            triggerGoal(data.nameB || "AWAY");
+        }
+        
+        lastScoreA = data.scoreA || 0;
+        lastScoreB = data.scoreB || 0;
+        document.getElementById('scoreA').innerText = lastScoreA;
+        document.getElementById('scoreB').innerText = lastScoreB;
+
+        // Card Logic
+        if(data.cardTime && data.cardTime > lastCardTime) {
+            showCard(data.lastCardPlayer, data.lastCardType);
+            lastCardTime = data.cardTime;
+        }
+    });
+
+    function triggerGoal(teamName) {
+        const goalDiv = document.getElementById('goal-overlay');
+        document.getElementById('celebrateTeam').innerText = teamName;
+        
+        goalDiv.style.display = 'flex';
+        
+        // 5 ਸੈਕਿੰਡ ਬਾਅਦ ਗੋਲ ਐਨੀਮੇਸ਼ਨ ਹਟਾ ਦਿਓ
+        setTimeout(() => {
+            goalDiv.style.display = 'none';
+        }, 5000);
+    }
+
+    function showCard(p, type) {
+        const c = document.getElementById('card-alert');
+        c.innerText = (type === 'yellow' ? '🟨 YELLOW CARD: ' : '🟥 RED CARD: ') + p;
+        c.className = type === 'yellow' ? 'yellow-card-bg' : 'red-card-bg';
+        c.style.display = 'block';
+        setTimeout(() => { c.style.display = 'none'; }, 4000);
+    }
+</script>
+</body>
+</html>
