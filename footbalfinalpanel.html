@@ -3,160 +3,205 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Admin - Final Layout</title>
+    <title>Tournament & Score Admin</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: 'Arial Black', sans-serif; background: #fff; padding: 20px; margin: 0; text-transform: uppercase; }
+        body { font-family: 'Segoe UI', sans-serif; background: #f0f2f5; padding: 10px; margin: 0; }
+        .card { background: #fff; border-radius: 12px; border: 1px solid #ddd; margin-bottom: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.05); overflow: hidden; max-width: 900px; margin-left: auto; margin-right: auto; }
+        .header { background: #1a73e8; color: white; padding: 12px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 13px; }
+        .content { padding: 15px; }
         
-        /* ਟੀਮ ਲਿਸਟ ਸਟਾਈਲ - ਬਿਲਕੁਲ ਸਿੱਧੀ */
-        .list-section { margin-top: 10px; width: 100%; }
-        .team-row { padding: 12px 0; border-bottom: 2px solid #eee; font-size: 22px; font-weight: 900; color: #000; }
+        .std-input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 12px; box-sizing: border-box; font-size: 15px; }
+        .btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; width: 100%; }
         
-        /* ਇਨਪੁਟ */
-        .std-input { width: 100%; padding: 15px; border: 3px solid #000; border-radius: 4px; margin-bottom: 10px; font-size: 18px; text-transform: uppercase; font-weight: bold; }
+        .btn-add { background: #28a745; color: white; margin-bottom: 15px; }
+        .btn-update { background: #1a73e8; color: white; font-size: 16px; }
+        .btn-score { background: #e91e63; color: white; font-size: 18px; margin-top: 5px; }
+        .btn-ticker { background: #ff5722; color: white; margin-bottom: 15px; height: 50px; font-size: 16px; }
+        .btn-mode { background: #eee; color: #333; font-size: 12px; }
+        .btn-active { border: 2px solid #000 !important; font-weight: 900 !important; background: #fff !important; color: #000 !important; }
         
-        /* ਬਟਨ */
-        .btn { border: none; border-radius: 4px; cursor: pointer; font-weight: 900; text-transform: uppercase; display: block; }
-        .btn-add { background: #28a745; color: white; width: 100%; padding: 15px; font-size: 16px; margin-bottom: 20px; }
+        .btn-win-circle { background: #ffc107; color: #000; border-radius: 50%; width: 40px; height: 40px; border: none; font-size: 20px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
 
-        /* ਵੱਡਾ ਬਟਨ (WADDA) */
-        .btn-declare { background: #ff5722; color: white; width: 100%; height: 80px; font-size: 28px; border: 4px solid #000; box-shadow: 0 5px 0 #000; margin-top: 15px; }
-        .btn-declare:active { transform: translateY(4px); box-shadow: none; }
-
-        /* ਛੋਟਾ ਬਟਨ (SHOTA) */
-        .btn-pending { background: #1a73e8; color: white; width: 180px; padding: 10px; font-size: 12px; margin-bottom: 15px; pointer-events: none; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .grid-effects { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
         
-        /* ਬਾਕੀ ਬਾਕਸਾਂ ਲਈ ਸਟਾਈਲ */
-        .admin-box { margin-top: 40px; padding: 20px; border: 3px solid #000; background: #f9f9f9; border-radius: 8px; }
-        h4 { margin: 0 0 15px 0; color: #000; font-size: 18px; text-decoration: underline; }
-        select { width: 100%; padding: 15px; border: 3px solid #000; border-radius: 4px; font-weight: 900; font-size: 20px; text-transform: uppercase; background: #fff; }
+        .box-list { background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; min-height: 150px; padding: 10px; max-height: 300px; overflow-y: auto; }
+        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 5px solid #1a73e8; }
         
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        .label-title { font-size: 11px; font-weight: bold; color: #555; margin-bottom: 6px; display: block; text-transform: uppercase; }
+        .large-select { height: 55px; border-radius: 8px; border: 2px solid #1a73e8; width: 100%; font-size: 16px; font-weight: bold; }
+        
+        /* Score Styling */
+        .score-input { font-size: 24px; text-align: center; font-weight: bold; color: #e91e63; border: 2px solid #e91e63; }
     </style>
 </head>
 <body>
 
-    <textarea id="bulkTeams" class="std-input" style="height: 80px;" placeholder="ENTER TEAMS (MUDKI-GILL, FZR-FDK)"></textarea>
-    <button class="btn btn-add" onclick="addBulkTeams()">ADD TEAMS TO LIST</button>
-
-    <div class="grid-2">
-        <div class="list-section">
-            <button class="btn btn-pending">PENDING RESULT</button>
-            <div id="playingList"></div>
-        </div>
-        <div class="list-section">
-            <button class="btn btn-pending" style="background:#28a745;">WINNERS BOX</button>
-            <div id="winnerList"></div>
+    <!-- 1. LIVE SCORE BOARD -->
+    <div class="card">
+        <div class="header" style="background: #e91e63;">Live Score Management</div>
+        <div class="content">
+            <div class="grid-2">
+                <div>
+                    <span class="label-title">Team A Name</span>
+                    <input type="text" id="scoreTeamA" class="std-input" placeholder="Team A">
+                    <span class="label-title">Score</span>
+                    <input type="number" id="pointsA" class="std-input score-input" value="0">
+                </div>
+                <div>
+                    <span class="label-title">Team B Name</span>
+                    <input type="text" id="scoreTeamB" class="std-input" placeholder="Team B">
+                    <span class="label-title">Score</span>
+                    <input type="number" id="pointsB" class="std-input score-input" value="0">
+                </div>
+            </div>
+            <button class="btn btn-score" onclick="updateScore()">Update Live Score</button>
         </div>
     </div>
 
-    <hr style="margin: 40px 0; border: 2px solid #000;">
-
-    <select id="winnerSelect"></select>
-    <button class="btn btn-declare" onclick="declareFinalResult()">DECLARE RESULT</button>
-
-    <div class="admin-box">
-        <h4>SCOREBOARD MATCH TIE</h4>
-        <div class="grid-2">
-            <select id="tie1"></select>
-            <select id="tie2"></select>
+    <!-- 2. TEAM MANAGEMENT -->
+    <div class="card">
+        <div class="header">Match List & Winners</div>
+        <div class="content">
+            <textarea id="bulkTeams" class="std-input" style="height: 60px;" placeholder="ਟੀਮਾਂ ਪਾਓ (e.g. 1-2, 3-4)"></textarea>
+            <button class="btn btn-add" onclick="addBulkTeams()">Add Teams to List</button>
+            <div class="grid-2">
+                <div><span class="label-title">Playing List</span><div id="playingList" class="box-list"></div></div>
+                <div><span class="label-title">Winners Box</span><div id="winnerList" class="box-list"></div></div>
+            </div>
         </div>
-        <button class="btn btn-add" style="background:#1a73e8; margin-top:15px;" onclick="updateTie()">UPDATE LIVE MATCH ON SCOREBOARD</button>
     </div>
 
-    <div class="admin-box" style="background: #fff;">
-        <h4>TICKER & TOURNAMENT INFO</h4>
-        <label style="font-size: 12px; font-weight: bold;">TOURNAMENT NAME</label>
-        <input type="text" id="tourName" class="std-input" placeholder="TOURNAMENT NAME">
-        
-        <label style="font-size: 12px; font-weight: bold;">NEXT EVENTS (INFO)</label>
-        <textarea id="nextEvents" class="std-input" style="height: 60px;" placeholder="NEXT EVENTS DETAIL"></textarea>
-        
-        <button class="btn btn-add" style="background: #333;" onclick="saveTicker()">SAVE ALL SETTINGS</button>
+    <!-- 3. TIES & NEXT PROGRAM -->
+    <div class="card">
+        <div class="header" style="background: #6f42c1;">Current Match Tie</div>
+        <div class="content">
+            <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
+                <select id="tie1" class="large-select"></select>
+                <select id="tie2" class="large-select"></select>
+            </div>
+            <button class="btn btn-update" onclick="updateTie()">Set Current Match Tie</button>
+        </div>
+    </div>
+
+    <!-- 4. TICKER & INFO -->
+    <div class="card">
+        <div class="header" style="background:#444;">Ticker Info & Display</div>
+        <div class="content">
+            <button id="tickerToggleBtn" class="btn btn-ticker" onclick="confirmAction('vis')">Ticker: ON/OFF</button>
+            <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
+            <input type="text" id="prizeList" class="std-input" placeholder="Prizes Information">
+            <textarea id="nextEvents" class="std-input" style="height: 60px;" placeholder="Other Events..."></textarea>
+            <button class="btn btn-update" style="background: #333;" onclick="confirmAction('info')">Update Ticker & Events</button>
+        </div>
     </div>
 
 <script>
+    // Firebase Setup
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("tickerData");
 
+    let tickerStatus = true;
+
+    // --- Score Update Function ---
+    function updateScore() {
+        db.update({
+            scoreA: document.getElementById('pointsA').value,
+            scoreB: document.getElementById('pointsB').value,
+            teamAName: document.getElementById('scoreTeamA').value,
+            teamBName: document.getElementById('scoreTeamB').value
+        }).then(() => alert("Score Updated!"));
+    }
+
+    // --- Existing Functions ---
+    function confirmAction(type) {
+        if (confirm("ਕੀ ਤੁਸੀਂ ਅਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
+            if (type === 'info') {
+                db.update({ 
+                    tournamentName: tourName.value, 
+                    prizes: prizeList.value,
+                    externalEvents: nextEvents.value 
+                });
+            } else if (type === 'vis') {
+                tickerStatus = !tickerStatus;
+                db.child('tickerVis').set(tickerStatus);
+            }
+        }
+    }
+
     function addBulkTeams() {
         const input = document.getElementById('bulkTeams').value;
         if(!input) return;
-        
         db.child('teamList').once('value', (snap) => {
-            let nextIdx = snap.numChildren() + 1;
+            let count = snap.numChildren();
             input.split(',').forEach(p => {
-                const name = p.trim().replace('-', ' VS ').toUpperCase();
+                const name = p.trim().replace('-', ' vs ');
                 if(name) {
-                    db.child('teamList').push().set({ name: name, matchIdx: nextIdx });
-                    nextIdx++;
+                    count++;
+                    const ref = db.child('teamList').push();
+                    ref.set({ id: ref.key, name: name, matchNum: count });
                 }
             });
         });
         document.getElementById('bulkTeams').value = "";
     }
 
-    function declareFinalResult() {
-        const win = document.getElementById('winnerSelect').value;
-        if(!win) return alert("SELECT TEAM FIRST!");
-        
-        db.child('winnerList').push().set({ name: win });
-        db.update({ finalWinner: win });
-        alert("RESULT DECLARED SUCCESSFULLY!");
-    }
-
     function updateTie() {
-        const t1 = document.getElementById('tie1').value;
-        const t2 = document.getElementById('tie2').value;
-        if(t1 && t2) {
-            db.update({ currentMatchTie: t1 + " VS " + t2 });
-            alert("SCOREBOARD UPDATED!");
+        if (tie1.value && tie2.value) {
+            db.update({ currentMatchTie: tie1.value + " VS " + tie2.value });
+            // Automatically set score names for convenience
+            document.getElementById('scoreTeamA').value = tie1.value;
+            document.getElementById('scoreTeamB').value = tie2.value;
         }
     }
 
-    function saveTicker() {
-        db.update({ 
-            tournamentName: document.getElementById('tourName').value.toUpperCase(), 
-            externalEvents: document.getElementById('nextEvents').value.toUpperCase() 
-        });
-        alert("SETTINGS SAVED!");
-    }
-
+    // --- Realtime Data Sync ---
     db.on("value", (snap) => {
         const data = snap.val() || {};
-        document.getElementById('tourName').value = data.tournamentName || "";
-        document.getElementById('nextEvents').value = data.externalEvents || "";
-        renderUI(data.teamList, data.winnerList);
+        
+        // Ticker Info
+        tourName.value = data.tournamentName || "";
+        prizeList.value = data.prizes || "";
+        nextEvents.value = data.externalEvents || "";
+        tickerStatus = !!data.tickerVis;
+        tickerToggleBtn.style.background = tickerStatus ? "#28a745" : "#dc3545";
+        tickerToggleBtn.innerText = tickerStatus ? "Ticker: SHOWING" : "Ticker: HIDDEN";
+
+        // Score Info
+        document.getElementById('pointsA').value = data.scoreA || 0;
+        document.getElementById('pointsB').value = data.scoreB || 0;
+        document.getElementById('scoreTeamA').value = data.teamAName || "";
+        document.getElementById('scoreTeamB').value = data.teamBName || "";
+
+        renderLists(data.teamList, data.winnerList);
     });
 
-    function renderUI(teamList, winnerList) {
-        const pList = document.getElementById('playingList');
-        const wList = document.getElementById('winnerList');
-        const wSelect = document.getElementById('winnerSelect');
-        const tie1 = document.getElementById('tie1');
-        const tie2 = document.getElementById('tie2');
-
-        pList.innerHTML = ""; wList.innerHTML = "";
-        let opts = `<option value="">SELECT TEAM</option>`;
-
-        if(teamList) {
-            let i = 1;
-            Object.values(teamList).forEach(t => {
-                pList.innerHTML += `<div class="team-row">${i}, ${t.name}</div>`;
-                opts += `<option value="${t.name}">${t.name}</option>`;
-                i++;
-            });
+    function moveToWin(id, name, matchNum) {
+        if (confirm(`ਕੀ ${name} ਜਿੱਤ ਗਈ ਹੈ?`)) {
+            db.child('teamList').child(id).remove();
+            const ref = db.child('winnerList').push();
+            ref.set({ id: ref.key, name: name, matchNum: matchNum });
         }
+    }
 
-        if(winnerList) {
-            Object.values(winnerList).forEach(w => {
-                wList.innerHTML += `<div class="team-row" style="color: #28a745;">${w.name} ★</div>`;
-            });
-        }
+    function renderLists(teamList, winnerList) {
+        playingList.innerHTML = ""; 
+        const winnerListDiv = document.getElementById('winnerList');
+        winnerListDiv.innerHTML = "";
+        let opts = `<option value="">Select Team</option>`;
+
+        if(teamList) Object.values(teamList).forEach(t => {
+            playingList.innerHTML += `<div class="team-item"><div><small>M-${t.matchNum}</small> <br><b>${t.name}</b></div><button class="btn-win-circle" onclick="moveToWin('${t.id}', '${t.name}', '${t.matchNum}')">✔</button></div>`;
+        });
         
-        wSelect.innerHTML = opts; tie1.innerHTML = opts; tie2.innerHTML = opts;
+        if(winnerList) Object.values(winnerList).forEach(w => {
+            winnerListDiv.innerHTML += `<div class="team-item"><div><b>${w.name}</b></div><span style="color:#28a745;">★</span></div>`;
+            opts += `<option value="${w.name}">${w.name}</option>`;
+        });
+        tie1.innerHTML = opts; tie2.innerHTML = opts;
     }
 </script>
 </body>
