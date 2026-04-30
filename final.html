@@ -1,124 +1,195 @@
-<div class="card">
-    <div class="header" style="background: #1a73e8;">TEAM MANAGEMENT & LISTS</div>
-    <div class="content">
-        <textarea id="bulkTeams" class="std-input" style="height: 60px; background:#121212; border:1px solid #333;" placeholder="ਟੀਮਾਂ ਪਾਓ (e.g. 1-2, 3-4)"></textarea>
-        <button class="btn btn-add" style="background: #28a745; margin-bottom: 20px;" onclick="addBulkTeams()">Add Teams</button>
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Admin - Master Panel</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0e14; color: white; padding: 10px; margin: 0; }
+        .card { background: #1c222d; border-radius: 12px; border: 1px solid #333; margin-bottom: 15px; box-shadow: 0 4px 10px rgba(0,0,0,0.3); overflow: hidden; max-width: 900px; margin-left: auto; margin-right: auto; }
+        .header { background: #1a73e8; color: white; padding: 12px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 13px; letter-spacing: 1px; }
+        .content { padding: 15px; }
         
-        <div class="grid-2">
-            <div>
-                <span class="label-title">PLAYING</span>
-                <div id="playingList" class="box-list" style="background: transparent; border:none; padding:0;">
+        .std-input { width: 100%; padding: 12px; border: 1px solid #333; border-radius: 6px; margin-bottom: 12px; box-sizing: border-box; font-size: 15px; background: #0b0e14; color: white; }
+        .btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; width: 100%; margin-bottom: 5px; }
+        
+        /* Team List Styling (image_2.png style) */
+        .team-card { background: #11151c; border-radius: 10px; padding: 15px; margin-bottom: 12px; border-left: 5px solid #1a73e8; display: flex; justify-content: space-between; align-items: center; box-shadow: 0 4px 8px rgba(0,0,0,0.2); }
+        .match-no { font-size: 10px; color: #888; text-transform: uppercase; margin-bottom: 4px; display: block; }
+        .team-names { font-size: 16px; font-weight: bold; color: #fff; }
+        .win-check { background: #ffc107; color: #000; width: 38px; height: 38px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 20px; cursor: pointer; border: none; box-shadow: 0 2px 5px rgba(0,0,0,0.3); }
+
+        /* Score & Info Grid */
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
+        .score-num { font-size: 45px; font-weight: bold; color: #78bc27; text-align: center; margin: 10px 0; background: #000; border-radius: 8px; padding: 5px; }
+        .box-list { background: #0b0e14; border: 1px solid #333; border-radius: 8px; min-height: 200px; padding: 10px; max-height: 400px; overflow-y: auto; }
+        .label-title { font-size: 11px; font-weight: bold; color: #aaa; margin-bottom: 6px; display: block; text-transform: uppercase; }
+        
+        select { background: #0b0e14; color: white; padding: 12px; border-radius: 6px; width: 100%; border: 1px solid #333; font-weight: bold; }
+    </style>
+</head>
+<body>
+
+    <!-- 1. SCOREBOARD (Top Section) -->
+    <div class="card">
+        <div class="header" style="background: #e91e63;">⚽ LIVE SCOREBOARD</div>
+        <div class="content">
+            <div class="grid-2">
+                <div style="text-align:center;">
+                    <span class="label-title">HOME</span>
+                    <input type="text" id="teamAName" class="std-input" placeholder="Team A">
+                    <div class="score-num" id="sA">0</div>
+                    <div class="grid-2">
+                        <button class="btn" style="background:#28a745;" onclick="changeScore('A', 1)">+</button>
+                        <button class="btn" style="background:#dc3545;" onclick="changeScore('A', -1)">-</button>
                     </div>
+                </div>
+                <div style="text-align:center;">
+                    <span class="label-title">AWAY</span>
+                    <input type="text" id="teamBName" class="std-input" placeholder="Team B">
+                    <div class="score-num" id="sB">0</div>
+                    <div class="grid-2">
+                        <button class="btn" style="background:#28a745;" onclick="changeScore('B', 1)">+</button>
+                        <button class="btn" style="background:#dc3545;" onclick="changeScore('B', -1)">-</button>
+                    </div>
+                </div>
             </div>
-            <div>
-                <span class="label-title">WINNERS</span>
-                <div id="winnerList" class="box-list" style="background: #0b0e14; border: 1px solid #333;">
-                    </div>
+            <button class="btn" style="background:#1a73e8; margin-top:10px;" onclick="updateScoreNames()">Update Live Names & Score</button>
+        </div>
+    </div>
+
+    <!-- 2. TEAM MANAGEMENT (image_2.png Style) -->
+    <div class="card">
+        <div class="header">TEAM MANAGEMENT & LISTS</div>
+        <div class="content">
+            <textarea id="bulkTeams" class="std-input" style="height: 60px;" placeholder="ਟੀਮਾਂ ਪਾਓ (e.g. 1-2, 3-4)"></textarea>
+            <button class="btn" style="background: #28a745;" onclick="addBulkTeams()">Add Teams</button>
+            <div class="grid-2">
+                <div><span class="label-title">PLAYING</span><div id="playingList" class="box-list" style="background:transparent; border:none;"></div></div>
+                <div><span class="label-title">WINNERS</span><div id="winnerList" class="box-list"></div></div>
             </div>
         </div>
     </div>
-</div>
 
-<style>
-    /* ਟੀਮ ਲਿਸਟ ਨੂੰ ਸੁੰਦਰ ਬਣਾਉਣ ਲਈ ਨਵਾਂ ਸਟਾਈਲ */
-    .team-card {
-        background: #1c222d;
-        border-radius: 10px;
-        padding: 15px;
-        margin-bottom: 12px;
-        border-left: 5px solid #1a73e8;
-        display: flex;
-        justify-content: space-between;
-        align-items: center;
-        box-shadow: 0 4px 8px rgba(0,0,0,0.2);
-    }
-    .team-info {
-        display: flex;
-        flex-direction: column;
-    }
-    .match-no {
-        font-size: 10px;
-        color: #888;
-        text-transform: uppercase;
-        margin-bottom: 4px;
-    }
-    .team-names {
-        font-size: 16px;
-        font-weight: bold;
-        color: #fff;
-    }
-    .win-check {
-        background: #ffc107;
-        color: #000;
-        width: 35px;
-        height: 35px;
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        font-size: 18px;
-        cursor: pointer;
-        border: none;
-    }
-    .winner-item {
-        padding: 10px;
-        border-bottom: 1px solid #333;
-        color: #28a745;
-        font-weight: bold;
-        display: flex;
-        justify-content: space-between;
-    }
-</style>
+    <!-- 3. MATCH TIES & NEXT -->
+    <div class="card">
+        <div class="header" style="background: #6f42c1;">MATCH TIES & NEXT</div>
+        <div class="content">
+            <div class="grid-2" style="margin-bottom:10px;">
+                <select id="tie1"></select>
+                <select id="tie2"></select>
+            </div>
+            <button class="btn" style="background:#1a73e8;" onclick="updateTie()">Update Match Tie</button>
+            <input type="text" id="nextProg" class="std-input" style="margin-top:10px;" placeholder="ਅਗਲਾ ਪ੍ਰੋਗਰਾਮ...">
+            <button class="btn" style="background:#e67e22;" onclick="confirmAction('nextProg')">Update Next Program</button>
+        </div>
+    </div>
+
+    <!-- 4. TICKER INFO -->
+    <div class="card">
+        <div class="header" style="background:#444;">TICKER INFO & VISIBILITY</div>
+        <div class="content">
+            <button id="tickerToggleBtn" class="btn" style="height:50px;" onclick="confirmAction('vis')">Ticker: ON/OFF</button>
+            <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
+            <input type="text" id="prizeList" class="std-input" placeholder="Prizes">
+            <button class="btn" style="background:#333;" onclick="confirmAction('info')">Update Ticker Info</button>
+        </div>
+    </div>
 
 <script>
-    // ਲਿਸਟ ਰੈਂਡਰ ਕਰਨ ਵਾਲਾ ਸਹੀ ਫੰਕਸ਼ਨ
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database().ref("tickerData");
+
+    let tickerStatus = true;
+
+    // Score Functions
+    function changeScore(team, val) {
+        db.child(team === 'A' ? 'scoreA' : 'scoreB').transaction(curr => Math.max(0, (curr || 0) + val));
+    }
+
+    function updateScoreNames() {
+        db.update({ teamAName: teamAName.value, teamBName: teamBName.value });
+        alert("Names Updated!");
+    }
+
+    function confirmAction(type) {
+        if (confirm("ਕੀ ਤੁਸੀਂ Update ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
+            if (type === 'info') db.update({ tournamentName: tourName.value, prizes: prizeList.value });
+            else if (type === 'nextProg') db.update({ nextProgram: nextProg.value });
+            else if (type === 'vis') db.child('tickerVis').set(!tickerStatus);
+        }
+    }
+
+    function addBulkTeams() {
+        const input = document.getElementById('bulkTeams').value;
+        if(!input) return;
+        db.child('teamList').once('value', (snap) => {
+            let count = snap.numChildren();
+            input.split(',').forEach(p => {
+                const name = p.trim().replace('-', ' vs ');
+                if(name) { count++; const ref = db.child('teamList').push(); ref.set({ id: ref.key, name: name, matchNum: count }); }
+            });
+        });
+        document.getElementById('bulkTeams').value = "";
+    }
+
+    function updateTie() {
+        if (tie1.value && tie2.value) {
+            db.update({ currentMatchTie: tie1.value + " VS " + tie2.value });
+            teamAName.value = tie1.value;
+            teamBName.value = tie2.value;
+            updateScoreNames();
+        }
+    }
+
+    // Real-time Sync
+    db.on("value", (snap) => {
+        const data = snap.val() || {};
+        
+        // Scores
+        document.getElementById('sA').innerText = data.scoreA || 0;
+        document.getElementById('sB').innerText = data.scoreB || 0;
+        teamAName.value = data.teamAName || "";
+        teamBName.value = data.teamBName || "";
+
+        // Ticker Info
+        tourName.value = data.tournamentName || "";
+        prizeList.value = data.prizes || "";
+        nextProg.value = data.nextProgram || "";
+        tickerStatus = !!data.tickerVis;
+        tickerToggleBtn.style.background = tickerStatus ? "#28a745" : "#dc3545";
+        tickerToggleBtn.innerText = tickerStatus ? "Ticker: SHOWING" : "Ticker: HIDDEN";
+
+        renderLists(data.teamList, data.winnerList);
+    });
+
     function renderLists(teamList, winnerList) {
         const pList = document.getElementById('playingList');
         const wList = document.getElementById('winnerList');
-        pList.innerHTML = ""; 
-        wList.innerHTML = "";
-        
+        pList.innerHTML = ""; wList.innerHTML = "";
         let opts = `<option value="">Select Team</option>`;
-        let matchCounter = 1; // ਨੰਬਰਿੰਗ 1 ਤੋਂ ਸ਼ੁਰੂ ਕਰਨ ਲਈ
+        let mCount = 1;
 
-        if(teamList) {
-            Object.values(teamList).forEach(t => {
-                pList.innerHTML += `
-                    <div class="team-card">
-                        <div class="team-info">
-                            <span class="match-no">Match ${matchCounter}</span>
-                            <span class="team-names">${t.name}</span>
-                        </div>
-                        <button class="win-check" onclick="moveToWin('${t.id}', '${t.name}')">✔</button>
-                    </div>
-                `;
-                matchCounter++;
-            });
-        }
-
-        if(winnerList) {
-            Object.values(winnerList).forEach(w => {
-                wList.innerHTML += `
-                    <div class="winner-item">
-                        <span>${w.name}</span>
-                        <span>★</span>
-                    </div>
-                `;
-                opts += `<option value="${w.name}">${w.name}</option>`;
-            });
-        }
-        
-        // Match Tie ਵਾਲੇ Select Boxes ਨੂੰ ਅਪਡੇਟ ਕਰੋ
-        if(document.getElementById('tie1')) {
-            document.getElementById('tie1').innerHTML = opts;
-            document.getElementById('tie2').innerHTML = opts;
-        }
+        if(teamList) Object.values(teamList).forEach(t => {
+            pList.innerHTML += `<div class="team-card"><div class="team-info"><span class="match-no">Match ${mCount}</span><span class="team-names">${t.name}</span></div><button class="win-check" onclick="moveToWin('${t.id}','${t.name}')">✔</button></div>`;
+            mCount++;
+        });
+        if(winnerList) Object.values(winnerList).forEach(w => {
+            wList.innerHTML += `<div style="padding:10px; border-bottom:1px solid #333; color:#28a745; font-weight:bold;">${w.name} ★</div>`;
+            opts += `<option value="${w.name}">${w.name}</option>`;
+        });
+        tie1.innerHTML = opts; tie2.innerHTML = opts;
     }
 
     function moveToWin(id, name) {
-        if(confirm("ਕੀ " + name + " ਜਿੱਤ ਗਈ ਹੈ?")) {
+        if(confirm(name + " ਜਿੱਤ ਗਈ ਹੈ?")) {
             db.child('teamList').child(id).remove();
             db.child('winnerList').push().set({ name: name });
         }
     }
 </script>
+</body>
+</html>
