@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Tournament Admin - Auto Paunte</title>
+    <title>Tournament Admin - Next Events Added</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
@@ -15,22 +15,21 @@
         .std-input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 12px; box-sizing: border-box; font-size: 15px; }
         .btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; text-transform: uppercase; transition: 0.3s; width: 100%; }
         
-        .btn-add { background: #28a745; color: white; width: 100%; margin-bottom: 15px; }
-        .btn-update { background: #1a73e8; color: white; font-size: 16px; width: 100%; }
-        .btn-ticker { background: #ff5722; color: white; margin-bottom: 15px; height: 50px; font-size: 16px; width: 100%; }
-        .btn-mode { background: #eee; color: #333; font-size: 12px; width: 100%; }
+        .btn-add { background: #28a745; color: white; margin-bottom: 15px; }
+        .btn-update { background: #1a73e8; color: white; font-size: 16px; }
+        .btn-ticker { background: #ff5722; color: white; margin-bottom: 15px; height: 50px; font-size: 16px; }
+        .btn-mode { background: #eee; color: #333; font-size: 12px; }
         .btn-active { border: 2px solid #000 !important; font-weight: 900 !important; background: #fff !important; color: #000 !important; }
         .btn-win { background: #ffc107; color: #000; font-size: 12px; padding: 8px 12px; border-radius: 4px; font-weight: bold; width: auto; }
 
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
         .grid-effects { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
         
-        .box-list { background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; min-height: 250px; padding: 10px; max-height: 450px; overflow-y: auto; }
-        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 12px; margin-bottom: 8px; border-radius: 8px; border-left: 5px solid #1a73e8; box-shadow: 0 2px 4px rgba(0,0,0,0.08); }
-        .team-name { font-weight: 600; font-size: 14px; color: #333; }
-        .paunta-label { color: #1a73e8; font-weight: 800; font-size: 12px; display: block; margin-bottom: 2px; }
+        .box-list { background: #f8f9fa; border: 1px solid #eee; border-radius: 8px; min-height: 200px; padding: 10px; max-height: 400px; overflow-y: auto; }
+        .team-item { display: flex; justify-content: space-between; align-items: center; background: #fff; padding: 10px; margin-bottom: 8px; border-radius: 8px; border-left: 5px solid #1a73e8; }
         
         .label-title { font-size: 11px; font-weight: bold; color: #555; margin-bottom: 6px; display: block; text-transform: uppercase; }
+        .paunta-label { color: #1a73e8; font-weight: 800; font-size: 11px; display: block; }
         .large-select { height: 55px; border-radius: 8px; border: 2px solid #1a73e8; width: 100%; font-size: 16px; font-weight: bold; }
     </style>
 </head>
@@ -40,36 +39,44 @@
     <div class="card">
         <div class="header">Team Management (Auto Paunte)</div>
         <div class="content">
-            <textarea id="bulkTeams" class="std-input" style="height: 60px;" placeholder="ਟੀਮਾਂ ਲਿਖੋ (e.g. 1-2, 3-4, 5-6)"></textarea>
-            <button class="btn btn-add" onclick="addBulkTeams()">Add Teams to List</button>
+            <textarea id="bulkTeams" class="std-input" style="height: 60px;" placeholder="ਟੀਮਾਂ ਲਿਖੋ (e.g. 1-2, 3-4)"></textarea>
+            <button class="btn btn-add" onclick="addBulkTeams()">Add Teams</button>
             <div class="grid-2">
-                <div><span class="label-title">Playing (ਪਾਉਂਟੇ)</span><div id="playingList" class="box-list"></div></div>
+                <div><span class="label-title">Playing</span><div id="playingList" class="box-list"></div></div>
                 <div><span class="label-title">Winners</span><div id="winnerList" class="box-list"></div></div>
             </div>
         </div>
     </div>
 
-    <!-- 2. TIES & NEXT PROGRAM -->
+    <!-- 2. NEXT EVENTS (HOR JGA DE PROGRAM) -->
     <div class="card">
-        <div class="header" style="background: #6f42c1;">Match Ties & Next Program</div>
+        <div class="header" style="background: #8e44ad;">Next Events (ਹੋਰ ਜਗ੍ਹਾ ਹੋਣ ਵਾਲੇ ਪ੍ਰੋਗਰਾਮ)</div>
+        <div class="content">
+            <span class="label-title">Events List</span>
+            <textarea id="nextEvents" class="std-input" style="height: 80px;" placeholder="e.g. 10 ਮਈ - ਪਿੰਡ ਕਾਲਾ ਸੰਘਿਆਂ, 15 ਮਈ - ਨਕੋਦਰ ਕਬੱਡੀ ਕੱਪ..."></textarea>
+            <button class="btn btn-update" style="background: #732d91;" onclick="confirmAction('events')">Update Events List</button>
+        </div>
+    </div>
+
+    <!-- 3. TIES & CURRENT NEXT PROGRAM -->
+    <div class="card">
+        <div class="header" style="background: #6f42c1;">Match Ties & Live Schedule</div>
         <div class="content">
             <div style="display:grid; grid-template-columns: 1fr 1fr; gap:10px; margin-bottom:10px;">
-                <select id="tie1" class="large-select"><option>Select Team 1</option></select>
-                <select id="tie2" class="large-select"><option>Select Team 2</option></select>
+                <select id="tie1" class="large-select"><option>Team 1</option></select>
+                <select id="tie2" class="large-select"><option>Team 2</option></select>
             </div>
             <button class="btn btn-update" style="margin-bottom:15px;" onclick="updateTie()">Update Next Match Tie</button>
             
-            <hr style="border: 0; border-top: 1px solid #eee; margin: 10px 0;">
-            
-            <span class="label-title">Next Program Detail</span>
-            <input type="text" id="nextProg" class="std-input" placeholder="Semi-Final, Final, etc.">
+            <span class="label-title">This Tournament's Next Program</span>
+            <input type="text" id="nextProg" class="std-input" placeholder="e.g. Semi-Final or Singer Entry">
             <button class="btn btn-update" style="background: #e67e22;" onclick="confirmAction('nextProg')">Update Next Program</button>
         </div>
     </div>
 
-    <!-- 3. WATERMARK & EFFECTS -->
+    <!-- 4. WATERMARK & EFFECTS -->
     <div class="card">
-        <div class="header" style="background: #2c3e50;">Watermark & Effects (Secure)</div>
+        <div class="header" style="background: #2c3e50;">Watermark & Effects</div>
         <div class="content">
             <span class="label-title">Watermark Text</span>
             <div style="display:flex; gap:10px;">
@@ -84,14 +91,14 @@
         </div>
     </div>
 
-    <!-- 4. TICKER INFO -->
+    <!-- 5. TICKER INFO -->
     <div class="card">
         <div class="header" style="background:#444;">Ticker Info & Visibility</div>
         <div class="content">
             <button id="tickerToggleBtn" class="btn btn-ticker" onclick="confirmAction('vis')">Ticker: ON/OFF</button>
             <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
             <input type="text" id="prizeList" class="std-input" placeholder="Prizes">
-            <input type="text" id="contactInfo" class="std-input" placeholder="Contact Info">
+            <input type="text" id="contactInfo" class="std-input" placeholder="Contact">
             <button class="btn btn-update" style="background: #333;" onclick="confirmAction('info')">Update All Ticker Info</button>
         </div>
     </div>
@@ -104,11 +111,13 @@
     let tickerStatus = true;
     let effectStates = { scroll: false, blink: false, fullscreen: false };
 
-    // --- SECURE CONFIRMATION ---
     function confirmAction(type, subType = null) {
         if (confirm("ਕੀ ਤੁਸੀਂ ਅਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
             if (type === 'info') {
                 db.update({ tournamentName: tourName.value, prizes: prizeList.value, contact: contactInfo.value });
+            } else if (type === 'events') {
+                db.update({ externalEvents: nextEvents.value });
+                alert("Next Events List Updated!");
             } else if (type === 'nextProg') {
                 db.update({ nextProgram: nextProg.value });
             } else if (type === 'wm') {
@@ -123,25 +132,17 @@
         }
     }
 
-    // --- TEAM LOGIC (ADD PAUNTE LABEL) ---
     function addBulkTeams() {
         const input = document.getElementById('bulkTeams').value;
         if(!input) return;
-        
-        // Get existing count to continue numbering
-        db.child('teamList').once('value', (snapshot) => {
-            let currentCount = snapshot.numChildren();
-            
-            input.split(',').forEach((p, index) => {
+        db.child('teamList').once('value', (snap) => {
+            let count = snap.numChildren();
+            input.split(',').forEach(p => {
                 const name = p.trim().replace('-', ' vs ');
                 if(name) {
-                    currentCount++;
+                    count++;
                     const ref = db.child('teamList').push();
-                    ref.set({ 
-                        id: ref.key, 
-                        name: name,
-                        paunta: "ਪਾਉਂਟੇ " + currentCount 
-                    });
+                    ref.set({ id: ref.key, name: name, paunta: "ਪਾਉਂਟੇ " + count });
                 }
             });
         });
@@ -152,7 +153,6 @@
         if (tie1.value && tie2.value) db.update({ currentMatchTie: tie1.value + " VS " + tie2.value });
     }
 
-    // --- DATA SYNC ---
     db.on("value", (snap) => {
         const data = snap.val() || {};
         tourName.value = data.tournamentName || "";
@@ -160,6 +160,7 @@
         contactInfo.value = data.contact || "";
         wmText.value = data.watermarkText || "";
         nextProg.value = data.nextProgram || "";
+        nextEvents.value = data.externalEvents || "";
         
         tickerStatus = !!data.tickerVis;
         tickerToggleBtn.innerText = tickerStatus ? "Ticker: SHOWING" : "Ticker: HIDDEN";
@@ -183,30 +184,15 @@
     }
 
     function renderLists(teamList, winnerList) {
-        playingList.innerHTML = ""; winnerListDiv = document.getElementById('winnerList');
-        winnerListDiv.innerHTML = "";
+        playingList.innerHTML = ""; const winDiv = document.getElementById('winnerList');
+        winDiv.innerHTML = "";
         let opts = `<option value="">Select Team</option>`;
 
         if(teamList) Object.values(teamList).forEach(t => {
-            playingList.innerHTML += `
-                <div class="team-item">
-                    <div>
-                        <span class="paunta-label">${t.paunta}</span>
-                        <span class="team-name">${t.name}</span>
-                    </div>
-                    <button class="btn-win" onclick="moveToWin('${t.id}', '${t.name}', '${t.paunta}')">WIN</button>
-                </div>`;
+            playingList.innerHTML += `<div class="team-item"><div><span class="paunta-label">${t.paunta}</span><b>${t.name}</b></div><button class="btn-win" onclick="moveToWin('${t.id}', '${t.name}', '${t.paunta}')">WIN</button></div>`;
         });
-        
         if(winnerList) Object.values(winnerList).forEach(w => {
-            winnerListDiv.innerHTML += `
-                <div class="team-item">
-                    <div>
-                        <span class="paunta-label">${w.paunta}</span>
-                        <span class="team-name">${w.name}</span>
-                    </div>
-                    <span style="color:#28a745; font-weight:bold;">✔</span>
-                </div>`;
+            winDiv.innerHTML += `<div class="team-item"><div><span class="paunta-label">${w.paunta}</span><b>${w.name}</b></div><span style="color:green">✔</span></div>`;
             opts += `<option value="${w.name}">${w.paunta}: ${w.name}</option>`;
         });
         tie1.innerHTML = opts; tie2.innerHTML = opts;
