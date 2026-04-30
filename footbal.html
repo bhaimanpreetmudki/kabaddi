@@ -3,27 +3,22 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Football Admin Pro - Manpreet Mudki</title>
+    <title>Football Admin - Fixed</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         .card { background: #16191c; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #333; overflow: hidden; margin-bottom: 12px; box-sizing: border-box; }
         .header { background: #27ae60; color: white; padding: 8px; text-align: center; font-weight: bold; font-size: 13px; text-transform: uppercase; }
-        
         .teams-container { display: flex; padding: 10px; gap: 8px; background: #1a1d21; }
         .team-box { flex: 1; text-align: center; background: #111; padding: 10px; border-radius: 10px; border: 1px solid #222; }
         .team-input { width: 95%; padding: 8px; background: #000; border: 1px solid #333; color: white; border-radius: 4px; text-align: center; margin-bottom: 5px; font-weight: bold; font-size: 13px; box-sizing: border-box; }
-        .shirt-color { width: 100%; height: 30px; border: 1px solid #444; background: none; cursor: pointer; margin-bottom: 8px; border-radius: 4px; }
-        
         .score-display { font-size: 55px; font-weight: 900; color: white; margin: 5px 0; }
         .btn-group { display: flex; gap: 4px; margin-bottom: 5px; }
         .btn-action { flex: 1; padding: 12px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; font-size: 13px; }
         .btn-plus { background: #2ecc71; } .btn-minus { background: #34495e; }
         .btn-yellow { background: #f1c40f; color: black; } .btn-red { background: #e74c3c; }
-        
         .timer-display { font-size: 35px; color: #2ecc71; text-align: center; font-family: monospace; font-weight: bold; padding: 10px; background: #000; border-radius: 8px; border: 1px solid #222; margin-bottom: 10px; }
-        
         .card-history { margin-top: 10px; background: #000; border-radius: 4px; padding: 5px; min-height: 40px; text-align: left; border: 1px dashed #444; }
         .c-tag { display: inline-block; margin: 2px; padding: 2px 6px; border-radius: 3px; font-size: 11px; font-weight: bold; }
         .y-tag { background: #f1c40f; color: black; } .r-tag { background: #e74c3c; color: white; }
@@ -32,8 +27,7 @@
 <body>
 
 <div style="width: 100%; max-width: 500px;">
-
-    <!-- Timer & Duration Config -->
+    <!-- Timer -->
     <div class="card">
         <div style="padding: 15px;">
             <div style="display: flex; gap: 10px; margin-bottom: 10px;">
@@ -42,47 +36,60 @@
                     <input type="number" id="matchMins" class="team-input" value="45" oninput="updateDB()">
                 </div>
                 <div style="flex: 1;">
-                    <label style="font-size: 10px; color: #888;">LIVE CLOCK</label>
+                    <label style="font-size: 10px; color: #888;">CLOCK</label>
                     <div id="timerDisplay" class="timer-display" style="font-size: 20px; padding: 6px;">00:00</div>
                 </div>
             </div>
             <div class="btn-group">
                 <button id="startBtn" class="btn-action" style="background: #27ae60;" onclick="startTimer()">START</button>
                 <button id="pauseBtn" class="btn-action" style="background: #e67e22;" onclick="pauseTimer()">PAUSE</button>
-                <button class="btn-action" style="background: #34495e;" onclick="resetTimer()">RESET</button>
+                <button class="btn-action" style="background: #34495e;" onclick="resetTimer()">RESET TIME</button>
             </div>
             <button id="boardToggle" class="btn-action" style="width:100%; margin-top:8px; background:#2980b9;" onclick="toggleBoard()">Board ON/OFF</button>
         </div>
     </div>
 
-    <!-- Teams Control -->
+    <!-- Teams -->
     <div class="card">
         <div class="header">Match Controller</div>
         <div class="teams-container">
             <div class="team-box">
                 <input type="text" id="nameA" class="team-input" placeholder="Team A" oninput="updateDB()">
-                <input type="color" id="colorA" class="shirt-color" oninput="updateDB()">
+                <input type="color" id="colorA" style="width:100%;" oninput="updateDB()">
                 <div class="score-display" id="dispA">0</div>
-                <div class="btn-group"><button class="btn-action btn-minus" onclick="changeVal('scoreA', -1)">-</button><button class="btn-action btn-plus" onclick="changeVal('scoreA', 1)">+</button></div>
+                <div class="btn-group">
+                    <button class="btn-action btn-minus" onclick="changeVal('scoreA', -1)">-</button>
+                    <button class="btn-action btn-plus" onclick="changeVal('scoreA', 1)">+</button>
+                </div>
                 <input type="text" id="pInputA" class="team-input" placeholder="No/Name" style="background:#222;">
-                <div class="btn-group"><button class="btn-action btn-yellow" onclick="giveCard('A', 'yellow')">YEL</button><button class="btn-action btn-red" onclick="giveCard('A', 'red')">RED</button></div>
+                <div class="btn-group">
+                    <button class="btn-action btn-yellow" onclick="giveCard('A', 'yellow')">YEL</button>
+                    <button class="btn-action btn-red" onclick="giveCard('A', 'red')">RED</button>
+                </div>
                 <div class="card-history" id="histA"></div>
             </div>
             <div class="team-box">
                 <input type="text" id="nameB" class="team-input" placeholder="Team B" oninput="updateDB()">
-                <input type="color" id="colorB" class="shirt-color" oninput="updateDB()">
+                <input type="color" id="colorB" style="width:100%;" oninput="updateDB()">
                 <div class="score-display" id="dispB">0</div>
-                <div class="btn-group"><button class="btn-action btn-minus" onclick="changeVal('scoreB', -1)">-</button><button class="btn-action btn-plus" onclick="changeVal('scoreB', 1)">+</button></div>
+                <div class="btn-group">
+                    <button class="btn-action btn-minus" onclick="changeVal('scoreB', -1)">-</button>
+                    <button class="btn-action btn-plus" onclick="changeVal('scoreB', 1)">+</button>
+                </div>
                 <input type="text" id="pInputB" class="team-input" placeholder="No/Name" style="background:#222;">
-                <div class="btn-group"><button class="btn-action btn-yellow" onclick="giveCard('B', 'yellow')">YEL</button><button class="btn-action btn-red" onclick="giveCard('B', 'red')">RED</button></div>
+                <div class="btn-group">
+                    <button class="btn-action btn-yellow" onclick="giveCard('B', 'yellow')">YEL</button>
+                    <button class="btn-action btn-red" onclick="giveCard('B', 'red')">RED</button>
+                </div>
                 <div class="card-history" id="histB"></div>
             </div>
         </div>
-        <div style="padding: 10px; display: flex; flex-direction: column; gap: 8px;">
-            <button class="btn-action" style="background:#2980b9;" onclick="swapTeams()">🔄 SWAP TEAMS</button>
-            <button id="pToggleBtn" class="btn-action" style="background:#e67e22;" onclick="togglePenaltyMode()">⚽ PENALTY BOX</button>
+        <div style="padding: 10px;">
+            <button id="pToggleBtn" class="btn-action" style="background:#e67e22; width:100%;" onclick="togglePenaltyMode()">⚽ OPEN PENALTY BOX</button>
         </div>
     </div>
+
+    <button class="btn-action" style="background:#c0392b; width:100%; padding:15px; margin-top:10px;" onclick="resetFullMatch()">RESET FULL MATCH</button>
 </div>
 
 <script>
@@ -108,12 +115,14 @@
 
             if(current.timerRunning) {
                 if(!timerInt) timerInt = setInterval(() => db.update({ matchSeconds: (current.matchSeconds || 0) + 1 }), 1000);
-                document.getElementById('startBtn').style.opacity = "0.5";
-            } else {
-                clearInterval(timerInt); timerInt = null;
-                document.getElementById('startBtn').style.opacity = "1";
-            }
-            updateHistUI('A', current.cardsA || []); updateHistUI('B', current.cardsB || []);
+            } else { clearInterval(timerInt); timerInt = null; }
+
+            const pBtn = document.getElementById('pToggleBtn');
+            pBtn.innerText = current.penaltyMode ? "⚽ CLOSE PENALTY BOX" : "⚽ OPEN PENALTY BOX";
+            pBtn.style.background = current.penaltyMode ? "#c0392b" : "#e67e22";
+
+            updateHistUI('A', current.cardsA || []);
+            updateHistUI('B', current.cardsB || []);
         });
     }
 
@@ -126,20 +135,36 @@
     function giveCard(team, type) {
         const p = document.getElementById('pInput' + team).value;
         if(!p) return;
+        
         let teamCards = current['cards' + team] || [];
-        teamCards.push({ p: p, type: type });
-        db.update({ ['cards' + team]: teamCards, lastCardPlayer: p, lastCardType: type, cardTime: Date.now() });
+        let yellowCount = teamCards.filter(c => c.p === p && c.type === 'yellow').length;
+        
+        let finalType = type;
+        if(type === 'yellow' && yellowCount >= 1) {
+            finalType = 'red'; // Auto red on 2nd yellow
+            alert("Player " + p + " already has a Yellow! Automatic Red.");
+        }
+
+        teamCards.push({ p: p, type: finalType });
+        db.update({ ['cards' + team]: teamCards, lastCardPlayer: p, lastCardType: finalType, cardTime: Date.now() });
         document.getElementById('pInput' + team).value = "";
     }
 
-    function changeVal(key, val) { db.update({ [key]: ((current[key] || 0) + val) < 0 ? 0 : (current[key] || 0) + val }); }
+    function changeVal(key, val) { 
+        let nv = (current[key] || 0) + val;
+        db.update({ [key]: nv < 0 ? 0 : nv, goalTrigger: val > 0 ? Date.now() : 0, lastGoalTeam: (key === 'scoreA' ? current.nameA : current.nameB) });
+    }
     function startTimer() { db.update({ timerRunning: true }); }
     function pauseTimer() { db.update({ timerRunning: false }); }
-    function resetTimer() { if(confirm("Reset?")) db.update({ matchSeconds: 0, timerRunning: false }); }
+    function resetTimer() { db.update({ matchSeconds: 0, timerRunning: false }); }
     function toggleBoard() { db.update({ showBoard: current.showBoard === false }); }
     function togglePenaltyMode() { db.update({ penaltyMode: !current.penaltyMode }); }
     function updateDB() { db.update({ nameA: document.getElementById('nameA').value, nameB: document.getElementById('nameB').value, teamColorA: document.getElementById('colorA').value, teamColorB: document.getElementById('colorB').value, matchDuration: document.getElementById('matchMins').value }); }
-    function swapTeams() { db.update({ nameA: current.nameB, nameB: current.nameA, scoreA: current.scoreB, scoreB: current.scoreA, teamColorA: current.teamColorB, teamColorB: current.teamColorA, cardsA: current.cardsB || [], cardsB: current.cardsA || [] }); }
+
+    function resetFullMatch() {
+        if(!confirm("Reset everything?")) return;
+        db.set({ scoreA: 0, scoreB: 0, matchSeconds: 0, timerRunning: false, showBoard: true, penaltyMode: false, cardsA: [], cardsB: [], nameA: "HOME", nameB: "AWAY", teamColorA: "#ff0000", teamColorB: "#0000ff" });
+    }
     loadData();
 </script>
 </body>
