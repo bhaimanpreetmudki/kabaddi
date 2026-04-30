@@ -2,93 +2,71 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>Sleek Wide Overlay - Manpreet Singh</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
         body { margin: 0; padding: 0; font-family: 'Arial Black', sans-serif; color: white; width: 1920px; height: 1080px; overflow: hidden; }
         
-        /* Goal Animation */
-        #goal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: none; align-items: center; justify-content: center;
-            z-index: 999; pointer-events: none;
-        }
-        .goal-text {
-            font-size: 180px; font-weight: 900; font-style: italic;
-            text-shadow: 0 0 40px rgba(0,0,0,0.8), 0 0 20px #fff;
-            animation: goalPop 0.8s ease-out infinite alternate;
-        }
-        @keyframes goalPop { 0% { transform: scale(1); } 100% { transform: scale(1.1); } }
-        
-        .flash-active { animation: screenFlash 0.4s ease-in-out 3; }
-        @keyframes screenFlash { 0%, 100% { background: transparent; } 50% { background: rgba(255,255,255,0.3); } }
-
-        /* Scoreboard - Low Height & Edge Scores */
         #scoreboard { 
             position: absolute; top: 50px; left: 50px; display: flex; align-items: center; 
-            background: #000; border-radius: 6px; height: 60px; /* Height Reduced */
-            transform: translateX(-150%); transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+            background: #000; border-radius: 6px; height: 60px; width: 800px; 
             box-shadow: 0 10px 25px rgba(0,0,0,0.7); overflow: hidden;
-            min-width: 700px; /* Wider */
+            transform: translateX(-150%); transition: 0.8s cubic-bezier(0.175, 0.885, 0.32, 1.275);
         }
         .show-board { transform: translateX(0) !important; }
 
         .team-sec { display: flex; align-items: center; height: 100%; flex: 1; position: relative; }
-        
-        /* Slanted Divider / Effect */
         #secA { clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%); z-index: 2; margin-right: -20px; }
         #secB { clip-path: polygon(5% 0, 100% 0, 100% 100%, 0% 100%); }
 
-        /* Score at Edges */
-        .score-box { font-size: 38px; font-weight: 900; width: 70px; text-align: center; background: rgba(0,0,0,0.3); line-height: 60px; }
+        /* White Score Boxes at Edges */
+        .score-box { 
+            font-size: 38px; font-weight: 900; width: 65px; text-align: center; 
+            background: #fff; color: #000; line-height: 60px; height: 100%;
+        }
         
-        /* Names in Middle */
         .name-container { flex-grow: 1; overflow: hidden; white-space: nowrap; padding: 0 15px; text-align: center; }
-        .name-text { display: inline-block; font-size: 22px; text-transform: uppercase; } /* Font size reduced */
+        .name-text { display: inline-block; font-size: 22px; text-transform: uppercase; }
         @keyframes scrollName { 0% { transform: translateX(100%); } 100% { transform: translateX(-120%); } }
 
-        #timer { 
-            background: #27ae60; padding: 0 20px; font-size: 28px; height: 100%; 
-            display: none; align-items: center; font-family: monospace;
-            border-left: 3px solid rgba(0,0,0,0.5);
+        /* Fixed Timer Section */
+        #timer-wrap {
+            width: 130px; background: #27ae60; height: 100%;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+            border-left: 3px solid rgba(0,0,0,0.3);
         }
-        .timer-active { display: flex !important; }
+        #period-val { font-size: 11px; text-transform: uppercase; font-weight: 900; opacity: 0.9; }
+        #time-val { font-size: 26px; font-family: monospace; font-weight: bold; }
 
-        /* Silver Penalty Strip - Thinner */
+        /* Silver Penalty Strip */
         #penalty-strip {
-            position: absolute; top: 111px; left: 50px; height: 40px; /* Thinner */
+            position: absolute; top: 111px; left: 50px; height: 35px; width: 800px;
             background: linear-gradient(180deg, #f0f0f0 0%, #bbbbbb 100%);
             display: none; align-items: center; justify-content: space-between;
-            border-radius: 0 0 10px 10px; box-shadow: 0 8px 15px rgba(0,0,0,0.4); border: 1px solid #fff;
+            border-radius: 0 0 10px 10px; border: 1px solid #fff;
         }
         .p-sec { display: flex; align-items: center; padding: 0 20px; flex: 1; }
         .balls { display: flex; gap: 8px; }
-        .ball { width: 18px; height: 18px; border-radius: 50%; background: radial-gradient(circle, #888 0%, #333 100%); border: 1px solid #777; }
-        .ball.goal { background: radial-gradient(circle, #2ecc71 0%, #1b5e20 100%); box-shadow: 0 0 8px #2ecc71; border: none; }
-        .ball.miss { background: radial-gradient(circle, #e74c3c 0%, #b71c1c 100%); box-shadow: 0 0 8px #e74c3c; border: none; }
+        .ball { width: 18px; height: 18px; border-radius: 50%; background: #888; border: 1px solid #777; }
+        .ball.goal { background: #2ecc71; box-shadow: 0 0 8px #2ecc71; border: none; }
+        .ball.miss { background: #e74c3c; box-shadow: 0 0 8px #e74c3c; border: none; }
     </style>
 </head>
 <body>
-
-    <div id="goal-overlay"><div class="goal-text" id="goal-msg">GOAL!</div></div>
-
     <div id="scoreboard">
-        <!-- Team A: Score at Edge, Name in Middle -->
         <div id="secA" class="team-sec">
             <div class="score-box" id="scoreA">0</div>
             <div class="name-container"><div class="name-text" id="nameA">TEAM A</div></div>
         </div>
-
-        <!-- Team B: Name in Middle, Score at Edge -->
         <div id="secB" class="team-sec">
             <div class="name-container"><div class="name-text" id="nameB">TEAM B</div></div>
             <div class="score-box" id="scoreB">0</div>
         </div>
-
-        <div id="timer">00:00</div>
+        <div id="timer-wrap">
+            <div id="period-val">MATCH START</div>
+            <div id="time-val">00:00</div>
+        </div>
     </div>
-
     <div id="penalty-strip">
         <div class="p-sec"><div id="pbA" class="balls"></div></div>
         <div style="font-weight:bold; color:#666;">/</div>
@@ -99,47 +77,32 @@
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("matchData");
-    let lastGoalTime = 0;
 
     db.on("value", (snap) => {
         const d = snap.val(); if(!d) return;
-        const board = document.getElementById('scoreboard');
-        board.classList.toggle('show-board', d.showBoard !== false);
+        document.getElementById('scoreboard').classList.toggle('show-board', d.showBoard !== false);
         
-        const cA = d.teamColorA || "#ff0000", cB = d.teamColorB || "#0000ff";
-        document.getElementById('secA').style.backgroundColor = cA;
-        document.getElementById('secB').style.backgroundColor = cB;
+        document.getElementById('secA').style.backgroundColor = d.teamColorA || "#ff0000";
+        document.getElementById('secB').style.backgroundColor = d.teamColorB || "#0000ff";
         
-        const nA = d.nameA || "TEAM A", nB = d.nameB || "TEAM B";
-        document.getElementById('nameA').innerText = nA;
-        document.getElementById('nameB').innerText = nB;
+        document.getElementById('nameA').innerText = d.nameA || "TEAM A";
+        document.getElementById('nameB').innerText = d.nameB || "TEAM B";
         document.getElementById('scoreA').innerText = d.scoreA || 0;
         document.getElementById('scoreB').innerText = d.scoreB || 0;
+        
+        // Timer & Half/Round
+        let s=d.matchSeconds||0, m=Math.floor(s/60), sc=s%60;
+        document.getElementById('time-val').innerText = (m<10?"0"+m:m)+":"+(sc<10?"0"+sc:sc);
+        document.getElementById('period-val').innerText = d.currentHalf || "1ST HALF";
 
-        document.getElementById('nameA').style.animation = nA.length > 12 ? "scrollName 6s linear infinite" : "none";
-        document.getElementById('nameB').style.animation = nB.length > 12 ? "scrollName 6s linear infinite" : "none";
+        // Scroll Logic
+        document.getElementById('nameA').style.animation = (d.nameA||"").length > 12 ? "scrollName 6s linear infinite" : "none";
+        document.getElementById('nameB').style.animation = (d.nameB||"").length > 12 ? "scrollName 6s linear infinite" : "none";
 
-        if(d.goalTrigger && d.goalTrigger > lastGoalTime) {
-            lastGoalTime = d.goalTrigger;
-            const overlay = document.getElementById('goal-overlay');
-            const msg = document.getElementById('goal-msg');
-            msg.style.color = (d.lastGoalTeam === d.nameA ? cA : cB);
-            overlay.style.display = 'flex';
-            document.body.classList.add('flash-active');
-            setTimeout(() => { overlay.style.display = 'none'; document.body.classList.remove('flash-active'); }, 3000);
-        }
-
-        const tBox = document.getElementById('timer');
-        if(d.timerRunning || d.matchSeconds > 0) {
-            tBox.classList.add('timer-active');
-            let s=d.matchSeconds||0, m=Math.floor(s/60), sc=s%60;
-            tBox.innerText = (m<10?"0"+m:m)+":"+(sc<10?"0"+sc:sc);
-        } else { tBox.classList.remove('timer-active'); }
-
+        // Penalty
         const pStrip = document.getElementById('penalty-strip');
         if(d.penaltyMode) {
             pStrip.style.display = 'flex';
-            pStrip.style.width = board.offsetWidth + "px";
             renderBalls('pbA', d.pListA || []);
             renderBalls('pbB', d.pListB || []);
         } else { pStrip.style.display = 'none'; }
