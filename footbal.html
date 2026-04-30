@@ -18,7 +18,8 @@
         
         .score-val { font-size: 38px; font-weight: 900; color: #2ecc71; margin: 2px 0; }
         .std-input { width: 100%; padding: 8px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-top: 5px; font-size: 13px; }
-        
+        .label-text { font-size: 10px; color: #8b949e; display: block; margin-top: 8px; text-align: left; text-transform: uppercase; }
+
         .btn-pm { border: none; color: white; padding: 5px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 2px; }
         .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 9px; flex: 1; width: 100%; }
 
@@ -33,11 +34,10 @@
 
 <div id="main-content" style="width: 100%; max-width: 500px;">
     
-    <!-- MAIN SCOREBOARD WITH QUICK CONTROLS -->
+    <!-- MAIN SCOREBOARD -->
     <div class="card">
         <div class="header"><i class="fas fa-futbol"></i> Scoreboard & Quick Actions</div>
         <div class="teams-container">
-            <!-- Team A -->
             <div class="team-box" id="boxA">
                 <input type="color" id="colorA" value="#ffffff" oninput="updateDB()" style="width:100%; height:18px; border:none; cursor:pointer;">
                 <input type="text" id="nameA" class="std-input" placeholder="Home Team" oninput="updateDB()">
@@ -53,14 +53,12 @@
                 </div>
             </div>
 
-            <!-- Middle Quick Buttons -->
             <div class="mid-controls">
                 <button id="visBtn" class="card-btn" style="background:#238636;" onclick="toggleVis('scoreVisible')">SHOW</button>
                 <button class="card-btn" style="background:#333;" onclick="resetOnlyScore()">RESET</button>
                 <div style="font-weight:bold; color:#444;">VS</div>
             </div>
 
-            <!-- Team B -->
             <div class="team-box" id="boxB">
                 <input type="color" id="colorB" value="#ffffff" oninput="updateDB()" style="width:100%; height:18px; border:none; cursor:pointer;">
                 <input type="text" id="nameB" class="std-input" placeholder="Away Team" oninput="updateDB()">
@@ -78,21 +76,26 @@
         </div>
     </div>
 
-    <!-- MATCH TIME & HALF DETAILS -->
+    <!-- MATCH INFO (ROUND & HALF SEPARATED) -->
     <div class="card">
-        <div class="header"><i class="fas fa-clock"></i> Match Details</div>
-        <div style="padding:10px; background:#0d1117;">
+        <div class="header"><i class="fas fa-info-circle"></i> Match Information</div>
+        <div style="padding:12px; background:#0d1117;">
             <div class="grid-2">
-                <div style="text-align:center; border-right: 1px solid #333;">
+                <div style="text-align:center; border-right: 1px solid #333; padding-right:10px;">
                     <div id="timerShow" style="font-size:32px; color:#f1c40f; font-family:monospace;">00:00</div>
                     <div class="flex-row">
                         <button class="card-btn" style="background:#238636;" onclick="startTimer()">Start</button>
                         <button class="card-btn" style="background:#f39c12;" onclick="pauseTimer()">Pause</button>
                         <button class="card-btn" style="background:#333;" onclick="resetTimer()">00</button>
                     </div>
+                    <span class="label-text">Duration</span>
+                    <input type="text" id="matchDuration" class="std-input" placeholder="e.g. 20m" oninput="updateDB()">
                 </div>
-                <div>
-                    <input type="text" id="matchDuration" class="std-input" placeholder="Duration (e.g. 20m)" oninput="updateDB()">
+                <div style="padding-left:5px;">
+                    <span class="label-text" style="color:#2ecc71;">Match Round</span>
+                    <input type="text" id="matchRound" class="std-input" placeholder="Semi-Final" oninput="updateDB()">
+                    
+                    <span class="label-text" style="color:#f1c40f;">Match Half</span>
                     <input type="text" id="roundInp" class="std-input" placeholder="1st Half" oninput="updateDB()">
                     <div class="flex-row">
                         <button class="card-btn half-btn" onclick="setHalf('1st Half')">1st</button>
@@ -135,7 +138,7 @@
     <div class="card">
         <div class="header" style="background:#333;">Live Events</div>
         <div style="padding:10px;">
-            <input type="text" id="eventInp" class="std-input" placeholder="Goal Scorer / Match Event" oninput="updateDB()">
+            <input type="text" id="eventInp" class="std-input" placeholder="Goal Scorer / Event" oninput="updateDB()">
             <button class="card-btn" style="background:#e74c3c; margin-top:10px; padding:10px;" onclick="fullReset()">RESET EVERYTHING</button>
         </div>
     </div>
@@ -165,6 +168,7 @@
                 document.getElementById('pA').value = data.penaltyA || "";
                 document.getElementById('pB').value = data.penaltyB || "";
                 document.getElementById('eventInp').value = data.lastEvent || "";
+                document.getElementById('matchRound').value = data.matchRound || "";
                 document.getElementById('roundInp').value = data.round || "";
                 document.getElementById('matchDuration').value = data.duration || "";
                 
@@ -189,6 +193,7 @@
             penaltyA: document.getElementById('pA').value,
             penaltyB: document.getElementById('pB').value,
             lastEvent: document.getElementById('eventInp').value,
+            matchRound: document.getElementById('matchRound').value,
             round: document.getElementById('roundInp').value,
             duration: document.getElementById('matchDuration').value,
             matchTime: document.getElementById('timerShow').innerText
@@ -206,7 +211,7 @@
     }
 
     function resetPenaltyOnly() { db.update({ penaltyA: "", penaltyB: "" }); }
-    function resetOnlyScore() { if(confirm("Reset Score to 0-0?")) db.update({ scoreA: 0, scoreB: 0 }); }
+    function resetOnlyScore() { if(confirm("Reset Score?")) db.update({ scoreA: 0, scoreB: 0 }); }
 
     function handleCard(team, type) {
         let pDetail = document.getElementById('player' + team).value;
@@ -229,7 +234,7 @@
     function fullReset() {
         if(confirm("Reset Everything?")) {
             yellowCounts = {}; seconds = 0; pauseTimer();
-            db.update({ scoreA: 0, scoreB: 0, penaltyA: "", penaltyB: "", matchTime: "00:00", penaltyVisible: false, lastEvent: "" });
+            db.update({ scoreA: 0, scoreB: 0, penaltyA: "", penaltyB: "", matchTime: "00:00", penaltyVisible: false, lastEvent: "", matchRound: "" });
         }
     }
 
