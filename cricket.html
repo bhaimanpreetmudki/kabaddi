@@ -1,0 +1,197 @@
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Create Match - Admin Panel</title>
+    <style>
+        /* CSS Layout */
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: #f4f7f9;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+        }
+
+        .container {
+            background: white;
+            padding: 30px;
+            border-radius: 15px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
+            width: 100%;
+            max-width: 450px;
+        }
+
+        h2 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 25px;
+            font-size: 24px;
+        }
+
+        .form-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+        }
+
+        .form-group {
+            flex: 1;
+            margin-bottom: 15px;
+        }
+
+        label {
+            display: block;
+            margin-bottom: 8px;
+            font-weight: 600;
+            color: #555;
+            font-size: 14px;
+        }
+
+        input, select {
+            width: 100%;
+            padding: 12px;
+            border: 1px solid #dcdfe6;
+            border-radius: 8px;
+            box-sizing: border-box;
+            font-size: 14px;
+            transition: border 0.3s;
+        }
+
+        input:focus, select:focus {
+            border-color: #4a90e2;
+            outline: none;
+        }
+
+        .vs-circle {
+            background: #ff4757;
+            color: white;
+            width: 35px;
+            height: 35px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border-radius: 50%;
+            font-weight: bold;
+            font-size: 12px;
+            margin-top: 20px;
+        }
+
+        .btn-submit {
+            width: 100%;
+            background-color: #4a90e2;
+            color: white;
+            padding: 14px;
+            border: none;
+            border-radius: 8px;
+            font-size: 16px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: background 0.3s;
+            margin-top: 10px;
+        }
+
+        .btn-submit:hover {
+            background-color: #357abd;
+        }
+
+        /* Responsive */
+        @media (max-width: 480px) {
+            .container {
+                margin: 15px;
+                padding: 20px;
+            }
+        }
+    </style>
+</head>
+<body>
+
+<div class="container">
+    <h2>ਨਵਾਂ ਮੈਚ ਬਣਾਓ</h2>
+    <form id="matchForm">
+        <!-- Team Selection -->
+        <div class="form-row">
+            <div class="form-group">
+                <label>ਟੀਮ A</label>
+                <input type="text" id="teamA" placeholder="ਟੀਮ ਦਾ ਨਾਮ" required>
+            </div>
+            <div class="vs-circle">VS</div>
+            <div class="form-group">
+                <label>ਟੀਮ B</label>
+                <input type="text" id="teamB" placeholder="ਟੀਮ ਦਾ ਨਾਮ" required>
+            </div>
+        </div>
+
+        <!-- Match Info -->
+        <div class="form-group">
+            <label>ਮੈਚ ਦੀ ਤਾਰੀਕ ਅਤੇ ਸਮਾਂ</label>
+            <input type="datetime-local" id="matchTime" required>
+        </div>
+
+        <div class="form-group">
+            <label>ਗਰਾਊਂਡ ਦਾ ਨਾਮ</label>
+            <input type="text" id="venue" placeholder="ਜਗ੍ਹਾ ਦਾ ਨਾਮ ਲਿਖੋ">
+        </div>
+
+        <div class="form-group">
+            <label>ਮੈਚ ਦੀ ਕਿਸਮ</label>
+            <select id="matchType">
+                <option value="League Match">ਲੀਗ ਮੈਚ</option>
+                <option value="Quarter Final">ਕੁਆਰਟਰ ਫਾਈਨਲ</option>
+                <option value="Semi Final">ਸੈਮੀ ਫਾਈਨਲ</option>
+                <option value="Final">ਫਾਈਨਲ</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn-submit">ਮੈਚ ਸੇਵ ਕਰੋ</button>
+    </form>
+</div>
+
+<!-- Firebase Script -->
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+
+<script>
+    // ਆਪਣਾ ਫਾਇਰਬੇਸ ਕੌਨਫਿਗਰੇਸ਼ਨ ਇੱਥੇ ਪਾਓ
+    const firebaseConfig = {
+        databaseURL: "YOUR_FIREBASE_DATABASE_URL_HERE"
+    };
+    
+    // Initialize Firebase
+    if (!firebase.apps.length) {
+        firebase.initializeApp(firebaseConfig);
+    }
+    const database = firebase.database();
+
+    // Form Submit Handler
+    document.getElementById('matchForm').addEventListener('submit', function(e) {
+        e.preventDefault();
+
+        const matchData = {
+            teamA: document.getElementById('teamA').value,
+            teamB: document.getElementById('teamB').value,
+            matchTime: document.getElementById('matchTime').value,
+            venue: document.getElementById('venue').value,
+            matchType: document.getElementById('matchType').value,
+            createdAt: new Date().getTime()
+        };
+
+        // Firebase ਵਿੱਚ ਡਾਟਾ ਪੁਸ਼ ਕਰਨਾ
+        database.ref('matches').push(matchData)
+            .then(() => {
+                alert("ਮੈਚ ਸਫਲਤਾਪੂਰਵਕ ਬਣਾਇਆ ਗਿਆ!");
+                document.getElementById('matchForm').reset();
+            })
+            .catch((error) => {
+                console.error("Error:", error);
+                alert("ਕੁਝ ਗਲਤ ਹੋ ਗਿਆ!");
+            });
+    });
+</script>
+
+</body>
+</html>
