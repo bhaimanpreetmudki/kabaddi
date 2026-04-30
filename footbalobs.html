@@ -30,11 +30,20 @@
         @keyframes scrollName { 0% { transform: translateX(100%); } 100% { transform: translateX(-120%); } }
 
         /* Fixed Timer Section */
-        #timer-wrap {
-            width: 130px; background: #27ae60; height: 100%;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-            border-left: 3px solid rgba(0,0,0,0.3);
-        }
+    /* ਬਾਕੀ ਸਟਾਈਲ ਦੇ ਨਾਲ ਇਹ ਵੀ ਜੋੜ ਦਿਓ */
+    #timer-wrap { 
+        display: none; /* ਪਹਿਲਾਂ ਲੁਕਿਆ ਰਹੇਗਾ */
+        width: 130px; 
+        background: #27ae60; 
+        height: 100%; 
+        flex-direction: column; 
+        align-items: center; 
+        justify-content: center; 
+        border-left: 3px solid rgba(0,0,0,0.3); 
+    }
+    .timer-active { 
+        display: flex !important; /* ਜਦੋਂ START ਹੋਵੇਗਾ ਤਾਂ ਦਿਖੇਗਾ */
+
         #period-val { font-size: 11px; text-transform: uppercase; font-weight: 900; opacity: 0.9; }
         #time-val { font-size: 26px; font-family: monospace; font-weight: bold; }
 
