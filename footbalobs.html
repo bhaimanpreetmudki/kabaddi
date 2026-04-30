@@ -2,176 +2,239 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Football Overlay with Goal Animation</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Football Admin Pro - Manpreet Mudki</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Arial Black', sans-serif; height: 1080px; width: 1920px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: #16191c; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #333; overflow: hidden; margin-bottom: 12px; box-sizing: border-box; }
+        .header { background: #27ae60; color: white; padding: 8px; text-align: center; font-weight: bold; font-size: 13px; text-transform: uppercase; }
         
-        /* ਮੇਨ ਸਕੋਰਬੋਰਡ */
-        #scoreboard {
-            position: absolute;
-            top: 40px;
-            left: 50px;
-            display: flex;
-            align-items: center;
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            padding: 5px 20px;
-            border-radius: 5px;
-            border-bottom: 4px solid #27ae60;
-            transform: translateX(-150%);
-            transition: 0.8s ease-in-out;
-            z-index: 10;
-        }
-        .show { transform: translateX(0) !important; }
+        .master-control { background: #1a1d21; padding: 12px; display: flex; justify-content: space-between; align-items: center; border-bottom: 2px solid #333; }
+        .toggle-btn { padding: 8px 20px; border-radius: 20px; border: none; font-weight: bold; cursor: pointer; }
+        .btn-on { background: #2ecc71; color: white; } .btn-off { background: #e74c3c; color: white; }
 
-        .team { font-size: 26px; text-transform: uppercase; padding: 0 15px; }
-        .score { font-size: 38px; background: #27ae60; padding: 0 20px; border-radius: 4px; margin: 0 10px; min-width: 40px; text-align: center; }
-        .timer-box { padding-left: 20px; border-left: 2px solid #333; margin-left: 10px; }
-        .time { font-size: 26px; color: #f1c40f; display: block; }
-        .half { font-size: 12px; color: #aaa; text-transform: uppercase; }
-
-        /* GOAL ਐਨੀਮੇਸ਼ਨ ਸਕ੍ਰੀਨ */
-        #goal-overlay {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            display: none;
-            justify-content: center;
-            align-items: center;
-            flex-direction: column;
-            z-index: 100;
-            background: rgba(0,0,0,0.3);
-            backdrop-filter: blur(5px);
-        }
-
-        .goal-text {
-            font-size: 180px;
-            color: #fff;
-            text-shadow: 0 0 20px #27ae60, 0 0 40px #27ae60;
-            font-style: italic;
-            animation: goalBounce 0.6s infinite alternate;
-        }
-
-        .goal-team {
-            font-size: 60px;
-            color: #f1c40f;
-            background: rgba(0,0,0,0.8);
-            padding: 10px 50px;
-            border-radius: 50px;
-            margin-top: -30px;
-            border: 5px solid #fff;
-        }
-
-        @keyframes goalBounce {
-            from { transform: scale(1) rotate(-2deg); }
-            to { transform: scale(1.1) rotate(2deg); }
-        }
-
-        /* Card Popup (Same as before) */
-        #card-alert {
-            position: absolute;
-            top: 150px;
-            left: 50px;
-            padding: 20px 40px;
-            border-radius: 10px;
-            font-size: 35px;
-            font-weight: bold;
-            display: none;
-            z-index: 50;
-            animation: popIn 0.5s ease forwards;
-        }
-        .yellow-card-bg { background: #f1c40f; color: black; }
-        .red-card-bg { background: #e74c3c; color: white; }
-        @keyframes popIn { 0% { transform: scale(0); opacity: 0; } 100% { transform: scale(1); opacity: 1; } }
+        .teams-container { display: flex; padding: 10px; gap: 8px; background: #1a1d21; }
+        .team-box { flex: 1; text-align: center; background: #111; padding: 10px; border-radius: 10px; }
+        .team-input { width: 95%; padding: 6px; background: #000; border: 1px solid #333; color: white; border-radius: 4px; text-align: center; margin-bottom: 5px; font-weight: bold; font-size: 12px; }
+        .shirt-color { width: 100%; height: 25px; border: 1px solid #444; background: none; cursor: pointer; padding: 0; margin-bottom: 5px; border-radius: 3px; }
+        
+        .score-display { font-size: 50px; font-weight: 900; color: white; margin: 5px 0; }
+        .btn-group { display: flex; gap: 4px; margin-bottom: 5px; }
+        .btn-action { flex: 1; padding: 10px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; font-size: 12px; }
+        .btn-plus { background: #2ecc71; } .btn-minus { background: #34495e; }
+        .btn-yellow { background: #f1c40f; color: black; } .btn-red { background: #e74c3c; }
+        
+        .timer-display { font-size: 40px; color: #2ecc71; text-align: center; font-family: monospace; font-weight: bold; padding: 10px; background: #000; border-radius: 8px; margin-bottom: 10px; border: 1px solid #222; }
+        .hidden { display: none; }
+        .p-stat { font-size: 24px; font-weight: bold; color: #e67e22; margin: 5px 0; }
     </style>
 </head>
 <body>
 
-    <div id="scoreboard">
-        <div class="team" id="nameA">HOME</div>
-        <div class="score" id="scoreA">0</div>
-        <div class="score" id="scoreB">0</div>
-        <div class="team" id="nameB">AWAY</div>
-        <div class="timer-box">
-            <span class="half" id="halfText">1st Half</span>
-            <span class="time" id="timeDisp">00:00</span>
+<div style="width: 100%; max-width: 500px;">
+
+    <!-- Visibility & Timer -->
+    <div class="card">
+        <div class="master-control">
+            <span style="font-size: 11px;">SCOREBOARD VISIBILITY</span>
+            <button id="boardToggle" class="toggle-btn btn-on" onclick="toggleBoard()">Board ON</button>
+        </div>
+        <div style="padding: 15px; background: #1a1d21;">
+            <div id="timerDisplay" class="timer-display">00:00</div>
+            <div class="btn-group">
+                <button id="startBtn" class="btn-action" style="background: #27ae60;" onclick="startTimer()">START</button>
+                <button id="pauseBtn" class="btn-action" style="background: #e67e22;" onclick="pauseTimer()">PAUSE</button>
+                <button class="btn-action" style="background: #c0392b;" onclick="resetTimer()">RESET TIME</button>
+            </div>
         </div>
     </div>
 
-    <!-- Goal Popup -->
-    <div id="goal-overlay">
-        <div class="goal-text">GOAL!!!</div>
-        <div class="goal-team" id="celebrateTeam">TEAM NAME</div>
+    <!-- Match Control -->
+    <div class="card">
+        <div class="header">Team & Score Controls</div>
+        <div class="teams-container">
+            <!-- Team A -->
+            <div class="team-box">
+                <input type="text" id="nameA" class="team-input" placeholder="Home" oninput="updateDB()">
+                <input type="color" id="colorA" class="shirt-color" oninput="updateDB()">
+                <input type="text" id="playersA" class="team-input" style="font-size: 10px; color: #888;" placeholder="Nos: 1, 7, 10" oninput="updateDB()">
+                
+                <div class="score-display" id="dispA">0</div>
+                <div class="btn-group">
+                    <button class="btn-action btn-minus" onclick="changeVal('scoreA', -1)">-</button>
+                    <button class="btn-action btn-plus" onclick="changeVal('scoreA', 1)">+</button>
+                </div>
+                
+                <select id="selA" class="team-input" style="background:#222;"><option value="">Select Player</option></select>
+                <div class="btn-group">
+                    <button class="btn-action btn-yellow" onclick="giveCard('A', 'yellow')">YEL</button>
+                    <button class="btn-action btn-red" onclick="giveCard('A', 'red')">RED</button>
+                </div>
+            </div>
+
+            <!-- Team B -->
+            <div class="team-box">
+                <input type="text" id="nameB" class="team-input" placeholder="Away" oninput="updateDB()">
+                <input type="color" id="colorB" class="shirt-color" oninput="updateDB()">
+                <input type="text" id="playersB" class="team-input" style="font-size: 10px; color: #888;" placeholder="Nos: 5, 9, 11" oninput="updateDB()">
+                
+                <div class="score-display" id="dispB">0</div>
+                <div class="btn-group">
+                    <button class="btn-action btn-minus" onclick="changeVal('scoreB', -1)">-</button>
+                    <button class="btn-action btn-plus" onclick="changeVal('scoreB', 1)">+</button>
+                </div>
+
+                <select id="selB" class="team-input" style="background:#222;"><option value="">Select Player</option></select>
+                <div class="btn-group">
+                    <button class="btn-action btn-yellow" onclick="giveCard('B', 'yellow')">YEL</button>
+                    <button class="btn-action btn-red" onclick="giveCard('B', 'red')">RED</button>
+                </div>
+            </div>
+        </div>
+
+        <div style="padding: 10px; display: flex; flex-direction: column; gap: 8px;">
+            <button class="btn-action" style="background:#2980b9; padding: 12px;" onclick="swapTeams()">🔄 SWAP TEAMS (SIDES)</button>
+            <button id="pToggleBtn" class="btn-action" style="background:#e67e22;" onclick="togglePenaltyMode()">⚽ OPEN PENALTY BOX</button>
+        </div>
     </div>
 
-    <!-- Card Popup -->
-    <div id="card-alert"></div>
+    <!-- Penalty Card -->
+    <div id="penalty-card" class="card hidden">
+        <div class="header" style="background:#e67e22;">Penalty Shootout</div>
+        <div style="padding:15px; display:flex; justify-content:space-around; background: #111; text-align: center;">
+            <div>
+                <div class="p-stat"><span id="pAttA">0</span> | <span id="pScoA" style="color:white;">0</span></div>
+                <button class="btn-action" style="background:#e67e22;" onclick="changeVal('pScoreA', 1); changeVal('pAttemptA', 1)">GOAL+</button>
+                <button class="btn-action btn-minus" onclick="changeVal('pAttemptA', 1)">MISS+</button>
+            </div>
+            <div style="border-left: 1px solid #333;"></div>
+            <div>
+                <div class="p-stat"><span id="pAttB">0</span> | <span id="pScoB" style="color:white;">0</span></div>
+                <button class="btn-action" style="background:#e67e22;" onclick="changeVal('pScoreB', 1); changeVal('pAttemptB', 1)">GOAL+</button>
+                <button class="btn-action btn-minus" onclick="changeVal('pAttemptB', 1)">MISS+</button>
+            </div>
+        </div>
+    </div>
+
+    <button class="btn-action" style="background:#c0392b; width:100%; padding:15px; margin-top:10px;" onclick="resetStats('all')">RESET FULL MATCH</button>
+</div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("matchData");
 
-    let lastScoreA = 0;
-    let lastScoreB = 0;
-    let lastCardTime = 0;
+    let current = {};
+    let timerInt;
 
-    db.on("value", (snap) => {
-        const data = snap.val();
-        if(!data) return;
+    function loadData() {
+        db.on("value", (snap) => {
+            current = snap.val() || {};
+            
+            // Sync Text/Scores
+            document.getElementById('dispA').innerText = current.scoreA || 0;
+            document.getElementById('dispB').innerText = current.scoreB || 0;
+            document.getElementById('pAttA').innerText = current.pAttemptA || 0;
+            document.getElementById('pAttB').innerText = current.pAttemptB || 0;
+            document.getElementById('pScoA').innerText = current.pScoreA || 0;
+            document.getElementById('pScoB').innerText = current.pScoreB || 0;
+            
+            document.getElementById('nameA').value = current.nameA || "";
+            document.getElementById('nameB').value = current.nameB || "";
+            document.getElementById('colorA').value = current.teamColorA || "#ff0000";
+            document.getElementById('colorB').value = current.teamColorB || "#0000ff";
+            document.getElementById('playersA').value = current.playersA || "";
+            document.getElementById('playersB').value = current.playersB || "";
 
-        // Scoreboard Display
-        const sb = document.getElementById('scoreboard');
-        if(data.showBoard !== false) sb.classList.add('show');
-        else sb.classList.remove('show');
+            // Timer Display
+            let s = current.matchSeconds || 0;
+            let m = Math.floor(s / 60);
+            let sec = s % 60;
+            document.getElementById('timerDisplay').innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
 
-        document.getElementById('nameA').innerText = data.nameA || "HOME";
-        document.getElementById('nameB').innerText = data.nameB || "AWAY";
-        document.getElementById('timeDisp').innerText = data.matchTime || "00:00";
-        document.getElementById('halfText').innerText = data.half || "1st Half";
+            // Timer Status
+            if(current.timerRunning) {
+                if(!timerInt) timerInt = setInterval(() => db.update({ matchSeconds: (current.matchSeconds || 0) + 1 }), 1000);
+                document.getElementById('startBtn').disabled = true;
+                document.getElementById('startBtn').style.opacity = "0.5";
+            } else {
+                clearInterval(timerInt); timerInt = null;
+                document.getElementById('startBtn').disabled = false;
+                document.getElementById('startBtn').style.opacity = "1";
+            }
 
-        // Goal Logic: ਜੇ ਸਕੋਰ ਵਧਿਆ ਹੈ
-        if(data.scoreA > lastScoreA) {
-            triggerGoal(data.nameA || "HOME");
-        } else if(data.scoreB > lastScoreB) {
-            triggerGoal(data.nameB || "AWAY");
-        }
-        
-        lastScoreA = data.scoreA || 0;
-        lastScoreB = data.scoreB || 0;
-        document.getElementById('scoreA').innerText = lastScoreA;
-        document.getElementById('scoreB').innerText = lastScoreB;
+            // UI Toggles
+            const boardBtn = document.getElementById('boardToggle');
+            if(current.showBoard !== false) { boardBtn.innerText = "Board ON"; boardBtn.className = "toggle-btn btn-on"; }
+            else { boardBtn.innerText = "Board OFF"; boardBtn.className = "toggle-btn btn-off"; }
 
-        // Card Logic
-        if(data.cardTime && data.cardTime > lastCardTime) {
-            showCard(data.lastCardPlayer, data.lastCardType);
-            lastCardTime = data.cardTime;
-        }
-    });
+            const pCard = document.getElementById('penalty-card');
+            if(current.penaltyMode) pCard.classList.remove('hidden');
+            else pCard.classList.add('hidden');
 
-    function triggerGoal(teamName) {
-        const goalDiv = document.getElementById('goal-overlay');
-        document.getElementById('celebrateTeam').innerText = teamName;
-        
-        goalDiv.style.display = 'flex';
-        
-        // 5 ਸੈਕਿੰਡ ਬਾਅਦ ਗੋਲ ਐਨੀਮੇਸ਼ਨ ਹਟਾ ਦਿਓ
-        setTimeout(() => {
-            goalDiv.style.display = 'none';
-        }, 5000);
+            fillDropdown('selA', current.playersA || "");
+            fillDropdown('selB', current.playersB || "");
+        });
     }
 
-    function showCard(p, type) {
-        const c = document.getElementById('card-alert');
-        c.innerText = (type === 'yellow' ? '🟨 YELLOW CARD: ' : '🟥 RED CARD: ') + p;
-        c.className = type === 'yellow' ? 'yellow-card-bg' : 'red-card-bg';
-        c.style.display = 'block';
-        setTimeout(() => { c.style.display = 'none'; }, 4000);
+    function fillDropdown(id, str) {
+        const sel = document.getElementById(id);
+        const oldVal = sel.value;
+        sel.innerHTML = '<option value="">Select No</option>';
+        str.split(',').forEach(n => { if(n.trim()) { let opt = document.createElement('option'); opt.value = opt.text = n.trim(); sel.add(opt); } });
+        sel.value = oldVal;
     }
+
+    function startTimer() { db.update({ timerRunning: true }); }
+    function pauseTimer() { db.update({ timerRunning: false }); }
+    function resetTimer() { if(confirm("Reset Time?")) db.update({ matchSeconds: 0, timerRunning: false }); }
+
+    function changeVal(key, val) { let nv = (current[key] || 0) + val; db.update({ [key]: nv < 0 ? 0 : nv }); }
+
+    function updateDB() {
+        db.update({
+            nameA: document.getElementById('nameA').value,
+            nameB: document.getElementById('nameB').value,
+            playersA: document.getElementById('playersA').value,
+            playersB: document.getElementById('playersB').value,
+            teamColorA: document.getElementById('colorA').value,
+            teamColorB: document.getElementById('colorB').value
+        });
+    }
+
+    function swapTeams() {
+        db.update({
+            nameA: current.nameB, nameB: current.nameA,
+            scoreA: current.scoreB, scoreB: current.scoreA,
+            playersA: current.playersB, playersB: current.playersA,
+            teamColorA: current.teamColorB, teamColorB: current.teamColorA
+        });
+    }
+
+    function giveCard(team, type) {
+        const p = document.getElementById('sel' + team).value;
+        if(!p) { alert("Select Player!"); return; }
+        db.update({
+            [(type === 'yellow' ? 'yellow' : 'red') + team]: (current[(type === 'yellow' ? 'yellow' : 'red') + team] || 0) + 1,
+            lastCardPlayer: p, lastCardType: type, cardTime: Date.now()
+        });
+    }
+
+    function toggleBoard() { db.update({ showBoard: current.showBoard === false }); }
+    function togglePenaltyMode() { db.update({ penaltyMode: !current.penaltyMode }); }
+
+    function resetStats(type) {
+        if(!confirm("Are you sure?")) return;
+        db.set({
+            scoreA: 0, scoreB: 0, matchSeconds: 0, showBoard: true, penaltyMode: false, timerRunning: false,
+            nameA: "HOME", nameB: "AWAY", teamColorA: "#ff0000", teamColorB: "#0000ff",
+            playersA: "", playersB: "", pScoreA: 0, pScoreB: 0, pAttemptA: 0, pAttemptB: 0
+        });
+    }
+
+    loadData();
 </script>
 </body>
 </html>
