@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Football Pro Admin - Manpreet Mudki</title>
+    <title>Football Admin - Manpreet Mudki</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -13,25 +13,26 @@
         .header { background: #27ae60; color: white; padding: 10px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 14px; }
         
         .teams-container { display: flex; padding: 15px; gap: 10px; background: #1a1d21; }
-        .team-box { flex: 1; text-align: center; position: relative; }
+        .team-box { flex: 1; text-align: center; }
         .team-input { width: 90%; padding: 8px; background: #000; border: 1px solid #444; color: white; border-radius: 5px; font-weight: bold; text-align: center; margin-bottom: 5px; }
         
-        /* Jersey Color Picker */
-        .color-label { font-size: 10px; color: #888; display: block; margin-bottom: 5px; }
-        .shirt-color { width: 40px; height: 30px; border: none; background: none; cursor: pointer; padding: 0; }
-
-        .score-display { font-size: 50px; font-weight: 900; color: white; margin: 5px 0; }
+        .shirt-color { width: 45px; height: 30px; border: 1px solid #444; background: none; cursor: pointer; padding: 0; margin-bottom: 5px; border-radius: 4px;}
+        .score-display { font-size: 55px; font-weight: 900; color: white; margin: 2px 0; text-shadow: 2px 2px 4px rgba(0,0,0,0.5); }
         
         .btn-group { display: flex; gap: 5px; }
-        .btn-action { flex: 1; padding: 12px; border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: bold; }
-        .btn-plus { background: #2ecc71; } .btn-minus { background: #34495e; }
-        .btn-blue { background: #2980b9; } .btn-orange { background: #e67e22; }
+        .btn-action { flex: 1; padding: 12px; border: none; border-radius: 6px; color: white; cursor: pointer; font-weight: bold; text-transform: uppercase; font-size: 12px; transition: 0.2s; }
+        .btn-plus { background: #2ecc71; font-size: 18px; } 
+        .btn-minus { background: #34495e; font-size: 18px; }
+        .btn-blue { background: #2980b9; } 
+        .btn-orange { background: #e67e22; } 
+        .btn-red { background: #c0392b; margin-top: 10px; width: 100%; }
 
-        .half-selector { display: flex; background: #000; padding: 5px; border-radius: 10px; margin: 15px; gap: 5px; width: 90%; max-width: 450px; }
-        .half-btn { flex: 1; padding: 8px; border: none; border-radius: 6px; background: #222; color: #777; cursor: pointer; font-size: 11px; font-weight: bold; }
-        .half-btn.active { background: #27ae60; color: white; }
+        .half-selector { display: flex; background: #000; padding: 5px; border-radius: 10px; margin: 15px; gap: 5px; border: 1px solid #222; }
+        .half-btn { flex: 1; padding: 10px; border: none; border-radius: 6px; background: #1a1a1a; color: #666; cursor: pointer; font-size: 11px; font-weight: bold; }
+        .half-btn.active { background: #27ae60; color: white; box-shadow: 0 0 10px rgba(39, 174, 96, 0.4); }
 
-        .std-input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #333; color: white; border-radius: 6px; margin-top: 10px; box-sizing: border-box; text-align: center; }
+        .hidden { display: none; }
+        .timer-box { width: 100%; padding: 12px; background: #000; border: 1px solid #333; color: #27ae60; text-align: center; border-radius: 6px; font-family: monospace; font-size: 18px; font-weight: bold; box-sizing: border-box; }
     </style>
 </head>
 <body>
@@ -39,22 +40,20 @@
 <div id="main-content" style="width: 100%; max-width: 500px;">
     
     <div class="card">
-        <div class="header">Football Live Controller</div>
+        <div class="header">Football Match Controller</div>
         
-        <div style="display:flex; justify-content:center;">
-            <div class="half-selector">
-                <button id="h1" class="half-btn" onclick="setHalf('1st Half')">1ST HALF</button>
-                <button id="h2" class="half-btn" onclick="setHalf('2nd Half')">2ND HALF</button>
-                <button id="het" class="half-btn" onclick="setHalf('Extra Time')">E.T.</button>
-            </div>
+        <!-- Half Selection (Indepedent) -->
+        <div class="half-selector">
+            <button id="h1" class="half-btn" onclick="setHalf('1st Half')">1ST HALF</button>
+            <button id="h2" class="half-btn" onclick="setHalf('2nd Half')">2ND HALF</button>
+            <button id="het" class="half-btn" onclick="setHalf('Extra Time')">E.T.</button>
         </div>
 
         <div class="teams-container">
-            <!-- Team A -->
+            <!-- Left Side -->
             <div class="team-box">
-                <input type="text" id="nameA" class="team-input" placeholder="HOME" oninput="updateDB()">
-                <span class="color-label">SHIRT COLOR</span>
-                <input type="color" id="colorA" class="shirt-color" oninput="updateDB()" value="#ff0000">
+                <input type="text" id="nameA" class="team-input" placeholder="TEAM A" oninput="updateDB()">
+                <input type="color" id="colorA" class="shirt-color" oninput="updateDB()">
                 <div class="score-display" id="dispA">0</div>
                 <div class="btn-group">
                     <button class="btn-action btn-minus" onclick="changeScore('scoreA', -1)">-</button>
@@ -62,13 +61,12 @@
                 </div>
             </div>
 
-            <div style="align-self:center; font-weight:bold; color:#444; font-size: 24px;">VS</div>
+            <div style="align-self:center; font-weight:bold; color:#444; font-size: 20px;">VS</div>
 
-            <!-- Team B -->
+            <!-- Right Side -->
             <div class="team-box">
-                <input type="text" id="nameB" class="team-input" placeholder="AWAY" oninput="updateDB()">
-                <span class="color-label">SHIRT COLOR</span>
-                <input type="color" id="colorB" class="shirt-color" oninput="updateDB()" value="#0000ff">
+                <input type="text" id="nameB" class="team-input" placeholder="TEAM B" oninput="updateDB()">
+                <input type="color" id="colorB" class="shirt-color" oninput="updateDB()">
                 <div class="score-display" id="dispB">0</div>
                 <div class="btn-group">
                     <button class="btn-action btn-minus" onclick="changeScore('scoreB', -1)">-</button>
@@ -77,33 +75,41 @@
             </div>
         </div>
 
-        <div style="padding: 15px;">
-            <button class="btn-action btn-blue" style="width:100%;" onclick="swapTeams()">🔄 SWAP SIDES (HALF TIME)</button>
-            <input type="text" id="timeInp" class="std-input" placeholder="MATCH TIME (00:00)" oninput="updateDB()">
+        <div style="padding: 15px; display: flex; flex-direction: column; gap: 10px;">
+            <input type="text" id="timeInp" class="timer-box" placeholder="00:00" oninput="updateDB()">
+            
+            <!-- independent Swap Button -->
+            <button class="btn-action btn-blue" onclick="swapTeams()" style="font-size: 14px; padding: 15px;">
+                <i class="fas fa-exchange-alt"></i> SWAP TEAMS (ANYTIME)
+            </button>
+            
+            <button id="penaltyToggleBtn" class="btn-action btn-orange" onclick="togglePenaltyMode()">⚽ OPEN PENALTY MODE</button>
         </div>
     </div>
 
     <!-- Penalty Shootout Section -->
-    <div class="card">
+    <div id="penalty-card" class="card hidden">
         <div class="header" style="background:#e67e22;">Penalty Shootout</div>
-        <div style="padding:15px; display:flex; justify-content:space-around; align-items:center;">
+        <div style="padding:20px; display:flex; justify-content:space-around; align-items:center; background: #111;">
             <div style="text-align:center;">
-                <div style="font-size:30px; font-weight:bold;" id="pA">0</div>
-                <div class="btn-group" style="margin-top:5px;">
+                <div style="font-size:45px; font-weight:bold; color:#e67e22;" id="pA">0</div>
+                <div class="btn-group">
                     <button class="btn-action btn-minus" onclick="changePenalty('pScoreA', -1)">-</button>
                     <button class="btn-action btn-orange" onclick="changePenalty('pScoreA', 1)">+</button>
                 </div>
             </div>
-            <div style="color:#555; font-weight:bold;">PENALTY</div>
+            <div style="font-weight:bold; color:#444;">PK</div>
             <div style="text-align:center;">
-                <div style="font-size:30px; font-weight:bold;" id="pB">0</div>
-                <div class="btn-group" style="margin-top:5px;">
+                <div style="font-size:45px; font-weight:bold; color:#e67e22;" id="pB">0</div>
+                <div class="btn-group">
                     <button class="btn-action btn-minus" onclick="changePenalty('pScoreB', -1)">-</button>
                     <button class="btn-action btn-orange" onclick="changePenalty('pScoreB', 1)">+</button>
                 </div>
             </div>
         </div>
     </div>
+
+    <button class="btn-action btn-red" onclick="resetMatch()">RESET ALL DATA</button>
 </div>
 
 <script>
@@ -111,7 +117,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database().ref("matchData");
 
-    let curA = 0, curB = 0, curPA = 0, curPB = 0;
+    let curA = 0, curB = 0, curPA = 0, curPB = 0, pMode = false;
 
     function loadData() {
         db.on("value", (snap) => {
@@ -119,7 +125,8 @@
             if(data) {
                 curA = data.scoreA || 0; curB = data.scoreB || 0;
                 curPA = data.pScoreA || 0; curPB = data.pScoreB || 0;
-                
+                pMode = !!data.penaltyMode;
+
                 document.getElementById('dispA').innerText = curA;
                 document.getElementById('dispB').innerText = curB;
                 document.getElementById('pA').innerText = curPA;
@@ -131,7 +138,18 @@
                 document.getElementById('colorB').value = data.teamColorB || "#0000ff";
                 document.getElementById('timeInp').value = data.matchTime || "";
 
-                // Half Buttons
+                const pCard = document.getElementById('penalty-card');
+                const pBtn = document.getElementById('penaltyToggleBtn');
+                if(pMode) {
+                    pCard.classList.remove('hidden');
+                    pBtn.innerText = "⚽ CLOSE PENALTY MODE";
+                    pBtn.style.background = "#333";
+                } else {
+                    pCard.classList.add('hidden');
+                    pBtn.innerText = "⚽ OPEN PENALTY MODE";
+                    pBtn.style.background = "#e67e22";
+                }
+
                 document.querySelectorAll('.half-btn').forEach(btn => btn.classList.remove('active'));
                 if(data.half === "1st Half") document.getElementById('h1').classList.add('active');
                 if(data.half === "2nd Half") document.getElementById('h2').classList.add('active');
@@ -140,8 +158,28 @@
         });
     }
 
-    function setHalf(h) { db.update({ half: h }); }
+    // Pure Swap Function: Just swaps whatever is currently there
+    function swapTeams() {
+        const nA = document.getElementById('nameA').value;
+        const nB = document.getElementById('nameB').value;
+        const cA = document.getElementById('colorA').value;
+        const cB = document.getElementById('colorB').value;
 
+        db.update({
+            nameA: nB,
+            nameB: nA,
+            scoreA: curB,
+            scoreB: curA,
+            teamColorA: cB,
+            teamColorB: cA,
+            pScoreA: curPB,
+            pScoreB: curPA
+        });
+    }
+
+    function togglePenaltyMode() { db.child('penaltyMode').set(!pMode); }
+    function setHalf(h) { db.update({ half: h }); }
+    
     function changeScore(team, val) {
         let newVal = (team === 'scoreA' ? curA : curB) + val;
         if(newVal < 0) newVal = 0;
@@ -164,18 +202,10 @@
         });
     }
 
-    function swapTeams() {
-        const nA = document.getElementById('nameA').value;
-        const nB = document.getElementById('nameB').value;
-        const cA = document.getElementById('colorA').value;
-        const cB = document.getElementById('colorB').value;
-        
-        db.update({
-            nameA: nB, nameB: nA,
-            scoreA: curB, scoreB: curA,
-            teamColorA: cB, teamColorB: cA,
-            pScoreA: curPB, pScoreB: curPA
-        });
+    function resetMatch() {
+        if(confirm("Reset everything?")) {
+            db.set({ scoreA: 0, scoreB: 0, pScoreA: 0, pScoreB: 0, matchTime: "00:00", half: "1st Half", penaltyMode: false, nameA: "TEAM A", nameB: "TEAM B", teamColorA: "#ff0000", teamColorB: "#0000ff" });
+        }
     }
 
     loadData();
