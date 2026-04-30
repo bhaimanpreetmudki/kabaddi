@@ -3,194 +3,213 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Create Match - Admin Panel</title>
+    <title>CricBest - Match Setup & Scoring</title>
     <style>
-        /* CSS Layout */
+        :root {
+            --bg-color: #0f172a;
+            --card-bg: #1e293b;
+            --accent: #2dd4bf;
+            --text-main: #f1f5f9;
+        }
+
         body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            background-color: #f4f7f9;
+            font-family: 'Segoe UI', sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
             display: flex;
             justify-content: center;
-            align-items: center;
-            min-height: 100vh;
-            margin: 0;
+            padding: 20px;
         }
 
-        .container {
-            background: white;
-            padding: 30px;
-            border-radius: 15px;
-            box-shadow: 0 8px 24px rgba(0,0,0,0.1);
-            width: 100%;
-            max-width: 450px;
+        .container { width: 100%; max-width: 600px; }
+
+        /* Setup Form Styles */
+        .setup-card {
+            background: var(--card-bg);
+            padding: 20px;
+            border-radius: 12px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.3);
         }
 
-        h2 {
-            text-align: center;
-            color: #2c3e50;
-            margin-bottom: 25px;
-            font-size: 24px;
-        }
+        h2 { color: var(--accent); border-bottom: 1px solid #334155; padding-bottom: 10px; }
 
-        .form-row {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-        }
+        .section-title { font-size: 14px; color: #94a3b8; margin: 20px 0 10px; display: flex; align-items: center; gap: 8px; }
 
-        .form-group {
-            flex: 1;
-            margin-bottom: 15px;
-        }
+        .input-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 15px; }
 
-        label {
-            display: block;
-            margin-bottom: 8px;
-            font-weight: 600;
-            color: #555;
-            font-size: 14px;
-        }
+        label { display: block; font-size: 12px; margin-bottom: 5px; color: #cbd5e1; }
 
         input, select {
             width: 100%;
-            padding: 12px;
-            border: 1px solid #dcdfe6;
-            border-radius: 8px;
-            box-sizing: border-box;
-            font-size: 14px;
-            transition: border 0.3s;
-        }
-
-        input:focus, select:focus {
-            border-color: #4a90e2;
-            outline: none;
-        }
-
-        .vs-circle {
-            background: #ff4757;
+            background: #0f172a;
+            border: 1px solid #334155;
             color: white;
-            width: 35px;
-            height: 35px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            border-radius: 50%;
+            padding: 10px;
+            border-radius: 6px;
+            box-sizing: border-box;
+        }
+
+        .toss-options { display: flex; gap: 10px; margin-top: 10px; }
+
+        .btn-toggle {
+            flex: 1;
+            padding: 10px;
+            background: #334155;
+            border: none;
+            color: white;
+            border-radius: 6px;
+            cursor: pointer;
+        }
+
+        .btn-toggle.active { background: var(--accent); color: #0f172a; font-weight: bold; }
+
+        .btn-main {
+            width: 100%;
+            background: var(--accent);
+            color: #0f172a;
+            padding: 15px;
+            border: none;
+            border-radius: 8px;
             font-weight: bold;
-            font-size: 12px;
+            font-size: 16px;
+            margin-top: 30px;
+            cursor: pointer;
+        }
+
+        /* Scoring Dashboard Styles (Hidden initially) */
+        #scoringPage { display: none; text-align: center; }
+
+        .score-display { font-size: 48px; font-weight: bold; margin: 20px 0; }
+        
+        .score-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
             margin-top: 20px;
         }
 
-        .btn-submit {
-            width: 100%;
-            background-color: #4a90e2;
+        .run-btn {
+            background: var(--card-bg);
+            border: 1px solid var(--accent);
             color: white;
-            padding: 14px;
-            border: none;
-            border-radius: 8px;
-            font-size: 16px;
-            font-weight: bold;
+            padding: 20px;
+            font-size: 20px;
+            border-radius: 10px;
             cursor: pointer;
-            transition: background 0.3s;
-            margin-top: 10px;
         }
 
-        .btn-submit:hover {
-            background-color: #357abd;
-        }
+        .run-btn:active { background: var(--accent); color: black; }
 
-        /* Responsive */
-        @media (max-width: 480px) {
-            .container {
-                margin: 15px;
-                padding: 20px;
-            }
-        }
+        .out-btn { background: #ef4444; border: none; color: white; }
+
+        .hidden { display: none !important; }
     </style>
 </head>
 <body>
 
 <div class="container">
-    <h2>ਨਵਾਂ ਮੈਚ ਬਣਾਓ</h2>
-    <form id="matchForm">
-        <!-- Team Selection -->
-        <div class="form-row">
+    
+    <div id="setupPage" class="setup-card">
+        <h2>Setup Match #1</h2>
+
+        <div class="section-title"><span>1</span> Match Settings</div>
+        <div class="input-grid">
             <div class="form-group">
-                <label>ਟੀਮ A</label>
-                <input type="text" id="teamA" placeholder="ਟੀਮ ਦਾ ਨਾਮ" required>
+                <label>Total Overs</label>
+                <input type="number" id="overs" value="8">
             </div>
-            <div class="vs-circle">VS</div>
             <div class="form-group">
-                <label>ਟੀਮ B</label>
-                <input type="text" id="teamB" placeholder="ਟੀਮ ਦਾ ਨਾਮ" required>
+                <label>Match Type</label>
+                <select id="type">
+                    <option>Group Stage</option>
+                    <option>Final</option>
+                </select>
             </div>
         </div>
 
-        <!-- Match Info -->
-        <div class="form-group">
-            <label>ਮੈਚ ਦੀ ਤਾਰੀਕ ਅਤੇ ਸਮਾਂ</label>
-            <input type="datetime-local" id="matchTime" required>
+        <div class="section-title"><span>2</span> Select Playing Teams</div>
+        <div class="input-grid">
+            <input type="text" id="teamA" placeholder="Team A Name">
+            <input type="text" id="teamB" placeholder="Team B Name">
         </div>
 
-        <div class="form-group">
-            <label>ਗਰਾਊਂਡ ਦਾ ਨਾਮ</label>
-            <input type="text" id="venue" placeholder="ਜਗ੍ਹਾ ਦਾ ਨਾਮ ਲਿਖੋ">
+        <div class="section-title"><span>3</span> Toss Configuration</div>
+        <label>Who won the toss?</label>
+        <div class="toss-options">
+            <button class="btn-toggle active" onclick="setToss('A')" id="tossA">Team A</button>
+            <button class="btn-toggle" onclick="setToss('B')" id="tossB">Team B</button>
         </div>
 
-        <div class="form-group">
-            <label>ਮੈਚ ਦੀ ਕਿਸਮ</label>
-            <select id="matchType">
-                <option value="League Match">ਲੀਗ ਮੈਚ</option>
-                <option value="Quarter Final">ਕੁਆਰਟਰ ਫਾਈਨਲ</option>
-                <option value="Semi Final">ਸੈਮੀ ਫਾਈਨਲ</option>
-                <option value="Final">ਫਾਈਨਲ</option>
-            </select>
-        </div>
+        <button class="btn-main" onclick="startMatch()">INITIALIZE MATCH</button>
+    </div>
 
-        <button type="submit" class="btn-submit">ਮੈਚ ਸੇਵ ਕਰੋ</button>
-    </form>
+    <div id="scoringPage">
+        <div class="setup-card">
+            <h3 id="displayMatch">TEAM A vs TEAM B</h3>
+            <div id="tossResult" style="font-size: 12px; color: var(--accent);">GILL WON THE TOSS AND ELECTED TO BAT</div>
+            
+            <div class="score-display">
+                <span id="runs">0</span> / <span id="wickets">0</span>
+                <div style="font-size: 16px; color: #94a3b8;">(0.0 / <span id="maxOvers">8</span>)</div>
+            </div>
+
+            <div class="score-grid">
+                <button class="run-btn" onclick="addRuns(0)">0</button>
+                <button class="run-btn" onclick="addRuns(1)">1</button>
+                <button class="run-btn" onclick="addRuns(2)">2</button>
+                <button class="run-btn" onclick="addRuns(4)">4</button>
+                <button class="run-btn" onclick="addRuns(6)">6</button>
+                <button class="run-btn out-btn" onclick="addWicket()">OUT</button>
+            </div>
+            
+            <button class="btn-main" style="background: #334155; color: white; margin-top: 20px;" onclick="location.reload()">Reset Match</button>
+        </div>
+    </div>
+
 </div>
 
-<!-- Firebase Script -->
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-<script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-
 <script>
-    // ਆਪਣਾ ਫਾਇਰਬੇਸ ਕੌਨਫਿਗਰੇਸ਼ਨ ਇੱਥੇ ਪਾਓ
-    const firebaseConfig = {
-        databaseURL: "YOUR_FIREBASE_DATABASE_URL_HERE"
-    };
-    
-    // Initialize Firebase
-    if (!firebase.apps.length) {
-        firebase.initializeApp(firebaseConfig);
+    let tossWinner = 'A';
+
+    function setToss(team) {
+        tossWinner = team;
+        document.getElementById('tossA').classList.toggle('active', team === 'A');
+        document.getElementById('tossB').classList.toggle('active', team === 'B');
     }
-    const database = firebase.database();
 
-    // Form Submit Handler
-    document.getElementById('matchForm').addEventListener('submit', function(e) {
-        e.preventDefault();
+    function startMatch() {
+        const teamA = document.getElementById('teamA').value || "Team A";
+        const teamB = document.getElementById('teamB').value || "Team B";
+        const maxOvers = document.getElementById('overs').value;
 
-        const matchData = {
-            teamA: document.getElementById('teamA').value,
-            teamB: document.getElementById('teamB').value,
-            matchTime: document.getElementById('matchTime').value,
-            venue: document.getElementById('venue').value,
-            matchType: document.getElementById('matchType').value,
-            createdAt: new Date().getTime()
-        };
+        // UI ਬਦਲੋ
+        document.getElementById('setupPage').classList.add('hidden');
+        document.getElementById('scoringPage').style.display = 'block';
 
-        // Firebase ਵਿੱਚ ਡਾਟਾ ਪੁਸ਼ ਕਰਨਾ
-        database.ref('matches').push(matchData)
-            .then(() => {
-                alert("ਮੈਚ ਸਫਲਤਾਪੂਰਵਕ ਬਣਾਇਆ ਗਿਆ!");
-                document.getElementById('matchForm').reset();
-            })
-            .catch((error) => {
-                console.error("Error:", error);
-                alert("ਕੁਝ ਗਲਤ ਹੋ ਗਿਆ!");
-            });
-    });
+        // ਡਾਟਾ ਸੈੱਟ ਕਰੋ
+        document.getElementById('displayMatch').innerText = `${teamA} vs ${teamB}`;
+        document.getElementById('maxOvers').innerText = maxOvers;
+        
+        let winnerName = (tossWinner === 'A') ? teamA : teamB;
+        document.getElementById('tossResult').innerText = `${winnerName.toUpperCase()} WON THE TOSS AND ELECTED TO BAT`;
+    }
+
+    // ਬੁਨਿਆਦੀ ਸਕੋਰਿੰਗ ਫੰਕਸ਼ਨ
+    let totalRuns = 0;
+    let totalWickets = 0;
+
+    function addRuns(r) {
+        totalRuns += r;
+        document.getElementById('runs').innerText = totalRuns;
+    }
+
+    function addWicket() {
+        if(totalWickets < 10) {
+            totalWickets++;
+            document.getElementById('wickets').innerText = totalWickets;
+        }
+    }
 </script>
 
 </body>
