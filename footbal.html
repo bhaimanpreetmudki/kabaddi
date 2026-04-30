@@ -2,37 +2,47 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Admin Control - Manpreet Singh</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Final Admin Panel - Manpreet Singh</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <style>
-        body { font-family: sans-serif; background: #0b0d0f; color: white; padding: 15px; }
-        .card { background: #16191c; border-radius: 12px; border: 1px solid #333; margin-bottom: 12px; padding: 15px; text-align: center; }
-        .header { background: #27ae60; padding: 8px; margin: -15px -15px 15px -15px; border-radius: 12px 12px 0 0; font-weight: bold; font-size: 14px; }
-        .team-row { display: flex; gap: 10px; }
-        .team-box { flex: 1; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #222; }
-        input, select { width: 100%; padding: 10px; background: #000; border: 1px solid #444; color: white; border-radius: 5px; margin-bottom: 8px; box-sizing: border-box; }
-        .score-display { font-size: 45px; font-weight: bold; color: #2ecc71; margin: 10px 0; }
-        .btn-group { display: flex; gap: 5px; margin-top: 5px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; font-size: 12px; }
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; }
+        .card { background: #16191c; border-radius: 12px; border: 1px solid #333; margin-bottom: 12px; padding: 15px; box-sizing: border-box; }
+        .header { background: #27ae60; padding: 8px; text-align: center; font-weight: bold; margin: -15px -15px 15px -15px; border-radius: 12px 12px 0 0; font-size: 13px; text-transform: uppercase; }
+        .team-row { display: flex; gap: 8px; margin-bottom: 10px; }
+        .team-box { flex: 1; text-align: center; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #222; }
+        
+        input, select { width: 100%; padding: 10px; background: #000; border: 1px solid #333; color: white; border-radius: 6px; text-align: center; margin-bottom: 5px; box-sizing: border-box; font-size: 14px; }
+        
+        .score-display { font-size: 45px; font-weight: 900; margin: 5px 0; color: #2ecc71; }
+        .btn-group { display: flex; gap: 4px; margin-top: 5px; }
+        .btn { flex: 1; padding: 12px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; font-size: 12px; text-transform: uppercase; }
+        
         .btn-plus { background: #2ecc71; } .btn-minus { background: #34495e; }
-        .btn-yellow { background: #f1c40f; color: #000; } .btn-red { background: #e74c3c; }
-        .timer-display { font-size: 35px; color: #f1c40f; font-family: monospace; background: #000; padding: 10px; border-radius: 8px; border: 1px solid #333; margin-bottom: 10px; }
-        .reset-all { background: #e74c3c; width: 100%; padding: 15px; border-radius: 10px; font-weight: bold; margin-bottom: 15px; cursor: pointer; border: none; color: white; }
+        .btn-yellow { background: #f1c40f; color: black; } .btn-red { background: #e74c3c; }
+        
+        .timer-display { font-size: 35px; color: #f1c40f; text-align: center; font-family: monospace; font-weight: bold; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
+        .reset-btn { background: #e74c3c; width: 100%; padding: 15px; font-size: 16px; margin-bottom: 10px; border-radius: 10px; border: none; color: white; font-weight: bold; cursor: pointer; }
+        
+        label { font-size: 11px; color: #888; display: block; margin-bottom: 4px; text-align: left; padding-left: 2px; }
     </style>
 </head>
 <body>
 
-    <button class="reset-all" onclick="resetAll()">⚠️ RESET ALL MATCH</button>
+    <button class="reset-btn" onclick="resetAll()">⚠️ RESET ALL (NEW MATCH)</button>
 
-    <!-- Timer Control -->
+    <!-- Timer Control Section -->
     <div class="card">
         <div class="header" style="background:#2980b9;">TIMER CONTROL</div>
         <div id="timerDisplay" class="timer-display">00:00</div>
         
         <div style="display:flex; gap:5px; margin-bottom:10px;">
-            <input type="number" id="setTimeInput" placeholder="Min (eg. 15)" style="margin:0;">
-            <button class="btn" style="background:#8e44ad; flex:0.4;" onclick="applyTime()">SET</button>
+            <div style="flex:1;">
+                <label>SET MINUTES</label>
+                <input type="number" id="setTimeInput" placeholder="eg. 15" style="margin:0;">
+            </div>
+            <button class="btn" style="background:#8e44ad; align-self: flex-end; padding:10px;" onclick="applyTime()">SET TIME</button>
         </div>
 
         <div class="btn-group">
@@ -42,52 +52,72 @@
         </div>
     </div>
 
-    <!-- Match Settings -->
+    <!-- Match Info Section -->
     <div class="card">
         <div class="header" style="background:#8e44ad;">MATCH INFO</div>
-        <div class="team-row">
-            <select id="roundInput" onchange="updateDB()">
-                <option value="LEAGUE MATCH">LEAGUE MATCH</option>
-                <option value="SEMI FINAL">SEMI FINAL</option>
-                <option value="FINAL">FINAL</option>
-            </select>
-            <select id="halfInput" onchange="updateDB()">
-                <option value="1ST HALF">1ST HALF</option>
-                <option value="2ND HALF">2ND HALF</option>
-            </select>
+        <div style="display:flex; gap:8px;">
+            <div style="flex:1;">
+                <label>ROUND</label>
+                <select id="roundInput" onchange="updateDB()">
+                    <option value="LEAGUE MATCH">LEAGUE MATCH</option>
+                    <option value="QUARTER FINAL">QUARTER FINAL</option>
+                    <option value="SEMI FINAL">SEMI FINAL</option>
+                    <option value="FINAL">FINAL</option>
+                </select>
+            </div>
+            <div style="flex:1;">
+                <label>PERIOD</label>
+                <select id="halfInput" onchange="updateDB()">
+                    <option value="1ST HALF">1ST HALF</option>
+                    <option value="2ND HALF">2ND HALF</option>
+                    <option value="EXTRA TIME">EXTRA TIME</option>
+                </select>
+            </div>
         </div>
     </div>
 
-    <!-- Score & Cards -->
+    <!-- Live Score & Cards Section -->
     <div class="card">
-        <div class="header">SCORE & CARDS</div>
+        <div class="header">LIVE SCORE & CARDS</div>
         <div class="team-row">
+            <!-- Team A -->
             <div class="team-box">
-                <input type="text" id="nameA" placeholder="TEAM A" oninput="updateDB()">
+                <input type="text" id="nameA" placeholder="Team A" oninput="updateDB()">
+                <input type="color" id="colorA" oninput="updateDB()" style="height:35px; padding:2px;">
                 <div class="score-display" id="dispA">0</div>
                 <div class="btn-group">
                     <button class="btn btn-minus" onclick="changeVal('scoreA', -1)">-</button>
                     <button class="btn btn-plus" onclick="changeVal('scoreA', 1)">+</button>
                 </div>
-                <div class="btn-group" style="margin-top:15px;">
-                    <button class="btn btn-yellow">Y</button>
-                    <button class="btn btn-red">R</button>
+                <!-- Card Section Back -->
+                <div style="margin-top:15px; border-top:1px solid #333; padding-top:10px;">
+                    <label>CARDS</label>
+                    <div class="btn-group">
+                        <button class="btn btn-yellow">Y</button>
+                        <button class="btn btn-red">R</button>
+                    </div>
                 </div>
             </div>
-
+            <!-- Team B -->
             <div class="team-box">
-                <input type="text" id="nameB" placeholder="TEAM B" oninput="updateDB()">
+                <input type="text" id="nameB" placeholder="Team B" oninput="updateDB()">
+                <input type="color" id="colorB" oninput="updateDB()" style="height:35px; padding:2px;">
                 <div class="score-display" id="dispB">0</div>
                 <div class="btn-group">
                     <button class="btn btn-minus" onclick="changeVal('scoreB', -1)">-</button>
                     <button class="btn btn-plus" onclick="changeVal('scoreB', 1)">+</button>
                 </div>
-                <div class="btn-group" style="margin-top:15px;">
-                    <button class="btn btn-yellow">Y</button>
-                    <button class="btn btn-red">R</button>
+                <!-- Card Section Back -->
+                <div style="margin-top:15px; border-top:1px solid #333; padding-top:10px;">
+                    <label>CARDS</label>
+                    <div class="btn-group">
+                        <button class="btn btn-yellow">Y</button>
+                        <button class="btn btn-red">R</button>
+                    </div>
                 </div>
             </div>
         </div>
+        <button class="btn" style="background:#8e44ad; width:100%; margin-top:5px;" onclick="swapTeams()">🔄 SWAP SIDES</button>
     </div>
 
 <script>
@@ -102,12 +132,14 @@
         document.getElementById('dispB').innerText = current.scoreB || 0;
         document.getElementById('nameA').value = current.nameA || "";
         document.getElementById('nameB').value = current.nameB || "";
+        document.getElementById('colorA').value = current.teamColorA || "#ff0000";
+        document.getElementById('colorB').value = current.teamColorB || "#0000ff";
         document.getElementById('roundInput').value = current.currentRound || "LEAGUE MATCH";
         document.getElementById('halfInput').value = current.currentHalf || "1ST HALF";
-        
+
         let s = current.matchSeconds || 0;
-        let m = Math.floor(s/60); let sc = s%60;
-        document.getElementById('timerDisplay').innerText = (m<10?"0"+m:m) + ":" + (sc<10?"0"+sc:sc);
+        let m = Math.floor(s/60); let sec = s%60;
+        document.getElementById('timerDisplay').innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
 
         if(current.timerRunning && !timerInt) {
             timerInt = setInterval(() => {
@@ -125,22 +157,28 @@
         let mins = document.getElementById('setTimeInput').value;
         if(mins > 0) db.update({ matchSeconds: mins * 60, timerRunning: false });
     }
+
     function changeVal(key, val) { 
         let nv = (current[key] || 0) + val;
         db.update({ [key]: nv < 0 ? 0 : nv });
     }
+
+    function updateDB() { 
+        db.update({ 
+            nameA: document.getElementById('nameA').value, 
+            nameB: document.getElementById('nameB').value, 
+            teamColorA: document.getElementById('colorA').value, 
+            teamColorB: document.getElementById('colorB').value,
+            currentRound: document.getElementById('roundInput').value,
+            currentHalf: document.getElementById('halfInput').value
+        }); 
+    }
+
     function startTimer() { db.update({ timerRunning: true }); }
     function pauseTimer() { db.update({ timerRunning: false }); }
     function resetTimer() { db.update({ matchSeconds: 0, timerRunning: false }); }
-    function updateDB() {
-        db.update({
-            nameA: document.getElementById('nameA').value,
-            nameB: document.getElementById('nameB').value,
-            currentRound: document.getElementById('roundInput').value,
-            currentHalf: document.getElementById('halfInput').value
-        });
-    }
-    function resetAll() { if(confirm("ਕੀ ਸਭ ਕੁਝ ਜ਼ੀਰੋ ਕਰਨਾ ਹੈ?")) db.set({ scoreA:0, scoreB:0, matchSeconds:0, timerRunning:false, nameA:"", nameB:"", currentRound:"LEAGUE MATCH", currentHalf:"1ST HALF" }); }
+    function swapTeams() { db.update({ nameA: current.nameB, nameB: current.nameA, scoreA: current.scoreB, scoreB: current.scoreA, teamColorA: current.teamColorB, teamColorB: current.teamColorA }); }
+    function resetAll() { if(confirm("ਕੀ ਸਭ ਕੁਝ ਜ਼ੀਰੋ ਕਰਨਾ ਹੈ?")) db.update({ scoreA: 0, scoreB: 0, matchSeconds: 0, timerRunning: false, currentRound: "LEAGUE MATCH", currentHalf: "1ST HALF" }); }
 </script>
 </body>
 </html>
