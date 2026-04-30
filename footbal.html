@@ -1,187 +1,24 @@
-<!DOCTYPE html>
-<html lang="pa">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Final Admin Panel - Manpreet Singh</title>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; }
-        .card { background: #16191c; border-radius: 12px; border: 1px solid #333; margin-bottom: 12px; padding: 15px; box-sizing: border-box; }
-        .header { background: #27ae60; padding: 8px; text-align: center; font-weight: bold; margin: -15px -15px 15px -15px; border-radius: 12px 12px 0 0; font-size: 13px; text-transform: uppercase; }
-        .team-row { display: flex; gap: 8px; margin-bottom: 10px; }
-        .team-box { flex: 1; text-align: center; background: #111; padding: 10px; border-radius: 8px; border: 1px solid #222; }
-        
-        /* Select & Input Styling */
-        input, select { width: 100%; padding: 10px; background: #000; border: 1px solid #333; color: white; border-radius: 6px; text-align: center; margin-bottom: 5px; box-sizing: border-box; font-size: 14px; }
-        select { cursor: pointer; appearance: none; background-image: url("data:image/svg+xml;charset=UTF-8,%3csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='white' width='18px' height='18px'%3e%3cpath d='M7 10l5 5 5-5z'/%3e%3c/svg%3e"); background-repeat: no-repeat; background-position: right 10px center; }
-        
-        .score-display { font-size: 45px; font-weight: 900; margin: 5px 0; color: #2ecc71; }
-        .btn-group { display: flex; gap: 4px; margin-top: 5px; }
-        .btn { flex: 1; padding: 12px; border: none; border-radius: 5px; color: white; cursor: pointer; font-weight: bold; font-size: 13px; text-transform: uppercase; }
-        .btn-plus { background: #2ecc71; } .btn-minus { background: #34495e; }
-        .btn-yellow { background: #f1c40f; color: black; } .btn-red { background: #e74c3c; }
-        .timer-display { font-size: 35px; color: #f1c40f; text-align: center; font-family: monospace; font-weight: bold; background: #000; padding: 10px; border-radius: 8px; margin-bottom: 10px; border: 1px solid #333; }
-        .reset-btn { background: #e74c3c; width: 100%; padding: 15px; font-size: 16px; margin-bottom: 10px; border-radius: 10px; border: none; color: white; font-weight: bold; cursor: pointer; }
-        
-        .setting-row { display: flex; gap: 10px; margin-top: 5px; }
-        .setting-col { flex: 1; }
-        label { font-size: 11px; color: #888; display: block; margin-bottom: 4px; text-align: left; padding-left: 2px; }
-    </style>
-</head>
-<body>
-
-    <button class="reset-btn" onclick="resetAll()">⚠️ RESET ALL (NEW MATCH)</button>
-
-    <!-- NEW: Match Settings Card (Round & Half) -->
-    <div class="card">
-        <div class="header" style="background:#2980b9;">MATCH SETTINGS</div>
-        <div class="setting-row">
-            <div class="setting-col">
-                <label>ROUND NAME</label>
-                <select id="roundInput" onchange="updateDB()">
-                    <option value="League Match">League Match</option>
-                    <option value="Quarter Final">Quarter Final</option>
-                    <option value="Semi Final">Semi Final</option>
-                    <option value="Final">Final</option>
-                </select>
-            </div>
-            <div class="setting-col">
-                <label>MATCH PERIOD</label>
-                <select id="halfInput" onchange="updateDB()">
-                    <option value="1ST HALF">1st Half</option>
-                    <option value="2ND HALF">2nd Half</option>
-                    <option value="EXTRA TIME">Extra Time</option>
-                    <option value="PENALTIES">Penalties</option>
-                </select>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
-        <div id="timerDisplay" class="timer-display">00:00</div>
-        <div class="btn-group">
-            <button class="btn" style="background: #27ae60;" onclick="startTimer()">START</button>
-            <button class="btn" style="background: #e67e22;" onclick="pauseTimer()">PAUSE</button>
-            <button class="btn" style="background: #34495e;" onclick="resetTimer()">RESET TIME</button>
-        </div>
-        <button class="btn" style="background:#2980b9; width:100%; margin-top:10px;" onclick="toggleBoard()">BOARD ON/OFF</button>
-    </div>
-
-    <div class="card">
-        <div class="header">LIVE SCORE & CARDS</div>
-        <div class="team-row">
-            <!-- Team A -->
-            <div class="team-box">
-                <input type="text" id="nameA" placeholder="Team A" oninput="updateDB()">
-                <input type="color" id="colorA" oninput="updateDB()" style="height:35px; padding:2px;">
-                <div class="score-display" id="dispA">0</div>
-                <div class="btn-group">
-                    <button class="btn btn-minus" onclick="changeVal('scoreA', -1)">-</button>
-                    <button class="btn btn-plus" onclick="changeVal('scoreA', 1)">+</button>
-                </div>
-            </div>
-            <!-- Team B -->
-            <div class="team-box">
-                <input type="text" id="nameB" placeholder="Team B" oninput="updateDB()">
-                <input type="color" id="colorB" oninput="updateDB()" style="height:35px; padding:2px;">
-                <div class="score-display" id="dispB">0</div>
-                <div class="btn-group">
-                    <button class="btn btn-minus" onclick="changeVal('scoreB', -1)">-</button>
-                    <button class="btn btn-plus" onclick="changeVal('scoreB', 1)">+</button>
-                </div>
-            </div>
-        </div>
-        <button class="btn" style="background:#8e44ad; width:100%;" onclick="swapTeams()">🔄 SWAP SIDES</button>
-    </div>
-
-    <div class="card">
-        <div class="header" style="background:#d35400;">PENALTY CONTROL</div>
-        <div class="team-row">
-            <div class="team-box">
-                <div class="btn-group">
-                    <button class="btn" style="background:#27ae60;" onclick="addPenalty('A', 'goal')">GOAL</button>
-                    <button class="btn" style="background:#e74c3c;" onclick="addPenalty('A', 'miss')">MISS</button>
-                </div>
-                <button class="btn" style="background:#444; font-size:10px; margin-top:5px;" onclick="clearPen('A')">RESET A</button>
-            </div>
-            <div class="team-box">
-                <div class="btn-group">
-                    <button class="btn" style="background:#27ae60;" onclick="addPenalty('B', 'goal')">GOAL</button>
-                    <button class="btn" style="background:#e74c3c;" onclick="addPenalty('B', 'miss')">MISS</button>
-                </div>
-                <button class="btn" style="background:#444; font-size:10px; margin-top:5px;" onclick="clearPen('B')">RESET B</button>
-            </div>
-        </div>
-        <button class="btn" id="pToggleBtn" style="background:#e67e22; width:100%;" onclick="togglePenaltyMode()">SHOW PENALTY OVERLAY</button>
-    </div>
+<!-- Overlay ਵਾਲੇ ਹਿੱਸੇ ਵਿੱਚ ਸਿਰਫ ਸਕ੍ਰਿਪਟ ਅਤੇ ਸਟਾਈਲ ਅਪਡੇਟ ਕਰੋ -->
+<style>
+    /* ਟਾਈਮ ਉਦੋਂ ਹੀ ਦਿਖੇਗਾ ਜਦੋਂ timerRunning true ਹੋਵੇਗਾ */
+    #timer-wrap { display: none; width: 130px; background: #27ae60; height: 100%; flex-direction: column; align-items: center; justify-content: center; border-left: 3px solid rgba(0,0,0,0.3); }
+    .timer-active { display: flex !important; }
+</style>
 
 <script>
-    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database().ref("matchData");
-    let current = {}; let timerInt;
-
     db.on("value", (snap) => {
-        current = snap.val() || {};
-        document.getElementById('dispA').innerText = current.scoreA || 0;
-        document.getElementById('dispB').innerText = current.scoreB || 0;
-        document.getElementById('nameA').value = current.nameA || "";
-        document.getElementById('nameB').value = current.nameB || "";
-        document.getElementById('colorA').value = current.teamColorA || "#ff0000";
-        document.getElementById('colorB').value = current.teamColorB || "#0000ff";
+        const d = snap.val(); if(!d) return;
         
-        // Update Select Boxes
-        document.getElementById('roundInput').value = current.currentRound || "League Match";
-        document.getElementById('halfInput').value = current.currentHalf || "1ST HALF";
+        // ਟਾਈਮ ਸਿਰਫ START ਹੋਣ ਤੇ ਦਿਖਾਓ
+        const tWrap = document.getElementById('timer-wrap');
+        if(d.timerRunning) { tWrap.classList.add('timer-active'); } 
+        else { tWrap.classList.remove('timer-active'); }
 
-        document.getElementById('pToggleBtn').innerText = current.penaltyMode ? "HIDE PENALTY" : "SHOW PENALTY";
-        let s = current.matchSeconds || 0; let m = Math.floor(s/60); let sec = s%60;
-        document.getElementById('timerDisplay').innerText = (m<10?"0"+m:m) + ":" + (sec<10?"0"+sec:sec);
-        
-        if(current.timerRunning && !timerInt) {
-            timerInt = setInterval(() => {
-                db.child('matchSeconds').transaction(s => (s || 0) + 1);
-            }, 1000);
-        }
-        if(!current.timerRunning) { clearInterval(timerInt); timerInt = null; }
+        // Countdown Timer Logic
+        let s = d.matchSeconds || 0;
+        let m = Math.floor(s/60);
+        let sc = s%60;
+        document.getElementById('time-val').innerText = (m<10?"0"+m:m)+":"+(sc<10?"0"+sc:sc);
+        document.getElementById('period-val').innerText = d.currentHalf || "MATCH";
     });
-
-    function changeVal(key, val) { 
-        let nv = (current[key] || 0) + val;
-        db.update({ [key]: nv < 0 ? 0 : nv });
-    }
-    
-    function resetAll() { 
-        if(confirm("ਕੀ ਸਭ ਕੁਝ ਜ਼ੀਰੋ ਕਰਨਾ ਹੈ?")) {
-            db.update({ 
-                scoreA: 0, scoreB: 0, matchSeconds: 0, 
-                timerRunning: false, pListA: [], pListB: [], 
-                penaltyMode: false, currentRound: "League Match", currentHalf: "1ST HALF" 
-            }); 
-        }
-    }
-
-    function updateDB() { 
-        db.update({ 
-            nameA: document.getElementById('nameA').value, 
-            nameB: document.getElementById('nameB').value, 
-            teamColorA: document.getElementById('colorA').value, 
-            teamColorB: document.getElementById('colorB').value,
-            currentRound: document.getElementById('roundInput').value,
-            currentHalf: document.getElementById('halfInput').value
-        }); 
-    }
-
-    function swapTeams() { db.update({ nameA: current.nameB, nameB: current.nameA, scoreA: current.scoreB, scoreB: current.scoreA, teamColorA: current.teamColorB, teamColorB: current.teamColorA }); }
-    function addPenalty(team, type) { let list = current['pList' + team] || []; if(list.length < 5) { list.push(type); db.update({ ['pList' + team]: list }); } }
-    function clearPen(team) { db.update({ ['pList' + team]: [] }); }
-    function startTimer() { db.update({ timerRunning: true }); }
-    function pauseTimer() { db.update({ timerRunning: false }); }
-    function resetTimer() { db.update({ matchSeconds: 0, timerRunning: false }); }
-    function toggleBoard() { db.update({ showBoard: current.showBoard === false }); }
-    function togglePenaltyMode() { db.update({ penaltyMode: !current.penaltyMode }); }
 </script>
-</body>
-</html>
