@@ -12,148 +12,149 @@
         .card { background: #161b22; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #30363d; overflow: hidden; margin-bottom: 12px; box-sizing: border-box; }
         .header { background: #238636; color: white; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 12px; letter-spacing: 1px; }
         
-        /* Big Box Styling */
-        .big-next-match { background: linear-gradient(145deg, #1e252e, #161b22); border: 2px solid #1a73e8; padding: 15px; text-align: center; }
-        .big-title { color: #1a73e8; font-size: 14px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; display: block; }
-        .vs-text { font-size: 20px; font-weight: 900; color: #f1c40f; margin: 0 10px; }
+        /* Big Next Match Box */
+        .big-next-card { background: linear-gradient(135deg, #1e252e 0%, #0d1117 100%); border: 2px solid #f1c40f; text-align: center; padding: 15px; }
+        .big-title { color: #f1c40f; font-size: 16px; font-weight: 900; text-transform: uppercase; margin-bottom: 10px; display: block; border-bottom: 1px solid #333; padding-bottom: 5px; }
+        .vs-divider { font-size: 24px; font-weight: 900; color: #e74c3c; margin: 0 10px; }
 
-        .teams-container { display: flex; padding: 10px; gap: 5px; background: #0d1117; align-items: center; }
-        .team-box { flex: 2; text-align: center; padding: 10px; border-radius: 8px; background: #161b22; border-top: 4px solid #fff; }
-        .mid-controls { flex: 1; display: flex; flex-direction: column; gap: 8px; align-items: center; }
-        .score-val { font-size: 38px; font-weight: 900; color: #2ecc71; margin: 2px 0; }
-        
         .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
-        .label-text { font-size: 10px; color: #8b949e; display: block; margin-top: 5px; text-align: left; text-transform: uppercase; font-weight: bold; }
-
         .btn-update { background: #1a73e8; color: white; padding: 12px; border-radius: 6px; border:none; cursor:pointer; width:100%; font-weight:bold; }
-        .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 9px; flex: 1; width: 100%; }
+        .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 9px; flex: 1; }
 
-        .match-list-item { display: flex; justify-content: space-between; align-items: center; background: #1c2128; margin-bottom: 5px; padding: 8px; border-radius: 5px; border-left: 4px solid #1a73e8; }
+        /* Brackets / Taiyan Styling */
+        .bracket-item { background: #1c2128; margin-bottom: 8px; padding: 10px; border-radius: 8px; border-left: 5px solid #f1c40f; display: flex; justify-content: space-between; align-items: center; }
+        .bracket-teams { display: flex; flex-direction: column; gap: 2px; }
+        .team-tag { font-size: 13px; font-weight: bold; color: #fff; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
     </style>
 </head>
 <body>
 
 <div id="main-content" style="width: 100%; max-width: 500px;">
-    
-    <!-- 1. SCOREBOARD -->
-    <div class="card">
-        <div class="header">Scoreboard</div>
-        <div class="teams-container">
-            <div class="team-box" id="boxA">
-                <input type="text" id="nameA" class="std-input" placeholder="Team A" oninput="updateMatchDB()">
-                <div class="score-val" id="dispA">0</div>
-                <button class="card-btn" style="background:#238636; margin-top:5px;" onclick="changeScore('scoreA', 1)">+</button>
-            </div>
-            <div class="mid-controls">
-                <button id="visBtn" class="card-btn" style="background:#238636;" onclick="toggleVis('scoreVisible')">SHOW</button>
-                <div style="font-weight:bold; color:#444;">VS</div>
-            </div>
-            <div class="team-box" id="boxB">
-                <input type="text" id="nameB" class="std-input" placeholder="Team B" oninput="updateMatchDB()">
-                <div class="score-val" id="dispB">0</div>
-                <button class="card-btn" style="background:#238636; margin-top:5px;" onclick="changeScore('scoreB', 1)">+</button>
-            </div>
-        </div>
-    </div>
 
-    <!-- *** BIG NEXT MATCH BOX *** -->
-    <div class="card big-next-match">
-        <span class="big-title"><i class="fas fa-star"></i> Highlighted Next Match</span>
-        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 10px;">
-            <input type="text" id="bigNextA" class="std-input" placeholder="Team 1" style="margin:0; text-align:center; font-weight:bold; font-size:16px; border-color:#1a73e8;">
-            <span class="vs-text">VS</span>
-            <input type="text" id="bigNextB" class="std-input" placeholder="Team 2" style="margin:0; text-align:center; font-weight:bold; font-size:16px; border-color:#1a73e8;">
+    <!-- 1. BIG NEXT MATCH BOX (HIGHLIGHTED) -->
+    <div class="card big-next-card">
+        <span class="big-title"><i class="fas fa-star"></i> Next Match (ਅਗਲਾ ਮੁਕਾਬਲਾ)</span>
+        <div style="display: flex; align-items: center; justify-content: center; margin-bottom: 15px;">
+            <input type="text" id="bigNextA" class="std-input" placeholder="Team 1" style="text-align:center; font-size:16px; border-color:#f1c40f; margin:0;">
+            <span class="vs-divider">VS</span>
+            <input type="text" id="bigNextB" class="std-input" placeholder="Team 2" style="text-align:center; font-size:16px; border-color:#f1c40f; margin:0;">
         </div>
         <button class="btn-update" onclick="updateBigMatch()" style="background:#f1c40f; color:#000;">
-            <i class="fas fa-sync-alt"></i> Update Big Match Box
+            <i class="fas fa-sync-alt"></i> Update Big Match Overlay
         </button>
     </div>
 
-    <!-- 2. SCHEDULE LIST (Add Multiple) -->
+    <!-- 2. TOURNAMENT BRACKETS (TAIYAN) -->
     <div class="card">
-        <div class="header" style="background: #1a73e8;">Add To Schedule List</div>
+        <div class="header" style="background: #1a73e8;"><i class="fas fa-sitemap"></i> Match Brackets (ਟਾਈਆਂ)</div>
         <div style="padding: 15px;">
             <div class="grid-2">
-                <input type="text" id="schTeamA" class="std-input" placeholder="ਟੀਮ A">
-                <input type="text" id="schTeamB" class="std-input" placeholder="ਟੀਮ B">
+                <input type="text" id="taiA" class="std-input" placeholder="ਟੀਮ 1">
+                <input type="text" id="taiB" class="std-input" placeholder="ਟੀਮ 2">
             </div>
-            <button class="btn-update" onclick="saveMatches()" style="margin-top:5px;">Add to List</button>
-            <div id="displayList" style="margin-top:10px; max-height: 150px; overflow-y: auto;"></div>
+            <button class="btn-update" onclick="addBracket()">Add to Brackets</button>
+            
+            <div id="bracketList" style="margin-top:15px; max-height: 250px; overflow-y: auto;">
+                <!-- Brackets will load here -->
+            </div>
         </div>
+    </div>
+
+    <!-- 3. RESET -->
+    <div class="card" style="border:none; background:transparent;">
+        <button class="card-btn" style="background:#da3633; padding:12px; width:100%; font-size:12px;" onclick="fullReset()">RESET SYSTEM</button>
     </div>
 
 </div>
 
 <script>
+    // Firebase Config
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) firebase.initializeApp(firebaseConfig);
-    
-    const matchRef = firebase.database().ref("matchData");
     const tickerRef = firebase.database().ref("tickerData");
 
-    // Big Match Box Update
+    // Big Match Update
     function updateBigMatch() {
         const t1 = document.getElementById('bigNextA').value;
         const t2 = document.getElementById('bigNextB').value;
-        if(!t1 || !t2) return alert("Fill names!");
+        if(!t1 || !t2) return alert("Please enter both teams!");
         
         tickerRef.update({
             bigNextMatch: t1 + " VS " + t2
-        }).then(() => alert("Big Match Updated!"));
+        }).then(() => alert("Big Match Updated Successfully!"));
     }
 
-    // Normal Schedule List
-    function saveMatches() {
-        const t1 = document.getElementById('schTeamA').value;
-        const t2 = document.getElementById('schTeamB').value;
-        if(!t1 || !t2) return;
-        tickerRef.child('nextMatchList').once('value', snap => {
+    // Add Brackets (Taiyan)
+    function addBracket() {
+        const t1 = document.getElementById('taiA').value;
+        const t2 = document.getElementById('taiB').value;
+        if(!t1 || !t2) return alert("Enter team names!");
+
+        tickerRef.child('taiList').once('value', snap => {
             let list = snap.val() || [];
             list.push({ t1, t2 });
-            tickerRef.child('nextMatchList').set(list);
-            document.getElementById('schTeamA').value = "";
-            document.getElementById('schTeamB').value = "";
+            tickerRef.child('taiList').set(list);
+            document.getElementById('taiA').value = "";
+            document.getElementById('taiB').value = "";
         });
     }
 
-    tickerRef.child('nextMatchList').on('value', snap => {
-        const div = document.getElementById('displayList');
+    // Load Brackets
+    tickerRef.child('taiList').on('value', snap => {
+        const div = document.getElementById('bracketList');
         div.innerHTML = "";
         const data = snap.val() || [];
         data.forEach((m, i) => {
             div.innerHTML += `
-                <div class="match-list-item">
-                    <span class="match-text">${m.t1} VS ${m.t2}</span>
-                    <button class="card-btn" style="background:#238636; width:50px; flex:none;" onclick="setLive('${m.t1}', '${m.t2}')">Set</button>
+                <div class="bracket-item">
+                    <div class="bracket-teams">
+                        <span class="team-tag">${m.t1}</span>
+                        <span style="color:#555; font-size:10px;">V/S</span>
+                        <span class="team-tag">${m.t2}</span>
+                    </div>
+                    <div style="display:flex; gap:5px;">
+                        <button class="card-btn" style="background:#238636;" onclick="moveToBig('${m.t1}', '${m.t2}')">SELECT</button>
+                        <button class="card-btn" style="background:#da3633;" onclick="deleteBracket(${i})">X</button>
+                    </div>
                 </div>`;
         });
     });
 
-    function setLive(t1, t2) {
-        matchRef.update({ nameA: t1, nameB: t2, scoreA: 0, scoreB: 0 });
+    // Move from list to Big Box
+    function moveToBig(t1, t2) {
+        document.getElementById('bigNextA').value = t1;
+        document.getElementById('bigNextB').value = t2;
+        window.scrollTo({ top: 0, behavior: 'smooth' });
     }
 
-    // Scoreboard Sync
-    function changeScore(team, val) {
-        matchRef.child(team).transaction(c => (c || 0) + val);
+    function deleteBracket(index) {
+        tickerRef.child('taiList').once('value', snap => {
+            let list = snap.val() || [];
+            list.splice(index, 1);
+            tickerRef.child('taiList').set(list);
+        });
     }
 
-    matchRef.on("value", snap => {
-        const d = snap.val() || {};
-        document.getElementById('dispA').innerText = d.scoreA || 0;
-        document.getElementById('dispB').innerText = d.scoreB || 0;
-        document.getElementById('nameA').value = d.nameA || "";
-        document.getElementById('nameB').value = d.nameB || "";
-    });
+    function fullReset() {
+        if(confirm("Are you sure? This will clear brackets.")) {
+            tickerRef.child('taiList').set(null);
+            tickerRef.update({ bigNextMatch: "" });
+            document.getElementById('bigNextA').value = "";
+            document.getElementById('bigNextB').value = "";
+        }
+    }
 
+    // Sync Big Box from DB
     tickerRef.on("value", snap => {
         const d = snap.val() || {};
-        const bigMatch = d.bigNextMatch || " VS ";
-        const parts = bigMatch.split(" VS ");
-        document.getElementById('bigNextA').value = parts[0] || "";
-        document.getElementById('bigNextB').value = parts[1] || "";
+        if(d.bigNextMatch) {
+            const parts = d.bigNextMatch.split(" VS ");
+            document.getElementById('bigNextA').value = parts[0] || "";
+            document.getElementById('bigNextB').value = parts[1] || "";
+        }
     });
 </script>
+
 </body>
 </html>
