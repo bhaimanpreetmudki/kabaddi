@@ -1,1 +1,156 @@
+<!DOCTYPE html>
+<html lang="pa">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Tournament Admin - Plain List</title>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
+    <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <style>
+        body { font-family: 'Segoe UI', sans-serif; background: #fff; padding: 20px; margin: 0; }
+        
+        /* ਟੀਮ ਲਿਸਟ ਦਾ ਡਿਜ਼ਾਈਨ */
+        .list-section { margin-top: 20px; }
+        .team-row { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f0f0f0; font-size: 19px; font-weight: 500; }
+        
+        /* ਇਨਪੁਟ ਅਤੇ ਬਟਨ */
+        .std-input { width: 100%; padding: 12px; border: 1px solid #ccc; border-radius: 6px; margin-bottom: 10px; font-size: 16px; }
+        .btn { padding: 12px; border: none; border-radius: 6px; cursor: pointer; font-weight: bold; width: 100%; text-transform: uppercase; }
+        .btn-add { background: #28a745; color: white; }
+        .btn-update { background: #1a73e8; color: white; margin-top: 10px; }
+        .btn-declare { background: #ff5722; color: white; height: 50px; font-size: 18px; margin-top: 15px; }
+        
+        .btn-win-circle { background: #ffc107; color: #000; border-radius: 50%; width: 35px; height: 35px; border: none; font-size: 18px; cursor: pointer; }
 
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 30px; }
+        h4 { margin-bottom: 10px; color: #666; text-transform: uppercase; font-size: 14px; border-bottom: 1px solid #ddd; padding-bottom: 5px; }
+        select { width: 100%; padding: 10px; border: 2px solid #1a73e8; border-radius: 6px; font-weight: bold; margin-bottom: 10px; }
+    </style>
+</head>
+<body>
+
+    <textarea id="bulkTeams" class="std-input" style="height: 60px;" placeholder="ਟੀਮਾਂ ਲਿਖੋ (Mudki-Gill, Fzr-Fdk)"></textarea>
+    <button class="btn btn-add" onclick="addBulkTeams()">Add Teams</button>
+
+    <div class="grid-2">
+        <div class="list-section">
+            <h4>Pending Result</h4>
+            <div id="playingList"></div>
+        </div>
+        <div class="list-section">
+            <h4>Declare Result</h4>
+            <div id="winnerList"></div>
+        </div>
+    </div>
+
+    <hr style="margin: 30px 0; border: 0; border-top: 1px solid #eee;">
+
+    <select id="winnerSelect"></select>
+    <button class="btn btn-declare" onclick="declareFinalResult()">Declare Final Result</button>
+
+    <div style="margin-top: 30px;">
+        <h4>Scoreboard & Ticker</h4>
+        <div class="grid-2">
+            <select id="tie1"></select>
+            <select id="tie2"></select>
+        </div>
+        <button class="btn btn-update" onclick="updateTie()">Set Live Match</button>
+
+        <input type="text" id="tourName" class="std-input" placeholder="Tournament Name" style="margin-top: 20px;">
+        <textarea id="nextEvents" class="std-input" style="height: 50px;" placeholder="Next Events..."></textarea>
+        <button class="btn btn-update" style="background: #333;" onclick="saveTicker()">Save Settings</button>
+    </div>
+
+<script>
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    firebase.initializeApp(firebaseConfig);
+    const db = firebase.database().ref("tickerData");
+
+    function addBulkTeams() {
+        const input = document.getElementById('bulkTeams').value;
+        if(!input) return;
+        db.child('teamList').once('value', (snap) => {
+            let count = snap.numChildren();
+            input.split(',').forEach(p => {
+                const name = p.trim().replace('-', ' vs ');
+                if(name) {
+                    count++;
+                    const ref = db.child('teamList').push();
+                    ref.set({ id: ref.key, name: name, matchIdx: count });
+                }
+            });
+        });
+        document.getElementById('bulkTeams').value = "";
+    }
+
+    function declareFinalResult() {
+        const win = document.getElementById('winnerSelect').value;
+        if(!win) return alert("Select Team!");
+        db.update({ finalWinner: win });
+        alert("Declared: " + win);
+    }
+
+    function updateTie() {
+        const t1 = document.getElementById('tie1').value;
+        const t2 = document.getElementById('tie2').value;
+        if(t1 && t2) db.update({ currentMatchTie: t1 + " VS " + t2 });
+        alert("Tie Updated!");
+    }
+
+    function saveTicker() {
+        db.update({ 
+            tournamentName: document.getElementById('tourName').value, 
+            externalEvents: document.getElementById('nextEvents').value 
+        });
+        alert("Saved!");
+    }
+
+    db.on("value", (snap) => {
+        const data = snap.val() || {};
+        document.getElementById('tourName').value = data.tournamentName || "";
+        document.getElementById('nextEvents').value = data.externalEvents || "";
+        renderUI(data.teamList, data.winnerList);
+    });
+
+    function moveToWin(id, name, idx) {
+        if(confirm(name + " Won?")) {
+            db.child('teamList').child(id).remove();
+            db.child('winnerList').push().set({ name: name, matchIdx: idx });
+        }
+    }
+
+    function renderUI(teamList, winnerList) {
+        const pList = document.getElementById('playingList');
+        const wList = document.getElementById('winnerList');
+        const wSelect = document.getElementById('winnerSelect');
+        const tie1 = document.getElementById('tie1');
+        const tie2 = document.getElementById('tie2');
+
+        pList.innerHTML = ""; wList.innerHTML = "";
+        let opts = `<option value="">Select Team</option>`;
+
+        if(teamList) {
+            Object.values(teamList).forEach(t => {
+                pList.innerHTML += `
+                    <div class="team-row">
+                        <div>${t.matchIdx}, ${t.name}</div>
+                        <button class="btn-win-circle" onclick="moveToWin('${t.id}', '${t.name}', '${t.matchIdx}')">✔</button>
+                    </div>`;
+            });
+        }
+
+        if(winnerList) {
+            Object.values(winnerList).forEach(w => {
+                wList.innerHTML += `
+                    <div class="team-row">
+                        <div style="color: green;">${w.matchIdx}, ${w.name}</div>
+                        <span>★</span>
+                    </div>`;
+                opts += `<option value="${w.name}">${w.name}</option>`;
+            });
+        }
+        wSelect.innerHTML = opts; tie1.innerHTML = opts; tie2.innerHTML = opts;
+    }
+</script>
+</body>
+</html>
