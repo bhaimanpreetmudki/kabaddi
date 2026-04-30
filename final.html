@@ -137,30 +137,30 @@
         </div>
     </div>
 
-    <!-- 4. MATCH TIES & NEXT (Updated) -->
+    <!-- 4. MATCH TIE -->
     <div class="card">
-        <div class="header" style="background: #6f42c1;">Match Ties & Next</div>
+        <div class="header" style="background: #6f42c1;">Current Match Tie</div>
         <div class="content">
-            <span class="label-title">Current Match Tie</span>
             <input type="text" id="tieInput" class="std-input" placeholder="Team A vs Team B">
             <button class="btn-update" onclick="updateTieManual()">Update Match Tie</button>
-            
-            <span class="label-title">Next Program</span>
-            <input type="text" id="nextProg" class="std-input" placeholder="ਅਗਲਾ ਪ੍ਰੋਗਰਾਮ...">
-            <button class="btn-update" style="background: #e67e22;" onclick="confirmTickerAction('nextProg')">Update Next Program</button>
         </div>
     </div>
 
-    <!-- 5. TICKER & EFFECTS -->
+    <!-- 5. TICKER INFO & NEXT PROGRAM -->
     <div class="card">
-        <div class="header" style="background:#444;">Ticker Info & Visibility</div>
+        <div class="header" style="background:#444;">Ticker Info & Next Program</div>
         <div class="content">
             <button id="tickerToggleBtn" class="btn-ticker" onclick="confirmTickerAction('vis')">Ticker: ON/OFF</button>
+            
+            <span class="label-title">Tournament & Prize</span>
             <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
             <input type="text" id="prizeList" class="std-input" placeholder="Prizes">
             <input type="text" id="contactInfo" class="std-input" placeholder="Contact">
-            <textarea id="nextEvents" class="std-input" style="height: 50px;" placeholder="External Events..."></textarea>
-            <button class="btn-update" style="background: #333;" onclick="confirmTickerAction('info')">Update Ticker Info</button>
+            
+            <span class="label-title" style="color:#e67e22;">Next Program</span>
+            <input type="text" id="nextProg" class="std-input" placeholder="ਅਗਲਾ ਪ੍ਰੋਗਰਾਮ...">
+            
+            <button class="btn-update" style="background: #238636;" onclick="confirmTickerAction('info')">Update All Ticker Info</button>
             
             <div class="label-title">Watermark</div>
             <div style="display:flex; gap:5px; margin-bottom:10px;">
@@ -179,7 +179,6 @@
     <!-- SYSTEM RESET -->
     <div class="card">
         <div style="padding:10px;">
-            <input type="text" id="eventInp" class="std-input" placeholder="Goal Scorer / Event" oninput="updateMatchDB()">
             <button class="card-btn" style="background:#e74c3c; padding:12px; font-size:12px;" onclick="fullReset()">RESET EVERYTHING</button>
         </div>
     </div>
@@ -206,7 +205,6 @@
             colorB: document.getElementById('colorB').value,
             penaltyA: document.getElementById('pA').value,
             penaltyB: document.getElementById('pB').value,
-            lastEvent: document.getElementById('eventInp').value,
             matchRound: document.getElementById('matchRound').value,
             round: document.getElementById('roundInp').value,
             duration: document.getElementById('matchDuration').value,
@@ -223,13 +221,14 @@
         let pDetail = document.getElementById('player' + team).value;
         if(!pDetail) { alert("Enter Player No!"); return; }
         let key = team + "_" + pDetail;
+        let eventMsg = "";
         if(type === 'Yellow') {
             yellowCounts[key] = (yellowCounts[key] || 0) + 1;
-            document.getElementById('eventInp').value = (yellowCounts[key] >= 2 ? "RED (2nd Yellow): " : "Yellow Card: ") + pDetail;
+            eventMsg = (yellowCounts[key] >= 2 ? "RED (2nd Yellow): " : "Yellow Card: ") + pDetail;
         } else {
-            document.getElementById('eventInp').value = "Red Card: " + pDetail;
+            eventMsg = "Red Card: " + pDetail;
         }
-        updateMatchDB();
+        matchRef.child('lastEvent').set(eventMsg);
     }
 
     function startTimer() {
@@ -266,11 +265,16 @@
         }
     }
 
-    // Ticker Functions
     function confirmTickerAction(type, subType = null) {
         if (confirm("ਕੀ ਤੁਸੀਂ ਅਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
-            if (type === 'info') tickerRef.update({ tournamentName: tourName.value, prizes: prizeList.value, contact: contactInfo.value, externalEvents: nextEvents.value });
-            else if (type === 'nextProg') tickerRef.update({ nextProgram: nextProg.value });
+            if (type === 'info') {
+                tickerRef.update({ 
+                    tournamentName: tourName.value, 
+                    prizes: prizeList.value, 
+                    contact: contactInfo.value,
+                    nextProgram: nextProg.value 
+                });
+            }
             else if (type === 'wm') tickerRef.update({ watermarkText: wmText.value });
             else if (type === 'vis') { tickerStatus = !tickerStatus; tickerRef.child('tickerVis').set(tickerStatus); }
             else if (type === 'effect') { effectStates[subType] = !effectStates[subType]; tickerRef.child('effects').child(subType).set(effectStates[subType]); }
@@ -301,7 +305,6 @@
         document.getElementById('matchRound').value = data.matchRound || "";
         document.getElementById('roundInp').value = data.round || "";
         document.getElementById('matchDuration').value = data.duration || "";
-        document.getElementById('eventInp').value = data.lastEvent || "";
         if(!timerInterval) document.getElementById('timerShow').innerText = data.matchTime || "00:00";
         document.getElementById('boxA').style.borderTopColor = data.colorA;
         document.getElementById('boxB').style.borderTopColor = data.colorB;
@@ -318,7 +321,6 @@
         contactInfo.value = data.contact || "";
         wmText.value = data.watermarkText || "";
         nextProg.value = data.nextProgram || "";
-        nextEvents.value = data.externalEvents || "";
         document.getElementById('tieInput').value = data.currentMatchTie || "";
         tickerStatus = !!data.tickerVis;
         tickerToggleBtn.style.background = tickerStatus ? "#238636" : "#da3633";
