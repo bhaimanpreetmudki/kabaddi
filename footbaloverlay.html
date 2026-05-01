@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>50-50 Capsule Overlay</title>
+    <title>Professional Floating Capsule Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -25,85 +25,88 @@
             align-items: center;
             background: rgba(0, 0, 0, 0.9);
             border-radius: 50px;
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.1);
+            padding: 0 5px; /* Kinare ton gap rakhan layi */
         }
 
-        /* --- Capsule Style Hints --- */
+        /* --- Floating Capsule Design --- */
         .capsule {
-            height: 80%;
+            height: 38px; /* Patti ton chota ta ki judeya na lage */
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 25px;
+            padding: 0 20px;
             font-weight: 900;
             border-radius: 50px;
             z-index: 10;
             margin: 0 5px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
         }
 
         /* LIVE BOX (White BG, Red Text) */
         .live-cap {
             background: #ffffff;
             color: #ff0000;
-            font-size: 26px;
-            min-width: 100px;
-            box-shadow: 0 0 15px rgba(255,255,255,0.2);
+            font-size: 24px;
+            min-width: 80px;
         }
 
-        /* RED HINT (Used for NEXT MATCH, PRIZES) */
-        .hint-red {
+        /* NEXT MATCH & INFO (White Background - AS REQUESTED) */
+        .white-hint {
+            background: #ffffff;
+            color: #ff0000;
+            font-size: 16px;
+            text-transform: uppercase;
+            min-width: 120px;
+        }
+
+        /* RED HINT (Prizes etc) */
+        .red-hint {
             background: #ff0000;
             color: #ffffff;
-            font-size: 18px;
+            font-size: 16px;
             text-transform: uppercase;
-            min-width: 130px;
+            min-width: 120px;
         }
 
-        /* 50% STATIC SECTION */
-        .static-half {
-            width: 42%; /* Adjusted for 50-50 feel with LIVE box */
+        /* TOURNAMENT NAME (Fixed) */
+        .tour-name {
             color: #f1c40f;
-            font-size: 24px;
+            font-size: 22px;
             font-weight: bold;
-            display: flex;
-            align-items: center;
-            padding-left: 10px;
+            padding: 0 15px;
             white-space: nowrap;
-            overflow: hidden;
         }
 
-        /* SCROLL SECTION (Remaining 50%) */
-        .scroll-half {
+        /* SCROLLING LIST BOX (After Hint Box) */
+        .list-scroll {
             flex-grow: 1;
             height: 100%;
             display: flex;
             align-items: center;
-            background: rgba(255, 255, 255, 0.05);
-            border-left: 2px solid #ff0000;
+            overflow: hidden;
         }
 
-        marquee { color: white; font-size: 22px; font-weight: bold; }
+        marquee { color: white; font-size: 20px; font-weight: bold; }
 
         /* CLOCK CAPSULE */
         .clock-cap {
             background: #f1c40f;
             color: #000;
-            min-width: 160px;
-            height: 80%;
+            min-width: 140px;
+            height: 38px;
             border-radius: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 22px;
+            font-size: 20px;
             font-weight: 900;
-            margin-right: 6px;
+            margin-right: 5px;
         }
 
-        /* Scoreboard */
-        #scoreboard { position: absolute; top: 25px; left: 25px; display: flex; gap: 8px; }
-        .s-box { background: white; color: #ff0000; width: 65px; height: 55px; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; border-radius: 12px; border: 2px solid #ff0000; }
-        .t-box { background: #000; color: white; padding: 0 25px; height: 55px; display: flex; align-items: center; font-size: 24px; min-width: 140px; border-radius: 12px; border: 1px solid #333; }
+        /* Scoreboard Style */
+        #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; gap: 8px; }
+        .s-box { background: white; color: #ff0000; width: 60px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; border-radius: 10px; border: 2px solid #ff0000; }
+        .t-box { background: #000; color: white; padding: 0 20px; height: 50px; display: flex; align-items: center; font-size: 22px; min-width: 130px; border-radius: 10px; border: 1px solid #444; }
     </style>
 </head>
 <body>
@@ -118,23 +121,25 @@
 
     <div id="master-footer">
         
-        <!-- LINE 1: LIVE + 50% TOUR NAME + RED HINT + 50% SCROLL -->
+        <!-- LINE 1: LIVE + TOUR NAME + WHITE NEXT MATCH HINT + SCROLLING LIST -->
         <div class="bar">
             <div class="capsule live-cap">LIVE</div>
-            <div class="static-half" id="tour-name">MAJHA KABADDI CUP 2026</div>
-            <div class="capsule hint-red">NEXT MATCH</div>
-            <div class="scroll-half">
-                <marquee scrollamount="6" id="scroll-top">UPCOMING: TEAM C VS TEAM D — ENJOY THE MATCH</marquee>
+            <div class="tour-name" id="tour-display">DHOLEWALA KABADDI CUP</div>
+            <div class="capsule white-hint">NEXT MATCH</div>
+            <div class="list-scroll">
+                <marquee scrollamount="6" id="scroll-top">MOGA VS LUDHIANA | JALANDHAR VS PATIALA | ENJOY LIVE ACTION</marquee>
             </div>
         </div>
 
-        <!-- LINE 2: INFO HINT + 50% SUB INFO + PRIZES HINT + 50% SCROLL + CLOCK -->
+        <!-- LINE 2: WHITE INFO HINT + SCROLLING LIST + RED PRIZES HINT + SCROLLING LIST + CLOCK -->
         <div class="bar">
-            <div class="capsule hint-red" style="min-width: 100px;">INFO</div>
-            <div class="static-half" style="width: 35%; color: white;" id="sub-info">LIVE FROM VILLAGE</div>
-            <div class="capsule hint-red">PRIZES</div>
-            <div class="scroll-half">
-                <marquee scrollamount="5" id="scroll-bot">1st Prize: ₹1,00,000 | 2nd Prize: ₹75,000 | Best Raider: Motorcycle</marquee>
+            <div class="capsule white-hint">INFO</div>
+            <div class="list-scroll" style="max-width: 200px;">
+                <marquee scrollamount="4" id="scroll-info">LIVE HD STREAMING</marquee>
+            </div>
+            <div class="capsule red-hint">PRIZES</div>
+            <div class="list-scroll">
+                <marquee scrollamount="5" id="scroll-bot">1st: ₹1,00,000 | 2nd: ₹75,000 | Best Player: Motorcycle</marquee>
             </div>
             <div class="clock-cap" id="live-clock">02:30 PM</div>
         </div>
@@ -146,6 +151,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    // Scores Sync
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
@@ -154,14 +160,16 @@
         document.getElementById('disp_sB').innerText = d.scoreB || "0";
     });
 
+    // Ticker Sync
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('tour-name').innerText = d.tournamentName || "TOURNAMENT 2026";
-        document.getElementById('scroll-top').innerText = d.participatingTeams || "NEXT MATCH LOADING...";
-        document.getElementById('sub-info').innerText = d.nextProgram || "LIVE STREAMING";
-        document.getElementById('scroll-bot').innerText = "🏆 " + (d.prizes || "UPDATING...");
+        document.getElementById('tour-display').innerText = d.tournamentName || "TOURNAMENT 2026";
+        document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING MATCHES LOADING...");
+        document.getElementById('scroll-info').innerText = (d.nextProgram || "LIVE KABADDI ACTION");
+        document.getElementById('scroll-bot').innerText = "🏆 " + (d.prizes || "UPDATING...") + " — " + (d.fullTickerText || "");
     });
 
+    // Clock
     setInterval(() => {
         const now = new Date();
         document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
