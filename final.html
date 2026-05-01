@@ -20,6 +20,9 @@
         .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 9px; flex: 1; width: 100%; }
 
         .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
+        /* ਨਵੇਂ ਬਾਕਸ ਲਈ ਸਟਾਈਲ */
+        .std-textarea { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; min-height: 45px; resize: none; overflow: hidden; }
+        
         .label-text, .label-title { font-size: 10px; color: #8b949e; display: block; margin-top: 5px; text-align: left; text-transform: uppercase; font-weight: bold; }
 
         .content { padding: 15px; }
@@ -148,6 +151,9 @@
             <input type="text" id="prizeList" class="std-input" placeholder="Prizes">
             <input type="text" id="contactInfo" class="std-input" placeholder="Contact">
             
+            <span class="label-title" style="color:#2ecc71;">Participting Teams</span>
+            <textarea id="teamsList" class="std-textarea" placeholder="Enter Team names here..." oninput="autoExpand(this)"></textarea>
+
             <span class="label-title" style="color:#e67e22;">Next Program</span>
             <input type="text" id="nextProg" class="std-input" placeholder="ਅਗਲਾ ਪ੍ਰੋਗਰਾਮ...">
             
@@ -187,6 +193,19 @@
     let yellowCounts = {};
     let tickerStatus = true;
     let effectStates = { scroll: false, blink: false, fullscreen: false };
+
+    // ਬਾਕਸ ਨੂੰ ਆਟੋਮੈਟਿਕ ਵੱਡਾ ਕਰਨ ਲਈ ਫੰਕਸ਼ਨ
+    function autoExpand(field) {
+        field.style.height = 'inherit';
+        const computed = window.getComputedStyle(field);
+        const height = parseInt(computed.getPropertyValue('border-top-width'), 10)
+                     + parseInt(computed.getPropertyValue('padding-top'), 10)
+                     + field.scrollHeight
+                     + parseInt(computed.getPropertyValue('padding-bottom'), 10)
+                     + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
+
+        field.style.height = height + 'px';
+    }
 
     function updateMatchDB() {
         matchRef.update({
@@ -263,7 +282,8 @@
                     tournamentName: tourName.value, 
                     prizes: prizeList.value, 
                     contact: contactInfo.value,
-                    nextProgram: nextProg.value 
+                    nextProgram: nextProg.value,
+                    participatingTeams: document.getElementById('teamsList').value
                 });
             }
             else if (type === 'wm') tickerRef.update({ watermarkText: wmText.value });
@@ -304,6 +324,11 @@
         contactInfo.value = data.contact || "";
         wmText.value = data.watermarkText || "";
         nextProg.value = data.nextProgram || "";
+        
+        const teamsInput = document.getElementById('teamsList');
+        teamsInput.value = data.participatingTeams || "";
+        autoExpand(teamsInput); // ਡਾਟਾ ਆਉਣ ਤੇ ਬਾਕਸ ਸਾਈਜ਼ ਸੈੱਟ ਕਰੋ
+
         tickerStatus = !!data.tickerVis;
         tickerToggleBtn.style.background = tickerStatus ? "#238636" : "#da3633";
         tickerToggleBtn.innerText = tickerStatus ? "Ticker: SHOWING" : "Ticker: HIDDEN";
