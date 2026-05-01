@@ -2,103 +2,138 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Slanted Double Layer Overlay</title>
+    <title>Kabaddi Live Pro Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
+        /* --- FOOTER CONTAINER --- */
         #master-footer {
             position: absolute;
-            bottom: 10px;
+            bottom: 15px;
             left: 0;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 5px;
-            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
+            gap: 2px;
         }
 
         .bar {
             display: flex;
             height: 45px;
             align-items: center;
-            color: white;
-            padding-left: 20px;
         }
 
-        /* Slanted Design Logic */
-        .slanted-box {
+        /* Slanted Style */
+        .box {
             height: 100%;
             display: flex;
             align-items: center;
             padding: 0 25px;
-            /* Tehdha Cut (Slant) */
-            clip-path: polygon(15% 0%, 100% 0%, 85% 100%, 0% 100%);
-            margin-left: -15px; 
-            font-weight: bold;
+            clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
+            margin-left: -15px;
+            transition: all 0.5s ease;
         }
 
-        /* Color Palette */
-        .color-red { background: linear-gradient(90deg, #b31217, #e6191f); color: white; min-width: 120px; z-index: 5; }
-        .color-dark { background: rgba(10, 25, 47, 0.95); color: #fff; flex: 2; z-index: 4; font-size: 22px; }
-        .color-yellow { background: #f1c40f; color: #000; min-width: 120px; z-index: 3; }
-        .color-blue { background: #0056b3; color: #fff; flex: 2; z-index: 2; font-size: 22px; }
-        .color-flash { background: #fff; color: #b31217; min-width: 160px; z-index: 1; font-weight: 900; font-size: 20px; }
+        /* 1. FIXED LIVE BOX */
+        .live-fix {
+            background: #b31217;
+            color: white;
+            font-size: 20px;
+            font-weight: 900;
+            min-width: 100px;
+            justify-content: center;
+            clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%); /* Different slant for start */
+            margin-left: 0;
+            z-index: 10;
+            animation: pulse 1.5s infinite;
+        }
 
-        .hint-text { font-size: 16px; text-transform: uppercase; letter-spacing: 1px; }
+        @keyframes pulse {
+            0% { background: #b31217; }
+            50% { background: #ff0000; }
+            100% { background: #b31217; }
+        }
 
-        /* Flash Clock Animation */
-        .flash-container { position: relative; width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; }
-        .flash-item { position: absolute; opacity: 0; transition: 0.6s ease; }
-        .flash-item.active { opacity: 1; }
+        /* 2. DYNAMIC HINT BOX (Yellow) */
+        .hint-dynamic {
+            background: #f1c40f;
+            color: black;
+            font-size: 16px;
+            text-transform: uppercase;
+            min-width: 120px;
+            justify-content: center;
+            z-index: 9;
+        }
 
-        /* Scoreboard */
+        /* 3. MAIN CONTENT BOX (Dark) */
+        .content-main {
+            background: rgba(0, 0, 0, 0.9);
+            color: white;
+            flex-grow: 1;
+            font-size: 22px;
+            z-index: 8;
+            border-right: 3px solid #f1c40f;
+        }
+
+        /* 4. DATE/TIME BOX */
+        .flash-end {
+            background: white;
+            color: #b31217;
+            min-width: 180px;
+            justify-content: center;
+            font-size: 20px;
+            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%); /* End slant */
+            z-index: 7;
+        }
+
+        /* Rotation Text Animation */
+        .rotator { position: relative; width: 100%; height: 100%; display: flex; align-items: center; }
+        .r-text { position: absolute; opacity: 0; transform: translateX(20px); transition: 0.5s; white-space: nowrap; }
+        .r-text.active { opacity: 1; transform: translateX(0); }
+
+        /* SCOREBOARD (Same Tede Style) */
         #scoreboard {
-            position: absolute; top: 30px; left: 30px; display: flex; height: 55px;
-            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.6));
+            position: absolute; top: 30px; left: 30px; display: flex; height: 50px;
         }
-        .s-box { background: white; color: black; width: 70px; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; }
-        .t-container { display: flex; background: #0a192f; border-top: 3px solid #f1c40f; }
-        .t-sec { padding: 0 25px; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; min-width: 150px; }
+        .s-val { background: white; color: black; width: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; z-index: 3; }
+        .t-name { background: #0a192f; color: white; padding: 0 20px; display: flex; align-items: center; font-size: 22px; min-width: 140px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); margin-left: -10px; z-index: 2; }
     </style>
 </head>
 <body>
 
     <!-- Scoreboard -->
     <div id="scoreboard">
-        <div id="disp_sA" class="s-box" style="clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%); border-radius: 5px 0 0 5px;">0</div>
-        <div class="t-container" style="margin-left: -15px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%);">
-            <div id="boxA" class="t-sec" style="background: #87CEEB; color: black;">TEAM A</div>
-            <div id="boxB" class="t-sec" style="background: #000;">TEAM B</div>
-        </div>
-        <div id="disp_sB" class="s-box" style="margin-left: -15px; clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%); border-radius: 0 5px 5px 0;">0</div>
+        <div id="disp_sA" class="s-val" style="clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%);">0</div>
+        <div id="boxA" class="t-name" style="background: #87CEEB; color: black;">TEAM A</div>
+        <div id="boxB" class="t-name" style="background: #000; color: white;">TEAM B</div>
+        <div id="disp_sB" class="s-val" style="clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%); margin-left: -10px;">0</div>
     </div>
 
     <!-- Double Layer Footer -->
     <div id="master-footer">
         
-        <!-- TOP BAR -->
+        <!-- Top Bar (Tournament Info) -->
         <div class="bar">
-            <div class="slanted-box color-red"><span class="hint-text">📍 ਪਿੰਡ</span></div>
-            <div class="slanted-box color-dark" id="top-list-1">DHOLEWALA (MOGA)</div>
-            <div class="slanted-box color-yellow"><span class="hint-text">🏆 ਇਨਾਮ</span></div>
-            <div class="slanted-box color-blue" id="top-list-2">1st: 1,00,000 | 2nd: 75,000</div>
+            <div class="box live-fix">LIVE</div>
+            <div class="box hint-dynamic">TOURNAMENT</div>
+            <div class="box content-main" id="top-info">DHOLEWALA (MOGA) KABADDI CUP 2026</div>
         </div>
 
-        <!-- BOTTOM BAR -->
+        <!-- Bottom Bar (Rotating Info) -->
         <div class="bar">
-            <div class="slanted-box color-yellow"><span class="hint-text">🏏 ਅਗਲਾ ਮੈਚ</span></div>
-            <div class="slanted-box color-blue" id="bot-list-1">TEAM A VS TEAM B</div>
-            <div class="slanted-box color-red"><span class="hint-text">📢 ਅੱਪਡੇਟ</span></div>
-            <div class="slanted-box color-dark" id="bot-list-2">WELCOME TO LIVE KABADDI</div>
-            <div class="slanted-box color-flash">
-                <div class="flash-container">
-                    <div id="date" class="flash-item active">01/05/2026</div>
-                    <div id="time" class="flash-item">10:30 AM</div>
+            <div class="box hint-dynamic" id="hint-bot">INFO</div>
+            <div class="box content-main">
+                <div class="rotator">
+                    <div class="r-text active" id="msg1">Welcome to Kabaddi Junction Live</div>
+                    <div class="r-text" id="msg2">1st Prize: ₹1,00,000 | 2nd Prize: ₹75,000</div>
+                    <div class="r-text" id="msg3">Next Match: Team A vs Team B</div>
+                    <div class="r-text" id="msg4">Helpline: +91 98765-43210</div>
                 </div>
             </div>
+            <div class="box flash-end" id="clock-box">10:30 AM</div>
         </div>
 
     </div>
@@ -108,38 +143,49 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Sync Data
+    // 1. Sync Data from Firebase
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
         document.getElementById('boxB').innerText = d.nameB || "TEAM B";
         document.getElementById('disp_sA').innerText = d.scoreA || "0";
         document.getElementById('disp_sB').innerText = d.scoreB || "0";
-        document.getElementById('scoreboard').style.opacity = d.scoreVisible ? "1" : "0";
     });
 
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('top-list-1').innerText = d.tournamentName || "VILLAGE";
-        document.getElementById('top-list-2').innerText = d.prizes || "UPDATING...";
-        document.getElementById('bot-list-1').innerText = d.participatingTeams || "NEXT MATCH";
-        document.getElementById('bot-list-2').innerText = d.nextProgram || "LIVE NOW";
+        document.getElementById('top-info').innerText = (d.tournamentName || "KABADDI CUP") + " 2026";
+        document.getElementById('msg1').innerText = d.nextProgram || "Live Tournament";
+        document.getElementById('msg2').innerText = "🏆 PRIZE: " + (d.prizes || "Updating...");
+        document.getElementById('msg3').innerText = "🏏 NEXT: " + (d.participatingTeams || "Wait...");
+        document.getElementById('msg4').innerText = "📞 HELPLINE: " + (d.fullTickerText || "Contact Admin");
     });
 
-    // Time & Date Switcher
+    // 2. Step-by-Step Rotation Logic
+    let step = 1;
+    const hints = ["INFO", "PRIZES", "MATCHES", "HELP"];
+    
+    setInterval(() => {
+        // Change Text
+        document.getElementById(`msg${step}`).classList.remove('active');
+        step = (step % 4) + 1;
+        document.getElementById(`msg${step}`).classList.add('active');
+        
+        // Change Hint Box Label accordingly
+        document.getElementById('hint-bot').innerText = hints[step-1];
+    }, 5000);
+
+    // 3. Clock Logic
     setInterval(() => {
         const now = new Date();
-        document.getElementById('date').innerText = now.toLocaleDateString('en-GB');
-        document.getElementById('time').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit' });
+        const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        const date = now.toLocaleDateString('en-GB');
         
-        const d = document.getElementById('date');
-        const t = document.getElementById('time');
-        if (d.classList.contains('active')) {
-            d.classList.remove('active'); t.classList.add('active');
-        } else {
-            t.classList.remove('active'); d.classList.add('active');
-        }
-    }, 4000);
+        const clockBox = document.getElementById('clock-box');
+        // Toggle between time and date
+        clockBox.innerText = (new Date().getSeconds() % 10 < 5) ? time : date;
+    }, 1000);
+
 </script>
 </body>
 </html>
