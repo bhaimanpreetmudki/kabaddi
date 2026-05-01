@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Manpreet Mudki - Final Ticker Overlay</title>
+    <title>Manpreet Mudki - Complete Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -10,45 +10,40 @@
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
+        /* --- SCOREBOARD --- */
+        #scoreboard {
+            position: absolute;
+            top: 30px;
+            right: 30px;
+            display: flex;
+            align-items: center;
+            height: 50px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+        .score-box { background: white; color: black; width: 60px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; }
+        .team-container { display: flex; height: 100%; min-width: 300px; background: rgba(0,0,0,0.9); overflow: hidden; border-radius: 5px; margin: 0 5px; }
+        .team-section { flex: 1; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; text-transform: uppercase; padding: 0 15px; }
+
+        /* --- TICKER --- */
         #footer-container {
             position: absolute;
             bottom: 20px;
             left: 0;
             width: 100%;
-            display: none; /* ਪੈਨਲ ਤੋਂ ਸਿਗਨਲ ਮਿਲਣ 'ਤੇ ਦਿਖਾਈ ਦੇਵੇਗਾ */
+            display: flex;
             flex-direction: column;
             gap: 4px;
         }
-
         .ticker-line { display: flex; height: 35px; align-items: center; overflow: hidden; }
-        
-        .hint-box {
-            height: 100%;
-            min-width: 110px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 17px;
-            font-weight: 900;
-            text-transform: uppercase;
-            padding: 0 12px;
-        }
-
-        /* Top Line Colors */
+        .hint-box { height: 100%; min-width: 110px; display: flex; align-items: center; justify-content: center; font-size: 17px; font-weight: 900; text-transform: uppercase; padding: 0 12px; }
         .line-top { background: #b31217; color: white; }
         .white-hint { background: white; color: #b31217; }
-        
-        /* Bottom Line Colors */
         .line-bottom { background: white; color: #b31217; }
         .red-hint { background: #b31217; color: white; }
-
         .content-area { flex: 1; font-size: 20px; font-weight: bold; padding: 0 15px; white-space: nowrap; display: flex; align-items: center; overflow: hidden; }
-
         .corner-box { width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; }
         .c-white { background: white; color: #b31217; }
         .c-red { background: #b31217; color: white; }
-
-        /* Animation Setup */
         .step-info { position: relative; height: 100%; flex: 1; display: flex; align-items: center; }
         .step-item { position: absolute; width: 100%; opacity: 0; transform: translateX(15px); transition: all 0.5s ease; }
         .step-item.active { opacity: 1; transform: translateX(0); }
@@ -56,8 +51,18 @@
 </head>
 <body>
 
+    <!-- Scoreboard Area -->
+    <div id="scoreboard">
+        <div id="disp_sA" class="score-box">0</div>
+        <div class="team-container">
+            <div id="boxA" class="team-section">TEAM A</div>
+            <div id="boxB" class="team-section">TEAM B</div>
+        </div>
+        <div id="disp_sB" class="score-box">0</div>
+    </div>
+
+    <!-- Ticker Area -->
     <div id="footer-container">
-        <!-- TOP LINE -->
         <div class="ticker-line line-top">
             <div class="hint-box white-hint">> LIVE</div>
             <div class="content-area" id="disp-tour">LOADING...</div>
@@ -66,7 +71,6 @@
             <div class="corner-box c-white" id="live-time">00:00 AM</div>
         </div>
 
-        <!-- BOTTOM LINE -->
         <div class="ticker-line line-bottom">
             <div class="hint-box red-hint">> UPCOMING</div>
             <div class="content-area">
@@ -87,37 +91,38 @@
     </div>
 
 <script>
-    // Firebase Setup
+    // Firebase Database Setup
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    // Match Data (Teams)
+    // 1. Scoreboard Logic
     db.ref("matchData").on("value", (snap) => {
-        const data = snap.val() || {};
-        document.getElementById('disp-match').innerText = (data.nameA || "TEAM A") + " VS " + (data.nameB || "TEAM B");
+        const d = snap.val() || {};
+        document.getElementById('boxA').innerText = d.nameA || "TEAM A";
+        document.getElementById('boxB').innerText = d.nameB || "TEAM B";
+        document.getElementById('disp_sA').innerText = d.scoreA || "0";
+        document.getElementById('disp_sB').innerText = d.scoreB || "0";
+        document.getElementById('disp-match').innerText = (d.nameA || "TEAM A") + " VS " + (d.nameB || "TEAM B");
+        
+        // Scoreboard Hide/Show
+        document.getElementById('scoreboard').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    // Ticker Data & Visibility Logic
+    // 2. Ticker Logic
     db.ref("tickerData").on("value", (snap) => {
         const data = snap.val() || {};
-        
-        // Updates from Admin Panel
         document.getElementById('disp-tour').innerText = data.tournamentName || "LIVE TOURNAMENT";
-        document.getElementById('disp-prize').innerText = data.prizes || "Prizes Loading...";
-        document.getElementById('disp-next').innerText = data.nextProgram || "Next Match Soon";
-        document.getElementById('disp-teams').innerText = data.participatingTeams || "Participating Teams";
+        document.getElementById('disp-prize').innerText = data.prizes || "";
+        document.getElementById('disp-next').innerText = data.nextProgram || "";
+        document.getElementById('disp-teams').innerText = data.participatingTeams || "";
         document.getElementById('disp-contact').innerText = data.contact || "";
         
-        // Corrected Visibility: Show if tickerVis is true
-        if (data.tickerVis === true) {
-            document.getElementById('footer-container').style.display = 'flex';
-        } else {
-            document.getElementById('footer-container').style.display = 'none';
-        }
+        // Ticker Hide/Show (Reverse logic fix)
+        document.getElementById('footer-container').style.display = (data.tickerVis === false) ? 'none' : 'flex';
     });
 
-    // Clock Function
+    // 3. Clock
     function updateClock() {
         const now = new Date();
         document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -126,20 +131,15 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // Auto Rotation for Info
+    // 4. Rotation Animation
     let step = 0;
     setInterval(() => {
-        const upcomingItems = [document.getElementById('disp-next'), document.getElementById('disp-teams')];
-        const prizeItems = [document.getElementById('disp-prize'), document.getElementById('disp-contact')];
-        
-        upcomingItems[step].classList.remove('active');
-        prizeItems[step].classList.remove('active');
-        
+        const up = [document.getElementById('disp-next'), document.getElementById('disp-teams')];
+        const prz = [document.getElementById('disp-prize'), document.getElementById('disp-contact')];
+        up[step].classList.remove('active'); prz[step].classList.remove('active');
         step = (step + 1) % 2;
-        
-        upcomingItems[step].classList.add('active');
-        prizeItems[step].classList.add('active');
-    }, 6000); 
+        up[step].classList.add('active'); prz[step].classList.add('active');
+    }, 6000);
 </script>
 </body>
 </html>
