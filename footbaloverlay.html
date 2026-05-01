@@ -2,68 +2,87 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Static Labels with Hidden Text Scroll</title>
+    <title>Customizable Arrow Ticker</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
+        /* --- ਇੱਥੋਂ ਤੁਸੀਂ ਸਭ ਕੁਝ ਕੰਟਰੋਲ ਕਰ ਸਕਦੇ ਹੋ --- */
+        :root {
+            --arrow-width: 25px;      /* Arrow ਕਿੰਨਾ ਬਾਹਰ ਨੂੰ ਨੁਕੀਲਾ ਹੋਵੇ */
+            --arrow-height: 52px;     /* ਪੂਰੀ ਪੱਟੀ ਦੀ ਹਾਈਟ */
+            --label-padding: 30px;    /* ਬਾਕਸ ਦੀ ਅੰਦਰਲੀ ਚੌੜਾਈ */
+            --white-box-color: #ffffff;
+            --red-box-color: #ff0000;
+        }
+
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
         #master-footer {
             position: absolute;
             bottom: 5px;
-            left: 0;
-            right: 0;
+            left: 0; right: 0;
             display: flex;
             flex-direction: column;
             gap: 2px;
         }
 
-        .bar { display: flex; height: 52px; width: 100%; overflow: hidden; position: relative; }
+        .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; }
 
-        /* --- 50-50 Sections --- */
-        .box-left { width: 45%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
+        /* 50-50 Sections */
+        .box-left { width: 45%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; background: #000; }
         .box-right { width: 55%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
 
-        .bg-black { background: #000; }
-        .bg-white { background: #fff; }
-        .border-red { border-left: 2px solid #ff0000; }
-
-        /* --- ਖੜ੍ਹੇ ਰਹਿਣ ਵਾਲੇ ਬਾਕਸ (Static Labels) --- */
+        /* Static Hint Boxes */
         .hint-label {
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            padding: 0 25px;
+            padding: 0 var(--label-padding);
             font-weight: 900;
             font-size: 22px;
             text-transform: uppercase;
-            position: absolute; /* ਇਹ ਬਾਕਸ ਨੂੰ ਇੱਕ ਜਗ੍ਹਾ ਟਿਕਾ ਕੇ ਰੱਖੇਗਾ */
-            left: 0;
-            top: 0;
-            z-index: 100; /* ਇਹ ਟੈਕਸਟ ਦੇ ਉੱਪਰ ਰਹੇਗਾ */
+            position: absolute;
+            left: 0; top: 0;
+            z-index: 100;
         }
 
-        .hint-white { background: #ffffff; color: #ff0000; }
-        .hint-red { background: #ff0000; color: #ffffff; }
+        /* --- Arrow (>) Design --- */
+        .hint-label::after {
+            content: "";
+            position: absolute;
+            right: calc(var(--arrow-width) * -1); /* Arrow ਨੂੰ ਬਾਕਸ ਦੇ ਨਾਲ ਜੋੜਨ ਲਈ */
+            top: 0;
+            width: 0;
+            height: 0;
+            border-top: calc(var(--arrow-height) / 2) solid transparent;
+            border-bottom: calc(var(--arrow-height) / 2) solid transparent;
+            z-index: 100;
+        }
 
-        /* --- ਟੈਕਸਟ ਜੋ ਪਿੱਛੇ ਚੱਲੇਗਾ --- */
+        /* Colors & Specific Arrow logic */
+        .hint-white { background: var(--white-box-color); color: #ff0000; }
+        .hint-white::after { border-left: var(--arrow-width) solid var(--white-box-color); }
+
+        .hint-red { background: var(--red-box-color); color: #ffffff; }
+        .hint-red::after { border-left: var(--arrow-width) solid var(--red-box-color); }
+
+        /* Scrolling Text */
         marquee {
             width: 100%;
             font-size: 26px;
             font-weight: 900;
             text-transform: uppercase;
             z-index: 10;
-            /* ਟੈਕਸਟ ਨੂੰ ਬਾਕਸ ਦੇ ਅੱਗੋਂ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਪੈਡਿੰਗ (Label ਦੀ ਚੌੜਾਈ ਮੁਤਾਬਕ) */
-            padding-left: 100px; 
+            /* ਟੈਕਸਟ ਕਿੱਥੋਂ ਦਿਖਣਾ ਸ਼ੁਰੂ ਹੋਵੇ */
+            padding-left: 120px; 
         }
 
-        .red-txt { color: #ff0000; }
-        .white-txt { color: #ffffff; }
-        .yellow-txt { color: #f1c40f; }
+        .txt-white { color: #fff; }
+        .txt-red { color: #ff0000; }
+        .txt-yellow { color: #f1c40f; }
 
-        /* ਘੜੀ */
         .clock-area {
             position: absolute;
             right: 0;
@@ -76,7 +95,7 @@
             justify-content: center;
             font-size: 24px;
             font-weight: 900;
-            z-index: 110; /* ਘੜੀ ਸਭ ਤੋਂ ਉੱਪਰ */
+            z-index: 110;
         }
 
         /* Scoreboard */
@@ -95,33 +114,30 @@
     </div>
 
     <div id="master-footer">
-        
-        <!-- TOP BAR -->
+        <!-- LINE 1 -->
         <div class="bar">
-            <div class="box-left bg-black">
+            <div class="box-left">
                 <div class="hint-label hint-white">LIVE</div>
-                <marquee scrollamount="5" class="yellow-txt" id="tour-name">MAJHA CUP 2026</marquee>
+                <marquee scrollamount="5" class="txt-yellow" id="tour-name">LOADING...</marquee>
             </div>
-            <div class="box-right bg-white">
+            <div class="box-right" style="background:#fff;">
                 <div class="hint-label hint-red">NEXT</div>
-                <marquee scrollamount="6" class="red-txt" id="scroll-top">TEAM A VS TEAM B</marquee>
+                <marquee scrollamount="6" class="txt-red" id="scroll-top">LOADING...</marquee>
             </div>
         </div>
 
-        <!-- BOTTOM BAR -->
+        <!-- LINE 2 -->
         <div class="bar">
-            <div class="box-left bg-black">
+            <div class="box-left">
                 <div class="hint-label hint-white">INFO</div>
-                <marquee scrollamount="4" class="white-txt" id="sub-info">LIVE STREAMING</marquee>
+                <marquee scrollamount="4" class="txt-white" id="sub-info">LOADING...</marquee>
             </div>
-            <div class="box-right bg-black border-red">
+            <div class="box-right" style="background:#000; border-left: 2px solid #ff0000;">
                 <div class="hint-label hint-red">PRIZES</div>
-                <!-- ਘੜੀ ਦੇ ਪਿੱਛੇ ਟੈਕਸਟ ਨਾ ਜਾਵੇ ਇਸ ਲਈ width ਘਟਾਈ ਹੈ -->
-                <marquee scrollamount="5" class="white-txt" style="width: calc(100% - 130px);" id="scroll-bot">1ST: 1,00,000 | 2ND: 75,000</marquee>
+                <marquee scrollamount="5" class="txt-white" style="width: calc(100% - 130px);" id="scroll-bot">LOADING...</marquee>
                 <div class="clock-area" id="live-clock">00:00 AM</div>
             </div>
         </div>
-
     </div>
 
 <script>
