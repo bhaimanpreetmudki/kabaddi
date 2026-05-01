@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV Style - Final Layout</title>
+    <title>Sukhdeep TV Style - Ticker & Scoreboard</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -13,10 +13,38 @@
             --label-padding: 25px;
             --main-red: #cc0000;
             --pure-white: #ffffff;
+            --pure-black: #000000;
         }
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
+        /* --- Scoreboard Style --- */
+        #scoreboard-container {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .score-row {
+            display: flex;
+            height: 45px;
+            width: 350px;
+            border: 2px solid var(--pure-white);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+        }
+
+        .team-box { flex: 1; display: flex; align-items: center; padding: 0 15px; font-size: 20px; font-weight: 900; text-transform: uppercase; }
+        .score-val { width: 60px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; background: var(--pure-black); color: var(--pure-white); }
+
+        .bg-red-team { background: var(--main-red); color: var(--pure-white); }
+        .bg-white-team { background: var(--pure-white); color: var(--main-red); }
+
+        /* --- Ticker Style --- */
         #master-footer {
             position: absolute;
             bottom: 10px; left: 0; right: 0;
@@ -34,15 +62,12 @@
             border-radius: 4px;
         }
 
-        /* Top Bar Colors: White Background */
         .top-bg { background: var(--pure-white); }
-        /* Bottom Bar Colors: Red Background */
         .bottom-bg { background: var(--main-red); }
 
         .box-left { width: 45%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
         .box-right { width: 55%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
 
-        /* Labels Base Style */
         .hint-label {
             height: 100%; display: flex; align-items: center; justify-content: center;
             padding: 0 var(--label-padding); font-weight: 900; font-size: 22px;
@@ -57,11 +82,9 @@
             z-index: 100;
         }
 
-        /* Red Label with White Arrow (Top Line) */
         .hint-red { background: var(--main-red); color: var(--pure-white); }
         .hint-red::after { border-left: var(--arrow-width) solid var(--main-red); }
 
-        /* White Label with Red Arrow (Bottom Line) */
         .hint-white { background: var(--pure-white); color: var(--main-red); }
         .hint-white::after { border-left: var(--arrow-width) solid var(--pure-white); }
 
@@ -80,8 +103,20 @@
 </head>
 <body>
 
+    <!-- Scoreboard Section -->
+    <div id="scoreboard-container">
+        <div class="score-row">
+            <div class="team-box bg-red-team" id="nameA">TEAM A</div>
+            <div class="score-val" id="scoreA">0</div>
+        </div>
+        <div class="score-row">
+            <div class="team-box bg-white-team" id="nameB">TEAM B</div>
+            <div class="score-val" id="scoreB">0</div>
+        </div>
+    </div>
+
+    <!-- Ticker Section -->
     <div id="master-footer">
-        <!-- LINE 1 (Top Bar: Red Hints, White Large Box) -->
         <div class="bar top-bg">
             <div class="box-left">
                 <div class="hint-label hint-red">LIVE</div>
@@ -97,7 +132,6 @@
             </div>
         </div>
 
-        <!-- LINE 2 (Bottom Bar: White Hints, Red Large Box) -->
         <div class="bar bottom-bg">
             <div class="box-left">
                 <div class="hint-label hint-white">INFO</div>
@@ -120,12 +154,27 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
+    // Match Data (Scoreboard)
+    db.ref("matchData").on("value", (snap) => {
+        const d = snap.val() || {};
+        document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
+        document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
+        document.getElementById('scoreA').innerText = d.scoreA || "0";
+        document.getElementById('scoreB').innerText = d.scoreB || "0";
+        
+        // Visibility control
+        document.getElementById('scoreboard-container').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
+    });
+
+    // Ticker Data
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT 2026").toUpperCase();
         document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
         document.getElementById('sub-info').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
         document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
+        
+        document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 
     function updateClock() {
