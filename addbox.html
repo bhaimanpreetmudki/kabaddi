@@ -2,14 +2,14 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV Style Double Layer Ticker</title>
+    <title>Double Layer Ticker (No Contact Box)</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- Scoreboard (As requested before) --- */
+        /* --- Scoreboard Section --- */
         #scoreboard {
             position: absolute;
             top: 30px;
@@ -28,7 +28,7 @@
         .team-b { background: #000000; color: white; }
         .vs-divider { width: 35px; background: white; color: black; font-weight: 900; display: flex; align-items: center; justify-content: center; clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%); font-size: 14px; }
 
-        /* --- DOUBLE LAYER TICKER (Sukhdeep TV Style) --- */
+        /* --- DOUBLE LAYER TICKER --- */
         #footer-container {
             position: absolute;
             bottom: 20px;
@@ -36,37 +36,33 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 2px; /* Gap between two lines */
+            gap: 2px;
         }
 
         .ticker-line {
             display: flex;
             background: white;
-            height: 30px;
+            height: 32px;
             align-items: center;
-            border-top: 1px solid #ccc;
             overflow: hidden;
         }
 
-        /* Red Heading Boxes */
         .head-box {
             background: #b31217;
             color: white;
             height: 100%;
-            padding: 0 15px;
+            padding: 0 20px;
             display: flex;
             align-items: center;
-            font-size: 16px;
+            font-size: 18px;
             font-weight: bold;
             white-space: nowrap;
-            text-transform: uppercase;
         }
 
-        /* Content Text Area */
         .content-box {
             flex: 1;
-            color: #b31217; /* Red text on white background */
-            font-size: 18px;
+            color: #b31217;
+            font-size: 20px;
             font-weight: bold;
             padding: 0 15px;
             white-space: nowrap;
@@ -75,26 +71,9 @@
             align-items: center;
         }
 
-        /* Step Animation for Right side sections */
-        .step-info {
-            position: relative;
-            height: 100%;
-            flex: 1;
-            display: flex;
-            align-items: center;
-        }
-
-        .step-item {
-            position: absolute;
-            width: 100%;
-            opacity: 0;
-            transform: translateY(10px);
-            transition: all 0.5s ease;
-        }
-        .step-item.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .step-info { position: relative; height: 100%; flex: 1; display: flex; align-items: center; }
+        .step-item { position: absolute; width: 100%; opacity: 0; transform: translateY(10px); transition: all 0.5s ease; }
+        .step-item.active { opacity: 1; transform: translateY(0); }
 
     </style>
 </head>
@@ -111,27 +90,25 @@
         <div id="disp_sB" class="score-box score-right">0</div>
     </div>
 
-    <!-- Double Layer Ticker -->
+    <!-- Double Layer Ticker (Contact Removed) -->
     <div id="footer-container">
         
-        <!-- TOP LINE: Live Info & Prizes -->
+        <!-- LINE 1: Tournament & Prizes -->
         <div class="ticker-line">
             <div class="head-box">LIVE</div>
-            <div class="content-box" id="tournament-name">TOURNAMENT NAME</div>
+            <div class="content-box" id="tournament-name">VILLAGE MUDKI (FIROZPUR)</div>
             
             <div class="head-box">PRIZES</div>
             <div class="content-box">
                 <div class="step-info">
-                    <div class="step-item active" id="p1">1st: ₹51,000</div>
-                    <div class="step-item" id="p2">2nd: ₹31,000</div>
+                    <div class="step-item active" id="p1">1st Prize: ₹51,000</div>
+                    <div class="step-item" id="p2">2nd Prize: ₹31,000</div>
+                    <div class="step-item" id="p3">Best Raider/Stopper: Cup + Cash</div>
                 </div>
             </div>
-
-            <div class="head-box">CONTACT</div>
-            <div class="content-box" id="contact-info">98765-XXXXX</div>
         </div>
 
-        <!-- BOTTOM LINE: Teams & Upcoming -->
+        <!-- LINE 2: Teams & Upcoming -->
         <div class="ticker-line">
             <div class="head-box">TEAMS</div>
             <div class="content-box" id="match-teams">TEAM A VS TEAM B</div>
@@ -139,8 +116,8 @@
             <div class="head-box">UPCOMING</div>
             <div class="content-box">
                 <div class="step-info">
-                    <div class="step-item active" id="u1">Match 2: Pind A vs Pind B</div>
-                    <div class="step-item" id="u2">Next Tourney: Pind C</div>
+                    <div class="step-item active" id="u1">Next Match: Pind X vs Pind Y</div>
+                    <div class="step-item" id="u2">Tournament Info: Full Day Event</div>
                 </div>
             </div>
         </div>
@@ -152,7 +129,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 1. Sync Match Data (Scoreboard)
+    // 1. Sync Match Data
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
@@ -171,28 +148,29 @@
     // 2. Sync Ticker Data
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('tournament-name').innerText = d.tournamentName || "VILLAGE CUP";
+        document.getElementById('tournament-name').innerText = d.tournamentName || "LIVE KABADDI CUP";
         document.getElementById('match-teams').innerText = (d.nameA || "TEAM A") + " VS " + (d.nameB || "TEAM B");
-        document.getElementById('contact-info').innerText = d.contact || "86998-171XX";
         
-        // Updating Steps
-        document.getElementById('p1').innerText = "1st: " + (d.prizes || "₹51,000");
-        document.getElementById('u1').innerText = "Next: " + (d.participatingTeams || "Updating...");
+        document.getElementById('p1').innerText = "1st Prize: " + (d.prizes || "₹51,000");
+        document.getElementById('u1').innerText = "Next: " + (d.participatingTeams || "Wait...");
         
         document.getElementById('footer-container').style.opacity = d.tickerVis ? "1" : "0";
     });
 
-    // 3. Step Rotation (Change Prizes and Upcoming info every 4 seconds)
-    let curStep = 1;
+    // 3. Step Rotation (Auto change info)
+    let curP = 1;
     setInterval(() => {
-        document.getElementById(`p${curStep}`).classList.remove('active');
-        document.getElementById(`u${curStep}`).classList.remove('active');
+        document.getElementById(`p${curP}`).classList.remove('active');
+        curP = (curP === 3) ? 1 : curP + 1;
+        document.getElementById(`p${curP}`).classList.add('active');
+
+        // Rotation for Upcoming matches
+        let curU = (curP > 2) ? 1 : curP; // Simple logic to sync
+        document.querySelectorAll('.ticker-line:nth-child(2) .step-item').forEach(el => el.classList.remove('active'));
+        let nextU = document.getElementById(`u${curU}`);
+        if(nextU) nextU.classList.add('active');
         
-        curStep = (curStep === 1) ? 2 : 1;
-        
-        document.getElementById(`p${curStep}`).classList.add('active');
-        document.getElementById(`u${curStep}`).classList.add('active');
-    }, 4000);
+    }, 5000);
 
 </script>
 </body>
