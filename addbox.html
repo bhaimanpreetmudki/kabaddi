@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV Style - Side by Side Scoreboard</title>
+    <title>Sukhdeep TV Style - Professional Scoreboard</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -18,34 +18,56 @@
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- Scoreboard Style (Left Side & Side-by-Side) --- */
+        /* --- Scoreboard Style (Wide Team Boxes & Side Scores) --- */
         #scoreboard-container {
             position: absolute;
-            top: 20px;
-            left: 20px; /* ਖੱਬੇ ਪਾਸੇ ਸੈੱਟ ਕੀਤਾ */
+            top: 25px;
+            left: 20px;
             display: flex;
-            flex-direction: row; /* ਬਰਾਬਰ-ਬਰਾਬਰ ਰੱਖਣ ਲਈ */
+            flex-direction: row;
             gap: 0px;
-            border: 2px solid var(--pure-white);
-            border-radius: 4px;
+            border: 3px solid var(--pure-white);
+            border-radius: 6px;
             overflow: hidden;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
         }
 
-        .score-row {
+        .score-unit {
             display: flex;
-            height: 50px;
-            min-width: 200px;
+            height: 55px;
+            align-items: center;
         }
 
-        .team-box { flex: 1; display: flex; align-items: center; padding: 0 15px; font-size: 20px; font-weight: 900; text-transform: uppercase; }
-        .score-val { width: 60px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; background: var(--pure-black); color: var(--pure-white); }
+        /* ਟੀਮ ਬਾਕਸ ਦੀ ਚੌੜਾਈ ਵਧਾ ਦਿੱਤੀ ਗਈ ਹੈ */
+        .team-display { 
+            width: 250px; 
+            height: 100%;
+            display: flex; 
+            align-items: center; 
+            padding: 0 20px; 
+            font-size: 22px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+        }
 
-        /* Color Difference */
-        .bg-red-team { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
-        .bg-white-team { background: var(--pure-white); color: var(--main-red); }
+        /* ਸਕੋਰ ਬਾਕਸ ਕਿਨਾਰਿਆਂ 'ਤੇ */
+        .score-box { 
+            width: 70px; 
+            height: 100%;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 34px; 
+            font-weight: 900; 
+            background: var(--pure-black); 
+            color: var(--pure-white); 
+        }
 
-        /* --- Ticker Style --- */
+        /* Color Variations */
+        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
+        .side-b { background: var(--pure-white); color: var(--main-red); }
+
+        /* --- Ticker Style (Pehle Vangu) --- */
         #master-footer {
             position: absolute;
             bottom: 10px; left: 0; right: 0;
@@ -104,15 +126,17 @@
 </head>
 <body>
 
-    <!-- Scoreboard Side by Side -->
+    <!-- Professional Scoreboard -->
     <div id="scoreboard-container">
-        <div class="score-row">
-            <div class="team-box bg-red-team" id="nameA">TEAM A</div>
-            <div class="score-val" id="scoreA">0</div>
+        <!-- Team A Unit -->
+        <div class="score-unit side-a">
+            <div class="score-box" id="scoreA">0</div>
+            <div class="team-display" id="nameA">TEAM A</div>
         </div>
-        <div class="score-row">
-            <div class="team-box bg-white-team" id="nameB">TEAM B</div>
-            <div class="score-val" id="scoreB">0</div>
+        <!-- Team B Unit -->
+        <div class="score-unit side-b">
+            <div class="team-display" id="nameB" style="text-align: right; justify-content: flex-end;">TEAM B</div>
+            <div class="score-box" id="scoreB">0</div>
         </div>
     </div>
 
