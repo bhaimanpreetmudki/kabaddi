@@ -2,115 +2,119 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Professional Sports Overlay</title>
+    <title>Professional Dual Ticker Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* 1. SCOREBOARD (TOP LEFT) */
+        /* Scoreboard (Top Left) */
         #scoreboard {
             position: absolute;
-            top: 30px;
-            left: 30px;
-            display: flex;
-            flex-direction: column;
-            background: rgba(0, 0, 0, 0.85);
+            top: 20px;
+            left: 20px;
+            background: rgba(0, 0, 0, 0.9);
+            border-left: 5px solid #f1c40f;
+            color: white;
+            padding: 10px;
+            min-width: 250px;
             border-radius: 4px;
-            overflow: hidden;
-            border-left: 5px solid #238636;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
-            min-width: 300px;
-            transition: 0.5s;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
         }
+        .sb-row { display: flex; justify-content: space-between; font-size: 22px; margin-bottom: 5px; }
+        .sb-score { color: #f1c40f; font-weight: bold; }
 
-        .team-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 15px; border-bottom: 1px solid #333; }
-        .team-name { font-size: 20px; color: white; text-transform: uppercase; font-weight: 700; }
-        .score { font-size: 28px; color: #f1c40f; font-weight: 800; }
-        
-        .timer-row { background: #238636; color: white; text-align: center; font-size: 18px; padding: 2px 0; font-weight: 700; }
-
-        /* 2. DUAL LAYER TICKER (BOTTOM) */
-        #ticker-container {
+        /* Ticker Container (Bottom) */
+        #footer {
             position: absolute;
-            bottom: 20px;
+            bottom: 0;
             left: 0;
             width: 100%;
             display: flex;
             flex-direction: column;
         }
 
-        /* Top Red Strip (Main Info Heading) */
-        .top-strip {
-            background: #b31217;
+        /* Top Layer: Village Name + Changing Info */
+        .top-layer {
+            display: flex;
+            height: 35px;
+            background: #b31217; /* Red Background */
             color: white;
-            height: 30px;
-            width: fit-content;
-            padding: 0 30px;
+            font-size: 18px;
+            align-items: center;
+        }
+        .village-box {
+            background: #f1c40f; /* Yellow Box */
+            color: black;
+            padding: 0 20px;
+            height: 100%;
             display: flex;
             align-items: center;
-            font-size: 16px;
-            font-weight: 700;
-            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
-            z-index: 2;
+            font-weight: bold;
+            clip-path: polygon(0 0, 90% 0, 100% 100%, 0% 100%);
+            min-width: 200px;
+        }
+        .top-info-scroll {
+            padding-left: 20px;
+            flex-grow: 1;
+            font-style: italic;
         }
 
-        /* Bottom Black Strip (Content) */
-        .bottom-strip {
-            background: rgba(0, 0, 0, 0.9);
-            color: #f1c40f;
-            height: 45px;
-            border-top: 2px solid #b31217;
+        /* Bottom Layer: Step by Step Info */
+        .bottom-layer {
+            height: 50px;
+            background: rgba(0, 0, 0, 0.95);
+            border-top: 2px solid #f1c40f;
+            color: white;
             display: flex;
             align-items: center;
+            justify-content: center;
+            font-size: 26px;
+            position: relative;
             overflow: hidden;
-            font-size: 24px;
         }
 
-        .info-slide {
-            white-space: nowrap;
-            display: inline-block;
-            animation: slide-info 25s linear infinite;
-            padding-left: 100%;
+        /* Step by Step Animation */
+        .step-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            opacity: 0;
+            transform: translateY(20px);
+            transition: all 0.8s ease-in-out;
+        }
+        .step-text.active {
+            opacity: 1;
+            transform: translateY(0);
         }
 
-        @keyframes slide-info {
-            0% { transform: translateX(0); }
-            100% { transform: translateX(-100%); }
-        }
-
-        /* Score Animation */
-        .bump { animation: bumpAnim 0.4s ease; }
-        @keyframes bumpAnim {
-            0% { transform: scale(1); }
-            50% { transform: scale(1.2); color: #fff; }
-            100% { transform: scale(1); }
-        }
+        .bump { animation: bump 0.3s ease-in-out; }
+        @keyframes bump { 0% {transform: scale(1);} 50% {transform: scale(1.1);} 100% {transform: scale(1);} }
     </style>
 </head>
 <body>
 
-    <!-- Scoreboard at Top Left -->
+    <!-- Scoreboard -->
     <div id="scoreboard">
-        <div class="team-row">
-            <span id="nameA" class="team-name">TEAM A</span>
-            <span id="scoreA" class="score">0</span>
-        </div>
-        <div class="team-row">
-            <span id="nameB" class="team-name">TEAM B</span>
-            <span id="scoreB" class="score">0</span>
-        </div>
-        <div id="time" class="timer-row">00:00</div>
+        <div class="sb-row"> <span id="nA">TEAM A</span> <span id="sA" class="sb-score">0</span> </div>
+        <div class="sb-row"> <span id="nB">TEAM B</span> <span id="sB" class="sb-score">0</span> </div>
     </div>
 
-    <!-- Dual Layer Ticker -->
-    <div id="ticker-container">
-        <div class="top-strip" id="ticker-heading">LIVE TOURNAMENT</div>
-        <div class="bottom-strip">
-            <div id="full-ticker" class="info-slide">
-                <!-- Data will be injected here -->
-            </div>
+    <!-- Dual Ticker Footer -->
+    <div id="footer">
+        <!-- Top Layer -->
+        <div class="top-layer">
+            <div class="village-box" id="village-display">VILLAGE NAME</div>
+            <div class="top-info-scroll" id="event-display">LIVE TOURNAMENT 2024</div>
+        </div>
+
+        <!-- Bottom Layer (Step-by-Step Info) -->
+        <div class="bottom-layer" id="step-container">
+            <div class="step-text active" id="step1">Welcome to the Match!</div>
+            <div class="step-text" id="step2">Next Match: Team A vs Team B</div>
+            <div class="step-text" id="step3">1st Prize: ₹51,000 + Cup</div>
+            <div class="step-text" id="step4">Don't forget to Subscribe!</div>
         </div>
     </div>
 
@@ -119,42 +123,45 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let lastA = -1, lastB = -1;
-
-    // 1. Match Score Sync
+    // 1. Sync Match Data
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
+        document.getElementById('nA').innerText = d.nameA || "TEAM A";
+        document.getElementById('nB').innerText = d.nameB || "TEAM B";
+        document.getElementById('sA').innerText = d.scoreA || "0";
+        document.getElementById('sB').innerText = d.scoreB || "0";
         document.getElementById('scoreboard').style.opacity = d.scoreVisible ? "1" : "0";
-        
-        document.getElementById('nameA').innerText = d.nameA || "TEAM A";
-        document.getElementById('nameB').innerText = d.nameB || "TEAM B";
-        document.getElementById('time').innerText = d.matchTime || "00:00";
-
-        // Score Bumping Animation
-        const sA = document.getElementById('scoreA');
-        const sB = document.getElementById('scoreB');
-
-        if(d.scoreA !== lastA) { sA.innerText = d.scoreA; if(lastA !== -1) sA.classList.add('bump'); setTimeout(()=>sA.classList.remove('bump'), 500); }
-        if(d.scoreB !== lastB) { sB.innerText = d.scoreB; if(lastB !== -1) sB.classList.add('bump'); setTimeout(()=>sB.classList.remove('bump'), 500); }
-        
-        lastA = d.scoreA; lastB = d.scoreB;
     });
 
-    // 2. Ticker Sync (Combines all 4 fields)
+    // 2. Sync Ticker Data & Setup Steps
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        const village = d.tournamentName || "VILLAGE NAME";
-        const nextMatch = d.participatingTeams || "UPCOMING MATCH"; // Using participatingTeams as Next Match placeholder
-        const prize = d.prizes || "WINNING PRIZE";
-        const event = d.nextProgram || "NEXT EVENT";
-
-        // Joining all 4 parts with a separator
-        const separator = " • ";
-        const combinedText = `📍 ${village}${separator} 🏏 NEXT MATCH: ${nextMatch}${separator} 🏆 PRIZE: ${prize}${separator} 📢 INFO: ${event}`;
+        document.getElementById('village-display').innerText = d.tournamentName || "VILLAGE";
+        document.getElementById('event-display').innerText = d.nextProgram || "LIVE EVENT";
         
-        document.getElementById('full-ticker').innerText = combinedText + " " + combinedText; // Repeat for gapless scrolling
-        document.getElementById('ticker-container').style.opacity = d.tickerVis ? "1" : "0";
+        // Update Step Texts
+        document.getElementById('step1').innerText = "📍 " + (d.tournamentName || "LIVE");
+        document.getElementById('step2').innerText = "🏏 NEXT: " + (d.participatingTeams || "Updating...");
+        document.getElementById('step3').innerText = "🏆 PRIZE: " + (d.prizes || "TBD");
+        document.getElementById('step4').innerText = "📢 INFO: " + (d.fullTickerText || "Stay Tuned");
+        
+        document.getElementById('footer').style.opacity = d.tickerVis ? "1" : "0";
     });
+
+    // 3. Step-by-Step Logic (Every 5 seconds change info)
+    let currentStep = 1;
+    const totalSteps = 4;
+
+    setInterval(() => {
+        // Remove active class from current
+        document.getElementById(`step${currentStep}`).classList.remove('active');
+        
+        // Move to next step
+        currentStep = currentStep >= totalSteps ? 1 : currentStep + 1;
+        
+        // Add active class to new step
+        document.getElementById(`step${currentStep}`).classList.add('active');
+    }, 5000); // 5000ms = 5 Seconds
 </script>
 </body>
 </html>
