@@ -2,119 +2,119 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Professional Dual Ticker Overlay</title>
+    <title>Rounded Corner Scoreboard Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* Scoreboard (Top Left) */
+        /* Scoreboard Layout */
         #scoreboard {
             position: absolute;
-            top: 20px;
-            left: 20px;
-            background: rgba(0, 0, 0, 0.9);
-            border-left: 5px solid #f1c40f;
-            color: white;
-            padding: 10px;
-            min-width: 250px;
-            border-radius: 4px;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.5);
-        }
-        .sb-row { display: flex; justify-content: space-between; font-size: 22px; margin-bottom: 5px; }
-        .sb-score { color: #f1c40f; font-weight: bold; }
-
-        /* Ticker Container (Bottom) */
-        #footer {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
+            top: 40px;
+            left: 40px;
             display: flex;
-            flex-direction: column;
-        }
-
-        /* Top Layer: Village Name + Changing Info */
-        .top-layer {
-            display: flex;
-            height: 35px;
-            background: #b31217; /* Red Background */
-            color: white;
-            font-size: 18px;
             align-items: center;
+            height: 60px;
+            filter: drop-shadow(0 10px 15px rgba(0,0,0,0.4));
+            transition: opacity 0.5s ease;
         }
-        .village-box {
-            background: #f1c40f; /* Yellow Box */
+
+        /* Side Score Boxes (White Background) */
+        .score-box {
+            background: white;
             color: black;
-            padding: 0 20px;
+            width: 70px;
             height: 100%;
             display: flex;
             align-items: center;
-            font-weight: bold;
-            clip-path: polygon(0 0, 90% 0, 100% 100%, 0% 100%);
-            min-width: 200px;
-        }
-        .top-info-scroll {
-            padding-left: 20px;
-            flex-grow: 1;
-            font-style: italic;
-        }
-
-        /* Bottom Layer: Step by Step Info */
-        .bottom-layer {
-            height: 50px;
-            background: rgba(0, 0, 0, 0.95);
-            border-top: 2px solid #f1c40f;
-            color: white;
-            display: flex;
-            align-items: center;
             justify-content: center;
-            font-size: 26px;
-            position: relative;
+            font-size: 35px;
+            font-weight: 900;
+            z-index: 2;
+        }
+        .score-left { border-radius: 40px 0 0 40px; }
+        .score-right { border-radius: 0 40px 40px 0; }
+
+        /* Team Name Sections (The Middle Part) */
+        .team-container {
+            display: flex;
+            height: 100%;
+            min-width: 350px;
+            background: rgba(0,0,0,0.8);
+            margin: 0 -5px; /* Slight overlap */
             overflow: hidden;
         }
 
-        /* Step by Step Animation */
-        .step-text {
-            position: absolute;
-            width: 100%;
-            text-align: center;
-            opacity: 0;
-            transform: translateY(20px);
-            transition: all 0.8s ease-in-out;
-        }
-        .step-text.active {
-            opacity: 1;
-            transform: translateY(0);
+        .team-section {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            font-size: 24px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            padding: 0 20px;
+            transition: background 0.5s ease;
         }
 
-        .bump { animation: bump 0.3s ease-in-out; }
-        @keyframes bump { 0% {transform: scale(1);} 50% {transform: scale(1.1);} 100% {transform: scale(1);} }
+        /* Default Colors */
+        .team-a { background: #87CEEB; color: black; } /* Skyblue Default */
+        .team-b { background: #000000; color: white; } /* Black Default */
+
+        .vs-divider {
+            width: 40px;
+            background: white;
+            color: black;
+            font-weight: 900;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
+            font-size: 14px;
+        }
+
+        /* Footer Ticker Styles (Keeping previous logic) */
+        #footer { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; }
+        .top-layer { display: flex; height: 35px; background: #b31217; color: white; font-size: 18px; align-items: center; }
+        .village-box { background: #f1c40f; color: black; padding: 0 20px; height: 100%; display: flex; align-items: center; font-weight: bold; min-width: 200px; clip-path: polygon(0 0, 90% 0, 100% 100%, 0% 100%); }
+        .bottom-layer { height: 50px; background: rgba(0, 0, 0, 0.95); border-top: 2px solid #f1c40f; color: white; display: flex; align-items: center; justify-content: center; font-size: 26px; overflow: hidden; position: relative; }
+        .step-text { position: absolute; width: 100%; text-align: center; opacity: 0; transform: translateY(15px); transition: 0.5s; }
+        .step-text.active { opacity: 1; transform: translateY(0); }
+
+        /* Animation */
+        .bump { animation: scoreBump 0.4s ease; }
+        @keyframes scoreBump { 0%{transform:scale(1);} 50%{transform:scale(1.2);} 100%{transform:scale(1);} }
     </style>
 </head>
 <body>
 
-    <!-- Scoreboard -->
+    <!-- Scoreboard Top Left -->
     <div id="scoreboard">
-        <div class="sb-row"> <span id="nA">TEAM A</span> <span id="sA" class="sb-score">0</span> </div>
-        <div class="sb-row"> <span id="nB">TEAM B</span> <span id="sB" class="sb-score">0</span> </div>
+        <div id="disp_sA" class="score-box score-left">0</div>
+        
+        <div class="team-container">
+            <div id="boxA" class="team-section team-a">TEAM A</div>
+            <div class="vs-divider">VS</div>
+            <div id="boxB" class="team-section team-b">TEAM B</div>
+        </div>
+
+        <div id="disp_sB" class="score-box score-right">0</div>
     </div>
 
     <!-- Dual Ticker Footer -->
     <div id="footer">
-        <!-- Top Layer -->
         <div class="top-layer">
-            <div class="village-box" id="village-display">VILLAGE NAME</div>
-            <div class="top-info-scroll" id="event-display">LIVE TOURNAMENT 2024</div>
+            <div class="village-box" id="village-display">VILLAGE</div>
+            <div style="padding-left:15px;" id="event-display">LIVE EVENT</div>
         </div>
-
-        <!-- Bottom Layer (Step-by-Step Info) -->
-        <div class="bottom-layer" id="step-container">
-            <div class="step-text active" id="step1">Welcome to the Match!</div>
-            <div class="step-text" id="step2">Next Match: Team A vs Team B</div>
-            <div class="step-text" id="step3">1st Prize: ₹51,000 + Cup</div>
-            <div class="step-text" id="step4">Don't forget to Subscribe!</div>
+        <div class="bottom-layer">
+            <div class="step-text active" id="step1">📍 Loading Village...</div>
+            <div class="step-text" id="step2">🏏 Next Match Info</div>
+            <div class="step-text" id="step3">🏆 Prize Details</div>
+            <div class="step-text" id="step4">📢 Important Update</div>
         </div>
     </div>
 
@@ -123,45 +123,66 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
+    let lastA = -1, lastB = -1;
+
     // 1. Sync Match Data
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('nA').innerText = d.nameA || "TEAM A";
-        document.getElementById('nB').innerText = d.nameB || "TEAM B";
-        document.getElementById('sA').innerText = d.scoreA || "0";
-        document.getElementById('sB').innerText = d.scoreB || "0";
+        
+        // Update Names
+        document.getElementById('boxA').innerText = d.nameA || "TEAM A";
+        document.getElementById('boxB').innerText = d.nameB || "TEAM B";
+        
+        // Update Colors (with Defaults)
+        const colorA = (d.colorA && d.colorA !== "#ffffff") ? d.colorA : "#87CEEB";
+        const colorB = (d.colorB && d.colorB !== "#ffffff") ? d.colorB : "#000000";
+        
+        const boxA = document.getElementById('boxA');
+        const boxB = document.getElementById('boxB');
+        
+        boxA.style.backgroundColor = colorA;
+        boxB.style.backgroundColor = colorB;
+        
+        // Adjust Text Color based on background brightness (Simple check)
+        boxA.style.color = (colorA === "#87CEEB") ? "black" : "white";
+        boxB.style.color = "white";
+
+        // Update Scores with Bump Animation
+        const sA = document.getElementById('disp_sA');
+        const sB = document.getElementById('disp_sB');
+
+        if(d.scoreA !== lastA) { 
+            sA.innerText = d.scoreA || "0";
+            if(lastA !== -1) { sA.classList.add('bump'); setTimeout(()=>sA.classList.remove('bump'), 400); }
+        }
+        if(d.scoreB !== lastB) { 
+            sB.innerText = d.scoreB || "0";
+            if(lastB !== -1) { sB.classList.add('bump'); setTimeout(()=>sB.classList.remove('bump'), 400); }
+        }
+
+        lastA = d.scoreA; lastB = d.scoreB;
         document.getElementById('scoreboard').style.opacity = d.scoreVisible ? "1" : "0";
     });
 
-    // 2. Sync Ticker Data & Setup Steps
+    // 2. Sync Ticker Logic
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('village-display').innerText = d.tournamentName || "VILLAGE";
-        document.getElementById('event-display').innerText = d.nextProgram || "LIVE EVENT";
-        
-        // Update Step Texts
-        document.getElementById('step1').innerText = "📍 " + (d.tournamentName || "LIVE");
-        document.getElementById('step2').innerText = "🏏 NEXT: " + (d.participatingTeams || "Updating...");
-        document.getElementById('step3').innerText = "🏆 PRIZE: " + (d.prizes || "TBD");
-        document.getElementById('step4').innerText = "📢 INFO: " + (d.fullTickerText || "Stay Tuned");
-        
+        document.getElementById('event-display').innerText = d.nextProgram || "LIVE";
+        document.getElementById('step1').innerText = "📍 " + (d.tournamentName || "VILLAGE");
+        document.getElementById('step2').innerText = "🏏 NEXT: " + (d.participatingTeams || "TO BE DECIDED");
+        document.getElementById('step3').innerText = "🏆 PRIZE: " + (d.prizes || "CASH PRIZE");
+        document.getElementById('step4').innerText = "📢 " + (d.fullTickerText || "STAY TUNED");
         document.getElementById('footer').style.opacity = d.tickerVis ? "1" : "0";
     });
 
-    // 3. Step-by-Step Logic (Every 5 seconds change info)
-    let currentStep = 1;
-    const totalSteps = 4;
-
+    // 3. Step-by-Step Cycle
+    let curStep = 1;
     setInterval(() => {
-        // Remove active class from current
-        document.getElementById(`step${currentStep}`).classList.remove('active');
-        
-        // Move to next step
-        currentStep = currentStep >= totalSteps ? 1 : currentStep + 1;
-        
-        // Add active class to new step
-        document.getElementById(`step${currentStep}`).classList.add('active');
-    }, 5000); // 5000ms = 5 Seconds
+        document.getElementById(`step${curStep}`).classList.remove('active');
+        curStep = (curStep % 4) + 1;
+        document.getElementById(`step${curStep}`).classList.add('active');
+    }, 5000);
 </script>
 </body>
 </html>
