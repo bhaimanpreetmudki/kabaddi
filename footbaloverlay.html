@@ -2,100 +2,116 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>OBS Cricket/Football Overlay</title>
+    <title>Professional Sports Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* Scoreboard Overlay */
+        /* 1. SCOREBOARD (TOP LEFT) */
         #scoreboard {
             position: absolute;
-            bottom: 50px;
-            left: 50%;
-            transform: translateX(-50%);
+            top: 30px;
+            left: 30px;
             display: flex;
-            align-items: center;
+            flex-direction: column;
             background: rgba(0, 0, 0, 0.85);
-            border: 2px solid #333;
-            border-radius: 8px;
-            height: 60px;
-            min-width: 600px;
-            color: white;
-            box-shadow: 0 10px 20px rgba(0,0,0,0.5);
-            transition: all 0.5s ease-in-out;
-            opacity: 0; /* Hidden by default */
+            border-radius: 4px;
+            overflow: hidden;
+            border-left: 5px solid #238636;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
+            min-width: 300px;
+            transition: 0.5s;
         }
 
-        .team { display: flex; align-items: center; padding: 0 20px; flex: 1; }
-        .team-name { font-size: 24px; text-transform: uppercase; margin: 0 15px; }
-        .score { font-size: 38px; font-weight: 700; color: #2ecc71; min-width: 40px; text-align: center; }
-
-        .vs-box { background: #f1c40f; color: black; padding: 5px 15px; font-weight: 800; font-size: 18px; skew: -20deg; }
+        .team-row { display: flex; justify-content: space-between; align-items: center; padding: 5px 15px; border-bottom: 1px solid #333; }
+        .team-name { font-size: 20px; color: white; text-transform: uppercase; font-weight: 700; }
+        .score { font-size: 28px; color: #f1c40f; font-weight: 800; }
         
-        .timer { background: #238636; padding: 0 20px; height: 100%; display: flex; align-items: center; font-size: 28px; border-radius: 0 6px 6px 0; min-width: 80px; }
+        .timer-row { background: #238636; color: white; text-align: center; font-size: 18px; padding: 2px 0; font-weight: 700; }
 
-        /* Animated Ticker */
-        #ticker-wrap {
+        /* 2. DUAL LAYER TICKER (BOTTOM) */
+        #ticker-container {
             position: absolute;
-            bottom: 10px;
+            bottom: 20px;
+            left: 0;
             width: 100%;
-            background: linear-gradient(90deg, #b31217 0%, #e74c3c 50%, #b31217 100%);
+            display: flex;
+            flex-direction: column;
+        }
+
+        /* Top Red Strip (Main Info Heading) */
+        .top-strip {
+            background: #b31217;
             color: white;
-            height: 35px;
+            height: 30px;
+            width: fit-content;
+            padding: 0 30px;
+            display: flex;
+            align-items: center;
+            font-size: 16px;
+            font-weight: 700;
+            clip-path: polygon(0 0, 100% 0, 95% 100%, 0% 100%);
+            z-index: 2;
+        }
+
+        /* Bottom Black Strip (Content) */
+        .bottom-strip {
+            background: rgba(0, 0, 0, 0.9);
+            color: #f1c40f;
+            height: 45px;
+            border-top: 2px solid #b31217;
             display: flex;
             align-items: center;
             overflow: hidden;
-            font-size: 20px;
-            font-weight: 600;
-            border-top: 2px solid #fff;
-            opacity: 0;
+            font-size: 24px;
         }
 
-        .ticker-move {
+        .info-slide {
             white-space: nowrap;
-            padding-left: 100%;
             display: inline-block;
-            animation: moveTicker 20s linear infinite;
+            animation: slide-info 25s linear infinite;
+            padding-left: 100%;
         }
 
-        @keyframes moveTicker {
+        @keyframes slide-info {
             0% { transform: translateX(0); }
             100% { transform: translateX(-100%); }
         }
 
-        /* Score Change Animation */
+        /* Score Animation */
         .bump { animation: bumpAnim 0.4s ease; }
         @keyframes bumpAnim {
             0% { transform: scale(1); }
-            50% { transform: scale(1.4); color: #f1c40f; }
+            50% { transform: scale(1.2); color: #fff; }
             100% { transform: scale(1); }
         }
     </style>
 </head>
 <body>
 
-    <!-- 1. Scoreboard -->
+    <!-- Scoreboard at Top Left -->
     <div id="scoreboard">
-        <div class="team" id="sideA">
-            <div id="overlay_nameA" class="team-name">TEAM A</div>
-            <div id="overlay_scoreA" class="score">0</div>
+        <div class="team-row">
+            <span id="nameA" class="team-name">TEAM A</span>
+            <span id="scoreA" class="score">0</span>
         </div>
-        
-        <div class="vs-box">VS</div>
-
-        <div class="team" id="sideB">
-            <div id="overlay_scoreB" class="score">0</div>
-            <div id="overlay_nameB" class="team-name">TEAM B</div>
+        <div class="team-row">
+            <span id="nameB" class="team-name">TEAM B</span>
+            <span id="scoreB" class="score">0</span>
         </div>
-
-        <div class="timer" id="overlay_time">00:00</div>
+        <div id="time" class="timer-row">00:00</div>
     </div>
 
-    <!-- 2. Scrolling Ticker -->
-    <div id="ticker-wrap">
-        <div id="overlay_ticker" class="ticker-move">Welcome to Live Tournament...</div>
+    <!-- Dual Layer Ticker -->
+    <div id="ticker-container">
+        <div class="top-strip" id="ticker-heading">LIVE TOURNAMENT</div>
+        <div class="bottom-strip">
+            <div id="full-ticker" class="info-slide">
+                <!-- Data will be injected here -->
+            </div>
+        </div>
     </div>
 
 <script>
@@ -103,40 +119,41 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let lastScoreA = 0, lastScoreB = 0;
+    let lastA = -1, lastB = -1;
 
-    // Listen for Match Data
+    // 1. Match Score Sync
     db.ref("matchData").on("value", (snap) => {
-        const data = snap.val() || {};
+        const d = snap.val() || {};
+        document.getElementById('scoreboard').style.opacity = d.scoreVisible ? "1" : "0";
         
-        // Toggle Visibility
-        document.getElementById('scoreboard').style.opacity = data.scoreVisible ? "1" : "0";
+        document.getElementById('nameA').innerText = d.nameA || "TEAM A";
+        document.getElementById('nameB').innerText = d.nameB || "TEAM B";
+        document.getElementById('time').innerText = d.matchTime || "00:00";
 
-        // Update Names & Colors
-        document.getElementById('overlay_nameA').innerText = data.nameA || "TEAM A";
-        document.getElementById('overlay_nameB').innerText = data.nameB || "TEAM B";
-        document.getElementById('sideA').style.borderLeft = `8px solid ${data.colorA || '#fff'}`;
-        document.getElementById('sideB').style.borderRight = `8px solid ${data.colorB || '#fff'}`;
+        // Score Bumping Animation
+        const sA = document.getElementById('scoreA');
+        const sB = document.getElementById('scoreB');
 
-        // Update Score with Animation
-        const sA = document.getElementById('overlay_scoreA');
-        const sB = document.getElementById('overlay_scoreB');
-
-        if(data.scoreA !== lastScoreA) { sA.innerText = data.scoreA; sA.classList.add('bump'); setTimeout(()=>sA.classList.remove('bump'), 500); }
-        if(data.scoreB !== lastScoreB) { sB.innerText = data.scoreB; sB.classList.add('bump'); setTimeout(()=>sB.classList.remove('bump'), 500); }
+        if(d.scoreA !== lastA) { sA.innerText = d.scoreA; if(lastA !== -1) sA.classList.add('bump'); setTimeout(()=>sA.classList.remove('bump'), 500); }
+        if(d.scoreB !== lastB) { sB.innerText = d.scoreB; if(lastB !== -1) sB.classList.add('bump'); setTimeout(()=>sB.classList.remove('bump'), 500); }
         
-        lastScoreA = data.scoreA;
-        lastScoreB = data.scoreB;
-
-        // Timer
-        document.getElementById('overlay_time').innerText = data.matchTime || "00:00";
+        lastA = d.scoreA; lastB = d.scoreB;
     });
 
-    // Listen for Ticker Data
+    // 2. Ticker Sync (Combines all 4 fields)
     db.ref("tickerData").on("value", (snap) => {
-        const data = snap.val() || {};
-        document.getElementById('ticker-wrap').style.opacity = data.tickerVis ? "1" : "0";
-        document.getElementById('overlay_ticker').innerText = data.fullTickerText || "";
+        const d = snap.val() || {};
+        const village = d.tournamentName || "VILLAGE NAME";
+        const nextMatch = d.participatingTeams || "UPCOMING MATCH"; // Using participatingTeams as Next Match placeholder
+        const prize = d.prizes || "WINNING PRIZE";
+        const event = d.nextProgram || "NEXT EVENT";
+
+        // Joining all 4 parts with a separator
+        const separator = " • ";
+        const combinedText = `📍 ${village}${separator} 🏏 NEXT MATCH: ${nextMatch}${separator} 🏆 PRIZE: ${prize}${separator} 📢 INFO: ${event}`;
+        
+        document.getElementById('full-ticker').innerText = combinedText + " " + combinedText; // Repeat for gapless scrolling
+        document.getElementById('ticker-container').style.opacity = d.tickerVis ? "1" : "0";
     });
 </script>
 </body>
