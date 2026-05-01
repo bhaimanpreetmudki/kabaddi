@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV Style Red & White</title>
+    <title>Sukhdeep TV Style - Red Hint Boxes</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -11,11 +11,8 @@
             --arrow-width: 20px;
             --arrow-height: 50px;
             --label-padding: 25px;
-            
-            /* Red & White Theme */
             --main-red: #cc0000;
             --pure-white: #ffffff;
-            --pure-black: #000000;
         }
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
@@ -33,12 +30,12 @@
             width: 100%; 
             overflow: hidden; 
             position: relative; 
-            border: 2px solid var(--pure-white);
+            border: 2px solid var(--main-red);
             border-radius: 4px;
         }
 
-        /* Sections */
-        .box-left { width: 45%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; background: var(--main-red); }
+        /* Large Background Boxes - Now White */
+        .box-left { width: 45%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; background: var(--pure-white); }
         .box-right { width: 55%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; background: var(--pure-white); }
 
         /* Labels */
@@ -56,17 +53,15 @@
             z-index: 100;
         }
 
-        /* Label Colors */
-        .hint-white { background: var(--pure-white); color: var(--main-red); }
-        .hint-white::after { border-left: var(--arrow-width) solid var(--pure-white); }
-
+        /* Red Hint Boxes with White Text */
         .hint-red { background: var(--main-red); color: var(--pure-white); }
         .hint-red::after { border-left: var(--arrow-width) solid var(--main-red); }
 
         marquee { width: 100%; font-size: 24px; font-weight: 900; text-transform: uppercase; z-index: 10; padding-left: 110px; }
 
-        .txt-white { color: #fff; }
+        /* Text on White Background is now Red */
         .txt-red { color: var(--main-red); }
+        .txt-white { color: var(--pure-white); }
 
         .clock-area {
             position: absolute; right: 0; background: var(--main-red); color: var(--pure-white);
@@ -82,8 +77,8 @@
         <!-- LINE 1 (Top Bar) -->
         <div class="bar">
             <div class="box-left">
-                <div class="hint-label hint-white">LIVE</div>
-                <marquee scrollamount="5" class="txt-white">
+                <div class="hint-label hint-red">LIVE</div>
+                <marquee scrollamount="5" class="txt-red">
                     <span id="tour-name">LOADING...</span>
                 </marquee>
             </div>
@@ -98,13 +93,13 @@
         <!-- LINE 2 (Bottom Bar) -->
         <div class="bar">
             <div class="box-left">
-                <div class="hint-label hint-white">INFO</div>
-                <marquee scrollamount="4" class="txt-white">
+                <div class="hint-label hint-red">INFO</div>
+                <marquee scrollamount="4" class="txt-red">
                     <span id="sub-info">LOADING...</span>
                 </marquee>
             </div>
             <div class="box-right" style="background: var(--main-red);">
-                <div class="hint-label hint-white">PRIZES</div>
+                <div class="hint-label hint-red" style="border-right: 2px solid white;">PRIZES</div>
                 <marquee scrollamount="5" class="txt-white" style="width: calc(100% - 140px);">
                     <span id="scroll-bot">LOADING...</span>
                 </marquee>
