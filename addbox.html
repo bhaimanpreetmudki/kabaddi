@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Manpreet Mudki - Ticker Overlay</title>
+    <title>Manpreet Mudki - Final Ticker Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
             bottom: 20px;
             left: 0;
             width: 100%;
-            display: flex;
+            display: none; /* ਪੈਨਲ ਤੋਂ ਸਿਗਨਲ ਮਿਲਣ 'ਤੇ ਦਿਖਾਈ ਦੇਵੇਗਾ */
             flex-direction: column;
             gap: 4px;
         }
@@ -31,11 +31,14 @@
             font-size: 17px;
             font-weight: 900;
             text-transform: uppercase;
+            padding: 0 12px;
         }
 
+        /* Top Line Colors */
         .line-top { background: #b31217; color: white; }
         .white-hint { background: white; color: #b31217; }
         
+        /* Bottom Line Colors */
         .line-bottom { background: white; color: #b31217; }
         .red-hint { background: #b31217; color: white; }
 
@@ -45,6 +48,7 @@
         .c-white { background: white; color: #b31217; }
         .c-red { background: #b31217; color: white; }
 
+        /* Animation Setup */
         .step-info { position: relative; height: 100%; flex: 1; display: flex; align-items: center; }
         .step-item { position: absolute; width: 100%; opacity: 0; transform: translateX(15px); transition: all 0.5s ease; }
         .step-item.active { opacity: 1; transform: translateX(0); }
@@ -53,25 +57,25 @@
 <body>
 
     <div id="footer-container">
-        <!-- TOP LINE (Live & Match) -->
+        <!-- TOP LINE -->
         <div class="ticker-line line-top">
-            <div class="hint-box white-hint">LIVE ></div>
+            <div class="hint-box white-hint">> LIVE</div>
             <div class="content-area" id="disp-tour">LOADING...</div>
-            <div class="hint-box white-hint">MATCH ></div>
+            <div class="hint-box white-hint">> MATCH</div>
             <div class="content-area" id="disp-match">TEAM A VS TEAM B</div>
             <div class="corner-box c-white" id="live-time">00:00 AM</div>
         </div>
 
-        <!-- BOTTOM LINE (Upcoming & Prizes) -->
+        <!-- BOTTOM LINE -->
         <div class="ticker-line line-bottom">
-            <div class="hint-box red-hint">UPCOMING ></div>
+            <div class="hint-box red-hint">> UPCOMING</div>
             <div class="content-area">
                 <div class="step-info">
                     <div class="step-item active" id="disp-next">Updating...</div>
                     <div class="step-item" id="disp-teams">Teams Loading...</div>
                 </div>
             </div>
-            <div class="hint-box red-hint">PRIZES ></div>
+            <div class="hint-box red-hint">> PRIZES</div>
             <div class="content-area">
                 <div class="step-info">
                     <div class="step-item active" id="disp-prize">Prize Info</div>
@@ -83,31 +87,37 @@
     </div>
 
 <script>
-    // ਪੈਨਲ ਵਾਲਾ ਸਹੀ Firebase ਲਿੰਕ
+    // Firebase Setup
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    // 1. ਮੈਚ ਦਾ ਡਾਟਾ (Teams)
+    // Match Data (Teams)
     db.ref("matchData").on("value", (snap) => {
         const data = snap.val() || {};
         document.getElementById('disp-match').innerText = (data.nameA || "TEAM A") + " VS " + (data.nameB || "TEAM B");
     });
 
-    // 2. ਟਿਕਰ ਦਾ ਡਾਟਾ (Tournament, Prizes, etc.)
+    // Ticker Data & Visibility Logic
     db.ref("tickerData").on("value", (snap) => {
         const data = snap.val() || {};
+        
+        // Updates from Admin Panel
         document.getElementById('disp-tour').innerText = data.tournamentName || "LIVE TOURNAMENT";
         document.getElementById('disp-prize').innerText = data.prizes || "Prizes Loading...";
         document.getElementById('disp-next').innerText = data.nextProgram || "Next Match Soon";
         document.getElementById('disp-teams').innerText = data.participatingTeams || "Participating Teams";
         document.getElementById('disp-contact').innerText = data.contact || "";
         
-        // ਓਹਲੇ (Hide/Show) ਲੋਜਿਕ
-        document.getElementById('footer-container').style.display = data.tickerVis === false ? 'none' : 'flex';
+        // Corrected Visibility: Show if tickerVis is true
+        if (data.tickerVis === true) {
+            document.getElementById('footer-container').style.display = 'flex';
+        } else {
+            document.getElementById('footer-container').style.display = 'none';
+        }
     });
 
-    // 3. ਘੜੀ (Clock)
+    // Clock Function
     function updateClock() {
         const now = new Date();
         document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -116,7 +126,7 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 4. ਐਨੀਮੇਸ਼ਨ (Rotation)
+    // Auto Rotation for Info
     let step = 0;
     setInterval(() => {
         const upcomingItems = [document.getElementById('disp-next'), document.getElementById('disp-teams')];
@@ -129,7 +139,7 @@
         
         upcomingItems[step].classList.add('active');
         prizeItems[step].classList.add('active');
-    }, 6000); // 6 ਸਕਿੰਟ ਬਾਅਦ ਬਦਲੇਗਾ
+    }, 6000); 
 </script>
 </body>
 </html>
