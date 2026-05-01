@@ -2,14 +2,14 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Rounded Corner Scoreboard Overlay</title>
+    <title>Professional 50-50 Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* Scoreboard Layout */
+        /* --- SCOREBOARD (Top Left) --- */
         #scoreboard {
             position: absolute;
             top: 40px;
@@ -18,10 +18,7 @@
             align-items: center;
             height: 60px;
             filter: drop-shadow(0 10px 15px rgba(0,0,0,0.4));
-            transition: opacity 0.5s ease;
         }
-
-        /* Side Score Boxes (White Background) */
         .score-box {
             background: white;
             color: black;
@@ -36,85 +33,95 @@
         }
         .score-left { border-radius: 40px 0 0 40px; }
         .score-right { border-radius: 0 40px 40px 0; }
+        .team-container { display: flex; height: 100%; min-width: 350px; background: rgba(0,0,0,0.8); margin: 0 -5px; overflow: hidden; }
+        .team-section { flex: 1; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; text-transform: uppercase; padding: 0 20px; transition: 0.5s; }
+        .team-a { background: #87CEEB; color: black; }
+        .team-b { background: #000000; color: white; }
+        .vs-divider { width: 40px; background: white; color: black; font-weight: 900; display: flex; align-items: center; justify-content: center; clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%); font-size: 14px; }
 
-        /* Team Name Sections (The Middle Part) */
-        .team-container {
+        /* --- FOOTER DUAL TICKER (50-50 Split) --- */
+        #footer {
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            width: 100%;
             display: flex;
-            height: 100%;
-            min-width: 350px;
-            background: rgba(0,0,0,0.8);
-            margin: 0 -5px; /* Slight overlap */
-            overflow: hidden;
+            height: 55px; /* Patii di uchai */
+            background: rgba(0, 0, 0, 0.9);
+            border-top: 3px solid #f1c40f;
         }
 
-        .team-section {
-            flex: 1;
-            display: flex;
-            align-items: center;
-            justify-content: center;
+        /* Khabba Pasa (Village Name) */
+        .village-half {
+            flex: 1; /* 50% width */
+            background: #b31217; /* Red background */
             color: white;
-            font-size: 24px;
-            text-transform: uppercase;
-            letter-spacing: 1px;
-            padding: 0 20px;
-            transition: background 0.5s ease;
-        }
-
-        /* Default Colors */
-        .team-a { background: #87CEEB; color: black; } /* Skyblue Default */
-        .team-b { background: #000000; color: white; } /* Black Default */
-
-        .vs-divider {
-            width: 40px;
-            background: white;
-            color: black;
-            font-weight: 900;
             display: flex;
             align-items: center;
             justify-content: center;
-            clip-path: polygon(25% 0%, 100% 0%, 75% 100%, 0% 100%);
-            font-size: 14px;
+            font-size: 28px;
+            font-weight: bold;
+            text-transform: uppercase;
+            border-right: 4px solid #f1c40f;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.5);
         }
 
-        /* Footer Ticker Styles (Keeping previous logic) */
-        #footer { position: absolute; bottom: 0; left: 0; width: 100%; display: flex; flex-direction: column; }
-        .top-layer { display: flex; height: 35px; background: #b31217; color: white; font-size: 18px; align-items: center; }
-        .village-box { background: #f1c40f; color: black; padding: 0 20px; height: 100%; display: flex; align-items: center; font-weight: bold; min-width: 200px; clip-path: polygon(0 0, 90% 0, 100% 100%, 0% 100%); }
-        .bottom-layer { height: 50px; background: rgba(0, 0, 0, 0.95); border-top: 2px solid #f1c40f; color: white; display: flex; align-items: center; justify-content: center; font-size: 26px; overflow: hidden; position: relative; }
-        .step-text { position: absolute; width: 100%; text-align: center; opacity: 0; transform: translateY(15px); transition: 0.5s; }
-        .step-text.active { opacity: 1; transform: translateY(0); }
+        /* Sajja Pasa (Changing Info) */
+        .info-half {
+            flex: 1; /* 50% width */
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            position: relative;
+            overflow: hidden;
+            background: #000;
+        }
 
-        /* Animation */
+        .step-text {
+            position: absolute;
+            width: 100%;
+            text-align: center;
+            color: #f1c40f;
+            font-size: 26px;
+            font-weight: bold;
+            opacity: 0;
+            transform: translateX(50px);
+            transition: all 0.6s ease-in-out;
+        }
+        .step-text.active {
+            opacity: 1;
+            transform: translateX(0);
+        }
+
+        /* Animation for score change */
         .bump { animation: scoreBump 0.4s ease; }
         @keyframes scoreBump { 0%{transform:scale(1);} 50%{transform:scale(1.2);} 100%{transform:scale(1);} }
     </style>
 </head>
 <body>
 
-    <!-- Scoreboard Top Left -->
+    <!-- Scoreboard -->
     <div id="scoreboard">
         <div id="disp_sA" class="score-box score-left">0</div>
-        
         <div class="team-container">
             <div id="boxA" class="team-section team-a">TEAM A</div>
             <div class="vs-divider">VS</div>
             <div id="boxB" class="team-section team-b">TEAM B</div>
         </div>
-
         <div id="disp_sB" class="score-box score-right">0</div>
     </div>
 
-    <!-- Dual Ticker Footer -->
+    <!-- 50-50 Dual Ticker Footer -->
     <div id="footer">
-        <div class="top-layer">
-            <div class="village-box" id="village-display">VILLAGE</div>
-            <div style="padding-left:15px;" id="event-display">LIVE EVENT</div>
-        </div>
-        <div class="bottom-layer">
-            <div class="step-text active" id="step1">📍 Loading Village...</div>
-            <div class="step-text" id="step2">🏏 Next Match Info</div>
-            <div class="step-text" id="step3">🏆 Prize Details</div>
-            <div class="step-text" id="step4">📢 Important Update</div>
+        <!-- Village Half -->
+        <div class="village-half" id="village-display">VILLAGE NAME</div>
+
+        <!-- Info Half (Step by Step) -->
+        <div class="info-half">
+            <div class="step-text active" id="step1">🏏 Loading Next Match...</div>
+            <div class="step-text" id="step2">🏆 Prize Details...</div>
+            <div class="step-text" id="step3">📢 Tournament Info...</div>
+            <div class="step-text" id="step4">🔥 Subscribe for Live!</div>
         </div>
     </div>
 
@@ -128,37 +135,21 @@
     // 1. Sync Match Data
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
-        
-        // Update Names
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
         document.getElementById('boxB').innerText = d.nameB || "TEAM B";
         
-        // Update Colors (with Defaults)
         const colorA = (d.colorA && d.colorA !== "#ffffff") ? d.colorA : "#87CEEB";
         const colorB = (d.colorB && d.colorB !== "#ffffff") ? d.colorB : "#000000";
         
-        const boxA = document.getElementById('boxA');
-        const boxB = document.getElementById('boxB');
-        
-        boxA.style.backgroundColor = colorA;
-        boxB.style.backgroundColor = colorB;
-        
-        // Adjust Text Color based on background brightness (Simple check)
-        boxA.style.color = (colorA === "#87CEEB") ? "black" : "white";
-        boxB.style.color = "white";
+        document.getElementById('boxA').style.backgroundColor = colorA;
+        document.getElementById('boxB').style.backgroundColor = colorB;
+        document.getElementById('boxA').style.color = (colorA === "#87CEEB") ? "black" : "white";
 
-        // Update Scores with Bump Animation
         const sA = document.getElementById('disp_sA');
         const sB = document.getElementById('disp_sB');
 
-        if(d.scoreA !== lastA) { 
-            sA.innerText = d.scoreA || "0";
-            if(lastA !== -1) { sA.classList.add('bump'); setTimeout(()=>sA.classList.remove('bump'), 400); }
-        }
-        if(d.scoreB !== lastB) { 
-            sB.innerText = d.scoreB || "0";
-            if(lastB !== -1) { sB.classList.add('bump'); setTimeout(()=>sB.classList.remove('bump'), 400); }
-        }
+        if(d.scoreA !== lastA) { sA.innerText = d.scoreA || "0"; if(lastA !== -1) { sA.classList.add('bump'); setTimeout(()=>sA.classList.remove('bump'), 400); } }
+        if(d.scoreB !== lastB) { sB.innerText = d.scoreB || "0"; if(lastB !== -1) { sB.classList.add('bump'); setTimeout(()=>sB.classList.remove('bump'), 400); } }
 
         lastA = d.scoreA; lastB = d.scoreB;
         document.getElementById('scoreboard').style.opacity = d.scoreVisible ? "1" : "0";
@@ -168,15 +159,16 @@
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('village-display').innerText = d.tournamentName || "VILLAGE";
-        document.getElementById('event-display').innerText = d.nextProgram || "LIVE";
-        document.getElementById('step1').innerText = "📍 " + (d.tournamentName || "VILLAGE");
-        document.getElementById('step2').innerText = "🏏 NEXT: " + (d.participatingTeams || "TO BE DECIDED");
-        document.getElementById('step3').innerText = "🏆 PRIZE: " + (d.prizes || "CASH PRIZE");
-        document.getElementById('step4').innerText = "📢 " + (d.fullTickerText || "STAY TUNED");
+        
+        document.getElementById('step1').innerText = "🏏 NEXT: " + (d.participatingTeams || "UPCOMING");
+        document.getElementById('step2').innerText = "🏆 PRIZE: " + (d.prizes || "BEST LUCK");
+        document.getElementById('step3').innerText = "📢 " + (d.nextProgram || "LIVE NOW");
+        document.getElementById('step4').innerText = "📍 " + (d.tournamentName || "WELCOME");
+        
         document.getElementById('footer').style.opacity = d.tickerVis ? "1" : "0";
     });
 
-    // 3. Step-by-Step Cycle
+    // 3. Step-by-Step Cycle (50-50 info change)
     let curStep = 1;
     setInterval(() => {
         document.getElementById(`step${curStep}`).classList.remove('active');
