@@ -2,158 +2,130 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>4-Box Kabaddi Professional Overlay</title>
+    <title>Double Layer Professional Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- SCOREBOARD --- */
-        #scoreboard {
-            position: absolute;
-            top: 30px;
-            left: 30px;
-            display: flex;
-            align-items: center;
-            height: 55px;
-            filter: drop-shadow(0 8px 12px rgba(0,0,0,0.5));
-        }
-        .score-box {
-            background: white;
-            color: black;
-            width: 65px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 32px;
-            font-weight: 900;
-            z-index: 2;
-        }
-        .score-left { border-radius: 35px 0 0 35px; }
-        .score-right { border-radius: 0 35px 35px 0; }
-        
-        .team-container { display: flex; height: 100%; min-width: 380px; background: rgba(0,0,0,0.9); margin: 0 -3px; overflow: hidden; }
-        .team-section { flex: 1; display: flex; align-items: center; justify-content: center; color: white; font-size: 24px; text-transform: uppercase; padding: 0 20px; }
-        .team-a { background: #87CEEB; color: black; } /* Skyblue */
-        .team-b { background: #000000; color: white; } /* Black */
-        .vs-divider { width: 40px; background: white; color: black; font-weight: 900; display: flex; align-items: center; justify-content: center; clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%); font-size: 14px; }
-
-        /* --- 4-BOX FOOTER TICKER --- */
-        #footer {
+        #master-footer {
             position: absolute;
             bottom: 0;
             left: 0;
             width: 100%;
             display: flex;
-            height: 60px;
-            background: #000;
-            border-top: 3px solid #f1c40f;
-        }
-
-        .footer-box {
-            flex: 1;
-            display: flex;
             flex-direction: column;
+        }
+
+        /* Common Bar Style */
+        .bar {
+            display: flex;
+            height: 40px;
             align-items: center;
-            justify-content: center;
-            border-right: 2px solid #333;
-            text-align: center;
-            position: relative;
-        }
-
-        .box-label {
-            font-size: 12px;
-            color: #f1c40f;
-            text-transform: uppercase;
-            margin-bottom: -2px;
-            letter-spacing: 1px;
-        }
-
-        .box-content {
-            font-size: 20px;
             color: white;
-            font-weight: bold;
+            font-size: 18px;
+            overflow: hidden;
         }
 
-        /* Highlighted Village Box (First Box) */
-        .village-box {
+        /* Top Bar Colors */
+        .top-bar { background: #1a1a1a; border-bottom: 2px solid #f1c40f; }
+        
+        /* Bottom Bar Colors */
+        .bottom-bar { background: #000; border-top: 1px solid #333; }
+
+        /* Small Hint Box */
+        .hint {
             background: #b31217; /* Red */
-            border-right: 3px solid #f1c40f;
+            padding: 0 15px;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            font-size: 14px;
+            text-transform: uppercase;
+            font-weight: bold;
+            min-width: 100px;
+            border-right: 2px solid #f1c40f;
         }
 
-        /* Animated Info Box (Last Box) */
-        #info-rotator {
-            position: relative;
-            width: 100%;
+        /* Large List Box */
+        .list-box {
+            flex: 2;
+            padding: 0 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: #fff;
+        }
+
+        /* Time & Date Flash Box */
+        .flash-box {
+            background: #f1c40f;
+            color: #000;
+            width: 150px;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
+            font-weight: 900;
+            position: relative;
         }
 
-        .step-text {
+        .flash-item {
             position: absolute;
             opacity: 0;
-            transform: translateY(15px);
             transition: 0.5s ease-in-out;
-            color: #f1c40f;
         }
 
-        .step-text.active {
-            opacity: 1;
-            transform: translateY(0);
-        }
+        .flash-item.active { opacity: 1; }
 
-        /* Score Animation */
-        .bump { animation: scoreBump 0.4s ease; }
-        @keyframes scoreBump { 0%{transform:scale(1);} 50%{transform:scale(1.2);} 100%{transform:scale(1);} }
+        /* Scoreboard (Keep previous style) */
+        #scoreboard {
+            position: absolute; top: 20px; left: 20px; display: flex; height: 50px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.5));
+        }
+        .s-box { background: white; color: black; width: 60px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; }
+        .t-container { display: flex; background: rgba(0,0,0,0.9); min-width: 300px; }
+        .t-sec { flex: 1; display: flex; align-items: center; justify-content: center; color: white; font-size: 20px; padding: 0 15px; }
     </style>
 </head>
 <body>
 
     <!-- Scoreboard -->
     <div id="scoreboard">
-        <div id="disp_sA" class="score-box score-left">0</div>
-        <div class="team-container">
-            <div id="boxA" class="team-section team-a">TEAM A</div>
-            <div class="vs-divider">VS</div>
-            <div id="boxB" class="team-section team-b">TEAM B</div>
+        <div id="disp_sA" class="s-box" style="border-radius: 25px 0 0 25px;">0</div>
+        <div class="t-container">
+            <div id="boxA" class="t-sec" style="background: #87CEEB; color: black;">TEAM A</div>
+            <div id="boxB" class="t-sec" style="background: #000;">TEAM B</div>
         </div>
-        <div id="disp_sB" class="score-box score-right">0</div>
+        <div id="disp_sB" class="s-box" style="border-radius: 0 25px 25px 0;">0</div>
     </div>
 
-    <!-- 4-Box Footer -->
-    <div id="footer">
-        <!-- Box 1: Village (Static Red) -->
-        <div class="footer-box village-box">
-            <div class="box-label">Tournament</div>
-            <div class="box-content" id="village-name">DHOLEWALA</div>
+    <!-- Double Layer Footer -->
+    <div id="master-footer">
+        
+        <!-- TOP BAR: 2 Hints + 2 Lists -->
+        <div class="top-bar bar">
+            <div class="hint">📍 ਪਿੰਡ</div>
+            <div class="list-box" id="top-list-1">VILLAGE NAME</div>
+            <div class="hint">🏆 ਇਨਾਮ</div>
+            <div class="list-box" id="top-list-2">1st: 1 Lakh, 2nd: 75k</div>
         </div>
 
-        <!-- Box 2: Next Match -->
-        <div class="footer-box">
-            <div class="box-label">Next Match</div>
-            <div class="box-content" id="next-match">UPCOMING...</div>
-        </div>
-
-        <!-- Box 3: Prize -->
-        <div class="footer-box">
-            <div class="box-label">1st Prize</div>
-            <div class="box-content" id="prize-money">₹1,00,000</div>
-        </div>
-
-        <!-- Box 4: Info/Ads (Step-by-Step Rotator) -->
-        <div class="footer-box">
-            <div class="box-label">Live Update</div>
-            <div id="info-rotator">
-                <div class="step-text active" id="s1">Subscribe Now</div>
-                <div class="step-text" id="s2">Contact for Live</div>
-                <div class="step-text" id="s3">Welcome to Moga</div>
-                <div class="step-text" id="s4">Share this Stream</div>
+        <!-- BOTTOM BAR: 2 Hints + 2 Lists + Time/Date -->
+        <div class="bottom-bar bar">
+            <div class="hint">🏏 ਅਗਲਾ ਮੈਚ</div>
+            <div class="list-box" id="bot-list-1">Team A vs Team B</div>
+            <div class="hint">📢 ਅੱਪਡੇਟ</div>
+            <div class="list-box" id="bot-list-2">Welcome to Live Streaming</div>
+            
+            <!-- Flash Time/Date -->
+            <div class="flash-box">
+                <div id="flash-date" class="flash-item active">01-05-2026</div>
+                <div id="flash-time" class="flash-item">12:00 PM</div>
             </div>
         </div>
+
     </div>
 
 <script>
@@ -161,51 +133,47 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    let lastA = -1, lastB = -1;
-
     // 1. Match Data
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
         document.getElementById('boxB').innerText = d.nameB || "TEAM B";
-        
-        const colorA = (d.colorA && d.colorA !== "#ffffff") ? d.colorA : "#87CEEB";
-        const colorB = (d.colorB && d.colorB !== "#ffffff") ? d.colorB : "#000000";
-        
-        document.getElementById('boxA').style.backgroundColor = colorA;
-        document.getElementById('boxB').style.backgroundColor = colorB;
-        document.getElementById('boxA').style.color = (colorA === "#87CEEB") ? "black" : "white";
-
-        const sA = document.getElementById('disp_sA');
-        const sB = document.getElementById('disp_sB');
-        if(d.scoreA !== lastA) { sA.innerText = d.scoreA || "0"; sA.classList.add('bump'); setTimeout(()=>sA.classList.remove('bump'), 400); }
-        if(d.scoreB !== lastB) { sB.innerText = d.scoreB || "0"; sB.classList.add('bump'); setTimeout(()=>sB.classList.remove('bump'), 400); }
-        lastA = d.scoreA; lastB = d.scoreB;
+        document.getElementById('disp_sA').innerText = d.scoreA || "0";
+        document.getElementById('disp_sB').innerText = d.scoreB || "0";
         document.getElementById('scoreboard').style.opacity = d.scoreVisible ? "1" : "0";
     });
 
     // 2. Ticker Data
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('village-name').innerText = d.tournamentName || "VILLAGE";
-        document.getElementById('next-match').innerText = d.participatingTeams || "WAITING";
-        document.getElementById('prize-money').innerText = d.prizes || "TBD";
-        
-        document.getElementById('s1').innerText = d.nextProgram || "LIVE";
-        document.getElementById('s2').innerText = "☎️ CONTACT ADMIN";
-        document.getElementById('s3').innerText = "📍 " + (d.tournamentName || "WELCOME");
-        document.getElementById('s4').innerText = "📢 " + (d.fullTickerText || "ENJOY LIVE");
-        
-        document.getElementById('footer').style.opacity = d.tickerVis ? "1" : "0";
+        document.getElementById('top-list-1').innerText = d.tournamentName || "VILLAGE";
+        document.getElementById('top-list-2').innerText = d.prizes || "UPDATING...";
+        document.getElementById('bot-list-1').innerText = d.participatingTeams || "NEXT MATCH";
+        document.getElementById('bot-list-2').innerText = d.nextProgram || "LIVE NOW";
     });
 
-    // 3. Last Box Rotation (Every 4 Seconds)
-    let step = 1;
+    // 3. Time & Date Logic
+    function updateClock() {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-GB');
+        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        document.getElementById('flash-date').innerText = dateStr;
+        document.getElementById('flash-time').innerText = timeStr;
+    }
+    setInterval(updateClock, 1000);
+
+    // 4. Flash Switcher (Every 3 seconds)
+    let showingDate = true;
     setInterval(() => {
-        document.getElementById(`s${step}`).classList.remove('active');
-        step = (step % 4) + 1;
-        document.getElementById(`s${step}`).classList.add('active');
-    }, 4000);
+        if (showingDate) {
+            document.getElementById('flash-date').classList.remove('active');
+            document.getElementById('flash-time').classList.add('active');
+        } else {
+            document.getElementById('flash-time').classList.remove('active');
+            document.getElementById('flash-date').classList.add('active');
+        }
+        showingDate = !showingDate;
+    }, 3000);
 </script>
 </body>
 </html>
