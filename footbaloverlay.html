@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Kabaddi Professional Split Overlay</title>
+    <title>Kabaddi Pro Scroll Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -16,101 +16,85 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 6px;
+            gap: 8px;
         }
 
         .bar {
             display: flex;
-            height: 48px;
+            height: 50px; /* Same Height for both */
             align-items: center;
             overflow: hidden;
         }
 
-        /* --- Slanted Design --- */
+        /* Slanted Shape */
         .slanted {
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
             clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
-            padding: 0 20px;
+            padding: 0 25px;
             font-weight: 900;
             z-index: 10;
         }
 
-        /* LIVE BOX */
+        /* 1. LIVE BOX (White Background, Red Bold Text) */
         .live-box {
+            background: #ffffff;
+            color: #ff0000;
+            min-width: 100px;
+            font-size: 28px;
+            border-right: 2px solid #ff0000;
+        }
+
+        /* 2. HINT BOX (Red Background, White Text) */
+        .hint-red {
             background: #ff0000;
             color: #ffffff;
-            min-width: 90px;
-            font-size: 22px;
-        }
-
-        /* TOURNAMENT NAME (50% Width) */
-        .tour-name-box {
-            background: #000000;
-            color: #f1c40f; /* Yellow text for contrast */
-            width: 45%; /* 50% section focus */
-            height: 100%;
-            display: flex;
-            align-items: center;
-            padding-left: 30px;
-            font-size: 22px;
+            min-width: 120px;
+            font-size: 18px;
+            text-transform: uppercase;
             margin-left: -15px;
             z-index: 9;
-            border-right: 3px solid #ff0000;
         }
 
-        /* UPPER TICKER (White) */
-        .upper-ticker {
-            background: #ffffff;
+        /* 3. SCROLL CONTAINER (Black) */
+        .scroll-bg {
+            background: rgba(0, 0, 0, 0.95);
             flex-grow: 1;
             height: 100%;
             display: flex;
             align-items: center;
             margin-left: -15px;
-            z-index: 8;
-        }
-
-        .upper-ticker marquee { color: #000; font-size: 20px; font-weight: bold; }
-
-        /* HINT BOXES (Lower Bar) */
-        .hint-yellow { background: #f1c40f; color: #000; min-width: 90px; font-size: 16px; margin-left: 0; }
-        .hint-red { background: #b31217; color: #fff; min-width: 110px; font-size: 16px; margin-left: -15px; z-index: 11; }
-
-        /* LOWER RED LIST BAR */
-        .red-list-bar {
-            background: #b31217;
-            flex-grow: 1;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            padding-left: 30px;
-            margin-left: -15px;
-            color: white;
-            font-size: 20px;
             z-index: 5;
+            border-right: 4px solid #ff0000;
         }
 
-        /* CLOCK */
+        marquee {
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
+        }
+
+        /* 4. CLOCK BOX */
         .clock-box {
-            background: #fff;
+            background: #f1c40f;
             color: #000;
-            min-width: 130px;
+            min-width: 140px;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 22px;
             clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%);
-            z-index: 12;
+            z-index: 11;
             font-weight: 900;
         }
 
-        /* Scoreboard */
+        /* Scoreboard (Mini Style) */
         #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; height: 50px; }
-        .s-box { background: white; color: black; width: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; }
-        .t-box { background: #000; color: white; padding: 0 20px; display: flex; align-items: center; font-size: 22px; min-width: 130px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); margin-left: -10px; }
+        .s-box { background: white; color: #ff0000; width: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; }
+        .t-box { background: #000; color: white; padding: 0 20px; display: flex; align-items: center; font-size: 22px; min-width: 140px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); margin-left: -10px; }
     </style>
 </head>
 <body>
@@ -118,28 +102,30 @@
     <!-- Scoreboard -->
     <div id="scoreboard">
         <div id="disp_sA" class="s-box" style="clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%);">0</div>
-        <div id="boxA" class="t-box" style="background: #87CEEB; color: black;">TEAM A</div>
+        <div id="boxA" class="t-box" style="background: #ffffff; color: #000;">TEAM A</div>
         <div id="boxB" class="t-box">TEAM B</div>
         <div id="disp_sB" class="s-box" style="clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%); margin-left: -10px;">0</div>
     </div>
 
     <div id="master-footer">
         
-        <!-- LINE 1: LIVE + 50% TOURNAMENT NAME + NEXT MATCH TICKER -->
+        <!-- LINE 1: LIVE + NEXT MATCH HINT + SCROLL -->
         <div class="bar">
             <div class="slanted live-box">LIVE</div>
-            <div class="tour-name-box" id="tour-display">DHOLEWALA KABADDI CUP</div>
-            <div class="upper-ticker">
-                <marquee scrollamount="5" id="next-match-scroll">NEXT MATCH: TEAM C VS TEAM D — ENJOY LIVE STREAMING</marquee>
+            <div class="slanted hint-red">NEXT MATCH</div>
+            <div class="scroll-bg">
+                <marquee scrollamount="6" id="scroll-top">UPCOMING: TEAM A VS TEAM B — LIVE FROM VILLAGE NAME</marquee>
             </div>
         </div>
 
-        <!-- LINE 2: PRIZE HINT + UPCOMING HINT + LIST BOX -->
+        <!-- LINE 2: TOURNAMENT HINT + UPDATES HINT + SCROLL + CLOCK -->
         <div class="bar">
-            <div class="slanted hint-yellow">🏆 PRIZE</div>
-            <div class="slanted hint-red">UPCOMING</div>
-            <div class="red-list-bar" id="list-text">Moga vs Ludhiana | Bathinda vs Mansa | Semi-Final at 5 PM</div>
-            <div class="clock-box" id="live-clock">02:30 PM</div>
+            <div class="slanted hint-red" style="margin-left:0; clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%);">TOURNAMENT</div>
+            <div class="slanted hint-red">PRIZES</div>
+            <div class="scroll-bg">
+                <marquee scrollamount="5" id="scroll-bot">1st Prize: ₹1,00,000 | 2nd Prize: ₹75,000 | Best Player: Motorcycle</marquee>
+            </div>
+            <div class="clock-box" id="live-clock">12:00 PM</div>
         </div>
 
     </div>
@@ -158,16 +144,15 @@
         document.getElementById('disp_sB').innerText = d.scoreB || "0";
     });
 
-    // Ticker & Content Sync
+    // Ticker Data Sync
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        // Upper Bar
-        document.getElementById('tour-display').innerText = d.tournamentName || "TOURNAMENT NAME";
-        document.getElementById('next-match-scroll').innerText = "NEXT MATCH: " + (d.participatingTeams || "WAITING...");
+        const village = d.tournamentName || "VILLAGE";
+        const teams = d.participatingTeams || "NEXT MATCH";
+        const prizes = d.prizes || "UPDATING...";
         
-        // Lower Bar
-        // ਇੱਥੇ ਤੁਸੀਂ prizes ਜਾਂ ਕਿਸੇ ਵੀ ਲਿਸਟ ਵਾਲੇ ਖਾਨੇ ਤੋਂ ਆਉਣ ਵਾਲੇ ਮੈਚਾਂ ਦੀ ਲਿਸਟ ਦਿਖਾ ਸਕਦੇ ਹੋ
-        document.getElementById('list-text').innerText = (d.prizes || "") + " | UPCOMING: " + (d.fullTickerText || "");
+        document.getElementById('scroll-top').innerText = "NEXT: " + teams + " — AT " + village;
+        document.getElementById('scroll-bot').innerText = "🏆 " + prizes + " — 📢 " + (d.fullTickerText || "");
     });
 
     // Clock
