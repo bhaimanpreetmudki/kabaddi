@@ -2,29 +2,30 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Customizable Arrow Ticker</title>
+    <title>Professional Ticker with Add Box</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
-        /* --- ਇੱਥੋਂ ਤੁਸੀਂ ਸਭ ਕੁਝ ਕੰਟਰੋਲ ਕਰ ਸਕਦੇ ਹੋ --- */
         :root {
-            --arrow-width: 25px;      /* Arrow ਕਿੰਨਾ ਬਾਹਰ ਨੂੰ ਨੁਕੀਲਾ ਹੋਵੇ */
-            --arrow-height: 52px;     /* ਪੂਰੀ ਪੱਟੀ ਦੀ ਹਾਈਟ */
-            --label-padding: 30px;    /* ਬਾਕਸ ਦੀ ਅੰਦਰਲੀ ਚੌੜਾਈ */
+            --arrow-width: 25px;      /* Arrow ਦੀ ਨੋਕ */
+            --arrow-height: 52px;     /* ਪੱਟੀ ਦੀ ਉਚਾਈ */
+            --label-padding: 30px;    /* Hint ਬਾਕਸ ਦੀ ਚੌੜਾਈ */
             --white-box-color: #ffffff;
             --red-box-color: #ff0000;
+            
+            /* --- Add Box Settings --- */
+            --add-box-bg: #f1c40f;    /* ਐਡ ਬਾਕਸ ਦਾ ਬੈਕਗਰਾਊਂਡ (ਪੀਲਾ) */
+            --add-box-txt: #000000;   /* ਐਡ ਬਾਕਸ ਦਾ ਟੈਕਸਟ ਰੰਗ */
+            --add-font-size: 20px;    /* ਐਡ ਬਾਕਸ ਦੇ ਫੌਂਟ ਦਾ ਸਾਈਜ਼ */
         }
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
         #master-footer {
             position: absolute;
-            bottom: 5px;
-            left: 0; right: 0;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
+            bottom: 5px; left: 0; right: 0;
+            display: flex; flex-direction: column; gap: 4px;
         }
 
         .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; }
@@ -33,108 +34,92 @@
         .box-left { width: 45%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; background: #000; }
         .box-right { width: 55%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
 
-        /* Static Hint Boxes */
+        /* Static Hint Labels */
         .hint-label {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 var(--label-padding);
-            font-weight: 900;
-            font-size: 22px;
-            text-transform: uppercase;
-            position: absolute;
-            left: 0; top: 0;
-            z-index: 100;
+            height: 100%; display: flex; align-items: center; justify-content: center;
+            padding: 0 var(--label-padding); font-weight: 900; font-size: 22px;
+            text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100;
         }
 
-        /* --- Arrow (>) Design --- */
+        /* Arrow (>) Setup */
         .hint-label::after {
-            content: "";
-            position: absolute;
-            right: calc(var(--arrow-width) * -1); /* Arrow ਨੂੰ ਬਾਕਸ ਦੇ ਨਾਲ ਜੋੜਨ ਲਈ */
-            top: 0;
-            width: 0;
-            height: 0;
+            content: ""; position: absolute; right: calc(var(--arrow-width) * -1);
+            top: 0; width: 0; height: 0;
             border-top: calc(var(--arrow-height) / 2) solid transparent;
             border-bottom: calc(var(--arrow-height) / 2) solid transparent;
             z-index: 100;
         }
 
-        /* Colors & Specific Arrow logic */
         .hint-white { background: var(--white-box-color); color: #ff0000; }
         .hint-white::after { border-left: var(--arrow-width) solid var(--white-box-color); }
 
         .hint-red { background: var(--red-box-color); color: #ffffff; }
         .hint-red::after { border-left: var(--arrow-width) solid var(--red-box-color); }
 
-        /* Scrolling Text */
-        marquee {
-            width: 100%;
-            font-size: 26px;
+        /* --- Add Box Styling --- */
+        .add-box {
+            background: var(--add-box-bg);
+            color: var(--add-box-txt);
+            height: 80%; /* ਪੱਟੀ ਤੋਂ ਥੋੜਾ ਛੋਟਾ ਰੱਖਣ ਲਈ */
+            display: inline-flex;
+            align-items: center;
+            padding: 0 15px;
+            margin: 0 10px;
             font-weight: 900;
+            font-size: var(--add-font-size);
+            border-radius: 4px;
+            border: 1px solid #000;
             text-transform: uppercase;
-            z-index: 10;
-            /* ਟੈਕਸਟ ਕਿੱਥੋਂ ਦਿਖਣਾ ਸ਼ੁਰੂ ਹੋਵੇ */
-            padding-left: 120px; 
         }
+
+        marquee { width: 100%; font-size: 26px; font-weight: 900; text-transform: uppercase; z-index: 10; padding-left: 120px; }
 
         .txt-white { color: #fff; }
         .txt-red { color: #ff0000; }
         .txt-yellow { color: #f1c40f; }
 
         .clock-area {
-            position: absolute;
-            right: 0;
-            background: #f1c40f;
-            color: #000;
-            min-width: 130px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 24px;
-            font-weight: 900;
-            z-index: 110;
+            position: absolute; right: 0; background: #f1c40f; color: #000;
+            min-width: 130px; height: 100%; display: flex; align-items: center;
+            justify-content: center; font-size: 24px; font-weight: 900; z-index: 110;
         }
-
-        /* Scoreboard */
-        #scoreboard { position: absolute; top: 15px; left: 15px; display: flex; gap: 4px; }
-        .s-box { background: white; color: #ff0000; width: 55px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; border: 2px solid #ff0000; }
-        .t-box { background: #000; color: white; padding: 0 15px; height: 45px; display: flex; align-items: center; font-size: 20px; min-width: 120px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <div id="scoreboard">
-        <div id="disp_sA" class="s-box">0</div>
-        <div id="boxA" class="t-box" style="background: #ffffff; color: #000;">TEAM A</div>
-        <div id="boxB" class="t-box">TEAM B</div>
-        <div id="disp_sB" class="s-box">0</div>
-    </div>
-
     <div id="master-footer">
-        <!-- LINE 1 -->
+        <!-- LINE 1 (Top Bar) -->
         <div class="bar">
             <div class="box-left">
                 <div class="hint-label hint-white">LIVE</div>
-                <marquee scrollamount="5" class="txt-yellow" id="tour-name">LOADING...</marquee>
+                <marquee scrollamount="5" class="txt-yellow">
+                    <span id="tour-name">LOADING...</span>
+                    <!-- Add Box Example -->
+                    <span class="add-box">AD: MANPREET STUDIO</span>
+                </marquee>
             </div>
             <div class="box-right" style="background:#fff;">
                 <div class="hint-label hint-red">NEXT</div>
-                <marquee scrollamount="6" class="txt-red" id="scroll-top">LOADING...</marquee>
+                <marquee scrollamount="6" class="txt-red">
+                    <span id="scroll-top">LOADING...</span>
+                </marquee>
             </div>
         </div>
 
-        <!-- LINE 2 -->
+        <!-- LINE 2 (Bottom Bar) -->
         <div class="bar">
             <div class="box-left">
                 <div class="hint-label hint-white">INFO</div>
-                <marquee scrollamount="4" class="txt-white" id="sub-info">LOADING...</marquee>
+                <marquee scrollamount="4" class="txt-white">
+                    <span id="sub-info">LOADING...</span>
+                    <span class="add-box" style="background: #ffffff; color: #ff0000;">SPONSOR: KABADDI CLUB</span>
+                </marquee>
             </div>
             <div class="box-right" style="background:#000; border-left: 2px solid #ff0000;">
                 <div class="hint-label hint-red">PRIZES</div>
-                <marquee scrollamount="5" class="txt-white" style="width: calc(100% - 130px);" id="scroll-bot">LOADING...</marquee>
+                <marquee scrollamount="5" class="txt-white" style="width: calc(100% - 130px);">
+                    <span id="scroll-bot">LOADING...</span>
+                </marquee>
                 <div class="clock-area" id="live-clock">00:00 AM</div>
             </div>
         </div>
@@ -144,14 +129,6 @@
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
-
-    db.ref("matchData").on("value", (snap) => {
-        const d = snap.val() || {};
-        document.getElementById('boxA').innerText = (d.nameA || "TEAM A").toUpperCase();
-        document.getElementById('boxB').innerText = (d.nameB || "TEAM B").toUpperCase();
-        document.getElementById('disp_sA').innerText = d.scoreA || "0";
-        document.getElementById('disp_sB').innerText = d.scoreB || "0";
-    });
 
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
