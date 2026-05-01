@@ -2,138 +2,142 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Kabaddi Live Pro Overlay</title>
+    <title>Kabaddi Live Scroll Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- FOOTER CONTAINER --- */
         #master-footer {
             position: absolute;
-            bottom: 15px;
+            bottom: 10px;
             left: 0;
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 2px;
+            gap: 5px;
         }
 
         .bar {
             display: flex;
             height: 45px;
             align-items: center;
+            overflow: hidden;
         }
 
-        /* Slanted Style */
-        .box {
+        /* --- Slanted Box Style --- */
+        .slanted {
             height: 100%;
             display: flex;
             align-items: center;
-            padding: 0 25px;
-            clip-path: polygon(10% 0%, 100% 0%, 90% 100%, 0% 100%);
-            margin-left: -15px;
-            transition: all 0.5s ease;
-        }
-
-        /* 1. FIXED LIVE BOX */
-        .live-fix {
-            background: #b31217;
-            color: white;
-            font-size: 20px;
+            justify-content: center;
+            clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
+            padding: 0 30px;
             font-weight: 900;
-            min-width: 100px;
-            justify-content: center;
-            clip-path: polygon(0 0, 100% 0, 85% 100%, 0 100%); /* Different slant for start */
-            margin-left: 0;
             z-index: 10;
-            animation: pulse 1.5s infinite;
         }
 
-        @keyframes pulse {
-            0% { background: #b31217; }
-            50% { background: #ff0000; }
-            100% { background: #b31217; }
-        }
-
-        /* 2. DYNAMIC HINT BOX (Yellow) */
-        .hint-dynamic {
-            background: #f1c40f;
-            color: black;
-            font-size: 16px;
-            text-transform: uppercase;
-            min-width: 120px;
-            justify-content: center;
-            z-index: 9;
-        }
-
-        /* 3. MAIN CONTENT BOX (Dark) */
-        .content-main {
-            background: rgba(0, 0, 0, 0.9);
-            color: white;
-            flex-grow: 1;
+        /* 1. LIVE HINT BOX */
+        .live-box {
+            background: #ff0000; /* Red */
+            color: #ffffff; /* White text */
+            min-width: 100px;
             font-size: 22px;
-            z-index: 8;
-            border-right: 3px solid #f1c40f;
+            letter-spacing: 2px;
+            animation: blink 1s infinite;
         }
 
-        /* 4. DATE/TIME BOX */
-        .flash-end {
+        @keyframes blink { 50% { opacity: 0.8; } }
+
+        /* 2. SCROLLING BOX (Village Name) */
+        .scroll-container {
+            background: rgba(0, 0, 0, 0.9); /* Dark Black */
+            flex-grow: 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            margin-left: -20px;
+            z-index: 5;
+            border-right: 4px solid #ff0000;
+        }
+
+        /* Marquee Effect */
+        marquee {
+            color: white;
+            font-size: 24px;
+            width: 100%;
+            font-weight: 500;
+        }
+
+        /* 3. PRICE HINT BOX */
+        .price-hint {
+            background: #ff0000;
+            color: white;
+            min-width: 140px;
+            font-size: 18px;
+            text-transform: uppercase;
+        }
+
+        /* 4. PRICE DISPLAY BOX */
+        .price-display {
+            background: #1a1a1a;
+            color: #f1c40f; /* Yellowish for price highlight */
+            flex-grow: 1;
+            height: 100%;
+            display: flex;
+            align-items: center;
+            padding-left: 40px;
+            font-size: 24px;
+            margin-left: -20px;
+        }
+
+        /* 5. CLOCK BOX */
+        .clock-box {
             background: white;
-            color: #b31217;
-            min-width: 180px;
+            color: black;
+            min-width: 150px;
+            height: 100%;
+            display: flex;
+            align-items: center;
             justify-content: center;
             font-size: 20px;
-            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%); /* End slant */
-            z-index: 7;
+            clip-path: polygon(12% 0, 100% 0, 100% 100%, 0 100%);
+            z-index: 11;
         }
 
-        /* Rotation Text Animation */
-        .rotator { position: relative; width: 100%; height: 100%; display: flex; align-items: center; }
-        .r-text { position: absolute; opacity: 0; transform: translateX(20px); transition: 0.5s; white-space: nowrap; }
-        .r-text.active { opacity: 1; transform: translateX(0); }
-
-        /* SCOREBOARD (Same Tede Style) */
-        #scoreboard {
-            position: absolute; top: 30px; left: 30px; display: flex; height: 50px;
-        }
-        .s-val { background: white; color: black; width: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; z-index: 3; }
-        .t-name { background: #0a192f; color: white; padding: 0 20px; display: flex; align-items: center; font-size: 22px; min-width: 140px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); margin-left: -10px; z-index: 2; }
+        /* Scoreboard (Mini Slant) */
+        #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; height: 50px; filter: drop-shadow(2px 4px 6px black); }
+        .s-box { background: white; color: black; width: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; }
+        .t-box { background: #000; color: white; padding: 0 20px; display: flex; align-items: center; font-size: 22px; min-width: 120px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); margin-left: -10px; }
     </style>
 </head>
 <body>
 
     <!-- Scoreboard -->
     <div id="scoreboard">
-        <div id="disp_sA" class="s-val" style="clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%);">0</div>
-        <div id="boxA" class="t-name" style="background: #87CEEB; color: black;">TEAM A</div>
-        <div id="boxB" class="t-name" style="background: #000; color: white;">TEAM B</div>
-        <div id="disp_sB" class="s-val" style="clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%); margin-left: -10px;">0</div>
+        <div id="disp_sA" class="s-box" style="clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%);">0</div>
+        <div id="boxA" class="t-box" style="background: #87CEEB; color: black;">TEAM A</div>
+        <div id="boxB" class="t-box">TEAM B</div>
+        <div id="disp_sB" class="s-box" style="clip-path: polygon(20% 0, 100% 0, 100% 100%, 0 100%); margin-left: -10px;">0</div>
     </div>
 
     <!-- Double Layer Footer -->
     <div id="master-footer">
         
-        <!-- Top Bar (Tournament Info) -->
+        <!-- LINE 1: LIVE + SCROLLING VILLAGE NAME -->
         <div class="bar">
-            <div class="box live-fix">LIVE</div>
-            <div class="box hint-dynamic">TOURNAMENT</div>
-            <div class="box content-main" id="top-info">DHOLEWALA (MOGA) KABADDI CUP 2026</div>
+            <div class="slanted live-box">LIVE</div>
+            <div class="scroll-container">
+                <marquee scrollamount="6" id="scroll-village">WELCOME TO THE TOURNAMENT - LIVE FROM VILLAGE NAME</marquee>
+            </div>
         </div>
 
-        <!-- Bottom Bar (Rotating Info) -->
+        <!-- LINE 2: PRICE HINT + PRICE SHOW + TIME -->
         <div class="bar">
-            <div class="box hint-dynamic" id="hint-bot">INFO</div>
-            <div class="box content-main">
-                <div class="rotator">
-                    <div class="r-text active" id="msg1">Welcome to Kabaddi Junction Live</div>
-                    <div class="r-text" id="msg2">1st Prize: ₹1,00,000 | 2nd Prize: ₹75,000</div>
-                    <div class="r-text" id="msg3">Next Match: Team A vs Team B</div>
-                    <div class="r-text" id="msg4">Helpline: +91 98765-43210</div>
-                </div>
-            </div>
-            <div class="box flash-end" id="clock-box">10:30 AM</div>
+            <div class="slanted price-hint">🏆 PRIZES</div>
+            <div class="price-display" id="prize-text">1st: ₹1,00,000 | 2nd: ₹75,000</div>
+            <div class="clock-box" id="live-clock">12:00 PM</div>
         </div>
 
     </div>
@@ -143,7 +147,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 1. Sync Data from Firebase
+    // Score & Teams Sync
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
@@ -152,40 +156,23 @@
         document.getElementById('disp_sB').innerText = d.scoreB || "0";
     });
 
+    // Ticker & Village Sync
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('top-info').innerText = (d.tournamentName || "KABADDI CUP") + " 2026";
-        document.getElementById('msg1').innerText = d.nextProgram || "Live Tournament";
-        document.getElementById('msg2').innerText = "🏆 PRIZE: " + (d.prizes || "Updating...");
-        document.getElementById('msg3').innerText = "🏏 NEXT: " + (d.participatingTeams || "Wait...");
-        document.getElementById('msg4').innerText = "📞 HELPLINE: " + (d.fullTickerText || "Contact Admin");
+        // Village name scrolling
+        const vName = d.tournamentName || "VILLAGE NAME";
+        document.getElementById('scroll-village').innerText = "LIVE TOURNAMENT FROM: " + vName + " — " + (d.nextProgram || "");
+        
+        // Price update
+        document.getElementById('prize-text').innerText = d.prizes || "Updating Prizes...";
     });
 
-    // 2. Step-by-Step Rotation Logic
-    let step = 1;
-    const hints = ["INFO", "PRIZES", "MATCHES", "HELP"];
-    
-    setInterval(() => {
-        // Change Text
-        document.getElementById(`msg${step}`).classList.remove('active');
-        step = (step % 4) + 1;
-        document.getElementById(`msg${step}`).classList.add('active');
-        
-        // Change Hint Box Label accordingly
-        document.getElementById('hint-bot').innerText = hints[step-1];
-    }, 5000);
-
-    // 3. Clock Logic
+    // Simple Clock
     setInterval(() => {
         const now = new Date();
-        const time = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-        const date = now.toLocaleDateString('en-GB');
-        
-        const clockBox = document.getElementById('clock-box');
-        // Toggle between time and date
-        clockBox.innerText = (new Date().getSeconds() % 10 < 5) ? time : date;
+        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        document.getElementById('live-clock').innerText = timeStr;
     }, 1000);
-
 </script>
 </body>
 </html>
