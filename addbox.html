@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Manpreet Mudki - Custom Overlay</title>
+    <title>Manpreet Mudki - Ticker Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -10,7 +10,6 @@
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- DOUBLE LAYER TICKER --- */
         #footer-container {
             position: absolute;
             bottom: 20px;
@@ -23,7 +22,6 @@
 
         .ticker-line { display: flex; height: 35px; align-items: center; overflow: hidden; }
         
-        /* Hint Boxes with > Arrow */
         .hint-box {
             height: 100%;
             min-width: 110px;
@@ -33,79 +31,83 @@
             font-size: 17px;
             font-weight: 900;
             text-transform: uppercase;
-            position: relative;
         }
 
-        /* Top Line (Red Strip, White Hint) */
         .line-top { background: #b31217; color: white; }
         .white-hint { background: white; color: #b31217; }
         
-        /* Bottom Line (White Strip, Red Hint) */
         .line-bottom { background: white; color: #b31217; }
         .red-hint { background: #b31217; color: white; }
 
-        /* Content Area */
-        .content-area { 
-            flex: 1; 
-            font-size: 20px; 
-            font-weight: bold; 
-            padding: 0 15px; 
-            white-space: nowrap; 
-            display: flex; 
-            align-items: center; 
-        }
+        .content-area { flex: 1; font-size: 20px; font-weight: bold; padding: 0 15px; white-space: nowrap; display: flex; align-items: center; overflow: hidden; }
 
-        /* Right Corner Clock/Date */
         .corner-box { width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; }
         .c-white { background: white; color: #b31217; }
         .c-red { background: #b31217; color: white; }
 
-        /* Animation */
         .step-info { position: relative; height: 100%; flex: 1; display: flex; align-items: center; }
         .step-item { position: absolute; width: 100%; opacity: 0; transform: translateX(15px); transition: all 0.5s ease; }
         .step-item.active { opacity: 1; transform: translateX(0); }
-
     </style>
 </head>
 <body>
 
     <div id="footer-container">
-        
-        <!-- TOP LINE -->
+        <!-- TOP LINE (Live & Match) -->
         <div class="ticker-line line-top">
             <div class="hint-box white-hint">LIVE ></div>
-            <div class="content-area" id="tournament-name">PIND MUDKI KABADDI CUP</div>
+            <div class="content-area" id="disp-tour">LOADING...</div>
             <div class="hint-box white-hint">MATCH ></div>
-            <div class="content-area" id="match-teams">TEAM A VS TEAM B</div>
+            <div class="content-area" id="disp-match">TEAM A VS TEAM B</div>
             <div class="corner-box c-white" id="live-time">00:00 AM</div>
         </div>
 
-        <!-- BOTTOM LINE -->
+        <!-- BOTTOM LINE (Upcoming & Prizes) -->
         <div class="ticker-line line-bottom">
             <div class="hint-box red-hint">UPCOMING ></div>
             <div class="content-area">
                 <div class="step-info">
-                    <div class="step-item active" id="u1">Next Match: Pind Mudki Vs Bagge</div>
-                    <div class="step-item" id="u2">Semi Final: Live at 6:00 PM</div>
+                    <div class="step-item active" id="disp-next">Updating...</div>
+                    <div class="step-item" id="disp-teams">Teams Loading...</div>
                 </div>
             </div>
             <div class="hint-box red-hint">PRIZES ></div>
             <div class="content-area">
                 <div class="step-info">
-                    <div class="step-item active" id="p1">1st: ₹51,000 | 2nd: ₹31,000</div>
-                    <div class="step-item" id="p2">Best Raider: ₹5,100 | Best Stopper: ₹5,100</div>
+                    <div class="step-item active" id="disp-prize">Prize Info</div>
+                    <div class="step-item" id="disp-contact">Contact Info</div>
                 </div>
             </div>
             <div class="corner-box c-red" id="live-date">01/05/2026</div>
         </div>
-
     </div>
 
 <script>
-    const firebaseConfig = { databaseURL: "https://manpreetpigeons-default-rtdb.firebaseio.com/" };
-    firebase.initializeApp(firebaseConfig);
+    // ਪੈਨਲ ਵਾਲਾ ਸਹੀ Firebase ਲਿੰਕ
+    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
+    // 1. ਮੈਚ ਦਾ ਡਾਟਾ (Teams)
+    db.ref("matchData").on("value", (snap) => {
+        const data = snap.val() || {};
+        document.getElementById('disp-match').innerText = (data.nameA || "TEAM A") + " VS " + (data.nameB || "TEAM B");
+    });
+
+    // 2. ਟਿਕਰ ਦਾ ਡਾਟਾ (Tournament, Prizes, etc.)
+    db.ref("tickerData").on("value", (snap) => {
+        const data = snap.val() || {};
+        document.getElementById('disp-tour').innerText = data.tournamentName || "LIVE TOURNAMENT";
+        document.getElementById('disp-prize').innerText = data.prizes || "Prizes Loading...";
+        document.getElementById('disp-next').innerText = data.nextProgram || "Next Match Soon";
+        document.getElementById('disp-teams').innerText = data.participatingTeams || "Participating Teams";
+        document.getElementById('disp-contact').innerText = data.contact || "";
+        
+        // ਓਹਲੇ (Hide/Show) ਲੋਜਿਕ
+        document.getElementById('footer-container').style.display = data.tickerVis === false ? 'none' : 'flex';
+    });
+
+    // 3. ਘੜੀ (Clock)
     function updateClock() {
         const now = new Date();
         document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -114,24 +116,20 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    db.ref("tickerData").on("value", (snap) => {
-        const d = snap.val() || {};
-        document.getElementById('tournament-name').innerText = d.tournamentName || "LIVE TOURNAMENT";
-        document.getElementById('match-teams').innerText = (d.nameA || "TEAM A") + " VS " + (d.nameB || "TEAM B");
-    });
-
+    // 4. ਐਨੀਮੇਸ਼ਨ (Rotation)
     let step = 0;
     setInterval(() => {
-        const uItems = [document.getElementById('u1'), document.getElementById('u2')];
-        const pItems = [document.getElementById('p1'), document.getElementById('p2')];
+        const upcomingItems = [document.getElementById('disp-next'), document.getElementById('disp-teams')];
+        const prizeItems = [document.getElementById('disp-prize'), document.getElementById('disp-contact')];
         
-        uItems[step].classList.remove('active');
-        pItems[step].classList.remove('active');
+        upcomingItems[step].classList.remove('active');
+        prizeItems[step].classList.remove('active');
+        
         step = (step + 1) % 2;
-        uItems[step].classList.add('active');
-        pItems[step].classList.add('active');
-    }, 5000);
-
+        
+        upcomingItems[step].classList.add('active');
+        prizeItems[step].classList.add('active');
+    }, 6000); // 6 ਸਕਿੰਟ ਬਾਅਦ ਬਦਲੇਗਾ
 </script>
 </body>
 </html>
