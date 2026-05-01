@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Kabaddi Pro Capsule Scroll Overlay</title>
+    <title>Kabaddi 50-50 Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -12,94 +12,101 @@
         #master-footer {
             position: absolute;
             bottom: 5px;
-            left: 0px;
-            right: 0px;
+            left: 0;
+            right: 0;
             display: flex;
             flex-direction: column;
-            gap: 0px;
+            gap: 2px; /* Pattiyan de vich gapp ghat kita */
         }
 
         .bar {
             display: flex;
-            height: 52px;
+            height: 50px; /* Exact 50-50 feel height */
             align-items: center;
             background: rgba(0, 0, 0, 0.95);
-            border-radius: 50px;
             overflow: hidden;
-            padding: 0 5px;
+            position: relative;
         }
 
-        /* --- Capsule Style for Hint Boxes Only --- */
+        /* --- Capsule Hint Boxes --- */
         .capsule-hint {
-            height: 52px;
+            height: 40px;
             display: flex;
             align-items: center;
             justify-content: center;
             padding: 0 20px;
             font-weight: 900;
-            border-radius: 50px; /* Capsule Shape */
-            z-index: 10;
+            border-radius: 50px;
+            position: relative;
+            z-index: 100; /* Isde thalle akhar jan ge */
             margin: 0 5px;
             text-transform: uppercase;
             white-space: nowrap;
+            box-shadow: 5px 0 10px rgba(0,0,0,0.5); /* Shadow ta ki akhar thalle jande saaf dikhan */
         }
 
-        /* LIVE & INFO (White BG, Red Text) */
-        .bg-white { background: #ffffff; color: #ff0000; font-size: 24px; }
+        .bg-white { background: #ffffff; color: #ff0000; font-size: 22px; }
+        .bg-red { background: #ff0000; color: #ffffff; font-size: 18px; }
 
-        /* NEXT MATCH & PRIZES (Red BG, White Text) */
-        .bg-red { background: #ff0000; color: #ffffff; font-size: 16px; }
-
-        /* --- Scrolling Area for ALL other content --- */
+        /* --- Scroll Box Layout --- */
         .scroll-box {
             flex-grow: 1;
-            height: 52px;
-            background: #ffffff; /* White background for list */
-            border-radius: 50px; /* List box v capsule look ch */
+            height: 100%;
             display: flex;
             align-items: center;
-            overflow: hidden;
-            margin: 0 5px;
+            position: relative;
+            z-index: 10; /* Hint box ton thalle */
+            margin-right: -10px; /* Akhar nu hint box de thalle bhejan layi */
         }
+
+        /* White Scroll (Top Bar) */
+        .bg-scroll-white { background: #ffffff; }
+        .bg-scroll-white marquee { color: #ff0000; }
+
+        /* Black Scroll (Prize/Bottom Bar) */
+        .bg-scroll-black { background: #000000; border-left: 1px solid #333; }
+        .bg-scroll-black marquee { color: #ffffff; }
 
         marquee {
-            color: #ff0000; 
-            font-size: 22px; 
-            font-weight: bold; 
-            text-transform: uppercase; /* Saare akhar capital */
+            font-size: 24px;
+            font-weight: bold;
+            text-transform: uppercase;
         }
 
-        /* Tournament Name Scroll (Yellowish) */
-        .tour-scroll {
+        /* Tournament Name Section */
+        .tour-area {
             width: 30%;
-            background: transparent;
+            color: #f1c40f;
+            font-size: 20px;
+            font-weight: bold;
+            padding-left: 10px;
+            text-transform: uppercase;
         }
-        .tour-scroll marquee { color: #f1c40f; }
 
         /* Clock Capsule */
         .clock-cap {
             background: #f1c40f;
             color: #000;
             min-width: 140px;
-            height: 52px;
+            height: 40px;
             border-radius: 50px;
             display: flex;
             align-items: center;
             justify-content: center;
             font-size: 22px;
             font-weight: 900;
-            margin-right: 5px;
+            margin-right: 10px;
+            z-index: 110;
         }
 
         /* Scoreboard */
         #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; gap: 5px; }
-        .s-box { background: white; color: #ff0000; width: 60px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; border-radius: 10px; border: 2px solid #ff0000; }
-        .t-box { background: #000; color: white; padding: 0 20px; height: 50px; display: flex; align-items: center; font-size: 22px; min-width: 130px; border-radius: 10px; text-transform: uppercase; }
+        .s-box { background: white; color: #ff0000; width: 60px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; border-radius: 5px; border: 2px solid #ff0000; }
+        .t-box { background: #000; color: white; padding: 0 20px; height: 50px; display: flex; align-items: center; font-size: 22px; min-width: 130px; border-radius: 5px; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-    <!-- Scoreboard -->
     <div id="scoreboard">
         <div id="disp_sA" class="s-box">0</div>
         <div id="boxA" class="t-box" style="background: #ffffff; color: #ff0000;">TEAM A</div>
@@ -109,29 +116,27 @@
 
     <div id="master-footer">
         
-        <!-- LINE 1: LIVE (Cap) + TOUR NAME (Scroll) + NEXT MATCH (Cap) + LIST (Scroll) -->
+        <!-- LINE 1: 50-50 Style (White Scroll) -->
         <div class="bar">
             <div class="capsule-hint bg-white">LIVE</div>
-            <div class="scroll-box tour-scroll" style="background: transparent;">
-                <marquee scrollamount="4" id="tour-name">MAJHA KABADDI CUP 2026</marquee>
-            </div>
+            <div class="tour-area" id="tour-name">MAJHA CUP 2026</div>
             <div class="capsule-hint bg-red">NEXT MATCH</div>
-            <div class="scroll-box">
-                <marquee scrollamount="6" id="scroll-top">TEAM MOGA VS TEAM LUDHIANA — BIG MATCH COMING UP</marquee>
+            <div class="scroll-box bg-scroll-white">
+                <marquee scrollamount="6" id="scroll-top">UPCOMING MATCH LOADING...</marquee>
             </div>
         </div>
 
-        <!-- LINE 2: INFO (Cap) + LIST (Scroll) + PRIZES (Cap) + LIST (Scroll) + CLOCK -->
+        <!-- LINE 2: 50-50 Style (Black Scroll for Prizes) -->
         <div class="bar">
             <div class="capsule-hint bg-white">INFO</div>
-            <div class="scroll-box" style="max-width: 200px;">
-                <marquee scrollamount="3" id="scroll-info">LIVE STREAMING HD</marquee>
+            <div class="scroll-box" style="max-width: 200px; background: #222; margin-left: 5px;">
+                <marquee scrollamount="4" id="scroll-info">LIVE STREAMING</marquee>
             </div>
             <div class="capsule-hint bg-red">PRIZES</div>
-            <div class="scroll-box">
-                <marquee scrollamount="5" id="scroll-bot">1ST: ₹1,00,000 | 2ND: ₹75,000 | BEST PLAYER: MOTORCYCLE</marquee>
+            <div class="scroll-box bg-scroll-black">
+                <marquee scrollamount="5" id="scroll-bot">LOADING PRIZES...</marquee>
             </div>
-            <div class="clock-cap" id="live-clock">02:30 PM</div>
+            <div class="clock-cap" id="live-clock">00:00 AM</div>
         </div>
 
     </div>
@@ -152,7 +157,7 @@
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT 2026").toUpperCase();
-        document.getElementById('scroll-top').innerText = (d.participatingTeams || "LOADING...").toUpperCase();
+        document.getElementById('scroll-top').innerText = (d.participatingTeams || "NEXT MATCH UPDATING Soon...").toUpperCase();
         document.getElementById('scroll-info').innerText = (d.nextProgram || "LIVE ACTION").toUpperCase();
         document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
     });
