@@ -2,14 +2,14 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Double Layer Ticker (No Contact Box)</title>
+    <title>Double Layer Ticker with Date/Time</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- Scoreboard Section --- */
+        /* --- SCOREBOARD --- */
         #scoreboard {
             position: absolute;
             top: 30px;
@@ -71,6 +71,29 @@
             align-items: center;
         }
 
+        /* --- Date & Time Flash Box (Right Corner) --- */
+        .datetime-box {
+            background: #f1c40f; /* Yellow background */
+            color: black;
+            height: 100%;
+            min-width: 150px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 18px;
+            font-weight: 900;
+            position: relative;
+        }
+
+        .flash-item {
+            position: absolute;
+            opacity: 0;
+            transition: opacity 0.5s ease-in-out;
+        }
+        .flash-item.active {
+            opacity: 1;
+        }
+
         .step-info { position: relative; height: 100%; flex: 1; display: flex; align-items: center; }
         .step-item { position: absolute; width: 100%; opacity: 0; transform: translateY(10px); transition: all 0.5s ease; }
         .step-item.active { opacity: 1; transform: translateY(0); }
@@ -90,38 +113,39 @@
         <div id="disp_sB" class="score-box score-right">0</div>
     </div>
 
-    <!-- Double Layer Ticker (Contact Removed) -->
+    <!-- Double Layer Ticker -->
     <div id="footer-container">
         
-        <!-- LINE 1: Tournament & Prizes -->
+        <!-- LINE 1: Tournament & Date/Time Flash -->
         <div class="ticker-line">
             <div class="head-box">LIVE</div>
             <div class="content-box" id="tournament-name">VILLAGE MUDKI (FIROZPUR)</div>
             
+            <!-- Right Corner Flash Box -->
+            <div class="datetime-box">
+                <div id="flash-date" class="flash-item active">01-05-2026</div>
+                <div id="flash-time" class="flash-item">04:43 PM</div>
+            </div>
+        </div>
+
+        <!-- LINE 2: Teams & Prizes -->
+        <div class="ticker-line">
             <div class="head-box">PRIZES</div>
             <div class="content-box">
                 <div class="step-info">
                     <div class="step-item active" id="p1">1st Prize: ₹51,000</div>
                     <div class="step-item" id="p2">2nd Prize: ₹31,000</div>
-                    <div class="step-item" id="p3">Best Raider/Stopper: Cup + Cash</div>
                 </div>
             </div>
-        </div>
-
-        <!-- LINE 2: Teams & Upcoming -->
-        <div class="ticker-line">
-            <div class="head-box">TEAMS</div>
-            <div class="content-box" id="match-teams">TEAM A VS TEAM B</div>
             
             <div class="head-box">UPCOMING</div>
             <div class="content-box">
                 <div class="step-info">
-                    <div class="step-item active" id="u1">Next Match: Pind X vs Pind Y</div>
-                    <div class="step-item" id="u2">Tournament Info: Full Day Event</div>
+                    <div class="step-item active" id="u1">Match 2: Team X vs Team Y</div>
+                    <div class="step-item" id="u2">Stay Tuned for Final</div>
                 </div>
             </div>
         </div>
-
     </div>
 
 <script>
@@ -129,48 +153,62 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 1. Sync Match Data
+    // 1. Sync Scoreboard
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
         document.getElementById('boxB').innerText = d.nameB || "TEAM B";
         document.getElementById('disp_sA').innerText = d.scoreA || "0";
         document.getElementById('disp_sB').innerText = d.scoreB || "0";
-        
-        const colorA = (d.colorA && d.colorA !== "#ffffff") ? d.colorA : "#87CEEB";
-        const colorB = (d.colorB && d.colorB !== "#ffffff") ? d.colorB : "#000000";
-        document.getElementById('boxA').style.backgroundColor = colorA;
-        document.getElementById('boxB').style.backgroundColor = colorB;
-        
         document.getElementById('scoreboard').style.opacity = d.scoreVisible ? "1" : "0";
     });
 
-    // 2. Sync Ticker Data
+    // 2. Update Date and Time
+    function updateClock() {
+        const now = new Date();
+        const dateStr = now.toLocaleDateString('en-GB'); // DD/MM/YYYY
+        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        
+        document.getElementById('flash-date').innerText = dateStr;
+        document.getElementById('flash-time').innerText = timeStr;
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
+
+    // 3. Toggle Date/Time Flash (Every 5 seconds)
+    let showDate = true;
+    setInterval(() => {
+        const dBox = document.getElementById('flash-date');
+        const tBox = document.getElementById('flash-time');
+        
+        if (showDate) {
+            dBox.classList.remove('active');
+            tBox.classList.add('active');
+        } else {
+            tBox.classList.remove('active');
+            dBox.classList.add('active');
+        }
+        showDate = !showDate;
+    }, 5000);
+
+    // 4. Sync Ticker Data
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('tournament-name').innerText = d.tournamentName || "LIVE KABADDI CUP";
-        document.getElementById('match-teams').innerText = (d.nameA || "TEAM A") + " VS " + (d.nameB || "TEAM B");
-        
-        document.getElementById('p1').innerText = "1st Prize: " + (d.prizes || "₹51,000");
+        document.getElementById('tournament-name').innerText = d.tournamentName || "LIVE EVENT";
+        document.getElementById('p1').innerText = "1st: " + (d.prizes || "₹51,000");
         document.getElementById('u1').innerText = "Next: " + (d.participatingTeams || "Wait...");
-        
         document.getElementById('footer-container').style.opacity = d.tickerVis ? "1" : "0";
     });
 
-    // 3. Step Rotation (Auto change info)
-    let curP = 1;
+    // 5. Step Rotation for Prizes/Upcoming
+    let curStep = 1;
     setInterval(() => {
-        document.getElementById(`p${curP}`).classList.remove('active');
-        curP = (curP === 3) ? 1 : curP + 1;
-        document.getElementById(`p${curP}`).classList.add('active');
-
-        // Rotation for Upcoming matches
-        let curU = (curP > 2) ? 1 : curP; // Simple logic to sync
-        document.querySelectorAll('.ticker-line:nth-child(2) .step-item').forEach(el => el.classList.remove('active'));
-        let nextU = document.getElementById(`u${curU}`);
-        if(nextU) nextU.classList.add('active');
-        
-    }, 5000);
+        document.getElementById(`p${curStep}`).classList.remove('active');
+        document.getElementById(`u${curStep}`).classList.remove('active');
+        curStep = (curStep === 1) ? 2 : 1;
+        document.getElementById(`p${curStep}`).classList.add('active');
+        document.getElementById(`u${curStep}`).classList.add('active');
+    }, 4000);
 
 </script>
 </body>
