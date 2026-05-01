@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Full Scrolling Ticker with Arrows</title>
+    <title>Static Labels with Hidden Text Scroll</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -16,76 +16,55 @@
             right: 0;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 2px;
         }
 
-        .bar {
-            display: flex;
-            height: 52px;
-            align-items: center;
-            width: 100%;
-            overflow: hidden;
-            position: relative;
-        }
+        .bar { display: flex; height: 52px; width: 100%; overflow: hidden; position: relative; }
 
-        /* ਬੈਕਗਰਾਊਂਡ ਰੰਗ */
-        .top-bar-bg { background: #ffffff; }
-        .bot-bar-bg { background: #000000; border-top: 2px solid #ff0000; }
+        /* --- 50-50 Sections --- */
+        .box-left { width: 45%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
+        .box-right { width: 55%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
 
-        /* ਸਕ੍ਰੋਲ ਹੋਣ ਵਾਲਾ ਕੰਟੇਨਰ */
-        .scroll-wrapper {
+        .bg-black { background: #000; }
+        .bg-white { background: #fff; }
+        .border-red { border-left: 2px solid #ff0000; }
+
+        /* --- ਖੜ੍ਹੇ ਰਹਿਣ ਵਾਲੇ ਬਾਕਸ (Static Labels) --- */
+        .hint-label {
+            height: 100%;
             display: flex;
             align-items: center;
-            white-space: nowrap;
-            width: 100%;
-        }
-
-        /* Arrow Box (ਹੁਣ ਇਹ ਵੀ ਸਕ੍ਰੋਲ ਹੋਵੇਗਾ) */
-        .arrow-tag {
-            display: inline-flex;
-            align-items: center;
-            height: 52px;
+            justify-content: center;
             padding: 0 25px;
             font-weight: 900;
             font-size: 22px;
-            position: relative;
-            margin-right: 30px; /* ਐਰੋ ਤੋਂ ਬਾਅਦ ਜਗ੍ਹਾ */
-        }
-
-        /* ਐਰੋ (>) ਦੀ ਸ਼ੇਪ */
-        .arrow-tag::after {
-            content: "";
-            position: absolute;
-            right: -20px;
+            text-transform: uppercase;
+            position: absolute; /* ਇਹ ਬਾਕਸ ਨੂੰ ਇੱਕ ਜਗ੍ਹਾ ਟਿਕਾ ਕੇ ਰੱਖੇਗਾ */
+            left: 0;
             top: 0;
-            width: 0;
-            height: 0;
-            border-top: 26px solid transparent;
-            border-bottom: 26px solid transparent;
+            z-index: 100; /* ਇਹ ਟੈਕਸਟ ਦੇ ਉੱਪਰ ਰਹੇਗਾ */
         }
 
-        /* ਰੰਗ ਸੈਟਿੰਗ */
-        .red-tag { background: #ff0000; color: #ffffff; }
-        .red-tag::after { border-left: 20px solid #ff0000; }
+        .hint-white { background: #ffffff; color: #ff0000; }
+        .hint-red { background: #ff0000; color: #ffffff; }
 
-        .white-tag { background: #ffffff; color: #ff0000; border-right: 1px solid #ddd; }
-        .white-tag::after { border-left: 20px solid #ffffff; }
-
-        /* ਟੈਕਸਟ ਸਟਾਈਲ */
-        .ticker-text {
-            font-size: 28px;
+        /* --- ਟੈਕਸਟ ਜੋ ਪਿੱਛੇ ਚੱਲੇਗਾ --- */
+        marquee {
+            width: 100%;
+            font-size: 26px;
             font-weight: 900;
             text-transform: uppercase;
-            display: flex;
-            align-items: center;
+            z-index: 10;
+            /* ਟੈਕਸਟ ਨੂੰ ਬਾਕਸ ਦੇ ਅੱਗੋਂ ਸ਼ੁਰੂ ਕਰਨ ਲਈ ਪੈਡਿੰਗ (Label ਦੀ ਚੌੜਾਈ ਮੁਤਾਬਕ) */
+            padding-left: 100px; 
         }
 
         .red-txt { color: #ff0000; }
         .white-txt { color: #ffffff; }
-        .yellow-txt { color: #f1c40f; padding: 0 15px; }
+        .yellow-txt { color: #f1c40f; }
 
-        /* ਘੜੀ ਫਿਕਸ ਰਹੇਗੀ (ਤਾਕਿ ਟਾਈਮ ਪੜ੍ਹਿਆ ਜਾ ਸਕੇ) */
-        .clock-fixed {
+        /* ਘੜੀ */
+        .clock-area {
             position: absolute;
             right: 0;
             background: #f1c40f;
@@ -97,7 +76,7 @@
             justify-content: center;
             font-size: 24px;
             font-weight: 900;
-            z-index: 200;
+            z-index: 110; /* ਘੜੀ ਸਭ ਤੋਂ ਉੱਪਰ */
         }
 
         /* Scoreboard */
@@ -108,7 +87,6 @@
 </head>
 <body>
 
-    <!-- Scoreboard -->
     <div id="scoreboard">
         <div id="disp_sA" class="s-box">0</div>
         <div id="boxA" class="t-box" style="background: #ffffff; color: #000;">TEAM A</div>
@@ -118,32 +96,30 @@
 
     <div id="master-footer">
         
-        <!-- TOP SCROLLING BAR -->
-        <div class="bar top-bar-bg">
-            <marquee scrollamount="7">
-                <div class="scroll-wrapper">
-                    <span class="arrow-tag red-tag">LIVE</span>
-                    <span class="ticker-text red-txt" id="tour-name">MAJHA CUP 2026</span>
-                    <span style="margin: 0 40px;"></span> <!-- Space between sections -->
-                    <span class="arrow-tag red-tag">NEXT MATCH</span>
-                    <span class="ticker-text red-txt" id="scroll-top">TEAM A VS TEAM B</span>
-                </div>
-            </marquee>
+        <!-- TOP BAR -->
+        <div class="bar">
+            <div class="box-left bg-black">
+                <div class="hint-label hint-white">LIVE</div>
+                <marquee scrollamount="5" class="yellow-txt" id="tour-name">MAJHA CUP 2026</marquee>
+            </div>
+            <div class="box-right bg-white">
+                <div class="hint-label hint-red">NEXT</div>
+                <marquee scrollamount="6" class="red-txt" id="scroll-top">TEAM A VS TEAM B</marquee>
+            </div>
         </div>
 
-        <!-- BOTTOM SCROLLING BAR -->
-        <div class="bar bot-bar-bg">
-            <marquee scrollamount="6">
-                <div class="scroll-wrapper">
-                    <span class="arrow-tag white-tag">INFO</span>
-                    <span class="ticker-text yellow-txt" id="sub-info">LIVE STREAMING</span>
-                    <span style="margin: 0 40px;"></span>
-                    <span class="arrow-tag white-tag">PRIZES</span>
-                    <span class="ticker-text white-txt" id="scroll-bot">1ST: 1,00,000 | 2ND: 75,000</span>
-                </div>
-            </marquee>
-            <!-- Clock stays fixed for readability -->
-            <div class="clock-fixed" id="live-clock">00:00 AM</div>
+        <!-- BOTTOM BAR -->
+        <div class="bar">
+            <div class="box-left bg-black">
+                <div class="hint-label hint-white">INFO</div>
+                <marquee scrollamount="4" class="white-txt" id="sub-info">LIVE STREAMING</marquee>
+            </div>
+            <div class="box-right bg-black border-red">
+                <div class="hint-label hint-red">PRIZES</div>
+                <!-- ਘੜੀ ਦੇ ਪਿੱਛੇ ਟੈਕਸਟ ਨਾ ਜਾਵੇ ਇਸ ਲਈ width ਘਟਾਈ ਹੈ -->
+                <marquee scrollamount="5" class="white-txt" style="width: calc(100% - 130px);" id="scroll-bot">1ST: 1,00,000 | 2ND: 75,000</marquee>
+                <div class="clock-area" id="live-clock">00:00 AM</div>
+            </div>
         </div>
 
     </div>
