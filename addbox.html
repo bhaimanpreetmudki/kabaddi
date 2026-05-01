@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Manpreet Mudki - Custom Sports Overlay</title>
+    <title>Manpreet Mudki - Final Fixed Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -19,6 +19,7 @@
             align-items: center;
             height: 55px;
             filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+            opacity: 1 !important; /* Hamesha dikhega */
         }
         .score-box { background: white; color: black; width: 70px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; z-index: 2; }
         .score-left { border-radius: 30px 0 0 30px; }
@@ -35,55 +36,26 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            opacity: 1 !important; /* Hamesha dikhega */
         }
 
-        .ticker-line {
-            display: flex;
-            height: 38px;
-            align-items: center;
-            overflow: hidden;
-        }
-
-        /* Top Red Line */
+        .ticker-line { display: flex; height: 38px; align-items: center; overflow: hidden; }
         .line-top { background: #b31217; color: white; }
-        /* Bottom White Line */
         .line-bottom { background: white; color: #b31217; border-top: 1px solid #ddd; }
 
-        .content-area {
-            flex: 1;
-            font-size: 22px;
-            font-weight: bold;
-            padding: 0 20px;
-            white-space: nowrap;
-            display: flex;
-            align-items: center;
-        }
+        .content-area { flex: 1; font-size: 22px; font-weight: bold; padding: 0 20px; white-space: nowrap; display: flex; align-items: center; }
 
-        /* --- Right Corner Boxes --- */
-        .corner-box {
-            width: 150px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 20px;
-            font-weight: 900;
-        }
-        /* Top Corner: White */
+        .corner-box { width: 150px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: 900; }
         .corner-top { background: white; color: #b31217; }
-        /* Bottom Corner: Red */
         .corner-bottom { background: #b31217; color: white; }
 
-        /* Step Animation */
         .step-info { position: relative; height: 100%; flex: 1; display: flex; align-items: center; }
         .step-item { position: absolute; width: 100%; opacity: 0; transform: translateY(10px); transition: all 0.5s ease; }
         .step-item.active { opacity: 1; transform: translateY(0); }
-
     </style>
 </head>
 <body>
 
-    <!-- Scoreboard -->
     <div id="scoreboard">
         <div id="disp_sA" class="score-box score-left">0</div>
         <div class="team-container">
@@ -93,10 +65,7 @@
         <div id="disp_sB" class="score-box score-right">0</div>
     </div>
 
-    <!-- Double Layer Ticker -->
     <div id="footer-container">
-        
-        <!-- TOP LINE: Wide Red (Tournament & Team) -->
         <div class="ticker-line line-top">
             <div class="content-area">
                 <span id="tournament-name">PIND MUDKI KABADDI CUP</span>
@@ -106,7 +75,6 @@
             <div class="corner-box corner-top" id="live-time">00:00 AM</div>
         </div>
 
-        <!-- BOTTOM LINE: Wide White (Prizes & Upcoming) -->
         <div class="ticker-line line-bottom">
             <div class="content-area">
                 <div class="step-info">
@@ -116,16 +84,14 @@
             </div>
             <div class="corner-box corner-bottom" id="live-date">01/05/2026</div>
         </div>
-
     </div>
 
 <script>
-    // Firebase Connection (as per your panel)
+    // Database URL check kro yr
     const firebaseConfig = { databaseURL: "https://manpreetpigeons-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 1. Sync Scoreboard
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
@@ -134,10 +100,8 @@
         document.getElementById('disp_sB').innerText = d.scoreB || "0";
         if(d.colorA) document.getElementById('boxA').style.backgroundColor = d.colorA;
         if(d.colorB) document.getElementById('boxB').style.backgroundColor = d.colorB;
-        document.getElementById('scoreboard').style.opacity = d.scoreVisible ? "1" : "0";
     });
 
-    // 2. Clock & Date Logic
     function updateClock() {
         const now = new Date();
         document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -146,17 +110,13 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 3. Sync Ticker Data
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tournament-name').innerText = d.tournamentName || "LIVE TOURNAMENT";
         document.getElementById('match-teams').innerText = (d.nameA || "TEAM A") + " VS " + (d.nameB || "TEAM B");
         document.getElementById('p1').innerText = "1st: " + (d.prizes || "₹51,000") + " | 2nd: " + (d.prizes2 || "₹31,000");
-        document.getElementById('u1').innerText = "Next: " + (d.participatingTeams || "Stay Tuned");
-        document.getElementById('footer-container').style.opacity = d.tickerVis ? "1" : "0";
     });
 
-    // 4. Bottom Info Flash Rotation
     let curStep = 0;
     const steps = ['p1', 'u1'];
     setInterval(() => {
@@ -164,7 +124,6 @@
         curStep = (curStep + 1) % steps.length;
         document.getElementById(steps[curStep]).classList.add('active');
     }, 5000);
-
 </script>
 </body>
 </html>
