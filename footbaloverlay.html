@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Professional Individual Box Control</title>
+    <title>Wide Capsule & Under Ticker Control</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -16,122 +16,59 @@
             right: 0;
             display: flex;
             flex-direction: column;
-            gap: 1px;
+            gap: 2px;
         }
 
         .bar {
             display: flex;
             height: 52px;
             align-items: center;
-            background: transparent; /* Main bar transparent rakhi hai taaki boxes dikhan */
+            background: transparent;
             overflow: hidden;
             width: 100%;
             position: relative;
         }
 
-        /* --- 4 ਵੱਡੇ ਬਾਕਸਾਂ ਦੀ ਅਲੱਗ-ਅਲੱਗ ਸੈਟਿੰਗ --- */
+        /* --- 4 ਵੱਡੇ ਬਾਕਸ ਸੈਟਿੰਗ --- */
+        #box-top-left { width: 45%; height: 100%; background: #000; display: flex; align-items: center; position: relative; z-index: 50; }
+        #box-top-right { width: 55%; height: 100%; background: #ffffff; display: flex; align-items: center; position: relative; z-index: 10; }
+        #box-bottom-left { width: 40%; height: 100%; background: #000; display: flex; align-items: center; position: relative; z-index: 50; }
+        #box-bottom-right { width: 60%; height: 100%; background: #000; display: flex; align-items: center; position: relative; z-index: 10; border-left: 2px solid #ff0000; }
 
-        #box-top-left {
-            width: 55%;
-            height: 100%;
-            background: #000;
+        /* --- ਕੈਪਸੂਲ ਸਟਾਈਲ (ਚੌੜਾਈ ਅਤੇ ਹਾਈਟ ਕੰਟਰੋਲ) --- */
+        .capsule {
             display: flex;
             align-items: center;
+            justify-content: center;
+            font-weight: 900;
+            border-radius: 50px;
+            text-transform: uppercase;
             position: relative;
-            z-index: 50;
-            /* ਇੱਥੋਂ ਸੈੱਟ ਕਰੋ */
-            top: 0px; 
-            left: 0px;
+            z-index: 100; /* ਟਿੱਕਰ ਤੋਂ ਉੱਪਰ ਰੱਖਣ ਲਈ */
+            
+            /* --- ਬਦਲਾਅ ਇੱਥੋਂ ਕਰੋ --- */
+            height: 46px;      /* ਹਾਈਟ ਵਧਾਉਣ/ਘਟਾਉਣ ਲਈ */
+            padding: 0 45px;   /* ਚੌੜਾਈ (Chore) ਵਧਾਉਣ ਲਈ ਪੈਡਿੰਗ ਵਧਾਓ */
+            margin: 0 5px;     /* ਸਾਈਡਾਂ ਤੋਂ ਜਗ੍ਹਾ */
         }
 
-        #box-top-right {
-            width: 45%;
-            height: 100%;
-            background: #ffffff;
-            display: flex;
-            align-items: center;
+        /* ਇਕੱਲੇ-ਇਕੱਲੇ ਕੈਪਸੂਲ ਦੇ ਆਪਸ਼ਨ */
+        #cap-live { background: #ffffff; color: #ff0000; top: 0px; left: 0px; }
+        #cap-next { background: #ff0000; color: #ffffff; top: 0px; left: -25px; } /* -25px ਨਾਲ ਟਿੱਕਰ ਇਸਦੇ ਹੇਠਾਂ ਵੜੇਗਾ */
+        #cap-info { background: #ffffff; color: #ff0000; top: 0px; left: 0px; }
+        #cap-prizes { background: #ff0000; color: #ffffff; top: 0px; left: -25px; }
+
+        /* --- ਟਿੱਕਰ (Marquee) ਸੈਟਿੰਗ --- */
+        marquee { 
+            font-size: 26px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            z-index: 5; /* ਕੈਪਸੂਲ ਤੋਂ ਨੀਚੇ ਰੱਖਣ ਲਈ */
             position: relative;
-            z-index: 10;
-            /* ਇੱਥੋਂ ਸੈੱਟ ਕਰੋ */
-            top: 0px;
-            left: 0px;
         }
-
-        #box-bottom-left {
-            width: 45%;
-            height: 100%;
-            background: #000;
-            display: flex;
-            align-items: center;
-            position: relative;
-            z-index: 50;
-            /* ਇੱਥੋਂ ਸੈੱਟ ਕਰੋ */
-            top: 0px;
-            left: 0px;
-        }
-
-        #box-bottom-right {
-            width: 55%;
-            height: 100%;
-            background: #000;
-            display: flex;
-            align-items: center;
-            position: relative;
-            z-index: 10;
-            border-left: 2px solid #ff0000;
-            /* ਇੱਥੋਂ ਸੈੱਟ ਕਰੋ */
-            top: 0px;
-            left: 0px;
-        }
-/* ਸਾਰੇ ਕੈਪਸੂਲਾਂ ਲਈ ਸਾਂਝਾ ਸਟਾਈਲ */
-    .capsule {
-        height: 52px; /* ਇੱਥੋਂ ਸਾਰਿਆਂ ਦੀ ਹਾਈਟ ਇਕੱਠੀ ਵਧੇਗੀ */
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 0 25px;
-        font-weight: 900;
-        border-radius: 50px;
-        text-transform: uppercase;
-        position: relative;
-        z-index: 100;
-    }
-
-    /* --- ਹੁਣ ਇਕੱਲੇ-ਇਕੱਲੇ ਕੈਪਸੂਲ ਦੀ ਸੈਟਿੰਗ --- */
-
-    #cap-live {
-        background: #ffffff; color: #ff0000;
-        top: 0px;    /* ਉੱਪਰ-ਹੇਠਾਂ ਲਈ */
-        left: 0px;   /* ਸੱਜੇ-ਖੱਬੇ ਲਈ */
-        height: 52px; /* ਜੇ ਸਿਰਫ ਇਸਦੀ ਹਾਈਟ ਬਦਲਣੀ ਹੋਵੇ */
-    }
-
-    #cap-next {
-        background: #ff0000; color: #ffffff;
-        top: 0px;    /* ਉੱਪਰ-ਹੇਠਾਂ (ਜਿਵੇਂ -2px) */
-        left: -10px; /* ਇਸ ਨੂੰ ਥੋੜਾ ਖੱਬੇ ਕਰਨ ਲਈ */
-    }
-
-    #cap-info {
-        background: #ffffff; color: #ff0000;
-        top: 0px;
-        left: 0px;
-    }
-
-    #cap-prizes {
-        background: #ff0000; color: #ffffff;
-        top: 0px;
-        left: -10px;
-    }
-
-    #cap-clock {
-        background: #f1c40f; color: #000;
-        top: 0px;
-        right: 0px; /* ਘੜੀ ਨੂੰ ਸੱਜੇ ਪਾਸੇ ਸੈੱਟ ਕਰਨ ਲਈ */
-    }
-        marquee { font-size: 26px; font-weight: 900; text-transform: uppercase; }
-        .red-text { color: #ff0000; }
-        .white-text { color: #ffffff; }
+        
+        .red-text { color: #ff0000; margin-left: -15px; } 
+        .white-text { color: #ffffff; margin-left: -15px; }
 
         .static-tour { color: #f1c40f; font-size: 22px; font-weight: bold; padding-left: 10px; text-transform: uppercase; }
 
@@ -145,10 +82,10 @@
             justify-content: center;
             font-size: 24px;
             font-weight: 900;
-            z-index: 60;
+            z-index: 110; /* ਘੜੀ ਨੂੰ ਸਭ ਤੋਂ ਉੱਪਰ ਰੱਖਿਆ ਹੈ */
         }
 
-        /* Scoreboard */
+        /* Scoreboard (ਉਹੀ ਰੱਖਿਆ ਹੈ) */
         #scoreboard { position: absolute; top: 15px; left: 15px; display: flex; gap: 4px; }
         .s-box { background: white; color: #ff0000; width: 55px; height: 45px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; border: 2px solid #ff0000; }
         .t-box { background: #000; color: white; padding: 0 15px; height: 45px; display: flex; align-items: center; font-size: 20px; min-width: 120px; text-transform: uppercase; }
@@ -165,28 +102,24 @@
 
     <div id="master-footer">
         
-        <!-- TOP BAR -->
+        <!-- LINE 1 -->
         <div class="bar">
-            <!-- 1. Top Left Box -->
             <div id="box-top-left">
                 <div id="cap-live" class="capsule">LIVE</div>
                 <div class="static-tour" id="tour-name">MAJHA CUP 2026</div>
             </div>
-            <!-- 2. Top Right Box -->
             <div id="box-top-right">
                 <div id="cap-next" class="capsule">NEXT MATCH</div>
-                <marquee scrollamount="6" class="red-text" id="scroll-top">TEAM A VS TEAM B</marquee>
+                <marquee scrollamount="6" class="red-text" id="scroll-top">LOADING...</marquee>
             </div>
         </div>
 
-        <!-- BOTTOM BAR -->
+        <!-- LINE 2 -->
         <div class="bar">
-            <!-- 3. Bottom Left Box -->
             <div id="box-bottom-left">
                 <div id="cap-info" class="capsule">INFO</div>
                 <div class="static-tour" style="color: white; font-size: 18px;" id="sub-info">LIVE STREAMING</div>
             </div>
-            <!-- 4. Bottom Right Box -->
             <div id="box-bottom-right">
                 <div id="cap-prizes" class="capsule">PRIZES</div>
                 <marquee scrollamount="5" class="white-text" id="scroll-bot">1ST: 1,00,000 | 2ND: 75,000</marquee>
