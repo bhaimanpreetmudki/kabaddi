@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV Style - Ticker & Scoreboard</title>
+    <title>Sukhdeep TV Style - Side by Side Scoreboard</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -18,30 +18,31 @@
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- Scoreboard Style --- */
+        /* --- Scoreboard Style (Left Side & Side-by-Side) --- */
         #scoreboard-container {
             position: absolute;
             top: 20px;
-            right: 20px;
+            left: 20px; /* ਖੱਬੇ ਪਾਸੇ ਸੈੱਟ ਕੀਤਾ */
             display: flex;
-            flex-direction: column;
-            gap: 5px;
+            flex-direction: row; /* ਬਰਾਬਰ-ਬਰਾਬਰ ਰੱਖਣ ਲਈ */
+            gap: 0px;
+            border: 2px solid var(--pure-white);
+            border-radius: 4px;
+            overflow: hidden;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
         .score-row {
             display: flex;
-            height: 45px;
-            width: 350px;
-            border: 2px solid var(--pure-white);
-            border-radius: 4px;
-            overflow: hidden;
-            box-shadow: 0 4px 6px rgba(0,0,0,0.3);
+            height: 50px;
+            min-width: 200px;
         }
 
         .team-box { flex: 1; display: flex; align-items: center; padding: 0 15px; font-size: 20px; font-weight: 900; text-transform: uppercase; }
-        .score-val { width: 60px; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; background: var(--pure-black); color: var(--pure-white); }
+        .score-val { width: 60px; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; background: var(--pure-black); color: var(--pure-white); }
 
-        .bg-red-team { background: var(--main-red); color: var(--pure-white); }
+        /* Color Difference */
+        .bg-red-team { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
         .bg-white-team { background: var(--pure-white); color: var(--main-red); }
 
         /* --- Ticker Style --- */
@@ -103,7 +104,7 @@
 </head>
 <body>
 
-    <!-- Scoreboard Section -->
+    <!-- Scoreboard Side by Side -->
     <div id="scoreboard-container">
         <div class="score-row">
             <div class="team-box bg-red-team" id="nameA">TEAM A</div>
@@ -154,26 +155,21 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    // Match Data (Scoreboard)
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
-        
-        // Visibility control
         document.getElementById('scoreboard-container').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    // Ticker Data
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT 2026").toUpperCase();
         document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
         document.getElementById('sub-info').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
         document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
-        
         document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 
