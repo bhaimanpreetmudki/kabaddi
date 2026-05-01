@@ -2,14 +2,23 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Double Layer Ticker with Date/Time</title>
+    <title>Manpreet Mudki - Sports Overlay</title>
+    <!-- Firebase Libraries -->
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <!-- Font for Professional Look -->
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+    
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
+        body { 
+            margin: 0; 
+            padding: 0; 
+            overflow: hidden; 
+            font-family: 'Rajdhani', sans-serif; 
+            background: transparent; 
+        }
 
-        /* --- SCOREBOARD --- */
+        /* --- SCOREBOARD (TOP LEFT) --- */
         #scoreboard {
             position: absolute;
             top: 30px;
@@ -18,17 +27,54 @@
             align-items: center;
             height: 55px;
             filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+            transition: opacity 0.5s ease;
         }
-        .score-box { background: white; color: black; width: 65px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; z-index: 2; }
+        .score-box { 
+            background: white; 
+            color: black; 
+            width: 70px; 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 34px; 
+            font-weight: 900; 
+            z-index: 2; 
+        }
         .score-left { border-radius: 30px 0 0 30px; }
         .score-right { border-radius: 0 30px 30px 0; }
-        .team-container { display: flex; height: 100%; min-width: 320px; background: rgba(0,0,0,0.8); margin: 0 -5px; overflow: hidden; }
-        .team-section { flex: 1; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; text-transform: uppercase; padding: 0 15px; }
-        .team-a { background: #87CEEB; color: black; }
-        .team-b { background: #000000; color: white; }
-        .vs-divider { width: 35px; background: white; color: black; font-weight: 900; display: flex; align-items: center; justify-content: center; clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%); font-size: 14px; }
+        
+        .team-container { 
+            display: flex; 
+            height: 100%; 
+            min-width: 350px; 
+            background: rgba(0,0,0,0.85); 
+            margin: 0 -5px; 
+            overflow: hidden; 
+        }
+        .team-section { 
+            flex: 1; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            color: white; 
+            font-size: 24px; 
+            text-transform: uppercase; 
+            padding: 0 20px; 
+        }
+        .vs-divider { 
+            width: 40px; 
+            background: white; 
+            color: black; 
+            font-weight: 900; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%); 
+            font-size: 16px; 
+        }
 
-        /* --- DOUBLE LAYER TICKER --- */
+        /* --- DOUBLE LAYER TICKER (BOTTOM) --- */
         #footer-container {
             position: absolute;
             bottom: 20px;
@@ -37,18 +83,20 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            transition: opacity 0.5s ease;
         }
 
         .ticker-line {
             display: flex;
             background: white;
-            height: 32px;
+            height: 35px;
             align-items: center;
             overflow: hidden;
+            box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
         }
 
         .head-box {
-            background: #b31217;
+            background: #b31217; /* Red Heading */
             color: white;
             height: 100%;
             padding: 0 20px;
@@ -62,7 +110,7 @@
         .content-box {
             flex: 1;
             color: #b31217;
-            font-size: 20px;
+            font-size: 22px;
             font-weight: bold;
             padding: 0 15px;
             white-space: nowrap;
@@ -71,16 +119,16 @@
             align-items: center;
         }
 
-        /* --- Date & Time Flash Box (Right Corner) --- */
+        /* --- Date & Time Flash (Right Corner) --- */
         .datetime-box {
-            background: #f1c40f; /* Yellow background */
+            background: #f1c40f; /* Yellow */
             color: black;
             height: 100%;
-            min-width: 150px;
+            min-width: 160px;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 18px;
+            font-size: 20px;
             font-weight: 900;
             position: relative;
         }
@@ -90,117 +138,127 @@
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
         }
-        .flash-item.active {
-            opacity: 1;
-        }
+        .flash-item.active { opacity: 1; }
 
+        /* Animation for Rotating Info */
         .step-info { position: relative; height: 100%; flex: 1; display: flex; align-items: center; }
-        .step-item { position: absolute; width: 100%; opacity: 0; transform: translateY(10px); transition: all 0.5s ease; }
-        .step-item.active { opacity: 1; transform: translateY(0); }
+        .step-item { 
+            position: absolute; 
+            width: 100%; 
+            opacity: 0; 
+            transform: translateY(15px); 
+            transition: all 0.6s cubic-bezier(0.175, 0.885, 0.32, 1.275); 
+        }
+        .step-item.active { 
+            opacity: 1; 
+            transform: translateY(0); 
+        }
 
     </style>
 </head>
 <body>
 
-    <!-- Scoreboard -->
+    <!-- 1. Scoreboard Layer -->
     <div id="scoreboard">
         <div id="disp_sA" class="score-box score-left">0</div>
         <div class="team-container">
-            <div id="boxA" class="team-section team-a">TEAM A</div>
+            <div id="boxA" class="team-section" style="background: #87CEEB; color: black;">TEAM A</div>
             <div class="vs-divider">VS</div>
-            <div id="boxB" class="team-section team-b">TEAM B</div>
+            <div id="boxB" class="team-section" style="background: #000000; color: white;">TEAM B</div>
         </div>
         <div id="disp_sB" class="score-box score-right">0</div>
     </div>
 
-    <!-- Double Layer Ticker -->
+    <!-- 2. Double Layer Ticker Layer -->
     <div id="footer-container">
         
-        <!-- LINE 1: Tournament & Date/Time Flash -->
+        <!-- TOP LINE: Tournament & Clock Flash -->
         <div class="ticker-line">
             <div class="head-box">LIVE</div>
-            <div class="content-box" id="tournament-name">VILLAGE MUDKI (FIROZPUR)</div>
+            <div class="content-box" id="tournament-name">PIND MUDKI (FIROZPUR)</div>
             
-            <!-- Right Corner Flash Box -->
             <div class="datetime-box">
-                <div id="flash-date" class="flash-item active">01-05-2026</div>
-                <div id="flash-time" class="flash-item">04:43 PM</div>
+                <div id="flash-date" class="flash-item active">01/05/2026</div>
+                <div id="flash-time" class="flash-item">04:48 PM</div>
             </div>
         </div>
 
-        <!-- LINE 2: Teams & Prizes -->
+        <!-- BOTTOM LINE: Teams & Prizes -->
         <div class="ticker-line">
+            <div class="head-box">TEAMS</div>
+            <div class="content-box" id="match-teams">WAITING FOR TEAMS...</div>
+            
             <div class="head-box">PRIZES</div>
             <div class="content-box">
                 <div class="step-info">
-                    <div class="step-item active" id="p1">1st Prize: ₹51,000</div>
-                    <div class="step-item" id="p2">2nd Prize: ₹31,000</div>
+                    <div class="step-item active" id="p1">1st: ₹51,000</div>
+                    <div class="step-item" id="p2">2nd: ₹31,000</div>
                 </div>
             </div>
-            
+
             <div class="head-box">UPCOMING</div>
             <div class="content-box">
                 <div class="step-info">
-                    <div class="step-item active" id="u1">Match 2: Team X vs Team Y</div>
-                    <div class="step-item" id="u2">Stay Tuned for Final</div>
+                    <div class="step-item active" id="u1">Match 2: Pind A vs Pind B</div>
+                    <div class="step-item" id="u2">Final: 6:00 PM Sharp</div>
                 </div>
             </div>
         </div>
+
     </div>
 
 <script>
-    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
+    // --- FIREBASE CONFIGURATION ---
+    const firebaseConfig = { 
+        databaseURL: "https://manpreetpigeons-default-rtdb.firebaseio.com/" // Your database
+    };
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // 1. Sync Scoreboard
+    // --- SCOREBOARD SYNC ---
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
         document.getElementById('boxB').innerText = d.nameB || "TEAM B";
         document.getElementById('disp_sA').innerText = d.scoreA || "0";
         document.getElementById('disp_sB').innerText = d.scoreB || "0";
+        
+        if(d.colorA) document.getElementById('boxA').style.backgroundColor = d.colorA;
+        if(d.colorB) document.getElementById('boxB').style.backgroundColor = d.colorB;
+        
         document.getElementById('scoreboard').style.opacity = d.scoreVisible ? "1" : "0";
     });
 
-    // 2. Update Date and Time
+    // --- CLOCK & FLASH LOGIC ---
     function updateClock() {
         const now = new Date();
-        const dateStr = now.toLocaleDateString('en-GB'); // DD/MM/YYYY
-        const timeStr = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-        
-        document.getElementById('flash-date').innerText = dateStr;
-        document.getElementById('flash-time').innerText = timeStr;
+        document.getElementById('flash-date').innerText = now.toLocaleDateString('en-GB');
+        document.getElementById('flash-time').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     }
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 3. Toggle Date/Time Flash (Every 5 seconds)
     let showDate = true;
     setInterval(() => {
-        const dBox = document.getElementById('flash-date');
-        const tBox = document.getElementById('flash-time');
-        
-        if (showDate) {
-            dBox.classList.remove('active');
-            tBox.classList.add('active');
-        } else {
-            tBox.classList.remove('active');
-            dBox.classList.add('active');
-        }
+        document.getElementById('flash-date').classList.toggle('active', !showDate);
+        document.getElementById('flash-time').classList.toggle('active', showDate);
         showDate = !showDate;
     }, 5000);
 
-    // 4. Sync Ticker Data
+    // --- TICKER DATA SYNC ---
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tournament-name').innerText = d.tournamentName || "LIVE EVENT";
+        document.getElementById('match-teams').innerText = (d.nameA || "TEAM A") + " VS " + (d.nameB || "TEAM B");
+        
+        // Updates for auto-rotating steps
         document.getElementById('p1').innerText = "1st: " + (d.prizes || "₹51,000");
-        document.getElementById('u1').innerText = "Next: " + (d.participatingTeams || "Wait...");
+        document.getElementById('u1').innerText = "Next: " + (d.participatingTeams || "Updating...");
+        
         document.getElementById('footer-container').style.opacity = d.tickerVis ? "1" : "0";
     });
 
-    // 5. Step Rotation for Prizes/Upcoming
+    // --- AUTO-ROTATE PRIZES & UPCOMING INFO ---
     let curStep = 1;
     setInterval(() => {
         document.getElementById(`p${curStep}`).classList.remove('active');
