@@ -2,90 +2,114 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Manpreet Mudki - Professional Ticker</title>
+    <title>Sukhdeep TV Style Red & White</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
-    
     <style>
+        :root {
+            --arrow-width: 20px;
+            --arrow-height: 50px;
+            --label-padding: 25px;
+            
+            /* Red & White Theme */
+            --main-red: #cc0000;
+            --pure-white: #ffffff;
+            --pure-black: #000000;
+        }
+
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* Skew Design */
-        .skew-box { transform: skew(-20deg); margin-left: 10px; margin-right: 10px; display: flex; align-items: center; }
-        .unskew { transform: skew(20deg); display: flex; align-items: center; justify-content: center; width: 100%; }
+        #master-footer {
+            position: absolute;
+            bottom: 10px; left: 0; right: 0;
+            display: flex; flex-direction: column; gap: 6px;
+            padding: 0 10px;
+        }
 
-        /* Scoreboard */
-        #scoreboard { position: absolute; top: 30px; right: 50px; display: flex; flex-direction: column; gap: 5px; }
-        .score-line { display: flex; height: 42px; width: 400px; align-items: center; border: 2px solid white; }
-        .bg-red { background: #b31217; color: white; }
-        .bg-white { background: white; color: #b31217; }
-        .hint-part { width: 100px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; border-right: 2px solid white; }
-        .name-part { flex: 1; padding: 0 15px; font-size: 22px; font-weight: bold; text-transform: uppercase; }
-        .val-part { width: 70px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; background: black; color: white; }
+        .bar { 
+            display: flex; 
+            height: var(--arrow-height); 
+            width: 100%; 
+            overflow: hidden; 
+            position: relative; 
+            border: 2px solid var(--pure-white);
+            border-radius: 4px;
+        }
 
-        /* Ticker Container */
-        #footer-container { position: absolute; bottom: 20px; left: 0; width: 100%; display: flex; flex-direction: column; gap: 5px; }
-        .ticker-line { display: flex; height: 38px; align-items: center; border-top: 2px solid white; border-bottom: 2px solid white; }
-        .ticker-hint { min-width: 120px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 17px; }
-        .content-area { flex: 1; padding: 0 20px; font-size: 20px; font-weight: bold; overflow: hidden; white-space: nowrap; }
-        .clock-box { width: 150px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; background: black; color: white; }
+        /* Sections */
+        .box-left { width: 45%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; background: var(--main-red); }
+        .box-right { width: 55%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; background: var(--pure-white); }
 
-        /* Animation */
-        .step-info { position: relative; height: 100%; flex: 1; display: flex; align-items: center; }
-        .step-item { position: absolute; width: 100%; opacity: 0; transition: 0.8s ease; transform: translateY(5px); }
-        .step-item.active { opacity: 1; transform: translateY(0); }
+        /* Labels */
+        .hint-label {
+            height: 100%; display: flex; align-items: center; justify-content: center;
+            padding: 0 var(--label-padding); font-weight: 900; font-size: 22px;
+            text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100;
+        }
+
+        .hint-label::after {
+            content: ""; position: absolute; right: calc(var(--arrow-width) * -1);
+            top: 0; width: 0; height: 0;
+            border-top: calc(var(--arrow-height) / 2) solid transparent;
+            border-bottom: calc(var(--arrow-height) / 2) solid transparent;
+            z-index: 100;
+        }
+
+        /* Label Colors */
+        .hint-white { background: var(--pure-white); color: var(--main-red); }
+        .hint-white::after { border-left: var(--arrow-width) solid var(--pure-white); }
+
+        .hint-red { background: var(--main-red); color: var(--pure-white); }
+        .hint-red::after { border-left: var(--arrow-width) solid var(--main-red); }
+
+        marquee { width: 100%; font-size: 24px; font-weight: 900; text-transform: uppercase; z-index: 10; padding-left: 110px; }
+
+        .txt-white { color: #fff; }
+        .txt-red { color: var(--main-red); }
+
+        .clock-area {
+            position: absolute; right: 0; background: var(--main-red); color: var(--pure-white);
+            min-width: 140px; height: 100%; display: flex; align-items: center;
+            justify-content: center; font-size: 26px; font-weight: 900; z-index: 110;
+            border-left: 2px solid var(--pure-white);
+        }
     </style>
 </head>
 <body>
 
-    <!-- Scoreboard Area -->
-    <div id="scoreboard">
-        <div class="score-line bg-red skew-box">
-            <div class="unskew" style="height:100%; display:flex;">
-                <div class="hint-part">TEAM ></div>
-                <div class="name-part" id="boxA">TEAM A</div>
-                <div class="val-part" id="disp_sA">0</div>
+    <div id="master-footer">
+        <!-- LINE 1 (Top Bar) -->
+        <div class="bar">
+            <div class="box-left">
+                <div class="hint-label hint-white">LIVE</div>
+                <marquee scrollamount="5" class="txt-white">
+                    <span id="tour-name">LOADING...</span>
+                </marquee>
             </div>
-        </div>
-        <div class="score-line bg-white skew-box">
-            <div class="unskew" style="height:100%; display:flex;">
-                <div class="hint-part" style="border-right: 2px solid #b31217;">TEAM ></div>
-                <div class="name-part" id="boxB">TEAM B</div>
-                <div class="val-part" id="disp_sB">0</div>
+            <div class="box-right">
+                <div class="hint-label hint-red">NEXT MATCH</div>
+                <marquee scrollamount="6" class="txt-red">
+                    <span id="scroll-top">LOADING...</span>
+                </marquee>
             </div>
-        </div>
-    </div>
-
-    <!-- Ticker Area -->
-    <div id="footer-container">
-        <!-- TOP LINE (Live & Match) -->
-        <div class="ticker-line bg-red">
-            <div class="ticker-hint bg-white skew-box"><div class="unskew">LIVE ></div></div>
-            <div class="content-area" id="disp-tour">LOADING...</div>
-            <div class="ticker-hint bg-white skew-box"><div class="unskew">MATCH ></div></div>
-            <div class="content-area" id="disp-match">TEAM A VS TEAM B</div>
-            <div class="clock-box skew-box"><div class="unskew" id="live-time">00:00 AM</div></div>
         </div>
 
-        <!-- BOTTOM LINE (Next & Prizes) -->
-        <div class="ticker-line bg-white" style="color: #b31217;">
-            <!-- Next Match List Box -->
-            <div class="ticker-hint bg-red skew-box" style="color:white;"><div class="unskew">NEXT ></div></div>
-            <div class="content-area">
-                <div class="step-info">
-                    <div class="step-item active" id="disp-next">Upcoming...</div>
-                    <div class="step-item" id="disp-teams">Team List...</div>
-                </div>
+        <!-- LINE 2 (Bottom Bar) -->
+        <div class="bar">
+            <div class="box-left">
+                <div class="hint-label hint-white">INFO</div>
+                <marquee scrollamount="4" class="txt-white">
+                    <span id="sub-info">LOADING...</span>
+                </marquee>
             </div>
-            <!-- Prize List Box -->
-            <div class="ticker-hint bg-red skew-box" style="color:white;"><div class="unskew">PRIZE ></div></div>
-            <div class="content-area">
-                <div class="step-info">
-                    <div class="step-item active" id="disp-prize">Prizes...</div>
-                    <div class="step-item" id="disp-contact">Contact...</div>
-                </div>
+            <div class="box-right" style="background: var(--main-red);">
+                <div class="hint-label hint-white">PRIZES</div>
+                <marquee scrollamount="5" class="txt-white" style="width: calc(100% - 140px);">
+                    <span id="scroll-bot">LOADING...</span>
+                </marquee>
+                <div class="clock-area" id="live-clock">00:00 AM</div>
             </div>
-            <div class="clock-box skew-box"><div class="unskew" id="live-date">01/05/2026</div></div>
         </div>
     </div>
 
@@ -94,51 +118,20 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    // Match & Score Data
-    db.ref("matchData").on("value", (snap) => {
-        const d = snap.val() || {};
-        document.getElementById('boxA').innerText = d.nameA || "TEAM A";
-        document.getElementById('boxB').innerText = d.nameB || "TEAM B";
-        document.getElementById('disp_sA').innerText = d.scoreA || "0";
-        document.getElementById('disp_sB').innerText = d.scoreB || "0";
-        document.getElementById('disp-match').innerText = (d.nameA || "TEAM A") + " VS " + (d.nameB || "TEAM B");
-        document.getElementById('scoreboard').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
-    });
-
-    // Ticker & Prize Data
     db.ref("tickerData").on("value", (snap) => {
-        const data = snap.val() || {};
-        document.getElementById('disp-tour').innerText = data.tournamentName || "";
-        document.getElementById('disp-next').innerText = data.nextProgram || "Next Program Soon";
-        document.getElementById('disp-teams').innerText = data.participatingTeams || "Team List Updating";
-        document.getElementById('disp-prize').innerText = data.prizes || "Prize List";
-        document.getElementById('disp-contact').innerText = data.contact || "";
-        document.getElementById('footer-container').style.display = (data.tickerVis === false) ? 'none' : 'flex';
+        const d = snap.val() || {};
+        document.getElementById('tour-name').innerText = (d.tournamentName || "Tournament 2026").toUpperCase();
+        document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
+        document.getElementById('sub-info').innerText = (d.nextProgram || "Live Coverage").toUpperCase();
+        document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "Updating...")).toUpperCase();
     });
 
-    // Clock
     function updateClock() {
         const now = new Date();
-        document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-        document.getElementById('live-date').innerText = now.toLocaleDateString('en-GB');
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     }
     setInterval(updateClock, 1000);
     updateClock();
-
-    // Rotation Logic (Separated for Next Match and Prizes)
-    let step = 0;
-    setInterval(() => {
-        const nextBox = [document.getElementById('disp-next'), document.getElementById('disp-teams')];
-        const prizeBox = [document.getElementById('disp-prize'), document.getElementById('disp-contact')];
-        
-        nextBox[step].classList.remove('active');
-        prizeBox[step].classList.remove('active');
-        
-        step = (step + 1) % 2;
-        
-        nextBox[step].classList.add('active');
-        prizeBox[step].classList.add('active');
-    }, 6000);
 </script>
 </body>
 </html>
