@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Manpreet Mudki - Pro Scoreboard & Ticker</title>
+    <title>Manpreet Mudki - Skewed Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -10,36 +10,28 @@
     <style>
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- SHARED STYLES --- */
-        .hint-box {
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 18px;
-            font-weight: 900;
-            text-transform: uppercase;
-            padding: 0 12px;
-            min-width: 100px;
-        }
-        .content-area { flex: 1; font-size: 22px; font-weight: bold; padding: 0 15px; display: flex; align-items: center; overflow: hidden; white-space: nowrap; }
+        /* --- COMMON SKEW STYLE --- */
+        .skew-box { transform: skew(-20deg); margin-left: 10px; margin-right: 10px; display: flex; align-items: center; }
+        .unskew { transform: skew(20deg); display: flex; align-items: center; justify-content: center; width: 100%; }
 
-        /* --- SCOREBOARD (Top Right) --- */
+        /* --- SCOREBOARD --- */
         #scoreboard {
             position: absolute;
             top: 30px;
-            right: 30px;
+            right: 50px;
             display: flex;
             flex-direction: column;
-            gap: 2px;
-            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.4));
+            gap: 5px;
         }
-        .score-line { display: flex; height: 40px; width: 450px; align-items: center; }
-        .bg-white { background: white; color: #b31217; }
+        .score-line { display: flex; height: 42px; width: 400px; align-items: center; border: 2px solid white; }
         .bg-red { background: #b31217; color: white; }
-        .score-val { width: 60px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 28px; font-weight: 900; background: white; color: black; border-left: 2px solid #ccc; }
+        .bg-white { background: white; color: #b31217; }
 
-        /* --- TICKER (Bottom) --- */
+        .hint-part { width: 100px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 18px; border-right: 2px solid white; }
+        .name-part { flex: 1; padding: 0 15px; font-size: 22px; font-weight: bold; text-transform: uppercase; }
+        .val-part { width: 70px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; background: black; color: white; }
+
+        /* --- TICKER --- */
         #footer-container {
             position: absolute;
             bottom: 20px;
@@ -47,63 +39,65 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 4px;
+            gap: 5px;
         }
-        .ticker-line { display: flex; height: 38px; align-items: center; overflow: hidden; }
-        .corner-box { width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 900; }
+        .ticker-line { display: flex; height: 38px; align-items: center; border-top: 2px solid white; border-bottom: 2px solid white; }
+        .ticker-hint { min-width: 120px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; font-size: 17px; }
+        .content-area { flex: 1; padding: 0 20px; font-size: 20px; font-weight: bold; overflow: hidden; white-space: nowrap; }
+        .clock-box { width: 150px; height: 100%; display: flex; align-items: center; justify-content: center; font-weight: 900; background: black; color: white; }
 
         /* Animation */
         .step-info { position: relative; height: 100%; flex: 1; display: flex; align-items: center; }
-        .step-item { position: absolute; width: 100%; opacity: 0; transform: translateX(15px); transition: all 0.5s ease; }
-        .step-item.active { opacity: 1; transform: translateX(0); }
+        .step-item { position: absolute; width: 100%; opacity: 0; transition: 0.5s; }
+        .step-item.active { opacity: 1; }
     </style>
 </head>
 <body>
 
-    <!-- NEW SCOREBOARD WITH HINT BOXES -->
+    <!-- SKEWED SCOREBOARD -->
     <div id="scoreboard">
-        <!-- Team A Line -->
-        <div class="score-line bg-red">
-            <div class="hint-box bg-white">TEAM ></div>
-            <div class="content-area" id="boxA">TEAM A</div>
-            <div class="score-val" id="disp_sA">0</div>
+        <div class="score-line bg-red skew-box">
+            <div class="unskew" style="height:100%; display:flex;">
+                <div class="hint-part">TEAM ></div>
+                <div class="name-part" id="boxA">TEAM A</div>
+                <div class="val-part" id="disp_sA">0</div>
+            </div>
         </div>
-        <!-- Team B Line -->
-        <div class="score-line bg-white" style="border-top: 1px solid #ccc;">
-            <div class="hint-box bg-red">TEAM ></div>
-            <div class="content-area" id="boxB">TEAM B</div>
-            <div class="score-val" id="disp_sB">0</div>
+        <div class="score-line bg-white skew-box">
+            <div class="unskew" style="height:100%; display:flex;">
+                <div class="hint-part" style="border-right: 2px solid #b31217;">TEAM ></div>
+                <div class="name-part" id="boxB">TEAM B</div>
+                <div class="val-part" id="disp_sB">0</div>
+            </div>
         </div>
     </div>
 
-    <!-- TICKER AREA -->
+    <!-- SKEWED TICKER -->
     <div id="footer-container">
-        <!-- Top Ticker -->
         <div class="ticker-line bg-red">
-            <div class="hint-box bg-white">LIVE ></div>
+            <div class="ticker-hint bg-white skew-box"><div class="unskew">LIVE ></div></div>
             <div class="content-area" id="disp-tour">LOADING...</div>
-            <div class="hint-box bg-white">MATCH ></div>
+            <div class="ticker-hint bg-white skew-box"><div class="unskew">MATCH ></div></div>
             <div class="content-area" id="disp-match">TEAM A VS TEAM B</div>
-            <div class="corner-box bg-white" id="live-time">00:00 AM</div>
+            <div class="clock-box skew-box"><div class="unskew" id="live-time">00:00 AM</div></div>
         </div>
 
-        <!-- Bottom Ticker -->
         <div class="ticker-line bg-white" style="color: #b31217;">
-            <div class="hint-box bg-red">UPCOMING ></div>
+            <div class="ticker-hint bg-red skew-box" style="color:white;"><div class="unskew">NEXT ></div></div>
             <div class="content-area">
                 <div class="step-info">
                     <div class="step-item active" id="disp-next">Updating...</div>
                     <div class="step-item" id="disp-teams">Teams Loading...</div>
                 </div>
             </div>
-            <div class="hint-box bg-red">PRIZES ></div>
+            <div class="ticker-hint bg-red skew-box" style="color:white;"><div class="unskew">PRIZE ></div></div>
             <div class="content-area">
                 <div class="step-info">
                     <div class="step-item active" id="disp-prize">Prize Info</div>
                     <div class="step-item" id="disp-contact">Contact Info</div>
                 </div>
             </div>
-            <div class="corner-box bg-red" id="live-date" style="color: white;">01/05/2026</div>
+            <div class="clock-box skew-box"><div class="unskew" id="live-date">01/05/2026</div></div>
         </div>
     </div>
 
@@ -112,7 +106,7 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    // 1. SCOREBOARD LOGIC (Admin Control)
+    // Scoreboard Data
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
@@ -120,25 +114,21 @@
         document.getElementById('disp_sA').innerText = d.scoreA || "0";
         document.getElementById('disp_sB').innerText = d.scoreB || "0";
         document.getElementById('disp-match').innerText = (d.nameA || "TEAM A") + " VS " + (d.nameB || "TEAM B");
-        
-        // Hide/Show Scoreboard
         document.getElementById('scoreboard').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    // 2. TICKER LOGIC (Admin Control)
+    // Ticker Data
     db.ref("tickerData").on("value", (snap) => {
         const data = snap.val() || {};
-        document.getElementById('disp-tour').innerText = data.tournamentName || "LIVE TOURNAMENT";
+        document.getElementById('disp-tour').innerText = data.tournamentName || "";
         document.getElementById('disp-prize').innerText = data.prizes || "";
         document.getElementById('disp-next').innerText = data.nextProgram || "";
         document.getElementById('disp-teams').innerText = data.participatingTeams || "";
         document.getElementById('disp-contact').innerText = data.contact || "";
-        
-        // Hide/Show Ticker
         document.getElementById('footer-container').style.display = (data.tickerVis === false) ? 'none' : 'flex';
     });
 
-    // 3. CLOCK
+    // Clock
     function updateClock() {
         const now = new Date();
         document.getElementById('live-time').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
@@ -147,16 +137,14 @@
     setInterval(updateClock, 1000);
     updateClock();
 
-    // 4. ANIMATION ROTATION
+    // Animation
     let step = 0;
     setInterval(() => {
         const up = [document.getElementById('disp-next'), document.getElementById('disp-teams')];
         const prz = [document.getElementById('disp-prize'), document.getElementById('disp-contact')];
-        if(up[0] && prz[0]) {
-            up[step].classList.remove('active'); prz[step].classList.remove('active');
-            step = (step + 1) % 2;
-            up[step].classList.add('active'); prz[step].classList.add('active');
-        }
+        up[step].classList.remove('active'); prz[step].classList.remove('active');
+        step = (step + 1) % 2;
+        up[step].classList.add('active'); prz[step].classList.add('active');
     }, 6000);
 </script>
 </body>
