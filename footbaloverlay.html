@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Zero-Gap Pro Kabaddi Overlay</title>
+    <title>Capsule Style Kabaddi Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -12,136 +12,125 @@
         #master-footer {
             position: absolute;
             bottom: 10px;
-            left: 0;
-            width: 100%;
+            left: 10px;
+            right: 10px;
             display: flex;
             flex-direction: column;
-            gap: 0px; /* Saare gap khatam */
+            gap: 10px;
         }
 
         .bar {
             display: flex;
-            height: 54px;
+            height: 45px;
             align-items: center;
-            width: 100%;
+            position: relative;
+            background: rgba(0, 0, 0, 0.85); /* Black strip background */
+            border-radius: 50px; /* Puri patti gol */
             overflow: hidden;
         }
 
-        /* --- Overlapping Slanted Design --- */
-        .slanted {
-            height: 100%;
+        /* --- Capsule Style Hint Boxes --- */
+        .capsule {
+            height: 85%;
             display: flex;
             align-items: center;
             justify-content: center;
-            clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
-            padding: 0 30px;
+            padding: 0 25px;
             font-weight: 900;
-            margin-right: -35px; /* Box ek duje de upr charan ge */
+            border-radius: 50px; /* Capsule Shape */
             position: relative;
+            z-index: 10;
+            margin-left: 5px;
+            box-shadow: 2px 0 10px rgba(0,0,0,0.3);
         }
 
-        /* LIVE BOX (Top Level) */
-        .live-box {
+        /* LIVE CAPSULE (White BG, Red Text) */
+        .live-cap {
             background: #ffffff;
             color: #ff0000;
-            min-width: 110px;
-            font-size: 32px;
-            z-index: 50; /* Sab ton upr */
-            clip-path: polygon(0 0, 100% 0, 80% 100%, 0 100%);
-        }
-
-        /* TOURNAMENT NAME BOX */
-        .tour-name-box {
-            background: #0a192f;
-            color: #f1c40f;
-            width: 40%;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            padding-left: 50px;
             font-size: 24px;
-            z-index: 40;
-            clip-path: polygon(8% 0, 100% 0, 92% 100%, 0 100%);
-            margin-right: -40px;
+            min-width: 90px;
+            border: 2px solid #ff0000;
         }
 
-        /* HINT BOX (Red - Tikker de upr dikhega) */
-        .hint-red {
+        /* RED HINT CAPSULE */
+        .hint-cap {
             background: #ff0000;
             color: #ffffff;
-            min-width: 150px;
             font-size: 16px;
             text-transform: uppercase;
-            z-index: 30;
+            min-width: 120px;
         }
 
-        /* SCROLL BOX (Piche wala area) */
+        /* YELLOW CAPSULE (Clock) */
+        .clock-cap {
+            background: #f1c40f;
+            color: #000;
+            min-width: 150px;
+            height: 85%;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 20px;
+            font-weight: 900;
+            margin-right: 5px;
+            margin-left: 10px;
+        }
+
+        /* SCROLL AREA */
         .scroll-area {
-            background: #4a0000;
             flex-grow: 1;
             height: 100%;
             display: flex;
             align-items: center;
-            padding-left: 50px;
-            z-index: 20; /* Eh sab ton thalle rahega */
-            border-bottom: 2px solid #ff0000;
+            padding-left: 15px;
+            z-index: 5;
         }
 
-        marquee { color: white; font-size: 24px; font-weight: bold; }
-
-        /* CLOCK BOX (Right Side Corner) */
-        .clock-box {
-            background: #f1c40f;
-            color: #000;
-            min-width: 250px; /* Full wide */
-            height: 100%;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            font-weight: 900;
-            z-index: 60; /* Clock v upr rahegi */
-            margin-right: 0;
-            clip-path: polygon(15% 0, 100% 0, 100% 100%, 0 100%);
+        marquee {
+            color: white;
+            font-size: 22px;
+            font-weight: bold;
         }
 
-        /* Scoreboard Zero Gap */
-        #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; height: 55px; }
-        .s-box { background: white; color: #ff0000; width: 70px; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; z-index: 10; }
-        .t-box { background: #000; color: white; padding: 0 30px; display: flex; align-items: center; font-size: 26px; min-width: 160px; clip-path: polygon(12% 0, 100% 0, 88% 100%, 0 100%); margin-left: -20px; z-index: 5; }
+        /* Scoreboard Capsule Style */
+        #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; gap: 5px; }
+        .s-box { background: white; color: #ff0000; width: 60px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; border-radius: 15px; border: 2px solid #ff0000; }
+        .t-box { background: #000; color: white; padding: 0 20px; height: 50px; display: flex; align-items: center; font-size: 22px; min-width: 120px; border-radius: 15px; border: 1px solid #444; }
     </style>
 </head>
 <body>
 
     <!-- Scoreboard -->
     <div id="scoreboard">
-        <div id="disp_sA" class="s-box" style="clip-path: polygon(0 0, 100% 0, 75% 100%, 0 100%);">0</div>
+        <div id="disp_sA" class="s-box">0</div>
         <div id="boxA" class="t-box" style="background: #ffffff; color: #000;">TEAM A</div>
-        <div id="boxB" class="t-box" style="margin-left: -25px;">TEAM B</div>
-        <div id="disp_sB" class="s-box" style="clip-path: polygon(25% 0, 100% 0, 100% 100%, 0 100%); margin-left: -20px;">0</div>
+        <div id="boxB" class="t-box">TEAM B</div>
+        <div id="disp_sB" class="s-box">0</div>
     </div>
 
     <div id="master-footer">
         
-        <!-- LINE 1: LIVE + TOUR NAME + NEXT MATCH + SCROLL -->
+        <!-- LINE 1: LIVE + TOUR NAME (CAPSULE) + NEXT MATCH + SCROLL -->
         <div class="bar">
-            <div class="slanted live-box">LIVE</div>
-            <div class="tour-name-box" id="tour-name">PUNJAB KABADDI CUP 2026</div>
-            <div class="slanted hint-red">NEXT MATCH</div>
+            <div class="capsule live-cap">LIVE</div>
+            <div class="capsule hint-cap" style="background: #0a192f; color: #f1c40f; min-width: 200px;" id="tour-name">TOURNAMENT 2026</div>
+            <div class="capsule hint-cap">NEXT MATCH</div>
             <div class="scroll-area">
-                <marquee scrollamount="6" id="scroll-top">UPCOMING: TEAM A VS TEAM B — LIVE FROM VILLAGE</marquee>
+                <marquee scrollamount="6" id="scroll-top">UPCOMING MATCH: TEAM A VS TEAM B — LIVE FROM VILLAGE</marquee>
             </div>
         </div>
 
         <!-- LINE 2: INFO + SUB INFO + PRIZES + SCROLL + CLOCK -->
-        <div class="bar" style="margin-top: -2px;"> <!-- Overlap line 1 -->
-            <div class="slanted hint-red" style="margin-left:0; clip-path: polygon(0 0, 100% 0, 82% 100%, 0 100%); min-width:110px;">INFO</div>
-            <div class="tour-name-box" style="width:30%; padding-left:45px;" id="sub-info">LIVE STREAMING</div>
-            <div class="slanted hint-red">PRIZES</div>
+        <div class="bar">
+            <div class="capsule hint-cap" style="min-width: 80px;">INFO</div>
+            <div class="capsule hint-cap" style="background: #333; min-width: 150px;" id="sub-info">LIVE STREAMING</div>
+            <div class="capsule hint-cap">PRIZES</div>
             <div class="scroll-area">
                 <marquee scrollamount="5" id="scroll-bot">1st Prize: ₹1,00,000 | 2nd Prize: ₹75,000 | Best Player: Motorcycle</marquee>
             </div>
-            <div class="clock-box" id="live-clock">02:30 PM</div>
+            <div class="clock-cap" id="live-clock">02:30 PM</div>
         </div>
 
     </div>
