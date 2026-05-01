@@ -2,127 +2,149 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Top Left Scoreboard & Bottom Ticker</title>
+    <title>Sukhdeep TV Style Double Layer Ticker</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Oswald:wght@600&family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
-        body { margin: 0; padding: 0; overflow: hidden; background: transparent; font-family: 'Rajdhani', sans-serif; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* 1. TOP LEFT SCOREBOARD */
-        #scoreboard-top-left {
+        /* --- Scoreboard (As requested before) --- */
+        #scoreboard {
             position: absolute;
-            top: 20px;
-            left: 20px;
+            top: 30px;
+            left: 30px;
+            display: flex;
+            align-items: center;
+            height: 55px;
+            filter: drop-shadow(0 5px 10px rgba(0,0,0,0.3));
+        }
+        .score-box { background: white; color: black; width: 65px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; z-index: 2; }
+        .score-left { border-radius: 30px 0 0 30px; }
+        .score-right { border-radius: 0 30px 30px 0; }
+        .team-container { display: flex; height: 100%; min-width: 320px; background: rgba(0,0,0,0.8); margin: 0 -5px; overflow: hidden; }
+        .team-section { flex: 1; display: flex; align-items: center; justify-content: center; color: white; font-size: 22px; text-transform: uppercase; padding: 0 15px; }
+        .team-a { background: #87CEEB; color: black; }
+        .team-b { background: #000000; color: white; }
+        .vs-divider { width: 35px; background: white; color: black; font-weight: 900; display: flex; align-items: center; justify-content: center; clip-path: polygon(20% 0%, 100% 0%, 80% 100%, 0% 100%); font-size: 14px; }
+
+        /* --- DOUBLE LAYER TICKER (Sukhdeep TV Style) --- */
+        #footer-container {
+            position: absolute;
+            bottom: 20px;
+            left: 0;
+            width: 100%;
             display: flex;
             flex-direction: column;
-            background: rgba(0, 0, 0, 0.85);
-            border-left: 5px solid #f1c40f;
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.5);
-            min-width: 300px;
-            border-radius: 4px;
+            gap: 2px; /* Gap between two lines */
+        }
+
+        .ticker-line {
+            display: flex;
+            background: white;
+            height: 30px;
+            align-items: center;
+            border-top: 1px solid #ccc;
             overflow: hidden;
         }
 
-        .match-meta {
-            background: #f1c40f;
-            color: #000;
-            font-size: 12px;
-            font-weight: 800;
-            padding: 2px 10px;
-            text-transform: uppercase;
-            display: flex;
-            justify-content: space-between;
-        }
-
-        .team-row {
-            display: flex;
-            align-items: center;
-            height: 40px;
-            border-bottom: 1px solid rgba(255,255,255,0.1);
-        }
-
-        .team-color { width: 8px; height: 100%; }
-
-        .team-name {
-            flex: 1;
+        /* Red Heading Boxes */
+        .head-box {
+            background: #b31217;
             color: white;
-            padding-left: 10px;
-            font-size: 20px;
-            font-family: 'Oswald', sans-serif;
-            text-transform: uppercase;
-        }
-
-        .score-val {
-            background: #fff;
-            color: #000;
-            width: 50px;
             height: 100%;
+            padding: 0 15px;
             display: flex;
             align-items: center;
-            justify-content: center;
-            font-size: 26px;
-            font-weight: 900;
-        }
-
-        /* 2. BOTTOM TICKER */
-        #ticker-container {
-            position: absolute;
-            bottom: 0;
-            left: 0;
-            width: 100%;
-            height: 40px;
-            background: rgba(0, 0, 0, 0.9);
-            display: flex;
-            align-items: center;
-            border-top: 3px solid #238636;
-        }
-
-        .ticker-label {
-            background: #238636;
-            color: white;
-            padding: 0 20px;
-            height: 100%;
-            display: flex;
-            align-items: center;
-            font-weight: bold;
             font-size: 16px;
+            font-weight: bold;
             white-space: nowrap;
+            text-transform: uppercase;
         }
 
-        marquee {
-            color: white;
-            font-size: 20px;
-            font-weight: 500;
+        /* Content Text Area */
+        .content-box {
+            flex: 1;
+            color: #b31217; /* Red text on white background */
+            font-size: 18px;
+            font-weight: bold;
+            padding: 0 15px;
+            white-space: nowrap;
+            overflow: hidden;
+            display: flex;
+            align-items: center;
         }
+
+        /* Step Animation for Right side sections */
+        .step-info {
+            position: relative;
+            height: 100%;
+            flex: 1;
+            display: flex;
+            align-items: center;
+        }
+
+        .step-item {
+            position: absolute;
+            width: 100%;
+            opacity: 0;
+            transform: translateY(10px);
+            transition: all 0.5s ease;
+        }
+        .step-item.active {
+            opacity: 1;
+            transform: translateY(0);
+        }
+
     </style>
 </head>
 <body>
 
-    <!-- Top Left Scoreboard -->
-    <div id="scoreboard-top-left">
-        <div class="match-meta">
-            <span id="disp-round">TOURNAMENT</span>
-            <span id="timer-text">00:00</span>
+    <!-- Scoreboard -->
+    <div id="scoreboard">
+        <div id="disp_sA" class="score-box score-left">0</div>
+        <div class="team-container">
+            <div id="boxA" class="team-section team-a">TEAM A</div>
+            <div class="vs-divider">VS</div>
+            <div id="boxB" class="team-section team-b">TEAM B</div>
         </div>
-        
-        <div class="team-row">
-            <div id="colorA" class="team-color"></div>
-            <div id="nameA" class="team-name">TEAM A</div>
-            <div id="scoreA" class="score-val">0</div>
-        </div>
-
-        <div class="team-row">
-            <div id="colorB" class="team-color"></div>
-            <div id="nameB" class="team-name">TEAM B</div>
-            <div id="scoreB" class="score-val">0</div>
-        </div>
+        <div id="disp_sB" class="score-box score-right">0</div>
     </div>
 
-    <!-- Bottom Ticker -->
-    <div id="ticker-container">
-        <div class="ticker-label">LIVE UPDATE</div>
-        <marquee id="ticker-msg" scrollamount="6"></marquee>
+    <!-- Double Layer Ticker -->
+    <div id="footer-container">
+        
+        <!-- TOP LINE: Live Info & Prizes -->
+        <div class="ticker-line">
+            <div class="head-box">LIVE</div>
+            <div class="content-box" id="tournament-name">TOURNAMENT NAME</div>
+            
+            <div class="head-box">PRIZES</div>
+            <div class="content-box">
+                <div class="step-info">
+                    <div class="step-item active" id="p1">1st: ₹51,000</div>
+                    <div class="step-item" id="p2">2nd: ₹31,000</div>
+                </div>
+            </div>
+
+            <div class="head-box">CONTACT</div>
+            <div class="content-box" id="contact-info">98765-XXXXX</div>
+        </div>
+
+        <!-- BOTTOM LINE: Teams & Upcoming -->
+        <div class="ticker-line">
+            <div class="head-box">TEAMS</div>
+            <div class="content-box" id="match-teams">TEAM A VS TEAM B</div>
+            
+            <div class="head-box">UPCOMING</div>
+            <div class="content-box">
+                <div class="step-info">
+                    <div class="step-item active" id="u1">Match 2: Pind A vs Pind B</div>
+                    <div class="step-item" id="u2">Next Tourney: Pind C</div>
+                </div>
+            </div>
+        </div>
+
     </div>
 
 <script>
@@ -130,34 +152,48 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Sync Data
+    // 1. Sync Match Data (Scoreboard)
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
+        document.getElementById('boxA').innerText = d.nameA || "TEAM A";
+        document.getElementById('boxB').innerText = d.nameB || "TEAM B";
+        document.getElementById('disp_sA').innerText = d.scoreA || "0";
+        document.getElementById('disp_sB').innerText = d.scoreB || "0";
         
-        // Names & Scores
-        document.getElementById('nameA').innerText = d.nameA || "TEAM A";
-        document.getElementById('nameB').innerText = d.nameB || "TEAM B";
-        document.getElementById('scoreA').innerText = d.scoreA || "0";
-        document.getElementById('scoreB').innerText = d.scoreB || "0";
+        const colorA = (d.colorA && d.colorA !== "#ffffff") ? d.colorA : "#87CEEB";
+        const colorB = (d.colorB && d.colorB !== "#ffffff") ? d.colorB : "#000000";
+        document.getElementById('boxA').style.backgroundColor = colorA;
+        document.getElementById('boxB').style.backgroundColor = colorB;
         
-        // Colors
-        document.getElementById('colorA').style.backgroundColor = d.colorA || "#ff0000";
-        document.getElementById('colorB').style.backgroundColor = d.colorB || "#0000ff";
-
-        // Meta & Timer
-        document.getElementById('disp-round').innerText = (d.matchRound || "LIVE") + " | " + (d.round || "");
-        document.getElementById('timer-text').innerText = d.matchTime || "00:00";
-
-        // Visibility
-        document.getElementById('scoreboard-top-left').style.display = d.scoreVisible ? "flex" : "none";
+        document.getElementById('scoreboard').style.opacity = d.scoreVisible ? "1" : "0";
     });
 
+    // 2. Sync Ticker Data
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        const msg = `${d.tournamentName || ""} • NEXT: ${d.nextProgram || ""} • PARTICIPATING TEAMS: ${d.participatingTeams || ""}`;
-        document.getElementById('ticker-msg').innerText = msg;
-        document.getElementById('ticker-container').style.display = d.tickerVis ? "flex" : "none";
+        document.getElementById('tournament-name').innerText = d.tournamentName || "VILLAGE CUP";
+        document.getElementById('match-teams').innerText = (d.nameA || "TEAM A") + " VS " + (d.nameB || "TEAM B");
+        document.getElementById('contact-info').innerText = d.contact || "86998-171XX";
+        
+        // Updating Steps
+        document.getElementById('p1').innerText = "1st: " + (d.prizes || "₹51,000");
+        document.getElementById('u1').innerText = "Next: " + (d.participatingTeams || "Updating...");
+        
+        document.getElementById('footer-container').style.opacity = d.tickerVis ? "1" : "0";
     });
+
+    // 3. Step Rotation (Change Prizes and Upcoming info every 4 seconds)
+    let curStep = 1;
+    setInterval(() => {
+        document.getElementById(`p${curStep}`).classList.remove('active');
+        document.getElementById(`u${curStep}`).classList.remove('active');
+        
+        curStep = (curStep === 1) ? 2 : 1;
+        
+        document.getElementById(`p${curStep}`).classList.add('active');
+        document.getElementById(`u${curStep}`).classList.add('active');
+    }, 4000);
+
 </script>
 </body>
 </html>
