@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Professional Floating Capsule Overlay</title>
+    <title>Kabaddi Pro Final Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -11,102 +11,95 @@
 
         #master-footer {
             position: absolute;
-            bottom: 15px;
-            left: 10px;
-            right: 10px;
+            bottom: 10px;
+            left: 0;
+            width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 12px;
+            gap: 5px;
         }
 
         .bar {
             display: flex;
-            height: 52px;
+            height: 55px;
             align-items: center;
-            background: rgba(0, 0, 0, 0.9);
-            border-radius: 50px;
-            padding: 0 5px; /* Kinare ton gap rakhan layi */
+            width: 100%;
+            background: #000; /* Main bar background */
         }
 
-        /* --- Floating Capsule Design --- */
-        .capsule {
-            height: 38px; /* Patti ton chota ta ki judeya na lage */
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 20px;
-            font-weight: 900;
-            border-radius: 50px;
-            z-index: 10;
-            margin: 0 5px;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.4);
-        }
-
-        /* LIVE BOX (White BG, Red Text) */
-        .live-cap {
-            background: #ffffff;
-            color: #ff0000;
-            font-size: 24px;
-            min-width: 80px;
-        }
-
-        /* NEXT MATCH & INFO (White Background - AS REQUESTED) */
-        .white-hint {
-            background: #ffffff;
-            color: #ff0000;
-            font-size: 16px;
-            text-transform: uppercase;
-            min-width: 120px;
-        }
-
-        /* RED HINT (Prizes etc) */
-        .red-hint {
-            background: #ff0000;
-            color: #ffffff;
-            font-size: 16px;
-            text-transform: uppercase;
-            min-width: 120px;
-        }
-
-        /* TOURNAMENT NAME (Fixed) */
-        .tour-name {
-            color: #f1c40f;
-            font-size: 22px;
-            font-weight: bold;
-            padding: 0 15px;
-            white-space: nowrap;
-        }
-
-        /* SCROLLING LIST BOX (After Hint Box) */
-        .list-scroll {
-            flex-grow: 1;
+        /* --- Hint Boxes (Connected to Edges) --- */
+        .hint-box {
             height: 100%;
             display: flex;
             align-items: center;
-            overflow: hidden;
+            justify-content: center;
+            padding: 0 25px;
+            font-weight: 900;
+            text-transform: uppercase;
+            z-index: 10;
         }
 
-        marquee { color: white; font-size: 20px; font-weight: bold; }
+        /* White Background Boxes (Live, Next Match Hint, Info) */
+        .bg-white {
+            background: #ffffff;
+            color: #ff0000;
+            font-size: 26px;
+            border-right: 2px solid #ff0000;
+        }
 
-        /* CLOCK CAPSULE */
-        .clock-cap {
+        /* Red Background Boxes (Prizes etc) */
+        .bg-red {
+            background: #ff0000;
+            color: #ffffff;
+            font-size: 20px;
+        }
+
+        /* --- Scrolling List (White Background as requested) --- */
+        .list-container {
+            flex-grow: 1;
+            height: 100%;
+            background: #ffffff; /* List di background white */
+            display: flex;
+            align-items: center;
+            overflow: hidden;
+            border-right: 3px solid #ff0000;
+        }
+
+        .list-container marquee {
+            color: #ff0000; /* White background te lal akhar */
+            font-size: 24px;
+            font-weight: bold;
+        }
+
+        /* Static Info Area */
+        .tour-name {
+            color: #f1c40f;
+            background: #000;
+            padding: 0 20px;
+            font-size: 24px;
+            font-weight: bold;
+            height: 100%;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Clock Box */
+        .clock-box {
             background: #f1c40f;
             color: #000;
-            min-width: 140px;
-            height: 38px;
-            border-radius: 50px;
+            min-width: 180px;
+            height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 20px;
+            font-size: 26px;
             font-weight: 900;
-            margin-right: 5px;
         }
 
         /* Scoreboard Style */
-        #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; gap: 8px; }
-        .s-box { background: white; color: #ff0000; width: 60px; height: 50px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; border-radius: 10px; border: 2px solid #ff0000; }
-        .t-box { background: #000; color: white; padding: 0 20px; height: 50px; display: flex; align-items: center; font-size: 22px; min-width: 130px; border-radius: 10px; border: 1px solid #444; }
+        #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; }
+        .s-box { background: white; color: #ff0000; width: 65px; height: 55px; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; border: 2px solid #ff0000; }
+        .t-box { background: #000; color: white; padding: 0 25px; height: 55px; display: flex; align-items: center; font-size: 24px; min-width: 150px; border: 1px solid #333; }
     </style>
 </head>
 <body>
@@ -114,34 +107,34 @@
     <!-- Scoreboard -->
     <div id="scoreboard">
         <div id="disp_sA" class="s-box">0</div>
-        <div id="boxA" class="t-box" style="background: #ffffff; color: #000;">TEAM A</div>
+        <div id="boxA" class="t-box" style="background: #ffffff; color: #ff0000;">TEAM A</div>
         <div id="boxB" class="t-box">TEAM B</div>
         <div id="disp_sB" class="s-box">0</div>
     </div>
 
     <div id="master-footer">
         
-        <!-- LINE 1: LIVE + TOUR NAME + WHITE NEXT MATCH HINT + SCROLLING LIST -->
+        <!-- LINE 1: LIVE + TOUR NAME + NEXT MATCH HINT + WHITE LIST BOX -->
         <div class="bar">
-            <div class="capsule live-cap">LIVE</div>
-            <div class="tour-name" id="tour-display">DHOLEWALA KABADDI CUP</div>
-            <div class="capsule white-hint">NEXT MATCH</div>
-            <div class="list-scroll">
-                <marquee scrollamount="6" id="scroll-top">MOGA VS LUDHIANA | JALANDHAR VS PATIALA | ENJOY LIVE ACTION</marquee>
+            <div class="hint-box bg-white">LIVE</div>
+            <div class="tour-name" id="tour-txt">KABADDI CUP 2026</div>
+            <div class="hint-box bg-red">NEXT MATCH</div>
+            <div class="list-container">
+                <marquee scrollamount="6" id="scroll-top">TEAM MOGA VS TEAM LUDHIANA — BIG MATCH COMING UP</marquee>
             </div>
         </div>
 
-        <!-- LINE 2: WHITE INFO HINT + SCROLLING LIST + RED PRIZES HINT + SCROLLING LIST + CLOCK -->
+        <!-- LINE 2: INFO BOX + WHITE LIST BOX + PRIZES HINT + WHITE LIST BOX + CLOCK -->
         <div class="bar">
-            <div class="capsule white-hint">INFO</div>
-            <div class="list-scroll" style="max-width: 200px;">
-                <marquee scrollamount="4" id="scroll-info">LIVE HD STREAMING</marquee>
+            <div class="hint-box bg-white">INFO</div>
+            <div class="list-container" style="max-width: 250px;">
+                <marquee scrollamount="4" id="scroll-info">LIVE STREAMING HD</marquee>
             </div>
-            <div class="capsule red-hint">PRIZES</div>
-            <div class="list-scroll">
+            <div class="hint-box bg-red">PRIZES</div>
+            <div class="list-container">
                 <marquee scrollamount="5" id="scroll-bot">1st: ₹1,00,000 | 2nd: ₹75,000 | Best Player: Motorcycle</marquee>
             </div>
-            <div class="clock-cap" id="live-clock">02:30 PM</div>
+            <div class="clock-box" id="live-clock">12:00 PM</div>
         </div>
 
     </div>
@@ -151,7 +144,7 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Scores Sync
+    // Data Sync
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
@@ -160,16 +153,14 @@
         document.getElementById('disp_sB').innerText = d.scoreB || "0";
     });
 
-    // Ticker Sync
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('tour-display').innerText = d.tournamentName || "TOURNAMENT 2026";
-        document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING MATCHES LOADING...");
-        document.getElementById('scroll-info').innerText = (d.nextProgram || "LIVE KABADDI ACTION");
-        document.getElementById('scroll-bot').innerText = "🏆 " + (d.prizes || "UPDATING...") + " — " + (d.fullTickerText || "");
+        document.getElementById('tour-txt').innerText = d.tournamentName || "TOURNAMENT 2026";
+        document.getElementById('scroll-top').innerText = d.participatingTeams || "NEXT MATCH LOADING...";
+        document.getElementById('scroll-info').innerText = d.nextProgram || "LIVE ACTION";
+        document.getElementById('scroll-bot').innerText = "🏆 " + (d.prizes || "UPDATING...");
     });
 
-    // Clock
     setInterval(() => {
         const now = new Date();
         document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
