@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Kabaddi Live Scroll Overlay</title>
+    <title>Kabaddi Live Final Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -16,12 +16,12 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 4px;
         }
 
         .bar {
             display: flex;
-            height: 45px;
+            height: 48px;
             align-items: center;
             overflow: hidden;
         }
@@ -33,56 +33,51 @@
             align-items: center;
             justify-content: center;
             clip-path: polygon(0 0, 100% 0, 88% 100%, 0 100%);
-            padding: 0 30px;
+            padding: 0 25px;
             font-weight: 900;
             z-index: 10;
         }
 
-        /* 1. LIVE HINT BOX */
+        /* 1. LIVE BOX (Fixed Color, Large Text) */
         .live-box {
-            background: #ff0000; /* Red */
-            color: #ffffff; /* White text */
-            min-width: 100px;
-            font-size: 22px;
-            letter-spacing: 2px;
-            animation: blink 1s infinite;
+            background: #ff0000 !important; /* Fixed Red */
+            color: #ffffff;
+            min-width: 110px;
+            font-size: 28px; /* Bigger Live Text */
+            letter-spacing: 1px;
+            padding: 0 10px;
         }
 
-        @keyframes blink { 50% { opacity: 0.8; } }
-
-        /* 2. SCROLLING BOX (Village Name) */
+        /* 2. VILLAGE SCROLL BAR (Dark Black) */
         .scroll-container {
-            background: rgba(0, 0, 0, 0.9); /* Dark Black */
+            background: #000000;
             flex-grow: 1;
             height: 100%;
             display: flex;
             align-items: center;
             margin-left: -20px;
             z-index: 5;
-            border-right: 4px solid #ff0000;
+            border-right: 4px solid #f1c40f;
         }
 
-        /* Marquee Effect */
         marquee {
             color: white;
-            font-size: 24px;
-            width: 100%;
-            font-weight: 500;
+            font-size: 22px;
+            font-weight: bold;
         }
 
-        /* 3. PRICE HINT BOX */
+        /* 3. PRICE HINT (Yellow Background, Black Text) */
         .price-hint {
-            background: #ff0000;
-            color: white;
-            min-width: 140px;
+            background: #f1c40f; /* Yellow */
+            color: #000000; /* Black Text */
+            min-width: 100px;
             font-size: 18px;
             text-transform: uppercase;
         }
 
-        /* 4. PRICE DISPLAY BOX */
-        .price-display {
-            background: #1a1a1a;
-            color: #f1c40f; /* Yellowish for price highlight */
+        /* 4. LOWER BAR (Red Background) */
+        .lower-red-bar {
+            background: #b31217; /* Red Bar */
             flex-grow: 1;
             height: 100%;
             display: flex;
@@ -90,13 +85,15 @@
             padding-left: 40px;
             font-size: 24px;
             margin-left: -20px;
+            color: white;
+            font-weight: bold;
         }
 
         /* 5. CLOCK BOX */
         .clock-box {
             background: white;
             color: black;
-            min-width: 150px;
+            min-width: 140px;
             height: 100%;
             display: flex;
             align-items: center;
@@ -106,8 +103,8 @@
             z-index: 11;
         }
 
-        /* Scoreboard (Mini Slant) */
-        #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; height: 50px; filter: drop-shadow(2px 4px 6px black); }
+        /* Scoreboard Style */
+        #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; height: 50px; }
         .s-box { background: white; color: black; width: 60px; display: flex; align-items: center; justify-content: center; font-size: 30px; font-weight: 900; }
         .t-box { background: #000; color: white; padding: 0 20px; display: flex; align-items: center; font-size: 22px; min-width: 120px; clip-path: polygon(10% 0, 100% 0, 90% 100%, 0 100%); margin-left: -10px; }
     </style>
@@ -129,14 +126,14 @@
         <div class="bar">
             <div class="slanted live-box">LIVE</div>
             <div class="scroll-container">
-                <marquee scrollamount="6" id="scroll-village">WELCOME TO THE TOURNAMENT - LIVE FROM VILLAGE NAME</marquee>
+                <marquee scrollamount="6" id="scroll-village">WELCOME TO LIVE KABADDI CUP 2026</marquee>
             </div>
         </div>
 
-        <!-- LINE 2: PRICE HINT + PRICE SHOW + TIME -->
+        <!-- LINE 2: PRICE HINT (YELLOW) + RED BAR + TIME -->
         <div class="bar">
-            <div class="slanted price-hint">🏆 PRIZES</div>
-            <div class="price-display" id="prize-text">1st: ₹1,00,000 | 2nd: ₹75,000</div>
+            <div class="slanted price-hint">🏆 PRIZE</div>
+            <div class="lower-red-bar" id="prize-text">1st: ₹1,00,000 | 2nd: ₹75,000</div>
             <div class="clock-box" id="live-clock">12:00 PM</div>
         </div>
 
@@ -159,12 +156,8 @@
     // Ticker & Village Sync
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        // Village name scrolling
-        const vName = d.tournamentName || "VILLAGE NAME";
-        document.getElementById('scroll-village').innerText = "LIVE TOURNAMENT FROM: " + vName + " — " + (d.nextProgram || "");
-        
-        // Price update
-        document.getElementById('prize-text').innerText = d.prizes || "Updating Prizes...";
+        document.getElementById('scroll-village').innerText = "LIVE FROM: " + (d.tournamentName || "VILLAGE NAME") + " — " + (d.nextProgram || "ENJOY THE MATCH");
+        document.getElementById('prize-text').innerText = d.prizes || "UPDATING...";
     });
 
     // Simple Clock
