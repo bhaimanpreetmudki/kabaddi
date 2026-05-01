@@ -83,28 +83,52 @@
             top: 0px;
             left: 0px;
         }
+/* ਸਾਰੇ ਕੈਪਸੂਲਾਂ ਲਈ ਸਾਂਝਾ ਸਟਾਈਲ */
+    .capsule {
+        height: 42px; /* ਇੱਥੋਂ ਸਾਰਿਆਂ ਦੀ ਹਾਈਟ ਇਕੱਠੀ ਵਧੇਗੀ */
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        padding: 0 25px;
+        font-weight: 900;
+        border-radius: 50px;
+        text-transform: uppercase;
+        position: relative;
+        z-index: 100;
+    }
 
-        /* --- Capsule Settings --- */
-        .capsule {
-            height: 42px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            padding: 0 25px;
-            font-weight: 900;
-            border-radius: 50px;
-            text-transform: uppercase;
-            position: relative;
-            z-index: 100;
-            margin: 0 10px;
-        }
+    /* --- ਹੁਣ ਇਕੱਲੇ-ਇਕੱਲੇ ਕੈਪਸੂਲ ਦੀ ਸੈਟਿੰਗ --- */
 
-        /* ਇਕੱਲੇ ਕੈਪਸੂਲ ਲਈ ID */
-        #cap-live { background: #ffffff; color: #ff0000; }
-        #cap-next { background: #ff0000; color: #ffffff; left: -15px; }
-        #cap-info { background: #ffffff; color: #ff0000; }
-        #cap-prizes { background: #ff0000; color: #ffffff; left: -15px; }
+    #cap-live {
+        background: #ffffff; color: #ff0000;
+        top: 0px;    /* ਉੱਪਰ-ਹੇਠਾਂ ਲਈ */
+        left: 0px;   /* ਸੱਜੇ-ਖੱਬੇ ਲਈ */
+        height: 42px; /* ਜੇ ਸਿਰਫ ਇਸਦੀ ਹਾਈਟ ਬਦਲਣੀ ਹੋਵੇ */
+    }
 
+    #cap-next {
+        background: #ff0000; color: #ffffff;
+        top: 0px;    /* ਉੱਪਰ-ਹੇਠਾਂ (ਜਿਵੇਂ -2px) */
+        left: -10px; /* ਇਸ ਨੂੰ ਥੋੜਾ ਖੱਬੇ ਕਰਨ ਲਈ */
+    }
+
+    #cap-info {
+        background: #ffffff; color: #ff0000;
+        top: 0px;
+        left: 0px;
+    }
+
+    #cap-prizes {
+        background: #ff0000; color: #ffffff;
+        top: 0px;
+        left: -10px;
+    }
+
+    #cap-clock {
+        background: #f1c40f; color: #000;
+        top: 0px;
+        right: 0px; /* ਘੜੀ ਨੂੰ ਸੱਜੇ ਪਾਸੇ ਸੈੱਟ ਕਰਨ ਲਈ */
+    }
         marquee { font-size: 26px; font-weight: 900; text-transform: uppercase; }
         .red-text { color: #ff0000; }
         .white-text { color: #ffffff; }
