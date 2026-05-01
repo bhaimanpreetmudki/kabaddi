@@ -137,16 +137,7 @@
         </div>
     </div>
 
-    <!-- 4. MATCH TIE -->
-    <div class="card">
-        <div class="header" style="background: #6f42c1;">Current Match Tie</div>
-        <div class="content">
-            <input type="text" id="tieInput" class="std-input" placeholder="Team A vs Team B">
-            <button class="btn-update" onclick="updateTieManual()">Update Match Tie</button>
-        </div>
-    </div>
-
-    <!-- 5. TICKER INFO & NEXT PROGRAM -->
+    <!-- 4. TICKER INFO & NEXT PROGRAM -->
     <div class="card">
         <div class="header" style="background:#444;">Ticker Info & Next Program</div>
         <div class="content">
@@ -281,14 +272,6 @@
         }
     }
 
-    function updateTieManual() {
-        const tieVal = document.getElementById('tieInput').value;
-        if (tieVal) {
-            tickerRef.update({ currentMatchTie: tieVal });
-            alert("Match Tie Updated!");
-        }
-    }
-
     // Sync Data
     matchRef.on("value", (snap) => {
         const data = snap.val() || {};
@@ -321,7 +304,6 @@
         contactInfo.value = data.contact || "";
         wmText.value = data.watermarkText || "";
         nextProg.value = data.nextProgram || "";
-        document.getElementById('tieInput').value = data.currentMatchTie || "";
         tickerStatus = !!data.tickerVis;
         tickerToggleBtn.style.background = tickerStatus ? "#238636" : "#da3633";
         tickerToggleBtn.innerText = tickerStatus ? "Ticker: SHOWING" : "Ticker: HIDDEN";
