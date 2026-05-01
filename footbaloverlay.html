@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Kabaddi Pro Final Overlay</title>
+    <title>Professional Connected Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -16,18 +16,19 @@
             width: 100%;
             display: flex;
             flex-direction: column;
-            gap: 5px;
+            gap: 8px;
         }
 
         .bar {
             display: flex;
-            height: 55px;
+            height: 52px;
             align-items: center;
+            background: #000; /* Main Bar Black */
+            overflow: hidden;
             width: 100%;
-            background: #000; /* Main bar background */
         }
 
-        /* --- Hint Boxes (Connected to Edges) --- */
+        /* --- Hint Boxes (Connected to Edges - No Rounding) --- */
         .hint-box {
             height: 100%;
             display: flex;
@@ -35,71 +36,71 @@
             justify-content: center;
             padding: 0 25px;
             font-weight: 900;
-            text-transform: uppercase;
             z-index: 10;
         }
 
-        /* White Background Boxes (Live, Next Match Hint, Info) */
+        /* White BG Boxes (LIVE, INFO) */
         .bg-white {
             background: #ffffff;
             color: #ff0000;
             font-size: 26px;
-            border-right: 2px solid #ff0000;
+            min-width: 100px;
         }
 
-        /* Red Background Boxes (Prizes etc) */
+        /* Red BG Boxes (NEXT MATCH, PRIZES) */
         .bg-red {
             background: #ff0000;
             color: #ffffff;
-            font-size: 20px;
+            font-size: 18px;
+            text-transform: uppercase;
+            min-width: 130px;
         }
 
-        /* --- Scrolling List (White Background as requested) --- */
-        .list-container {
+        /* 50% STATIC SECTION (Tournament Name) */
+        .static-area {
+            width: 35%;
+            color: #f1c40f;
+            font-size: 24px;
+            font-weight: bold;
+            display: flex;
+            align-items: center;
+            padding-left: 15px;
+            white-space: nowrap;
+        }
+
+        /* --- SCROLL SECTION (White Background as requested) --- */
+        .scroll-white {
             flex-grow: 1;
             height: 100%;
-            background: #ffffff; /* List di background white */
             display: flex;
             align-items: center;
-            overflow: hidden;
-            border-right: 3px solid #ff0000;
+            background: #ffffff; /* List background white */
+            border-left: 2px solid #ff0000;
         }
 
-        .list-container marquee {
-            color: #ff0000; /* White background te lal akhar */
-            font-size: 24px;
-            font-weight: bold;
+        marquee { 
+            color: #ff0000; /* Red text on white background */
+            font-size: 22px; 
+            font-weight: bold; 
         }
 
-        /* Static Info Area */
-        .tour-name {
-            color: #f1c40f;
-            background: #000;
-            padding: 0 20px;
-            font-size: 24px;
-            font-weight: bold;
-            height: 100%;
-            display: flex;
-            align-items: center;
-        }
-
-        /* Clock Box */
-        .clock-box {
+        /* CLOCK SECTION */
+        .clock-section {
             background: #f1c40f;
             color: #000;
-            min-width: 180px;
+            min-width: 160px;
             height: 100%;
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 26px;
+            font-size: 24px;
             font-weight: 900;
         }
 
-        /* Scoreboard Style */
-        #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; }
+        /* Scoreboard */
+        #scoreboard { position: absolute; top: 20px; left: 20px; display: flex; gap: 5px; }
         .s-box { background: white; color: #ff0000; width: 65px; height: 55px; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; border: 2px solid #ff0000; }
-        .t-box { background: #000; color: white; padding: 0 25px; height: 55px; display: flex; align-items: center; font-size: 24px; min-width: 150px; border: 1px solid #333; }
+        .t-box { background: #000; color: white; padding: 0 25px; height: 55px; display: flex; align-items: center; font-size: 24px; min-width: 140px; border: 1px solid #333; }
     </style>
 </head>
 <body>
@@ -107,34 +108,32 @@
     <!-- Scoreboard -->
     <div id="scoreboard">
         <div id="disp_sA" class="s-box">0</div>
-        <div id="boxA" class="t-box" style="background: #ffffff; color: #ff0000;">TEAM A</div>
+        <div id="boxA" class="t-box" style="background: #ffffff; color: #000;">TEAM A</div>
         <div id="boxB" class="t-box">TEAM B</div>
         <div id="disp_sB" class="s-box">0</div>
     </div>
 
     <div id="master-footer">
         
-        <!-- LINE 1: LIVE + TOUR NAME + NEXT MATCH HINT + WHITE LIST BOX -->
+        <!-- LINE 1: LIVE + TOUR NAME + NEXT MATCH + WHITE SCROLL LIST -->
         <div class="bar">
             <div class="hint-box bg-white">LIVE</div>
-            <div class="tour-name" id="tour-txt">KABADDI CUP 2026</div>
+            <div class="static-area" id="tour-name">MAJHA KABADDI CUP 2026</div>
             <div class="hint-box bg-red">NEXT MATCH</div>
-            <div class="list-container">
-                <marquee scrollamount="6" id="scroll-top">TEAM MOGA VS TEAM LUDHIANA — BIG MATCH COMING UP</marquee>
+            <div class="scroll-white">
+                <marquee scrollamount="6" id="scroll-top">UPCOMING: TEAM C VS TEAM D — ENJOY THE MATCH</marquee>
             </div>
         </div>
 
-        <!-- LINE 2: INFO BOX + WHITE LIST BOX + PRIZES HINT + WHITE LIST BOX + CLOCK -->
+        <!-- LINE 2: INFO + SUB INFO + PRIZES + WHITE SCROLL LIST + CLOCK -->
         <div class="bar">
-            <div class="hint-box bg-white">INFO</div>
-            <div class="list-container" style="max-width: 250px;">
-                <marquee scrollamount="4" id="scroll-info">LIVE STREAMING HD</marquee>
-            </div>
+            <div class="hint-box bg-white" style="min-width: 100px;">INFO</div>
+            <div class="static-area" style="width: 30%; color: white;" id="sub-info">LIVE FROM VILLAGE</div>
             <div class="hint-box bg-red">PRIZES</div>
-            <div class="list-container">
-                <marquee scrollamount="5" id="scroll-bot">1st: ₹1,00,000 | 2nd: ₹75,000 | Best Player: Motorcycle</marquee>
+            <div class="scroll-white">
+                <marquee scrollamount="5" id="scroll-bot">1st Prize: ₹1,00,000 | 2nd Prize: ₹75,000 | Best Raider: Motorcycle</marquee>
             </div>
-            <div class="clock-box" id="live-clock">12:00 PM</div>
+            <div class="clock-section" id="live-clock">02:30 PM</div>
         </div>
 
     </div>
@@ -144,7 +143,6 @@
     firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
-    // Data Sync
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('boxA').innerText = d.nameA || "TEAM A";
@@ -155,9 +153,9 @@
 
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('tour-txt').innerText = d.tournamentName || "TOURNAMENT 2026";
+        document.getElementById('tour-name').innerText = d.tournamentName || "TOURNAMENT 2026";
         document.getElementById('scroll-top').innerText = d.participatingTeams || "NEXT MATCH LOADING...";
-        document.getElementById('scroll-info').innerText = d.nextProgram || "LIVE ACTION";
+        document.getElementById('sub-info').innerText = d.nextProgram || "LIVE STREAMING";
         document.getElementById('scroll-bot').innerText = "🏆 " + (d.prizes || "UPDATING...");
     });
 
