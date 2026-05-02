@@ -2,191 +2,186 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manpreet Admin - Pro Broadcast Control</title>
+    <title>Sukhdeep TV - Fixed Master Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: #161b22; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #30363d; overflow: hidden; margin-bottom: 12px; box-sizing: border-box; }
-        .header { background: #238636; color: white; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
-        .teams-container { display: flex; padding: 10px; gap: 5px; background: #0d1117; align-items: stretch; }
-        .team-box { flex: 2; text-align: center; padding: 10px; border-radius: 8px; background: #161b22; border-top: 5px solid #fff; transition: 0.3s; }
-        .score-val { font-size: 42px; font-weight: 900; color: #2ecc71; margin: 5px 0; }
-        .btn-pm { border: none; color: white; padding: 8px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 2px; }
-        .card-btn { padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 10px; flex: 1; width: 100%; }
-        .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
-        .std-textarea { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; resize: none; min-height: 60px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
-        .section-divider { border-bottom: 1px solid #30363d; margin: 15px 0 10px 0; padding-bottom: 5px; color: #2ecc71; font-size: 11px; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
-        .section-divider::after { content: ""; flex: 1; height: 1px; background: #30363d; }
-        .color-picker-wrap { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; background: #0d1117; padding: 5px; border-radius: 5px; border: 1px solid #30363d; }
-        .color-picker-wrap label { font-size: 9px; color: #8b949e; text-transform: uppercase; }
+        :root {
+            --arrow-width: 20px;
+            --arrow-height: 50px;
+            --label-padding: 25px;
+            --main-red: #cc0000;
+            --pure-white: #ffffff;
+            --pure-black: #000000;
+            --container-width: 610px;
+        }
+
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
+
+        /* --- Scoreboard Styles --- */
+        #scoreboard-wrapper { position: absolute; top: 25px; left: 20px; display: flex; flex-direction: column; gap: 2px; z-index: 100; }
+        #scoreboard-main-row { display: flex; align-items: flex-start; }
+        #scoreboard-container { display: flex; width: var(--container-width); border: 3px solid var(--pure-white); border-radius: 6px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.6); background: var(--pure-black); }
+        .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
+        .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; }
+        .team-display { flex-grow: 1; padding: 0 15px; font-size: 36px; font-weight: 900; text-transform: uppercase; overflow: hidden; white-space: nowrap; }
+        .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; }
+        
+        /* Card Indicators on Scoreboard */
+        .card-indicator { width: 15px; height: 22px; border-radius: 2px; display: none; position: absolute; bottom: 5px; border: 1px solid rgba(0,0,0,0.3); }
+        #cardA { right: 10px; }
+        #cardB { left: 10px; }
+        .yellow-card { background: #ffd700; display: block; }
+        .red-card { background: #ff0000; display: block; }
+
+        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
+        .side-b { background: var(--pure-white); color: var(--main-red); }
+
+        #match-timer-box { background: var(--main-red); color: white; height: 60px; display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; }
+
+        /* --- Ticker Styles --- */
+        #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999; }
+        .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
+        .top-bg { background: var(--pure-white); }
+        .bottom-bg { background: var(--main-red); }
+        marquee { width: 100%; font-size: 36px; font-weight: 900; text-transform: uppercase; padding-left: 130px; }
+        .txt-red { color: var(--main-red); }
+        .txt-white { color: var(--pure-white); }
+
+        /* Animation Overlays */
+        #goal-overlay, #card-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; display: none; justify-content: center; align-items: center; z-index: 5000; pointer-events: none; }
+        .flash-text { font-size: 120px; color: #fff; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 30px rgba(0,0,0,0.8); animation: flashAnim 0.5s infinite alternate; }
+        @keyframes flashAnim { from { transform: scale(0.9); } to { transform: scale(1.1); } }
+        .yellow-text { color: #ffd700; text-shadow: 0 0 30px #ffd700; }
+        .red-text { color: #ff0000; text-shadow: 0 0 30px #ff0000; }
+        
+        #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
-<div id="main-content" style="width: 100%; max-width: 500px;">
-    
-    <!-- JERSEY COLOR & SCORE SECTION -->
-    <div class="card">
-        <div class="header"><i class="fas fa-tshirt"></i> Team Match Control</div>
-        <div class="teams-container">
-            <!-- Team A -->
-            <div class="team-box" id="boxA">
-                <div class="color-picker-wrap">
-                    <label>Jersey</label>
-                    <input type="color" id="colorA" value="#ffffff" oninput="updateMatchDB()" style="flex:1; height:25px; border:none; background:none; cursor:pointer;">
-                </div>
-                <input type="text" id="nameA" class="std-input" placeholder="Team A Name" oninput="updateMatchDB()">
-                <div class="score-val" id="dispA">0</div>
-                <div style="display:flex;">
-                    <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
-                    <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
-                </div>
-            </div>
+    <div id="goal-overlay"><div class="flash-text">GOAL !!!</div></div>
+    <div id="card-overlay"><div id="card-flash-text" class="flash-text">CARD</div></div>
 
-            <div style="flex:1; text-align:center; display:flex; flex-direction:column; justify-content:center; gap:8px;">
-                <button id="visBtn" class="card-btn" style="background:#238636;" onclick="toggleVis()">SHOW</button>
-                <button class="card-btn" style="background:#333;" onclick="resetMatch()">RESET</button>
-            </div>
+    <div id="watermark">SUKHDEEP TV</div>
 
-            <!-- Team B -->
-            <div class="team-box" id="boxB">
-                <div class="color-picker-wrap">
-                    <label>Jersey</label>
-                    <input type="color" id="colorB" value="#ffffff" oninput="updateMatchDB()" style="flex:1; height:25px; border:none; background:none; cursor:pointer;">
+    <div id="scoreboard-wrapper">
+        <div id="scoreboard-main-row">
+            <div id="scoreboard-container">
+                <div id="jA" class="jersey-strip"></div>
+                <div class="score-unit side-a">
+                    <div class="score-box" id="scoreA">0</div>
+                    <div class="team-display" id="nameA">TEAM A</div>
+                    <div id="cardA" class="card-indicator"></div>
                 </div>
-                <input type="text" id="nameB" class="std-input" placeholder="Team B Name" oninput="updateMatchDB()">
-                <div class="score-val" id="dispB">0</div>
-                <div style="display:flex;">
-                    <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
-                    <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
+                <div class="score-unit side-b">
+                    <div id="cardB" class="card-indicator"></div>
+                    <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
+                    <div class="score-box" id="scoreB">0</div>
                 </div>
+                <div id="jB" class="jersey-strip"></div>
             </div>
+            <div id="match-timer-box">00:00</div>
         </div>
     </div>
 
-    <!-- MATCH & UPCOMING BOX -->
-    <div class="card">
-        <div class="header"><i class="fas fa-calendar-alt"></i> Match Info & Upcoming</div>
-        <div style="padding:15px; background:#0d1117;">
-            <div class="section-divider">Current Match Details</div>
-            <div class="grid-2">
-                <input type="text" id="matchTitle" class="std-input" placeholder="Match Type (e.g. Final)" oninput="updateMatchDB()">
-                <input type="text" id="roundInp" class="std-input" placeholder="Round (e.g. 1st Half)" oninput="updateMatchDB()">
-            </div>
-            
-            <div class="section-divider">Upcoming Match</div>
-            <textarea id="upcomingMatch" class="std-textarea" placeholder="Next Match: Team X vs Team Y (Time: 4:00 PM)" oninput="updateTickerInfo()"></textarea>
-            
-            <div class="section-divider">Participating Team List</div>
-            <textarea id="teamList" class="std-textarea" placeholder="1. TEAM A  2. TEAM B  3. TEAM C..." oninput="this.value = this.value.toUpperCase(); updateTickerInfo();"></textarea>
+    <div id="master-footer">
+        <div class="bar top-bg">
+            <marquee id="tour-name" class="txt-red">TOURNAMENT</marquee>
+        </div>
+        <div class="bar bottom-bg">
+            <marquee id="scroll-bot" class="txt-white">LIVE COVERAGE</marquee>
         </div>
     </div>
-
-    <!-- WATERMARK & CONTACTS SECTION -->
-    <div class="card">
-        <div class="header"><i class="fas fa-broadcast-tower"></i> Broadcast Branding</div>
-        <div style="padding:15px;">
-            <div class="section-divider">Branding</div>
-            <input type="text" id="watermarkText" class="std-input" placeholder="Channel Name / Watermark" oninput="updateTickerInfo()">
-            
-            <div class="section-divider">Contact & Prize</div>
-            <div class="grid-2">
-                <div class="color-picker-wrap" style="margin-bottom:0;">
-                    <i class="fab fa-whatsapp" style="color:#25d366; margin:0 5px;"></i>
-                    <input type="text" id="whatsappNum" class="std-input" style="margin:0; border:none;" placeholder="WhatsApp" oninput="updateTickerInfo()">
-                </div>
-                <div class="color-picker-wrap" style="margin-bottom:0;">
-                    <i class="fas fa-phone-alt" style="color:#3498db; margin:0 5px;"></i>
-                    <input type="text" id="callNum" class="std-input" style="margin:0; border:none;" placeholder="Call No." oninput="updateTickerInfo()">
-                </div>
-            </div>
-            <input type="text" id="prizeInfo" class="std-input" style="margin-top:8px;" placeholder="Prize Details (e.g. 1st 51000, 2nd 31000)" oninput="updateTickerInfo()">
-            
-            <button class="card-btn" style="background:#238636; padding:15px; margin-top:10px; font-size:12px;" onclick="alert('Data Synced with Firebase!')">SAVE ALL SETTINGS</button>
-        </div>
-    </div>
-
-</div>
 
 <script>
-    // Firebase Config
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
-
     const urlParams = new URLSearchParams(window.location.search);
-    const clientID = urlParams.get('id') || "default_user";
-    const matchRef = db.ref("users/" + clientID + "/matchData");
-    const tickerRef = db.ref("users/" + clientID + "/tickerData");
+    const clientID = urlParams.get('id');
 
-    let sVis = true;
+    let lastA = 0, lastB = 0;
+    let localMatchTime = 0;
+    let timerInterval = null;
 
-    function updateMatchDB() {
-        matchRef.update({
-            nameA: document.getElementById('nameA').value,
-            nameB: document.getElementById('nameB').value,
-            colorA: document.getElementById('colorA').value,
-            colorB: document.getElementById('colorB').value,
-            matchTitle: document.getElementById('matchTitle').value,
-            round: document.getElementById('roundInp').value
-        });
-        // Update local border color for visual feedback
-        document.getElementById('boxA').style.borderTopColor = document.getElementById('colorA').value;
-        document.getElementById('boxB').style.borderTopColor = document.getElementById('colorB').value;
-    }
+    db.ref("users/" + clientID + "/matchData").on("value", (snap) => {
+        const d = snap.val() || {};
 
-    function changeScore(team, val) {
-        matchRef.child(team).once('value', snap => {
-            matchRef.update({ [team]: Math.max(0, (snap.val() || 0) + val) });
-        });
-    }
+        // 1. Goal Animation
+        if (d.scoreA > lastA || d.scoreB > lastB) { triggerFlash('goal-overlay'); }
+        lastA = d.scoreA || 0; lastB = d.scoreB || 0;
 
-    function toggleVis() { matchRef.child('scoreVisible').set(!sVis); }
-    function resetMatch() { if(confirm("Reset Score?")) matchRef.update({ scoreA: 0, scoreB: 0 }); }
+        // 2. Fixed Card Logic (Only triggers if card value exists and then clears)
+        if (d.cardsA && d.cardsA !== "") {
+            triggerCardFlash(d.cardsA, d.playerNameA, d.nameA || "Team A", "A");
+        }
+        if (d.cardsB && d.cardsB !== "") {
+            triggerCardFlash(d.cardsB, d.playerNameB, d.nameB || "Team B", "B");
+        }
 
-    function updateTickerInfo() {
-        tickerRef.update({
-            watermark: document.getElementById('watermarkText').value,
-            whatsappNumber: document.getElementById('whatsappNum').value,
-            callNumber: document.getElementById('callNum').value,
-            prizeInfo: document.getElementById('prizeInfo').value,
-            upcomingMatch: document.getElementById('upcomingMatch').value,
-            participatingTeams: document.getElementById('teamList').value
-        });
-    }
+        // 3. Timer Logic
+        let mTime = d.matchTime || "00:00";
+        const parts = mTime.split(':');
+        const remoteSecs = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        if (Math.abs(remoteSecs - localMatchTime) > 2) { localMatchTime = remoteSecs; }
 
-    // REALTIME LISTENERS
-    matchRef.on("value", snap => {
-        const data = snap.val() || {};
-        document.getElementById('dispA').innerText = data.scoreA || 0;
-        document.getElementById('dispB').innerText = data.scoreB || 0;
-        document.getElementById('nameA').value = data.nameA || "";
-        document.getElementById('nameB').value = data.nameB || "";
-        document.getElementById('colorA').value = data.colorA || "#ffffff";
-        document.getElementById('colorB').value = data.colorB || "#ffffff";
-        document.getElementById('matchTitle').value = data.matchTitle || "";
-        document.getElementById('roundInp').value = data.round || "";
+        if (d.timerRunning === true) {
+            if (!timerInterval) { timerInterval = setInterval(() => { localMatchTime++; updateTimerUI(); }, 1000); }
+        } else {
+            clearInterval(timerInterval); timerInterval = null; updateTimerUI();
+        }
+
+        // UI Updates
+        document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
+        document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
+        document.getElementById('scoreA').innerText = d.scoreA || "0";
+        document.getElementById('scoreB').innerText = d.scoreB || "0";
+        document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
+        document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
         
-        document.getElementById('boxA').style.borderTopColor = data.colorA || "#fff";
-        document.getElementById('boxB').style.borderTopColor = data.colorB || "#fff";
-
-        sVis = !!data.scoreVisible;
-        document.getElementById('visBtn').innerText = sVis ? "HIDE" : "SHOW";
-        document.getElementById('visBtn').style.background = sVis ? "#da3633" : "#238636";
+        document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    tickerRef.on("value", snap => {
-        const data = snap.val() || {};
-        document.getElementById('watermarkText').value = data.watermark || "";
-        document.getElementById('whatsappNum').value = data.whatsappNumber || "";
-        document.getElementById('callNum').value = data.callNumber || "";
-        document.getElementById('prizeInfo').value = data.prizeInfo || "";
-        document.getElementById('upcomingMatch').value = data.upcomingMatch || "";
-        document.getElementById('teamList').value = data.participatingTeams || "";
+    function triggerCardFlash(type, playerNum, teamName, teamKey) {
+        const overlay = document.getElementById('card-overlay');
+        const text = document.getElementById('card-flash-text');
+        
+        text.className = "flash-text " + (type === "yellow" ? "yellow-text" : "red-text");
+        let displayNo = playerNum ? (" - " + playerNum) : "";
+        text.innerText = teamName.toUpperCase() + ": " + type.toUpperCase() + " CARD" + displayNo;
+        
+        overlay.style.display = 'flex';
+        
+        // 4 ਸੈਕਿੰਡ ਬਾਅਦ ਐਨੀਮੇਸ਼ਨ ਬੰਦ ਅਤੇ ਡਾਟਾਬੇਸ ਵਿੱਚੋਂ ਕਾਰਡ ਕਲੀਅਰ
+        setTimeout(() => { 
+            overlay.style.display = 'none'; 
+            db.ref("users/" + clientID + "/matchData/cards" + teamKey).set(""); 
+        }, 4000);
+    }
+
+    function updateTimerUI() {
+        const mins = Math.floor(localMatchTime / 60);
+        const secs = localMatchTime % 60;
+        const fmt = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
+        document.getElementById('match-timer-box').innerText = fmt;
+        document.getElementById('match-timer-box').style.display = (fmt === "00:00") ? "none" : "flex";
+    }
+
+    function triggerFlash(id) {
+        const el = document.getElementById(id);
+        el.style.display = 'flex';
+        setTimeout(() => { el.style.display = 'none'; }, 3000);
+    }
+
+    db.ref("users/" + clientID + "/tickerData").on("value", (snap) => {
+        const d = snap.val() || {};
+        document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
+        document.getElementById('scroll-bot').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
+        document.getElementById('watermark').innerText = (d.watermarkText || "SUKHDEEP TV").toUpperCase();
+        document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 </script>
 </body>
