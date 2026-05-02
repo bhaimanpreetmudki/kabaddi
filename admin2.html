@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manpreet Admin - Custom Layout</title>
+    <title>Manpreet Admin - Final Layout</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -18,10 +18,8 @@
         .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 10px; flex: 1; width: 100%; }
         .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .section-divider { border-bottom: 1px solid #30363d; margin: 10px 0; padding-bottom: 5px; color: #2ecc71; font-size: 11px; font-weight: bold; text-transform: uppercase; }
         .penalty-log { font-size: 11px; color: #f1c40f; margin-top: 5px; min-height: 15px; background: #0d1117; border-radius: 4px; padding: 2px; }
         
-        /* New Styles for separated boxes */
         .collapsible-header { background: #1f2428; cursor: pointer; display: flex; justify-content: space-between; padding: 10px; font-size: 12px; font-weight: bold; border-top: 1px solid #30363d; }
         .content-panel { display: none; padding: 10px; background: #0d1117; }
         .label-text { font-size: 11px; color: #8b949e; margin-bottom: 4px; display: block; text-transform: uppercase; }
@@ -30,47 +28,8 @@
 <body>
 
 <div id="main-content" style="width: 100%; max-width: 500px;">
-    
-    <!-- (SHEDDED NO) SCOREBOARD SECTION -->
-    <div class="card">
-        <div class="header">Scoreboard</div>
-        <div class="teams-container">
-            <div class="team-box" id="boxA">
-                <input type="text" id="nameA" class="std-input" placeholder="Team A" oninput="updateMatchDB()">
-                <div class="score-val" id="dispA">0</div>
-                <div style="display:flex; margin-bottom: 8px;">
-                    <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
-                    <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
-                </div>
-            </div>
-            <div style="flex:1; text-align:center;">
-                <button id="visBtn" class="card-btn" style="background:#238636; margin-bottom:5px;" onclick="toggleVis()">SHOW</button>
-                <button class="card-btn" style="background:#333;" onclick="resetMatch()">RESET</button>
-            </div>
-            <div class="team-box" id="boxB">
-                <input type="text" id="nameB" class="std-input" placeholder="Team B" oninput="updateMatchDB()">
-                <div class="score-val" id="dispB">0</div>
-                <div style="display:flex; margin-bottom: 8px;">
-                    <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
-                    <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
-                </div>
-            </div>
-        </div>
-    </div>
 
-    <!-- (SHEDDED NO) TIMER SECTION -->
-    <div class="card">
-        <div class="header">Persistent Timer</div>
-        <div style="padding:15px; text-align:center; background:#0d1117;">
-            <div id="timerShow" style="font-size:45px; color:#f1c40f; font-family:monospace; margin-bottom:10px;">00:00</div>
-            <div class="grid-2">
-                <button id="timerBtn" class="card-btn" style="background:#238636; height:45px;" onclick="handleTimerClick()">START</button>
-                <button class="card-btn" style="background:#333; height:45px;" onclick="resetTimer()">RESET TIME</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 1. PLANTI BOX (OPEN/CLOSE SYSTEM) -->
+    <!-- 1. PLANTI BOX (NOW ON TOP) -->
     <div class="card">
         <div class="collapsible-header" onclick="toggleBox('penaltyBox')">
             <span><i class="fas fa-gavel"></i> PENALTY (PLANTI) BOX</span>
@@ -100,38 +59,77 @@
         </div>
     </div>
 
-    <!-- 2. TEAM MATCH LIST BOX -->
+    <!-- 2. SCOREBOARD -->
+    <div class="card">
+        <div class="header">Scoreboard</div>
+        <div class="teams-container">
+            <div class="team-box">
+                <input type="text" id="nameA" class="std-input" placeholder="Team A" oninput="updateMatchDB()">
+                <div class="score-val" id="dispA">0</div>
+                <div style="display:flex;">
+                    <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
+                    <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
+                </div>
+            </div>
+            <div style="flex:1; text-align:center; padding: 0 5px;">
+                <button id="visBtn" class="card-btn" style="background:#238636; margin-bottom:5px;" onclick="toggleVis()">SHOW</button>
+                <button class="card-btn" style="background:#333;" onclick="resetMatch()">RESET</button>
+            </div>
+            <div class="team-box">
+                <input type="text" id="nameB" class="std-input" placeholder="Team B" oninput="updateMatchDB()">
+                <div class="score-val" id="dispB">0</div>
+                <div style="display:flex;">
+                    <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
+                    <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- 3. PERSISTENT TIMER -->
+    <div class="card">
+        <div class="header">Persistent Timer</div>
+        <div style="padding:15px; text-align:center; background:#0d1117;">
+            <div id="timerShow" style="font-size:45px; color:#f1c40f; font-family:monospace; margin-bottom:10px;">00:00</div>
+            <div class="grid-2">
+                <button id="timerBtn" class="card-btn" style="background:#238636; height:45px;" onclick="handleTimerClick()">START</button>
+                <button class="card-btn" style="background:#333; height:45px;" onclick="resetTimer()">RESET TIME</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. TOURNAMENT NAME BOX -->
+    <div class="card">
+        <div class="header">Tournament Name</div>
+        <div style="padding:10px;">
+            <input type="text" id="tourNameInput" class="std-input" style="margin-bottom:0;" placeholder="e.g. Kabaddi Cup 2026" oninput="updateTickerInfo()">
+        </div>
+    </div>
+
+    <!-- 5. PRIZE DETAILS BOX -->
+    <div class="card">
+        <div class="header">Prize Details</div>
+        <div style="padding:10px;">
+            <textarea id="prizeInput" class="std-input" style="height:50px; resize:none; margin-bottom:0;" placeholder="1st Prize: 51,000 | 2nd Prize: 31,000" oninput="updateTickerInfo()"></textarea>
+        </div>
+    </div>
+
+    <!-- 6. TEAM MATCH LIST -->
     <div class="card">
         <div class="header">Team Match List</div>
         <div style="padding:10px;">
-            <textarea id="matchListInput" class="std-input" style="height:60px; resize:none;" placeholder="1. TEAM A VS TEAM B&#10;2. TEAM C VS TEAM D" oninput="updateTickerInfo()"></textarea>
+            <textarea id="matchListInput" class="std-input" style="height:60px; resize:none; margin-bottom:0;" placeholder="Match List Details" oninput="updateTickerInfo()"></textarea>
         </div>
     </div>
 
-    <!-- 3. UPCOMING EVENT BOX -->
+    <!-- 7. WATERMARK & CONTACT INFO -->
     <div class="card">
-        <div class="header">Upcoming Events</div>
+        <div class="header">Channel & Contact</div>
         <div style="padding:10px;">
-            <textarea id="upcomingInput" class="std-input" style="height:60px; resize:none;" placeholder="Next Program: Final Match at 4:00 PM" oninput="updateTickerInfo()"></textarea>
-        </div>
-    </div>
-
-    <!-- 4. WATERMARK & CONTACT BOX (SEPARATED) -->
-    <div class="card">
-        <div class="header">Watermark & Contact Info</div>
-        <div style="padding:10px;">
-            <span class="label-text">Watermark (Channel Name)</span>
-            <input type="text" id="watermarkText" class="std-input" placeholder="Enter Channel Name" oninput="updateTickerInfo()">
-            
+            <input type="text" id="watermarkText" class="std-input" placeholder="Watermark (Channel Name)" oninput="updateTickerInfo()">
             <div class="grid-2">
-                <div>
-                    <span class="label-text">Call Number</span>
-                    <input type="text" id="callNum" class="std-input" placeholder="Call No." oninput="updateTickerInfo()">
-                </div>
-                <div>
-                    <span class="label-text">WhatsApp Number</span>
-                    <input type="text" id="whatsappNum" class="std-input" placeholder="WhatsApp" oninput="updateTickerInfo()">
-                </div>
+                <input type="text" id="callNum" class="std-input" placeholder="Call No." oninput="updateTickerInfo()">
+                <input type="text" id="whatsappNum" class="std-input" placeholder="WhatsApp" oninput="updateTickerInfo()">
             </div>
         </div>
     </div>
@@ -139,7 +137,6 @@
 </div>
 
 <script>
-    // Firebase initialization remains same
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
@@ -151,7 +148,6 @@
 
     let isRunning = false, startTime = 0, elapsedTime = 0, sVis = true;
 
-    // Toggle Box Functionality
     function toggleBox(id) {
         let panel = document.getElementById(id);
         let icon = document.getElementById(id.replace('Box', 'Icon'));
@@ -164,9 +160,6 @@
         }
     }
 
-    // Existing functions (updateMatchDB, changeScore, giveCard, handleTimerClick, etc.) 
-    // maintain their logic to ensure data consistency with Firebase.
-    
     function updateMatchDB() {
         matchRef.update({
             nameA: document.getElementById('nameA').value,
@@ -182,13 +175,15 @@
 
     function giveCard(team, type) {
         let pNum = document.getElementById('pNum' + team).value;
-        if (!pNum) return alert("Enter Player Number First!");
+        if (!pNum) return alert("Enter Player Number!");
         matchRef.child('cards' + team).once('value', snap => {
             let data = snap.val() || {};
-            let count = data[pNum] || 0;
+            let count = (data[pNum] === "RED") ? "RED" : (data[pNum] || 0);
             if (type === 'Yellow') {
-                count++;
-                data[pNum] = (count >= 2) ? "RED" : count;
+                if (count !== "RED") {
+                    count++;
+                    data[pNum] = (count >= 2) ? "RED" : count;
+                }
             } else { data[pNum] = "RED"; }
             matchRef.child('cards' + team).set(data);
             document.getElementById('pNum' + team).value = "";
@@ -203,8 +198,9 @@
 
     function updateTickerInfo() {
         tickerRef.update({
+            tournamentName: document.getElementById('tourNameInput').value,
+            prizeInfo: document.getElementById('prizeInput').value,
             matchList: document.getElementById('matchListInput').value,
-            upcomingEvent: document.getElementById('upcomingInput').value,
             watermark: document.getElementById('watermarkText').value,
             callNumber: document.getElementById('callNum').value,
             whatsappNumber: document.getElementById('whatsappNum').value
@@ -215,18 +211,15 @@
     function resetMatch() { if(confirm("Reset Score & Cards?")) matchRef.update({ scoreA: 0, scoreB: 0, cardsA: {}, cardsB: {} }); }
     function resetTimer() { if(confirm("Reset Timer?")) matchRef.update({ timerRunning: false, startTime: 0, elapsedTime: 0, matchTime: "00:00" }); }
 
-    // Realtime Listeners
     matchRef.on("value", snap => {
         const data = snap.val() || {};
         document.getElementById('dispA').innerText = data.scoreA || 0;
         document.getElementById('dispB').innerText = data.scoreB || 0;
         document.getElementById('nameA').value = data.nameA || "";
         document.getElementById('nameB').value = data.nameB || "";
-        
         const renderCards = (cd) => !cd ? "No Cards" : Object.entries(cd).map(([p, v]) => v === "RED" ? `P${p}:🟥` : `P${p}:` + "🟨".repeat(v)).join(" | ");
         document.getElementById('logA').innerHTML = renderCards(data.cardsA);
         document.getElementById('logB').innerHTML = renderCards(data.cardsB);
-
         isRunning = !!data.timerRunning;
         startTime = data.startTime || 0;
         elapsedTime = data.elapsedTime || 0;
@@ -237,8 +230,9 @@
 
     tickerRef.on("value", snap => {
         const d = snap.val() || {};
+        document.getElementById('tourNameInput').value = d.tournamentName || "";
+        document.getElementById('prizeInput').value = d.prizeInfo || "";
         document.getElementById('matchListInput').value = d.matchList || "";
-        document.getElementById('upcomingInput').value = d.upcomingEvent || "";
         document.getElementById('watermarkText').value = d.watermark || "";
         document.getElementById('callNum').value = d.callNumber || "";
         document.getElementById('whatsappNum').value = d.whatsappNumber || "";
