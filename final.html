@@ -151,11 +151,9 @@
     const urlParams = new URLSearchParams(window.location.search);
     const clientID = urlParams.get('id');
 
-    // --- Script ਟੈਗ ਦੇ ਅੰਦਰ ਸਿਰਫ ਇਸ ਹਿੱਸੇ ਨੂੰ ਅਪਡੇਟ ਕਰੋ ---
-
     let lastA = 0, lastB = 0;
     let lastCardA = "", lastCardB = "";
-    let lastPlayerA = "", lastPlayerB = ""; // ਨਵਾਂ: ਪਲੇਅਰ ਨੰਬਰ ਟਰੈਕ ਕਰਨ ਲਈ
+    let lastPlayerA = "", lastPlayerB = "";
 
     db.ref("users/" + clientID + "/matchData").on("value", (snap) => {
         const d = snap.val() || {};
@@ -164,13 +162,14 @@
         if (d.scoreA > lastA || d.scoreB > lastB) { triggerFlash('goal-overlay'); }
         lastA = d.scoreA || 0; lastB = d.scoreB || 0;
 
-        // 2. CARD ANIMATION LOGIC (ਅਪਡੇਟ ਕੀਤਾ)
-        // ਜੇਕਰ ਕਾਰਡ ਦੀ ਟਾਈਪ ਬਦਲੀ ਹੈ ਜਾਂ ਪਲੇਅਰ ਦਾ ਨੰਬਰ ਬਦਲਿਆ ਹੈ ਤਾਂ ਐਨੀਮੇਸ਼ਨ ਚੱਲੇਗੀ
+        // 2. CARD ANIMATION LOGIC (ਟੀਮ ਅਤੇ ਪਲੇਅਰ ਨੰਬਰ ਦੇ ਨਾਲ)
+        // Team A Card logic
         if (d.cardsA && (d.cardsA !== lastCardA || d.playerNameA !== lastPlayerA)) { 
-            triggerCardFlash(d.cardsA, d.playerNameA); 
+            triggerCardFlash(d.cardsA, d.playerNameA, d.nameA || "TEAM A"); 
         }
+        // Team B Card logic
         if (d.cardsB && (d.cardsB !== lastCardB || d.playerNameB !== lastPlayerB)) { 
-            triggerCardFlash(d.cardsB, d.playerNameB); 
+            triggerCardFlash(d.cardsB, d.playerNameB, d.nameB || "TEAM B"); 
         }
         
         lastCardA = d.cardsA || ""; 
@@ -178,13 +177,11 @@
         lastPlayerA = d.playerNameA || "";
         lastPlayerB = d.playerNameB || "";
 
-        // ਬਾਕੀ ਸਾਰਾ ਡਾਟਾ ਅਪਡੇਟ ਕਰੋ
+        // UI Updates
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
-        document.getElementById('round-detail').innerText = "ROUND: " + (d.matchRound || "1");
-        document.getElementById('half-detail').innerText = (d.round || "FIRST HALF").toUpperCase();
         
         let mTime = d.matchTime || "00:00";
         document.getElementById('match-timer-box').innerText = mTime;
@@ -192,52 +189,50 @@
 
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
-
+        
+        // Scoreboard ਦੇ ਛੋਟੇ ਕਾਰਡ ਅਪਡੇਟ ਕਰਨ ਲਈ
         updateCardIndicator('cardA', d.cardsA);
         updateCardIndicator('cardB', d.cardsB);
-
-        for (let i = 1; i <= 5; i++) {
-            updatePenaltyBall('a', i, d.penaltyA);
-            updatePenaltyBall('b', i, d.penaltyB);
-        }
-        document.getElementById('penalty-shots-container').style.display = (d.penaltyVisible === true) ? 'flex' : 'none';
-        document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    // 3. ਅਪਡੇਟ ਕੀਤਾ ਐਨੀਮੇਸ਼ਨ ਫੰਕਸ਼ਨ (ਪਲੇਅਰ ਨੰਬਰ ਦੇ ਨਾਲ)
-    function triggerCardFlash(type, playerNum) {
+    // 3. ਮੇਨ ਕਾਰਡ ਐਨੀਮੇਸ਼ਨ ਫੰਕਸ਼ਨ (ਸਿਰਫ਼ ਇੱਕ ਵਾਰ ਰੱਖੋ)
+    function triggerCardFlash(type, playerNum, teamName) {
         const overlay = document.getElementById('card-overlay');
         const text = document.getElementById('card-flash-text');
         
-        // ਕਾਰਡ ਦੀ ਟਾਈਪ ਦੇ ਮੁਤਾਬਕ ਰੰਗ ਸੈੱਟ ਕਰੋ
+        // ਰੰਗ ਸੈੱਟ ਕਰੋ
         text.className = "flash-text " + (type === "yellow" ? "yellow-text" : "red-text");
         
-        // ਸਕ੍ਰੀਨ ਤੇ ਲਿਖਿਆ ਆਵੇਗਾ: YELLOW CARD - 10
+        // ਡਿਸਪਲੇਅ: "TEAM A: YELLOW CARD - 10"
         let displayNo = playerNum ? (" - " + playerNum) : "";
-        text.innerText = (type === "yellow" ? "YELLOW CARD" : "RED CARD") + displayNo;
+        text.innerText = teamName.toUpperCase() + ": " + (type === "yellow" ? "YELLOW CARD" : "RED CARD") + displayNo;
         
         overlay.style.display = 'flex';
         
-        // 4 ਸੈਕਿੰਡ ਬਾਅਦ ਐਨੀਮੇਸ਼ਨ ਹਟਾ ਦਿਓ
         setTimeout(() => { 
             overlay.style.display = 'none'; 
         }, 4000);
     }
+
     function triggerFlash(overlayId) {
         const overlay = document.getElementById(overlayId);
         overlay.style.display = 'flex';
         setTimeout(() => { overlay.style.display = 'none'; }, 3000);
     }
 
-    function triggerCardFlash(type) {
-        const overlay = document.getElementById('card-overlay');
-        const text = document.getElementById('card-flash-text');
-        text.className = "flash-text " + (type === "yellow" ? "yellow-text" : "red-text");
-        text.innerText = (type === "yellow" ? "YELLOW CARD" : "RED CARD");
-        overlay.style.display = 'flex';
-        setTimeout(() => { overlay.style.display = 'none'; }, 3000);
+    // ਸਕੋਰਬੋਰਡ ਉੱਤੇ ਛੋਟਾ ਕਾਰਡ ਦਿਖਾਉਣ ਲਈ ਫੰਕਸ਼ਨ
+    function updateCardIndicator(id, type) {
+        const el = document.getElementById(id);
+        if (!type || type === "none") {
+            el.style.display = 'none';
+        } else {
+            el.style.display = 'block';
+            el.className = "card-indicator " + (type === "yellow" ? "yellow-card" : "red-card");
+        }
     }
 
+    // ਬਾਕੀ ਫੰਕਸ਼ਨ (Ticker, Clock, Penalty) ਉਹੀ ਰਹਿਣਗੇ...
+    
     function updatePenaltyBall(team, index, penaltyString) {
         let ball = document.getElementById(team + index);
         let symbols = penaltyString ? Array.from(penaltyString) : [];
