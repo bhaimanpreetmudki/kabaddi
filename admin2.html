@@ -190,27 +190,87 @@
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-    const db = firebase.database();
+    
+    const matchRef = firebase.database().ref("matchData");
+    const tickerRef = firebase.database().ref("tickerData");
 
-    const urlParams = new URLSearchParams(window.location.search);
-    const clientID = urlParams.get('id') || "default_user";
-    const matchRef = db.ref("users/" + clientID + "/matchData");
-    const tickerRef = db.ref("users/" + clientID + "/tickerData");
+    let curA = 0, curB = 0, seconds = 0, timerInterval = null, sVis = true, pVis = false;
+    let yellowCounts = {};
+    let tickerStatus = true;
 
-    let isRunning = false, startTime = 0, elapsedTime = 0, sVis = true;
+    function autoExpand(field) {
+        field.style.height = 'inherit';
+        field.style.height = field.scrollHeight + 'px';
+    }
 
     function updateMatchDB() {
         matchRef.update({
             nameA: document.getElementById('nameA').value,
-            nameB: document.getElementById('nameB').value
+            nameB: document.getElementById('nameB').value,
+            colorA: document.getElementById('colorA').value,
+            colorB: document.getElementById('colorB').value,
+            penaltyA: document.getElementById('pA').value,
+            penaltyB: document.getElementById('pB').value,
+            matchRound: document.getElementById('matchRound').value,
+            round: document.getElementById('roundInp').value,
+            duration: document.getElementById('matchDuration').value,
+            matchTime: document.getElementById('timerShow').innerText
         });
     }
 
     function changeScore(team, val) {
-        matchRef.child(team).once('value', snap => {
-            matchRef.update({ [team]: Math.max(0, (snap.val() || 0) + val) });
-        });
+        let current = (team === 'scoreA' ? curA : curB);
+        matchRef.update({ [team]: Math.max(0, current + val) });
     }
+
+    function handleCard(team, type) {
+        let pDetail = document.getElementById('player' + team).value;
+        if(!pDetail) { alert("Enter Player No!"); return; }
+        let key = team + "_" + pDetail;
+        let eventMsg = "";
+        if(type === 'Yellow') {
+            yellowCounts[key] = (yellowCounts[key] || 0) + 1;
+            eventMsg = (yellowCounts[key] >= 2 ? "RED (2nd Yellow): " : "Yellow Card: ") + pDetail;
+        } else {
+            eventMsg = "Red Card: " + pDetail;
+        }
+        matchRef.child('lastEvent').set(eventMsg);
+    }
+
+    function startTimer() {
+        if (timerInterval) return;
+        timerInterval = setInterval(() => {
+            seconds++;
+            let m = Math.floor(seconds / 60), s = seconds % 60;
+            let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+            document.getElementById('timerShow').innerText = timeStr;
+            matchRef.child('matchTime').set(timeStr);
+        }, 1000);
+    }
+    function pauseTimer() { clearInterval(timerInterval); timerInterval = null; updateMatchDB(); }
+    function resetTimer() { seconds = 0; document.getElementById('timerShow').innerText = "00:00"; matchRef.child('matchTime').set("00:00"); }
+    function setHalf(val) { document.getElementById('roundInp').value = val; updateMatchDB(); }
+    
+    function addPenalty(id, icon) {
+        let inp = document.getElementById(id);
+        let count = (inp.value.match(/✅|❌/g) || []).length;
+        if(count >= 5) { alert("Max 5 Penalties!"); return; }
+        inp.value = inp.value + icon;
+        updateMatchDB();
+    }
+    
+    function togglePenaltyVis() { matchRef.child('penaltyVisible').set(!pVis); }
+    function toggleVis(field) { matchRef.child(field).set(!sVis); }
+    function resetPenaltyOnly() { matchRef.update({ penaltyA: "", penaltyB: "" }); }
+    function resetOnlyScore() { if(confirm("Reset Score?")) matchRef.update({ scoreA: 0, scoreB: 0 }); }
+    
+    function fullReset() {
+        if(confirm("Reset Everything?")) {
+            yellowCounts = {}; seconds = 0; pauseTimer();
+            matchRef.update({ scoreA: 0, scoreB: 0, penaltyA: "", penaltyB: "", matchTime: "00:00", penaltyVisible: false, lastEvent: "" });
+        }
+    }
+
 
     // ਪਲੰਟੀ ਐਡ ਕਰਨ ਵਾਲਾ ਫੰਕਸ਼ਨ - ਬਿਨਾਂ ਕਿਸੇ ਲਿਮਿਟ ਦੇ
     function addShoot(team, res) {
