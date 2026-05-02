@@ -145,7 +145,10 @@
             <span class="label-title">Tournament & Prize</span>
             <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
             <input type="text" id="prizeList" class="std-input" placeholder="Prizes">
-            <input type="text" id="contactInfo" class="std-input" placeholder="Contact">
+            
+            <span class="label-title">Contact Information</span>
+            <input type="text" id="contactInfo" class="std-input" placeholder="Call Number">
+            <input type="text" id="whatsappNumber" class="std-input" placeholder="WhatsApp Number">
             
             <span class="label-title" style="color:#2ecc71;">Participting Teams</span>
             <textarea id="teamsList" class="std-textarea" placeholder="Enter Team names here..." oninput="autoExpand(this)"></textarea>
@@ -263,6 +266,7 @@
                     tournamentName: tourName.value, 
                     prizes: prizeList.value, 
                     contact: contactInfo.value,
+                    whatsapp: whatsappNumber.value,
                     nextProgram: nextProg.value,
                     participatingTeams: document.getElementById('teamsList').value
                 });
@@ -301,6 +305,7 @@
         tourName.value = data.tournamentName || "";
         prizeList.value = data.prizes || "";
         contactInfo.value = data.contact || "";
+        whatsappNumber.value = data.whatsapp || "";
         wmText.value = data.watermarkText || "";
         nextProg.value = data.nextProgram || "";
         const teamsInput = document.getElementById('teamsList');
