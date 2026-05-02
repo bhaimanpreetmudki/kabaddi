@@ -2,12 +2,15 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV Full System - Advanced Watermark</title>
+    <title>Sukhdeep TV - Professional Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
+            --arrow-width: 20px;
+            --arrow-height: 50px;
+            --label-padding: 25px;
             --main-red: #cc0000;
             --pure-white: #ffffff;
             --pure-black: #000000;
@@ -15,45 +18,66 @@
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; height: 100vh; width: 100vw; }
 
-        /* --- Advanced Watermark Styles --- */
-        #watermark-container {
-            position: absolute;
-            top: 0; left: 0;
-            width: 100%; height: 100%;
-            pointer-events: none;
-            z-index: 1000;
-        }
-
+        /* --- Watermark Styles --- */
         #wm-img {
             position: absolute;
-            width: 120px; /* ਲੋੜ ਅਨੁਸਾਰ ਸਾਈਜ਼ ਬਦਲੋ */
-            opacity: 0.7;
+            width: 120px; 
+            opacity: 0.8;
             display: none;
+            z-index: 1000;
             filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
         }
 
-        /* --- Scoreboard & Ticker Styles --- */
-        #scoreboard-wrapper { position: absolute; top: 25px; left: 20px; display: flex; flex-direction: column; z-index: 500; }
-        #scoreboard-container { display: flex; border: 3px solid var(--pure-white); border-radius: 6px 6px 0 0; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
+        /* --- Scoreboard Style --- */
+        #scoreboard-wrapper {
+            position: absolute;
+            top: 25px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            z-index: 500;
+        }
+
+        #scoreboard-container {
+            display: flex;
+            flex-direction: row;
+            border: 3px solid var(--pure-white);
+            border-radius: 6px;
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
+        }
+
         .score-unit { display: flex; height: 55px; align-items: center; }
         .team-display { width: 250px; height: 100%; display: flex; align-items: center; padding: 0 20px; font-size: 22px; font-weight: 900; text-transform: uppercase; }
         .score-box { width: 70px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; background: var(--pure-black); color: var(--pure-white); }
         .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
         .side-b { background: var(--pure-white); color: var(--main-red); }
 
-        #match-meta { display: flex; background: var(--pure-black); color: var(--pure-white); height: 30px; border: 3px solid var(--pure-white); border-top: none; border-radius: 0 0 6px 6px; justify-content: space-between; padding: 0 15px; align-items: center; font-size: 16px; font-weight: 800; text-transform: uppercase; }
-        .meta-item { color: #f1c40f; }
+        /* --- Round & Half Info (Transparent) --- */
+        #match-meta-info {
+            display: flex;
+            gap: 20px;
+            padding: 5px 10px;
+            color: var(--pure-white);
+            font-size: 18px;
+            font-weight: 900;
+            text-transform: uppercase;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+        }
 
-        #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 6px; padding: 0 10px; z-index: 500; }
-        .bar { display: flex; height: 50px; width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
+        /* --- Ticker Style (No Changes) --- */
+        #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 6px; padding: 0 10px; }
+        .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
         .top-bg { background: var(--pure-white); }
         .bottom-bg { background: var(--main-red); }
-        .hint-label { height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 25px; font-weight: 900; font-size: 22px; text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100; }
-        .hint-label::after { content: ""; position: absolute; right: -20px; top: 0; width: 0; height: 0; border-top: 25px solid transparent; border-bottom: 25px solid transparent; z-index: 100; }
+        .box-left { width: 45%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
+        .box-right { width: 55%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
+        .hint-label { height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 var(--label-padding); font-weight: 900; font-size: 22px; text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100; }
+        .hint-label::after { content: ""; position: absolute; right: calc(var(--arrow-width) * -1); top: 0; width: 0; height: 0; border-top: calc(var(--arrow-height) / 2) solid transparent; border-bottom: calc(var(--arrow-height) / 2) solid transparent; z-index: 100; }
         .hint-red { background: var(--main-red); color: var(--pure-white); }
-        .hint-red::after { border-left: 20px solid var(--main-red); }
+        .hint-red::after { border-left: var(--arrow-width) solid var(--main-red); }
         .hint-white { background: var(--pure-white); color: var(--main-red); }
-        .hint-white::after { border-left: 20px solid var(--pure-white); }
+        .hint-white::after { border-left: var(--arrow-width) solid var(--pure-white); }
         marquee { width: 100%; font-size: 24px; font-weight: 900; text-transform: uppercase; z-index: 10; padding-left: 110px; }
         .txt-red { color: var(--main-red); }
         .txt-white { color: var(--pure-white); }
@@ -62,9 +86,7 @@
 </head>
 <body>
 
-    <div id="watermark-container">
-        <img src="" id="wm-img">
-    </div>
+    <img src="" id="wm-img">
 
     <div id="scoreboard-wrapper">
         <div id="scoreboard-container">
@@ -77,29 +99,30 @@
                 <div class="score-box" id="scoreB">0</div>
             </div>
         </div>
-        <div id="match-meta">
-            <div>ROUND: <span class="meta-item" id="round-val">1</span></div>
-            <div>STATUS: <span class="meta-item" id="half-val">1ST HALF</span></div>
+        <!-- Round & Half Info Under Scoreboard -->
+        <div id="match-meta-info">
+            <span id="round-text"></span>
+            <span id="half-text"></span>
         </div>
     </div>
 
     <div id="master-footer">
         <div class="bar top-bg">
-            <div class="box-left" style="width:45%;">
+            <div class="box-left">
                 <div class="hint-label hint-red">LIVE</div>
                 <marquee scrollamount="5" class="txt-red"><span id="tour-name">LOADING...</span></marquee>
             </div>
-            <div class="box-right" style="width:55%;">
+            <div class="box-right">
                 <div class="hint-label hint-red">NEXT MATCH</div>
                 <marquee scrollamount="6" class="txt-red"><span id="scroll-top">LOADING...</span></marquee>
             </div>
         </div>
         <div class="bar bottom-bg">
-            <div class="box-left" style="width:45%;">
+            <div class="box-left">
                 <div class="hint-label hint-white">INFO</div>
                 <marquee scrollamount="4" class="txt-white"><span id="sub-info">LOADING...</span></marquee>
             </div>
-            <div class="box-right" style="width:55%;">
+            <div class="box-right">
                 <div class="hint-label hint-white">PRIZES</div>
                 <marquee scrollamount="5" class="txt-white" style="width: calc(100% - 140px);"><span id="scroll-bot">LOADING...</span></marquee>
                 <div class="clock-area" id="live-clock">00:00 AM</div>
@@ -113,44 +136,45 @@
     const db = firebase.database();
 
     const wm = document.getElementById('wm-img');
-    let wmMode = "blink"; // blink, scroll, bounce
-    let posX = 100, posY = 100, velX = 2, velY = 2;
+    let wmMode = "blink"; 
+    let posX = 100, posY = 100, velX = 3, velY = 3;
+    let animId = null;
 
-    function startWatermarkLogic() {
+    function resetWM() {
+        cancelAnimationFrame(animId);
+        wm.style.display = "none";
+    }
+
+    function runWatermark() {
+        resetWM();
         if (wmMode === "scroll") {
-            let startY = Math.random() * (window.innerHeight * 0.35) + (window.innerHeight * 0.35);
+            let startY = (window.innerHeight * 0.35) + (Math.random() * (window.innerHeight * 0.35));
             wm.style.top = startY + "px";
-            wm.style.left = window.innerWidth + "px";
+            let curX = window.innerWidth;
             wm.style.display = "block";
-            let moveX = window.innerWidth;
-            let scrollInt = setInterval(() => {
-                moveX -= 3;
-                wm.style.left = moveX + "px";
-                if (moveX < -150) { clearInterval(scrollInt); wm.style.display="none"; setTimeout(startWatermarkLogic, 2000); }
-            }, 20);
-        } 
-        else if (wmMode === "blink") {
-            wm.style.display = "none";
-            setTimeout(() => {
-                let randomX = Math.random() * (window.innerWidth - 150);
-                let randomY = Math.random() * (window.innerHeight - 150);
-                wm.style.left = randomX + "px";
-                wm.style.top = randomY + "px";
-                wm.style.display = "block";
-                setTimeout(startWatermarkLogic, 5000); // 5 sec show
-            }, 1000); // 1 sec hide
-        }
-        else if (wmMode === "bounce") {
+            function move() {
+                curX -= 4;
+                wm.style.left = curX + "px";
+                if(curX > -150) animId = requestAnimationFrame(move);
+                else setTimeout(runWatermark, 2000);
+            }
+            move();
+        } else if (wmMode === "blink") {
+            let rX = Math.random() * (window.innerWidth - 150);
+            let rY = Math.random() * (window.innerHeight - 150);
+            wm.style.left = rX + "px"; wm.style.top = rY + "px";
             wm.style.display = "block";
-            function animateBounce() {
+            setTimeout(() => { wm.style.display = "none"; setTimeout(runWatermark, 5000); }, 5000);
+        } else if (wmMode === "bounce") {
+            wm.style.display = "block";
+            function bounce() {
                 posX += velX; posY += velY;
                 if (posX + 120 >= window.innerWidth || posX <= 0) velX *= -1;
                 if (posY + 120 >= window.innerHeight || posY <= 0) velY *= -1;
-                wm.style.left = posX + "px";
-                wm.style.top = posY + "px";
-                if(wmMode === "bounce") requestAnimationFrame(animateBounce);
+                wm.style.left = posX + "px"; wm.style.top = posY + "px";
+                animId = requestAnimationFrame(bounce);
             }
-            animateBounce();
+            bounce();
         }
     }
 
@@ -160,15 +184,21 @@
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
-        document.getElementById('round-val').innerText = d.round || "1";
-        document.getElementById('half-val').innerText = (d.halfStatus || "1ST HALF").toUpperCase();
-        document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
+        
+        // Round & Half Text Update
+        document.getElementById('round-text').innerText = d.round || "";
+        document.getElementById('half-text').innerText = d.halfStatus || "";
+        
+        document.getElementById('scoreboard-container').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
+        document.getElementById('match-meta-info').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
 
         if(d.logoUrl) { 
             wm.src = d.logoUrl; 
-            if(wm.style.display === "none" && wmMode !== "blink") startWatermarkLogic();
+            if(d.wmMode && d.wmMode !== wmMode) {
+                wmMode = d.wmMode;
+                runWatermark();
+            }
         }
-        if(d.wmMode) { wmMode = d.wmMode; } // ਪੈਨਲ ਤੋਂ ਮੋਡ ਬਦਲੋ (blink, scroll, bounce)
     });
 
     db.ref("tickerData").on("value", (snap) => {
@@ -186,7 +216,7 @@
     }
     setInterval(updateClock, 1000);
     updateClock();
-    startWatermarkLogic(); // ਸ਼ੁਰੂਆਤੀ ਲੋਡ 'ਤੇ ਚਲਾਓ
+    runWatermark();
 </script>
 </body>
 </html>
