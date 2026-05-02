@@ -15,7 +15,7 @@
             --pure-white: #ffffff;
             --pure-black: #000000;
         }
-
+          
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
         /* --- 1. Scoreboard Wrapper --- */
@@ -55,7 +55,7 @@
             text-shadow: 2px 2px 4px #000;
             text-transform: uppercase;
         }
-
+         
         /* Penalty/Time Box */
         #penalty-box {
             background: rgba(0, 0, 0, 0.8);
@@ -69,6 +69,37 @@
             align-self: flex-start;
             margin-top: 5px;
         }
+        /* Penalty Ball System Style */
+#penalty-shots-container {
+    display: flex;
+    justify-content: space-between;
+    background: linear-gradient(145deg, #bdc3c7, #2c3e50); /* Silver/Metallic Style */
+    padding: 10px;
+    border: 2px solid white;
+    border-radius: 8px;
+    margin-top: 10px;
+    width: 716px; /* Scoreboard ਦੇ ਬਰਾਬਰ */
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5);
+}
+
+.team-shots { display: flex; gap: 8px; align-items: center; }
+
+.ball {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    background: #555; /* Default Empty Color */
+    border: 2px solid #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 18px;
+    font-weight: bold;
+    color: white;
+}
+
+.ball.goal { background: #00ff00; color: #000; } /* Green for Goal */
+.ball.miss { background: #ff0000; color: #fff; } /* Red for Miss */
 
         /* --- 2. Ticker Section --- */
         #master-footer {
@@ -151,7 +182,27 @@
         </div>
         <div id="penalty-box">TIME: <span id="timer-val">00:00</span></div>
     </div>
+<div id="penalty-shots-container">
+    <!-- Team A Shots -->
+    <div class="team-shots" id="shotsA">
+        <div class="ball" id="a1">1</div>
+        <div class="ball" id="a2">2</div>
+        <div class="ball" id="a3">3</div>
+        <div class="ball" id="a4">4</div>
+        <div class="ball" id="a5">5</div>
+    </div>
 
+    <div style="color: white; font-weight: 900;">PENALTY</div>
+
+    <!-- Team B Shots -->
+    <div class="team-shots" id="shotsB">
+        <div class="ball" id="b1">1</div>
+        <div class="ball" id="b2">2</div>
+        <div class="ball" id="b3">3</div>
+        <div class="ball" id="b4">4</div>
+        <div class="ball" id="b5">5</div>
+    </div>
+</div>
     <!-- Ticker Section -->
     <div id="master-footer">
         <div class="bar top-bg">
@@ -206,6 +257,33 @@
 
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
+    // Penalty Shots Logic
+for (let i = 1; i <= 5; i++) {
+    // Team A
+    let ballA = document.getElementById('a' + i);
+    let statusA = d['a' + i]; // Firebase ਵਿੱਚ ਡਾਟਾ a1, a2, a3 ਆਦਿ ਹੋਵੇਗਾ
+    if (statusA === "goal") {
+        ballA.className = "ball goal"; ballA.innerText = "●";
+    } else if (statusA === "miss") {
+        ballA.className = "ball miss"; ballA.innerText = "X";
+    } else {
+        ballA.className = "ball"; ballA.innerText = i;
+    }
+
+    // Team B
+    let ballB = document.getElementById('b' + i);
+    let statusB = d['b' + i];
+    if (statusB === "goal") {
+        ballB.className = "ball goal"; ballB.innerText = "●";
+    } else if (statusB === "miss") {
+        ballB.className = "ball miss"; ballB.innerText = "X";
+    } else {
+        ballB.className = "ball"; ballB.innerText = i;
+    }
+}
+
+// Penalty Box Visibility
+document.getElementById('penalty-shots-container').style.display = (d.showPenalty === true) ? 'flex' : 'none';
 
     // Ticker Data (Marquees and Watermark)
     db.ref("tickerData").on("value", (snap) => {
