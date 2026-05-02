@@ -20,7 +20,6 @@
         .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 9px; flex: 1; width: 100%; }
 
         .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
-        /* ਨਵੇਂ ਬਾਕਸ ਲਈ ਸਟਾਈਲ */
         .std-textarea { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; min-height: 45px; resize: none; overflow: hidden; }
         
         .label-text, .label-title { font-size: 10px; color: #8b949e; display: block; margin-top: 5px; text-align: left; text-transform: uppercase; font-weight: bold; }
@@ -28,11 +27,8 @@
         .content { padding: 15px; }
         .btn-update { background: #1a73e8; color: white; padding: 12px; border-radius: 6px; border:none; cursor:pointer; width:100%; font-weight:bold; margin-bottom: 10px;}
         .btn-ticker { background: #ff5722; color: white; margin-bottom: 15px; height: 50px; font-size: 16px; border-radius: 6px; border:none; width:100%; font-weight:bold; cursor:pointer; }
-        .btn-mode { background: #30363d; color: white; font-size: 12px; padding: 10px; border: none; border-radius: 4px; cursor: pointer; }
-        .btn-active { border: 2px solid #fff !important; background: #238636 !important; }
-
+        
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .grid-effects { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
         .flex-row { display: flex; gap: 5px; margin-top: 8px; }
         
         #penaltyControlSection { display: none; background: #1c2128; padding: 15px; border-top: 3px solid #f39c12; }
@@ -149,7 +145,10 @@
             <span class="label-title">Tournament & Prize</span>
             <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
             <input type="text" id="prizeList" class="std-input" placeholder="Prizes">
-            <input type="text" id="contactInfo" class="std-input" placeholder="Contact">
+            
+            <span class="label-title">Contact Information</span>
+            <input type="text" id="contactInfo" class="std-input" placeholder="Call Number">
+            <input type="text" id="whatsappNumber" class="std-input" placeholder="WhatsApp Number">
             
             <span class="label-title" style="color:#2ecc71;">Participting Teams</span>
             <textarea id="teamsList" class="std-textarea" placeholder="Enter Team names here..." oninput="autoExpand(this)"></textarea>
@@ -160,15 +159,9 @@
             <button class="btn-update" style="background: #238636;" onclick="confirmTickerAction('info')">Update All Ticker Info</button>
             
             <div class="label-title">Watermark</div>
-            <div style="display:flex; gap:5px; margin-bottom:10px;">
+            <div style="display:flex; gap:5px;">
                 <input type="text" id="wmText" class="std-input" placeholder="Brand Name" style="margin:0;">
                 <button class="btn-update" style="width:80px; margin:0;" onclick="confirmTickerAction('wm')">Set</button>
-            </div>
-            
-            <div class="grid-effects">
-                <button id="btn-scroll" class="btn-mode" onclick="confirmTickerAction('effect', 'scroll')">SCROLL</button>
-                <button id="btn-blink" class="btn-mode" onclick="confirmTickerAction('effect', 'blink')">BLINK</button>
-                <button id="btn-fullscreen" class="btn-mode" onclick="confirmTickerAction('effect', 'fullscreen')">F-SCREEN</button>
             </div>
         </div>
     </div>
@@ -190,23 +183,14 @@
     const tickerRef = firebase.database().ref("tickerData");
 
     let curA = 0, curB = 0, seconds = 0, timerInterval = null, sVis = true, pVis = false;
-    let yellowCounts = {};
     let tickerStatus = true;
-    let effectStates = { scroll: false, blink: false, fullscreen: false };
 
-    // ਬਾਕਸ ਨੂੰ ਆਟੋਮੈਟਿਕ ਵੱਡਾ ਕਰਨ ਲਈ ਫੰਕਸ਼ਨ
     function autoExpand(field) {
         field.style.height = 'inherit';
-        const computed = window.getComputedStyle(field);
-        const height = parseInt(computed.getPropertyValue('border-top-width'), 10)
-                     + parseInt(computed.getPropertyValue('padding-top'), 10)
-                     + field.scrollHeight
-                     + parseInt(computed.getPropertyValue('padding-bottom'), 10)
-                     + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
-
-        field.style.height = height + 'px';
+        field.style.height = field.scrollHeight + 'px';
     }
 
+    // ਟਾਈਮਰ ਨੂੰ ਬਿਨਾਂ ਰੀਸੈੱਟ ਕੀਤੇ ਡੇਟਾ ਅਪਡੇਟ ਕਰਨਾ
     function updateMatchDB() {
         matchRef.update({
             nameA: document.getElementById('nameA').value,
@@ -217,8 +201,8 @@
             penaltyB: document.getElementById('pB').value,
             matchRound: document.getElementById('matchRound').value,
             round: document.getElementById('roundInp').value,
-            duration: document.getElementById('matchDuration').value,
-            matchTime: document.getElementById('timerShow').innerText
+            duration: document.getElementById('matchDuration').value
+            // ਮੈਚ ਟਾਈਮ ਇੱਥੇ ਅਪਡੇਟ ਨਹੀਂ ਕੀਤਾ ਜਾਵੇਗਾ ਤਾਂ ਜੋ ਰੀਸੈੱਟ ਨਾ ਹੋਵੇ
         });
     }
 
@@ -227,38 +211,50 @@
         matchRef.update({ [team]: Math.max(0, current + val) });
     }
 
+    // ਕਾਰਡ ਸਿਸਟਮ - ਡਿਟੇਲ ਸੇਵ ਕਰਨ ਲਈ
     function handleCard(team, type) {
         let pDetail = document.getElementById('player' + team).value;
         if(!pDetail) { alert("Enter Player No!"); return; }
-        let key = team + "_" + pDetail;
-        let eventMsg = "";
-        if(type === 'Yellow') {
-            yellowCounts[key] = (yellowCounts[key] || 0) + 1;
-            eventMsg = (yellowCounts[key] >= 2 ? "RED (2nd Yellow): " : "Yellow Card: ") + pDetail;
-        } else {
-            eventMsg = "Red Card: " + pDetail;
-        }
+        
+        let eventMsg = type + " Card: Player " + pDetail;
         matchRef.child('lastEvent').set(eventMsg);
+        
+        // ਪਲੇਅਰ ਲਿਸਟ ਵਿੱਚ ਕਾਰਡ ਜੋੜਨਾ
+        let currentCards = document.getElementById('teamsList').value;
+        document.getElementById('teamsList').value = currentCards + "\n" + team + " - " + eventMsg;
+        autoExpand(document.getElementById('teamsList'));
     }
 
     function startTimer() {
         if (timerInterval) return;
         timerInterval = setInterval(() => {
             seconds++;
-            let m = Math.floor(seconds / 60), s = seconds % 60;
-            let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
-            document.getElementById('timerShow').innerText = timeStr;
-            matchRef.child('matchTime').set(timeStr);
+            updateTimerDisplay();
         }, 1000);
     }
-    function pauseTimer() { clearInterval(timerInterval); timerInterval = null; updateMatchDB(); }
-    function resetTimer() { seconds = 0; document.getElementById('timerShow').innerText = "00:00"; matchRef.child('matchTime').set("00:00"); }
-    function setHalf(val) { document.getElementById('roundInp').value = val; updateMatchDB(); }
-    
+
+    function updateTimerDisplay() {
+        let m = Math.floor(seconds / 60), s = seconds % 60;
+        let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+        document.getElementById('timerShow').innerText = timeStr;
+        matchRef.child('matchTime').set(timeStr);
+    }
+
+    function pauseTimer() { 
+        clearInterval(timerInterval); 
+        timerInterval = null; 
+    }
+
+    function resetTimer() { 
+        pauseTimer();
+        seconds = 0; 
+        document.getElementById('timerShow').innerText = "00:00"; 
+        matchRef.child('matchTime').set("00:00"); 
+    }
+
+    // ਪੈਨਲਟੀ ਲਿਮਟ ਹਟਾ ਦਿੱਤੀ ਗਈ ਹੈ
     function addPenalty(id, icon) {
         let inp = document.getElementById(id);
-        let count = (inp.value.match(/✅|❌/g) || []).length;
-        if(count >= 5) { alert("Max 5 Penalties!"); return; }
         inp.value = inp.value + icon;
         updateMatchDB();
     }
@@ -270,33 +266,41 @@
     
     function fullReset() {
         if(confirm("Reset Everything?")) {
-            yellowCounts = {}; seconds = 0; pauseTimer();
-            matchRef.update({ scoreA: 0, scoreB: 0, penaltyA: "", penaltyB: "", matchTime: "00:00", penaltyVisible: false, lastEvent: "" });
+            seconds = 0; pauseTimer();
+            matchRef.update({ 
+                scoreA: 0, scoreB: 0, 
+                penaltyA: "", penaltyB: "", 
+                matchTime: "00:00", 
+                penaltyVisible: false, 
+                lastEvent: "" 
+            });
         }
     }
 
-    function confirmTickerAction(type, subType = null) {
+    // ਬਾਕੀ ਫੰਕਸ਼ਨ ਪਹਿਲਾਂ ਵਾਂਗ ਰਹਿਣਗੇ...
+    function confirmTickerAction(type) {
         if (confirm("ਕੀ ਤੁਸੀਂ ਅਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
             if (type === 'info') {
                 tickerRef.update({ 
                     tournamentName: tourName.value, 
                     prizes: prizeList.value, 
                     contact: contactInfo.value,
+                    whatsapp: whatsappNumber.value,
                     nextProgram: nextProg.value,
                     participatingTeams: document.getElementById('teamsList').value
                 });
             }
             else if (type === 'wm') tickerRef.update({ watermarkText: wmText.value });
             else if (type === 'vis') { tickerStatus = !tickerStatus; tickerRef.child('tickerVis').set(tickerStatus); }
-            else if (type === 'effect') { effectStates[subType] = !effectStates[subType]; tickerRef.child('effects').child(subType).set(effectStates[subType]); }
         }
     }
 
-    // Sync Data
+    // Firebase Listener
     matchRef.on("value", (snap) => {
         const data = snap.val() || {};
         curA = data.scoreA || 0; curB = data.scoreB || 0;
         sVis = !!data.scoreVisible; pVis = !!data.penaltyVisible;
+        
         document.getElementById('dispA').innerText = curA;
         document.getElementById('dispB').innerText = curB;
         document.getElementById('nameA').value = data.nameA || "";
@@ -308,7 +312,14 @@
         document.getElementById('matchRound').value = data.matchRound || "";
         document.getElementById('roundInp').value = data.round || "";
         document.getElementById('matchDuration').value = data.duration || "";
-        if(!timerInterval) document.getElementById('timerShow').innerText = data.matchTime || "00:00";
+        
+        // ਟਾਈਮਰ ਨੂੰ ਸਿਰਫ ਤਾਂ ਹੀ ਅਪਡੇਟ ਕਰੋ ਜੇ ਇਹ ਚੱਲ ਨਹੀਂ ਰਿਹਾ
+        if(!timerInterval) {
+            document.getElementById('timerShow').innerText = data.matchTime || "00:00";
+            let parts = (data.matchTime || "00:00").split(":");
+            seconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        }
+        
         document.getElementById('boxA').style.borderTopColor = data.colorA;
         document.getElementById('boxB').style.borderTopColor = data.colorB;
         document.getElementById('visBtn').innerText = sVis ? "HIDE" : "SHOW";
@@ -322,21 +333,15 @@
         tourName.value = data.tournamentName || "";
         prizeList.value = data.prizes || "";
         contactInfo.value = data.contact || "";
+        whatsappNumber.value = data.whatsapp || "";
         wmText.value = data.watermarkText || "";
         nextProg.value = data.nextProgram || "";
-        
         const teamsInput = document.getElementById('teamsList');
         teamsInput.value = data.participatingTeams || "";
-        autoExpand(teamsInput); // ਡਾਟਾ ਆਉਣ ਤੇ ਬਾਕਸ ਸਾਈਜ਼ ਸੈੱਟ ਕਰੋ
-
+        autoExpand(teamsInput);
         tickerStatus = !!data.tickerVis;
         tickerToggleBtn.style.background = tickerStatus ? "#238636" : "#da3633";
         tickerToggleBtn.innerText = tickerStatus ? "Ticker: SHOWING" : "Ticker: HIDDEN";
-        const effects = data.effects || {};
-        ['scroll', 'blink', 'fullscreen'].forEach(e => {
-            effectStates[e] = !!effects[e];
-            document.getElementById('btn-' + e).className = effectStates[e] ? 'btn-mode btn-active' : 'btn-mode';
-        });
     });
 </script>
 </body>
