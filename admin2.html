@@ -26,31 +26,35 @@
 
 <div id="main-content" style="width: 100%; max-width: 500px;">
 
-    <!-- 1. PENALTY BOX -->
-    <div class="card">
-        <div class="header" style="background:#f39c12; color:black;"><i class="fas fa-volleyball-ball"></i> Penalty Shootout</div>
-        <div class="content-panel" style="padding:10px;">
-            <div class="grid-2">
-                <div class="team-box">
-                    <span class="label-text">Team A Shoot</span>
-                    <div class="grid-2">
-                        <button class="card-btn" style="background:#238636;" onclick="addShoot('A', 'G')">Goal</button>
-                        <button class="card-btn" style="background:#da3633;" onclick="addShoot('A', 'M')">Miss</button>
-                    </div>
-                    <div class="penalty-log" id="logA">---</div>
-                </div>
-                <div class="team-box">
-                    <span class="label-text">Team B Shoot</span>
-                    <div class="grid-2">
-                        <button class="card-btn" style="background:#238636;" onclick="addShoot('B', 'G')">Goal</button>
-                        <button class="card-btn" style="background:#da3633;" onclick="addShoot('B', 'M')">Miss</button>
-                    </div>
-                    <div class="penalty-log" id="logB">---</div>
-                </div>
-            </div>
-            <button class="card-btn" style="background:#333; margin-top:10px;" onclick="resetPenaltyOnly()">Clear Penalty Log</button>
-        </div>
+   <!-- 1. PENALTY (PLANTI) BOX -->
+<div class="card">
+    <div class="collapsible-header" onclick="toggleBox('penaltyBox')">
+        <span><i class="fas fa-volleyball-ball"></i> PENALTY (PLANTI) SHOOTOUT</span>
+        <i class="fas fa-plus" id="penaltyIcon"></i>
     </div>
+    <!-- display:none ਨਾਲ ਇਹ ਪਹਿਲਾਂ ਬੰਦ ਰਹੇਗਾ -->
+    <div id="penaltyBox" class="content-panel" style="display: none;">
+        <div class="grid-2">
+            <div class="team-box">
+                <span class="label-text">Team A Shoot</span>
+                <div class="grid-2">
+                    <button class="card-btn" style="background:#238636;" onclick="addShoot('A', 'G')">Goal</button>
+                    <button class="card-btn" style="background:#da3633;" onclick="addShoot('A', 'M')">Miss</button>
+                </div>
+                <div class="penalty-log" id="logA">---</div>
+            </div>
+            <div class="team-box">
+                <span class="label-text">Team B Shoot</span>
+                <div class="grid-2">
+                    <button class="card-btn" style="background:#238636;" onclick="addShoot('B', 'G')">Goal</button>
+                    <button class="card-btn" style="background:#da3633;" onclick="addShoot('B', 'M')">Miss</button>
+                </div>
+                <div class="penalty-log" id="logB">---</div>
+            </div>
+        </div>
+        <button class="card-btn" style="background:#333; margin-top:10px;" onclick="resetPenaltyOnly()">Clear Penalty Log</button>
+    </div>
+</div>
 
     <!-- 2. SCOREBOARD -->
     <div class="card">
@@ -154,11 +158,25 @@
         });
     }
 
+    // ਪਲੰਟੀ ਐਡ ਕਰਨ ਵਾਲਾ ਫੰਕਸ਼ਨ - ਬਿਨਾਂ ਕਿਸੇ ਲਿਮਿਟ ਦੇ
     function addShoot(team, res) {
         matchRef.child('p' + team).once('value', snap => {
             let current = snap.val() || "";
-            if(current.length < 5) matchRef.update({ ['p' + team]: current + res });
+            // ਹੁਣ ਇੱਥੇ ਕੋਈ ਲਿਮਿਟ ਨਹੀਂ ਹੈ, ਜਿੰਨੇ ਮਰਜ਼ੀ ਐਡ ਕਰੋ
+            matchRef.update({ ['p' + team]: current + res });
         });
+    }
+    // ਬਾਕਸ ਨੂੰ ਖੋਲ੍ਹਣ ਅਤੇ ਬੰਦ ਕਰਨ ਲਈ ਫੰਕਸ਼ਨ
+    function toggleBox(id) {
+        let panel = document.getElementById(id);
+        let icon = document.getElementById(id.replace('Box', 'Icon'));
+        if (panel.style.display === "block") {
+            panel.style.display = "none";
+            icon.className = "fas fa-plus";
+        } else {
+            panel.style.display = "block";
+            icon.className = "fas fa-minus";
+        }
     }
 
     function resetPenaltyOnly() {
