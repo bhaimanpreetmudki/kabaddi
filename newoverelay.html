@@ -2,23 +2,21 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV Style - Full Overlay</title>
+    <title>Sukhdeep TV - Professional Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --arrow-width: 20px;
-            --arrow-height: 50px;
-            --label-padding: 25px;
             --main-red: #cc0000;
             --pure-white: #ffffff;
             --pure-black: #000000;
+            --ticker-height: 50px;
         }
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- 1. Scoreboard Wrapper --- */
+        /* --- 1. Scoreboard (Top Layer) --- */
         #scoreboard-wrapper {
             position: absolute;
             top: 25px;
@@ -26,6 +24,7 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
+            z-index: 500; /* Scoreboard level */
         }
 
         #scoreboard-container {
@@ -33,188 +32,102 @@
             border: 3px solid var(--pure-white);
             border-radius: 6px;
             overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
             background: var(--pure-black);
         }
 
         .score-unit { display: flex; height: 60px; align-items: center; }
         .team-display { width: 250px; padding: 0 20px; font-size: 26px; font-weight: 900; text-transform: uppercase; }
         .score-box { width: 80px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; }
-
         .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
         .side-b { background: var(--pure-white); color: var(--main-red); }
 
-        /* Round & Half Details */
-        #match-details {
-            display: flex;
-            justify-content: space-between;
-            padding: 0 5px;
-            color: var(--pure-white);
-            font-size: 18px;
-            font-weight: 700;
-            text-shadow: 2px 2px 4px #000;
-            text-transform: uppercase;
+        /* --- 2. Goal Animation (Middle Layer) --- */
+        #goal-overlay {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            display: none; justify-content: center; align-items: center;
+            z-index: 400; /* Ticker ਤੋਂ ਨੀਚੇ ਰਹੇਗਾ */
+            background: rgba(0, 0, 0, 0.2);
+            pointer-events: none;
+        }
+        .goal-text { 
+            font-size: 150px; color: white; font-weight: 900; 
+            text-shadow: 0 0 20px var(--main-red);
+            animation: bounceIn 0.6s infinite alternate; 
         }
 
-        /* Penalty/Time Box */
-        #penalty-box {
-            background: rgba(0, 0, 0, 0.8);
-            color: yellow;
-            border: 2px solid yellow;
-            padding: 5px 15px;
-            border-radius: 4px;
-            font-size: 20px;
-            font-weight: 900;
-            display: none;
-            align-self: flex-start;
-            margin-top: 5px;
-        }
-
-        /* --- 2. Ticker Section --- */
+        /* --- 3. Ticker (Top Most Layer) --- */
         #master-footer {
             position: absolute;
             bottom: 10px; left: 0; right: 0;
             display: flex; flex-direction: column; gap: 4px;
             padding: 0 10px;
+            z-index: 999; /* ਸਭ ਤੋਂ ਉੱਪਰ ਰਹੇਗਾ ਤਾਂ ਜੋ ਐਨੀਮੇਸ਼ਨ ਪਿੱਛੇ ਚੱਲੇ */
         }
 
         .bar { 
-            display: flex; height: var(--arrow-height); width: 100%; 
+            display: flex; height: var(--ticker-height); width: 100%; 
             overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px;
         }
-
         .top-bg { background: var(--pure-white); }
         .bottom-bg { background: var(--main-red); }
-
-        .box-left, .box-right { width: 50%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
-
-        .hint-label {
-            height: 100%; display: flex; align-items: center; justify-content: center;
-            padding: 0 var(--label-padding); font-weight: 900; font-size: 20px;
-            text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100;
-        }
-
-        .hint-label::after {
-            content: ""; position: absolute; right: calc(var(--arrow-width) * -1);
-            top: 0; border-top: 25px solid transparent; border-bottom: 25px solid transparent;
-        }
-
-        .hint-red { background: var(--main-red); color: var(--pure-white); }
-        .hint-red::after { border-left: var(--arrow-width) solid var(--main-red); }
-
-        .hint-white { background: var(--pure-white); color: var(--main-red); }
-        .hint-white::after { border-left: var(--arrow-width) solid var(--pure-white); }
-
-        marquee { width: 100%; font-size: 24px; font-weight: 900; text-transform: uppercase; padding-left: 130px; }
+        
+        marquee { width: 100%; font-size: 24px; font-weight: 900; text-transform: uppercase; line-height: 45px; }
         .txt-red { color: var(--main-red); }
         .txt-white { color: var(--pure-white); }
 
-        .clock-area {
-            position: absolute; right: 0; background: var(--pure-white); color: var(--main-red);
-            min-width: 140px; height: 100%; display: flex; align-items: center;
-            justify-content: center; font-size: 26px; font-weight: 900; z-index: 110;
-            border-left: 2px solid var(--main-red);
-        }
-
-        /* --- 3. Animations & Watermark --- */
-        #goal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            display: none; justify-content: center; align-items: center; z-index: 1000;
-            background: rgba(204, 0, 0, 0.4);
-        }
-        .goal-text { font-size: 150px; color: white; font-weight: 900; animation: bounceIn 0.8s infinite alternate; }
-        @keyframes bounceIn { from { transform: scale(1); } to { transform: scale(1.1); } }
-
-        #watermark { position: fixed; top: 20px; right: 20px; color: rgba(255,255,255,0.7); font-size: 24px; font-weight: 900; }
+        @keyframes bounceIn { from { transform: scale(1); } to { transform: scale(1.15); } }
     </style>
 </head>
 <body>
 
     <div id="goal-overlay"><div class="goal-text">GOAL !!!</div></div>
-    <div id="watermark">SUKHDEEP TV</div>
 
-    <!-- Scoreboard Wrapper -->
     <div id="scoreboard-wrapper">
         <div id="scoreboard-container">
             <div class="score-unit side-a">
                 <div class="score-box" id="scoreA">0</div>
-                <div class="team-display" id="nameA">TEAM A</div>
+                <div class="team-display" id="nameA">HOME</div>
             </div>
             <div class="score-unit side-b">
-                <div class="team-display" id="nameB" style="text-align: right; justify-content: flex-end;">TEAM B</div>
+                <div class="team-display" id="nameB" style="text-align: right;">AWAY</div>
                 <div class="score-box" id="scoreB">0</div>
             </div>
         </div>
-        <div id="match-details">
-            <span id="round-detail">ROUND: 1</span>
-            <span id="half-detail">FIRST HALF</span>
-        </div>
-        <div id="penalty-box">TIME: <span id="timer-val">00:00</span></div>
     </div>
 
-    <!-- Ticker Section -->
     <div id="master-footer">
         <div class="bar top-bg">
-            <div class="box-left">
-                <div class="hint-label hint-red">LIVE</div>
-                <marquee scrollamount="5" class="txt-red" id="tour-name">TOURNAMENT 2026</marquee>
-            </div>
-            <div class="box-right">
-                <div class="hint-label hint-red">TEAMS</div>
-                <marquee scrollamount="6" class="txt-red" id="scroll-top">UPCOMING MATCHES</marquee>
-            </div>
+            <marquee scrollamount="6" class="txt-red" id="scroll-top">WELCOME TO THE TOURNAMENT</marquee>
         </div>
-
         <div class="bar bottom-bg">
-            <div class="box-left">
-                <div class="hint-label hint-white">INFO</div>
-                <marquee scrollamount="4" class="txt-white" id="sub-info">LIVE COVERAGE</marquee>
-            </div>
-            <div class="box-right">
-                <div class="hint-label hint-white">PRIZES</div>
-                <marquee scrollamount="5" class="txt-white" style="width: calc(100% - 140px);" id="scroll-bot">UPDATING...</marquee>
-                <div class="clock-area" id="live-clock">00:00 AM</div>
-            </div>
+            <marquee scrollamount="5" class="txt-white" id="scroll-bot">LIVE FROM THE GROUND</marquee>
         </div>
     </div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
-    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
+    firebase.initializeApp(firebaseConfig);
     const db = firebase.database();
 
     let lastA = 0, lastB = 0;
 
-    // Match Data (Scoreboard, Timer, Rounds)
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
-        
         if (d.scoreA > lastA || d.scoreB > lastB) { triggerGoal(); }
         lastA = d.scoreA || 0; lastB = d.scoreB || 0;
 
-        document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
-        document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
+        document.getElementById('nameA').innerText = (d.nameA || "HOME").toUpperCase();
+        document.getElementById('nameB').innerText = (d.nameB || "AWAY").toUpperCase();
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
-        document.getElementById('round-detail').innerText = "ROUND: " + (d.roundNum || "1");
-        document.getElementById('half-detail').innerText = (d.halfName || "FIRST HALF").toUpperCase();
-
-        if (d.timerActive) {
-            document.getElementById('penalty-box').style.display = 'block';
-            document.getElementById('timer-val').innerText = d.matchTimer || "00:00";
-        } else { document.getElementById('penalty-box').style.display = 'none'; }
-
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    // Ticker Data (Marquees and Watermark)
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
-        document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
-        document.getElementById('sub-info').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
-        document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
-        document.getElementById('watermark').innerText = (d.watermarkText || "SUKHDEEP TV").toUpperCase();
+        document.getElementById('scroll-top').innerText = (d.tournamentName + " | " + d.participatingTeams).toUpperCase();
+        document.getElementById('scroll-bot').innerText = (d.nextProgram + " | " + d.prizes).toUpperCase();
         document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 
@@ -223,13 +136,6 @@
         overlay.style.display = 'flex';
         setTimeout(() => { overlay.style.display = 'none'; }, 3000);
     }
-
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
 </script>
 </body>
 </html>
