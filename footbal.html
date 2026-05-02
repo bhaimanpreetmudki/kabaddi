@@ -204,9 +204,18 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
+    // --- ID ਫੜਨ ਵਾਲਾ ਨਵਾਂ ਹਿੱਸਾ ---
+    const urlParams = new URLSearchParams(window.location.search);
+    const clientID = urlParams.get('id');
+
+    if (!clientID) {
+        console.error("No Client ID found in URL!");
+    }
+
     let lastA = 0, lastB = 0;
 
-    db.ref("matchData").on("value", (snap) => {
+    // ਹੁਣ db.ref ਵਿੱਚ clientID ਦੀ ਵਰਤੋਂ ਕੀਤੀ ਗਈ ਹੈ
+    db.ref("users/" + clientID + "/matchData").on("value", (snap) => {
         const d = snap.val() || {};
         if (d.scoreA > lastA || d.scoreB > lastB) { triggerGoal(); }
         lastA = d.scoreA || 0; lastB = d.scoreB || 0;
@@ -253,7 +262,8 @@
         else { ball.className = "ball"; ball.innerText = index; }
     }
 
-    db.ref("tickerData").on("value", (snap) => {
+    // ਟਿੱਕਰ ਲਈ ਵੀ ਸਪੈਸ਼ਲ ਪਾਥ (Path)
+    db.ref("users/" + clientID + "/tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
         document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
@@ -264,7 +274,7 @@
         document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 
-    // Contact Flasher logic same as before
+    // ਬਾਕੀ ਫੰਕਸ਼ਨ ਸੇਮ ਰਹਿਣਗੇ
     let isW = false;
     setInterval(() => {
         const icon = document.getElementById('fl-icon');
@@ -275,6 +285,7 @@
 
     function moveWatermark() {
         const wm = document.getElementById('watermark');
+        if(!wm) return;
         const maxX = window.innerWidth - wm.offsetWidth - 50;
         const maxY = window.innerHeight - 150; 
         const randomX = Math.floor(Math.random() * maxX);
@@ -285,13 +296,16 @@
 
     function triggerGoal() {
         const overlay = document.getElementById('goal-overlay');
+        if(!overlay) return;
         overlay.style.display = 'flex';
         setTimeout(() => { overlay.style.display = 'none'; }, 3000);
     }
 
     function updateClock() {
+        const clockEl = document.getElementById('live-clock');
+        if(!clockEl) return;
         const now = new Date();
-        document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        clockEl.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     }
     setInterval(updateClock, 1000);
     updateClock();
