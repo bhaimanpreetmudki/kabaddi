@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manpreet Admin - Penalty Layout</title>
+    <title>Manpreet Admin - All Functions</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -19,46 +19,36 @@
         .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .penalty-log { font-size: 18px; letter-spacing: 2px; color: #f1c40f; margin-top: 8px; min-height: 25px; background: #0d1117; border-radius: 4px; padding: 5px; text-align: center; }
-        
-        .collapsible-header { background: #f39c12; color: black; cursor: pointer; display: flex; justify-content: space-between; padding: 10px; font-size: 12px; font-weight: bold; }
-        .content-panel { display: block; padding: 10px; background: #0d1117; }
         .label-text { font-size: 11px; color: #8b949e; margin-bottom: 4px; display: block; text-transform: uppercase; }
-        .btn-goal { background: #238636; }
-        .btn-miss { background: #da3633; }
     </style>
 </head>
 <body>
 
 <div id="main-content" style="width: 100%; max-width: 500px;">
 
-    <!-- 1. PENALTY (PLANTI) BOX (GOAL/MISS) -->
+    <!-- 1. PENALTY BOX -->
     <div class="card">
-        <div class="collapsible-header">
-            <span><i class="fas fa-volleyball-ball"></i> PENALTY (PLANTI) SHOOTOUT</span>
-            <i class="fas fa-minus"></i>
-        </div>
-        <div id="penaltyBox" class="content-panel">
+        <div class="header" style="background:#f39c12; color:black;"><i class="fas fa-volleyball-ball"></i> Penalty Shootout</div>
+        <div class="content-panel" style="padding:10px;">
             <div class="grid-2">
                 <div class="team-box">
                     <span class="label-text">Team A Shoot</span>
                     <div class="grid-2">
-                        <button class="card-btn btn-goal" onclick="addShoot('A', 'G')">Goal</button>
-                        <button class="card-btn btn-miss" onclick="addShoot('A', 'M')">Miss</button>
+                        <button class="card-btn" style="background:#238636;" onclick="addShoot('A', 'G')">Goal</button>
+                        <button class="card-btn" style="background:#da3633;" onclick="addShoot('A', 'M')">Miss</button>
                     </div>
                     <div class="penalty-log" id="logA">---</div>
                 </div>
                 <div class="team-box">
                     <span class="label-text">Team B Shoot</span>
                     <div class="grid-2">
-                        <button class="card-btn btn-goal" onclick="addShoot('B', 'G')">Goal</button>
-                        <button class="card-btn btn-miss" onclick="addShoot('B', 'M')">Miss</button>
+                        <button class="card-btn" style="background:#238636;" onclick="addShoot('B', 'G')">Goal</button>
+                        <button class="card-btn" style="background:#da3633;" onclick="addShoot('B', 'M')">Miss</button>
                     </div>
                     <div class="penalty-log" id="logB">---</div>
                 </div>
             </div>
-            <div style="text-align: center; margin-top: 10px;">
-                <button class="card-btn" style="background:#333; width: auto; padding: 8px 20px;" onclick="resetPenaltyOnly()">Clear Penalty Log</button>
-            </div>
+            <button class="card-btn" style="background:#333; margin-top:10px;" onclick="resetPenaltyOnly()">Clear Penalty Log</button>
         </div>
     </div>
 
@@ -89,8 +79,7 @@
         </div>
     </div>
 
-    <!-- ਬਾਕੀ ਸੈਕਸ਼ਨ (Timer, Ticker ਆਦਿ) ਪਹਿਲਾਂ ਵਾਂਗ ਹੀ ਰਹਿਣਗੇ... -->
-    <!-- (ਸਪੇਸ ਬਚਾਉਣ ਲਈ ਥੋੜਾ ਛੋਟਾ ਕੀਤਾ ਗਿਆ ਹੈ) -->
+    <!-- 3. TIMER -->
     <div class="card">
         <div class="header">Persistent Timer</div>
         <div style="padding:15px; text-align:center; background:#0d1117;">
@@ -98,6 +87,42 @@
             <div class="grid-2">
                 <button id="timerBtn" class="card-btn" style="background:#238636; height:45px;" onclick="handleTimerClick()">START</button>
                 <button class="card-btn" style="background:#333; height:45px;" onclick="resetTimer()">RESET TIME</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. TOURNAMENT NAME -->
+    <div class="card">
+        <div class="header">Tournament Name</div>
+        <div style="padding:10px;">
+            <input type="text" id="tourNameInput" class="std-input" style="margin-bottom:0;" placeholder="e.g. Kabaddi Cup 2026" oninput="updateTickerInfo()">
+        </div>
+    </div>
+
+    <!-- 5. PRIZE DETAILS -->
+    <div class="card">
+        <div class="header">Prize Details</div>
+        <div style="padding:10px;">
+            <textarea id="prizeInput" class="std-input" style="height:50px; resize:none; margin-bottom:0;" placeholder="1st Prize: 51,000 | 2nd Prize: 31,000" oninput="updateTickerInfo()"></textarea>
+        </div>
+    </div>
+
+    <!-- 6. TEAM MATCH LIST -->
+    <div class="card">
+        <div class="header">Team Match List</div>
+        <div style="padding:10px;">
+            <textarea id="matchListInput" class="std-input" style="height:60px; resize:none; margin-bottom:0;" placeholder="Match List Details" oninput="updateTickerInfo()"></textarea>
+        </div>
+    </div>
+
+    <!-- 7. CHANNEL & CONTACT -->
+    <div class="card">
+        <div class="header">Channel & Contact</div>
+        <div style="padding:10px;">
+            <input type="text" id="watermarkText" class="std-input" placeholder="Watermark (Channel Name)" oninput="updateTickerInfo()">
+            <div class="grid-2">
+                <input type="text" id="callNum" class="std-input" placeholder="Call No." oninput="updateTickerInfo()">
+                <input type="text" id="whatsappNum" class="std-input" placeholder="WhatsApp" oninput="updateTickerInfo()">
             </div>
         </div>
     </div>
@@ -112,8 +137,22 @@
     const urlParams = new URLSearchParams(window.location.search);
     const clientID = urlParams.get('id') || "default_user";
     const matchRef = db.ref("users/" + clientID + "/matchData");
+    const tickerRef = db.ref("users/" + clientID + "/tickerData");
 
     let isRunning = false, startTime = 0, elapsedTime = 0, sVis = true;
+
+    function updateMatchDB() {
+        matchRef.update({
+            nameA: document.getElementById('nameA').value,
+            nameB: document.getElementById('nameB').value
+        });
+    }
+
+    function changeScore(team, val) {
+        matchRef.child(team).once('value', snap => {
+            matchRef.update({ [team]: Math.max(0, (snap.val() || 0) + val) });
+        });
+    }
 
     function addShoot(team, res) {
         matchRef.child('p' + team).once('value', snap => {
@@ -123,20 +162,24 @@
     }
 
     function resetPenaltyOnly() {
-        if(confirm("Clear Penalty Shootout?")) matchRef.update({ pA: "", pB: "" });
-    }
-
-    // ਬਾਕੀ ਫੰਕਸ਼ਨ ਪਹਿਲਾਂ ਵਾਲੇ ਹੀ ਕੰਮ ਕਰਨਗੇ...
-    function changeScore(team, val) {
-        matchRef.child(team).once('value', snap => {
-            matchRef.update({ [team]: Math.max(0, (snap.val() || 0) + val) });
-        });
+        if(confirm("Clear Penalty Log?")) matchRef.update({ pA: "", pB: "" });
     }
 
     function handleTimerClick() {
         const now = Date.now();
         if (!isRunning) matchRef.update({ timerRunning: true, startTime: now - elapsedTime });
         else matchRef.update({ timerRunning: false, elapsedTime: Date.now() - startTime });
+    }
+
+    function updateTickerInfo() {
+        tickerRef.update({
+            tournamentName: document.getElementById('tourNameInput').value,
+            prizeInfo: document.getElementById('prizeInput').value,
+            matchList: document.getElementById('matchListInput').value,
+            watermark: document.getElementById('watermarkText').value,
+            callNumber: document.getElementById('callNum').value,
+            whatsappNumber: document.getElementById('whatsappNum').value
+        });
     }
 
     function toggleVis() { matchRef.child('scoreVisible').set(!sVis); }
@@ -147,8 +190,9 @@
         const data = snap.val() || {};
         document.getElementById('dispA').innerText = data.scoreA || 0;
         document.getElementById('dispB').innerText = data.scoreB || 0;
+        document.getElementById('nameA').value = data.nameA || "";
+        document.getElementById('nameB').value = data.nameB || "";
         
-        // Penalty Icons Rendering
         const renderP = (s) => !s ? "---" : s.split("").map(x => x === 'G' ? '✅' : '❌').join(" ");
         document.getElementById('logA').innerHTML = renderP(data.pA);
         document.getElementById('logB').innerHTML = renderP(data.pB);
@@ -159,6 +203,16 @@
         sVis = !!data.scoreVisible;
         document.getElementById('visBtn').innerText = sVis ? "HIDE" : "SHOW";
         document.getElementById('visBtn').style.background = sVis ? "#da3633" : "#238636";
+    });
+
+    tickerRef.on("value", snap => {
+        const d = snap.val() || {};
+        document.getElementById('tourNameInput').value = d.tournamentName || "";
+        document.getElementById('prizeInput').value = d.prizeInfo || "";
+        document.getElementById('matchListInput').value = d.matchList || "";
+        document.getElementById('watermarkText').value = d.watermark || "";
+        document.getElementById('callNum').value = d.callNumber || "";
+        document.getElementById('whatsappNum').value = d.whatsappNumber || "";
     });
 
     setInterval(() => {
