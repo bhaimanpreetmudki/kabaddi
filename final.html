@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Final Fixed Overlay</title>
+    <title>Sukhdeep TV - Final Master Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -20,16 +20,45 @@
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- Scoreboard --- */
+        /* --- 1. Scoreboard Wrapper --- */
         #scoreboard-wrapper { position: absolute; top: 25px; left: 20px; display: flex; flex-direction: column; gap: 2px; z-index: 100; }
         #scoreboard-main-row { display: flex; align-items: flex-start; }
-        #scoreboard-container { display: flex; width: var(--container-width); border: 3px solid var(--pure-white); border-radius: 6px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.6); background: var(--pure-black); }
+        
+        #scoreboard-container { 
+            display: flex; 
+            width: var(--container-width); 
+            border: 3px solid var(--pure-white); 
+            border-radius: 6px; 
+            overflow: hidden; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6); 
+            background: var(--pure-black); 
+        }
+
         .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
+
         .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; }
-        .team-display { flex-grow: 1; padding: 0 15px; font-size: 36px; font-weight: 900; text-transform: uppercase; overflow: hidden; white-space: nowrap; }
+        .team-display { 
+            flex-grow: 1; 
+            padding: 0 15px; 
+            font-size: 36px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            overflow: hidden;
+            white-space: nowrap;
+        }
         .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; }
         
-        .card-indicator { width: 15px; height: 22px; border-radius: 2px; display: none; position: absolute; bottom: 5px; border: 1px solid rgba(0,0,0,0.3); }
+        /* --- Card Styles --- */
+        .card-indicator {
+            width: 15px;
+            height: 22px;
+            border-radius: 2px;
+            display: none;
+            position: absolute;
+            bottom: 5px;
+            border: 1px solid rgba(0,0,0,0.3);
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
         #cardA { right: 10px; }
         #cardB { left: 10px; }
         .yellow-card { background: #ffd700; display: block; }
@@ -38,43 +67,95 @@
         .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
         .side-b { background: var(--pure-white); color: var(--main-red); }
 
-        #match-timer-box { background: var(--main-red); color: white; height: 60px; display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; }
+        #match-timer-box { background: var(--main-red); color: white; height: 60px; display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; box-shadow: 5px 5px 15px rgba(0,0,0,0.4); }
 
         #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 26px; font-weight: 700; text-shadow: 2px 2px 4px #000; text-transform: uppercase; width: var(--container-width); }
 
-        /* --- Penalty --- */
-        #penalty-shots-container { display: none; justify-content: space-between; align-items: center; background: var(--main-red); padding: 10px; border: 3px solid white; border-radius: 8px; margin-top: 5px; width: var(--container-width); box-shadow: 0 4px 10px rgba(0,0,0,0.5); color: white; }
+        /* --- Penalty System --- */
+        #penalty-shots-container { 
+            display: none; 
+            justify-content: space-between; 
+            align-items: center; 
+            background: var(--main-red); 
+            padding: 10px; 
+            border: 3px solid white; 
+            border-radius: 8px; 
+            margin-top: 5px; 
+            width: var(--container-width); 
+            box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+            color: white; 
+        }
+
         .team-shots { display: flex; gap: 3px; }
-        .ball { width: 25px; height: 25px; border-radius: 50%; background: #fff; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #000; }
-        .ball.goal { background: #00ff00; color: #000; border-color: #fff; }
+
+        .ball { 
+            width: 25px; 
+            height: 25px; 
+            border-radius: 50%; 
+            background: #fff; 
+            border: 2px solid #000; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 18px; 
+            font-weight: bold; 
+            color: #000; 
+        }
+
+        .ball.goal { background: #00ff00; color: #000; border-color: #fff; } 
         .ball.miss { background: #000000; color: #fff; border-color: #fff; }
 
-        /* --- Overlays --- */
-        #goal-overlay, #card-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 100vh; display: none; justify-content: center; align-items: center; z-index: 5000; pointer-events: none; }
-        .flash-text { font-size: 120px; color: #fff; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 30px rgba(0,0,0,0.8); animation: flashAnim 0.5s infinite alternate; }
-        @keyframes flashAnim { from { transform: scale(0.9); } to { transform: scale(1.1); } }
-        .yellow-text { color: #ffd700; text-shadow: 0 0 30px #ffd700; }
-        .red-text { color: #ff0000; text-shadow: 0 0 30px #ff0000; }
-
-        #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000; text-transform: uppercase; }
+        /* Contact Flasher */
+        #contact-flasher { position: absolute; bottom: 120px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 6px 15px; border-radius: 5px; border-left: 4px solid var(--main-red); font-size: 36px; font-weight: 900; display: flex; align-items: center; gap: 10px; z-index: 1001; }
 
         /* --- Ticker --- */
         #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999; }
         .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
         .top-bg { background: var(--pure-white); }
         .bottom-bg { background: var(--main-red); }
+        .box-left, .box-right { width: 50%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
+        .hint-label { height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 var(--label-padding); font-weight: 900; font-size: 36px; text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100; }
+        .hint-label::after { content: ""; position: absolute; right: calc(var(--arrow-width) * -1); top: 0; border-top: 25px solid transparent; border-bottom: 25px solid transparent; }
+        .hint-red { background: var(--main-red); color: var(--pure-white); }
+        .hint-red::after { border-left: var(--arrow-width) solid var(--main-red); }
+        .hint-white { background: var(--pure-white); color: var(--main-red); }
+        .hint-white::after { border-left: var(--arrow-width) solid var(--pure-white); }
         marquee { width: 100%; font-size: 36px; font-weight: 900; text-transform: uppercase; padding-left: 130px; }
         .txt-red { color: var(--main-red); }
         .txt-white { color: var(--pure-white); }
         .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
+
+        #watermark { 
+            position: fixed; 
+            color: #FFFFFF !important; 
+            font-size: 35px; 
+            font-weight: 900; 
+            z-index: 9999; 
+            opacity: 1 !important; 
+            text-shadow: 2px 2px 0px #000000, 3px 3px 5px rgba(0,0,0,0.8); 
+            transition: all 1.2s ease-in-out; 
+            pointer-events: none; 
+            text-transform: uppercase;
+        }
+
+        #goal-overlay, #card-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 80vh; display: none; justify-content: center; align-items: center; z-index: 500; pointer-events: none; }
+        .goal-text { font-size: 150px; color: #fff; font-weight: 900; text-shadow: 0 0 20px #ff0000; animation: ghaintGoal 0.5s ease-in-out infinite alternate; text-transform: uppercase; }
+        @keyframes ghaintGoal { from { transform: scale(0.8); } to { transform: scale(1.1); } }
+        
+        .card-flash { font-size: 100px; font-weight: 900; text-transform: uppercase; text-shadow: 0 0 20px rgba(0,0,0,0.8); animation: ghaintGoal 0.5s ease-in-out infinite alternate; }
     </style>
 </head>
 <body>
 
-    <div id="goal-overlay"><div class="flash-text" style="color:white; text-shadow: 0 0 20px red;">GOAL !!!</div></div>
-    <div id="card-overlay"><div id="card-flash-text" class="flash-text">CARD</div></div>
-
+    <div id="goal-overlay"><div class="goal-text">GOAL !!!</div></div>
+    <div id="card-overlay"><div id="card-text" class="card-flash">CARD</div></div>
+    
     <div id="watermark">SUKHDEEP TV</div>
+
+    <div id="contact-flasher">
+        <i id="fl-icon" class="fas fa-phone-alt"></i>
+        <span id="fl-num">86996-40061</span>
+    </div>
 
     <div id="scoreboard-wrapper">
         <div id="scoreboard-main-row">
@@ -94,10 +175,12 @@
             </div>
             <div id="match-timer-box">00:00</div>
         </div>
+        
         <div id="match-details">
             <span id="round-detail">ROUND: 1</span>
             <span id="half-detail">FIRST HALF</span>
         </div>
+
         <div id="penalty-shots-container">
             <div class="team-shots" id="shotsA">
                 <div class="ball" id="a1">1</div><div class="ball" id="a2">2</div><div class="ball" id="a3">3</div><div class="ball" id="a4">4</div><div class="ball" id="a5">5</div>
@@ -111,11 +194,12 @@
 
     <div id="master-footer">
         <div class="bar top-bg">
-            <marquee id="tour-name" class="txt-red">TOURNAMENT</marquee>
+            <div class="box-left"><div class="hint-label hint-red">LIVE</div><marquee id="tour-name" class="txt-red">TOURNAMENT</marquee></div>
+            <div class="box-right"><div class="hint-label hint-red">TEAMS</div><marquee id="scroll-top" class="txt-red">UPCOMING</marquee></div>
         </div>
         <div class="bar bottom-bg">
-            <marquee id="scroll-bot" class="txt-white">LIVE COVERAGE</marquee>
-            <div class="clock-area" id="live-clock">00:00 AM</div>
+            <div class="box-left"><div class="hint-label hint-white">INFO</div><marquee id="sub-info" class="txt-white">LIVE COVERAGE</marquee></div>
+            <div class="box-right"><div class="hint-label hint-white">PRIZES</div><marquee id="scroll-bot" class="txt-white">UPDATING...</marquee><div class="clock-area" id="live-clock">00:00 AM</div></div>
         </div>
     </div>
 
@@ -123,45 +207,20 @@
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
+
     const urlParams = new URLSearchParams(window.location.search);
     const clientID = urlParams.get('id');
 
     let lastA = 0, lastB = 0;
-    let localMatchTime = 0;
-    let timerInterval = null;
+    let localTime = 0;
+    let timerInt = null;
 
     db.ref("users/" + clientID + "/matchData").on("value", (snap) => {
         const d = snap.val() || {};
-
-        // 1. Goal Animation
-        if (d.scoreA > lastA || d.scoreB > lastB) { triggerFlash('goal-overlay'); }
-        lastA = d.scoreA || 0; lastB = d.scoreB || 0;
-
-        // 2. Fixed Card Logic
-        if (d.cardsA && d.cardsA !== "") {
-            triggerCardFlash(d.cardsA, d.playerNameA, d.nameA || "Team A", "A");
-        }
-        if (d.cardsB && d.cardsB !== "") {
-            triggerCardFlash(d.cardsB, d.playerNameB, d.nameB || "Team B", "B");
-        }
-
-        // 3. Independent Timer Logic (Syncs but counts locally)
-        let mTime = d.matchTime || "00:00";
-        const parts = mTime.split(':');
-        const remoteSecs = parseInt(parts[0]) * 60 + parseInt(parts[1]);
         
-        // Sync if difference is more than 2 seconds
-        if (Math.abs(remoteSecs - localMatchTime) > 2) { localMatchTime = remoteSecs; }
-
-        if (d.timerRunning === true) {
-            if (!timerInterval) {
-                timerInterval = setInterval(() => { localMatchTime++; updateTimerUI(); }, 1000);
-            }
-        } else {
-            clearInterval(timerInterval);
-            timerInterval = null;
-            updateTimerUI();
-        }
+        // Goal Check
+        if (d.scoreA > lastA || d.scoreB > lastB) { triggerGoal(); }
+        lastA = d.scoreA || 0; lastB = d.scoreB || 0;
 
         // UI Updates
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
@@ -172,10 +231,30 @@
         document.getElementById('half-detail').innerText = (d.round || "FIRST HALF").toUpperCase();
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
-        
-        updateSmallCards('cardA', d.cardsA);
-        updateSmallCards('cardB', d.cardsB);
 
+        // Timer Sync Logic
+        let mTime = d.matchTime || "00:00";
+        let parts = mTime.split(':');
+        let remoteSecs = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        
+        if (Math.abs(remoteSecs - localTime) > 2) { localTime = remoteSecs; }
+
+        if (d.timerRunning) {
+            if (!timerInt) timerInt = setInterval(() => { localTime++; updateTimerUI(); }, 1000);
+        } else {
+            clearInterval(timerInt);
+            timerInt = null;
+            updateTimerUI();
+        }
+
+        // Cards Logic
+        if (d.cardsA && d.cardsA !== "") { triggerCardOverlay(d.cardsA, d.playerNameA, d.nameA, 'A'); }
+        if (d.cardsB && d.cardsB !== "") { triggerCardOverlay(d.cardsB, d.playerNameB, d.nameB, 'B'); }
+        
+        updateCardIcon('cardA', d.cardsA);
+        updateCardIcon('cardB', d.cardsB);
+
+        // Penalty
         for (let i = 1; i <= 5; i++) {
             updatePenaltyBall('a', i, d.penaltyA);
             updatePenaltyBall('b', i, d.penaltyB);
@@ -184,29 +263,28 @@
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    function triggerCardFlash(type, playerNum, teamName, teamKey) {
+    function updateTimerUI() {
+        let m = Math.floor(localTime / 60);
+        let s = localTime % 60;
+        let fmt = (m < 10 ? "0" : "") + m + ":" + (s < 10 ? "0" : "") + s;
+        let el = document.getElementById('match-timer-box');
+        el.innerText = fmt;
+        el.style.display = (fmt === "00:00") ? "none" : "flex";
+    }
+
+    function triggerCardOverlay(type, pNum, tName, team) {
         const overlay = document.getElementById('card-overlay');
-        const text = document.getElementById('card-flash-text');
-        text.className = "flash-text " + (type === "yellow" ? "yellow-text" : "red-text");
-        let displayNo = playerNum ? (" - " + playerNum) : "";
-        text.innerText = teamName.toUpperCase() + ": " + type.toUpperCase() + " CARD" + displayNo;
+        const text = document.getElementById('card-text');
+        text.style.color = (type === 'yellow') ? '#ffd700' : '#ff0000';
+        text.innerText = (tName || "TEAM") + " - PLAYER " + (pNum || "") + " (" + type + ")";
         overlay.style.display = 'flex';
         setTimeout(() => { 
             overlay.style.display = 'none'; 
-            db.ref("users/" + clientID + "/matchData/cards" + teamKey).set(""); 
+            db.ref("users/" + clientID + "/matchData/cards" + team).set(""); 
         }, 4000);
     }
 
-    function updateTimerUI() {
-        const mins = Math.floor(localMatchTime / 60);
-        const secs = localMatchTime % 60;
-        const fmt = (mins < 10 ? "0" : "") + mins + ":" + (secs < 10 ? "0" : "") + secs;
-        const box = document.getElementById('match-timer-box');
-        box.innerText = fmt;
-        box.style.display = (fmt === "00:00") ? "none" : "flex";
-    }
-
-    function updateSmallCards(id, type) {
+    function updateCardIcon(id, type) {
         let el = document.getElementById(id);
         el.className = "card-indicator";
         if (type === "yellow") el.classList.add("yellow-card");
@@ -222,33 +300,27 @@
         else { ball.className = "ball"; ball.innerText = index; }
     }
 
-    function triggerFlash(id) {
-        const el = document.getElementById(id);
-        el.style.display = 'flex';
-        setTimeout(() => { el.style.display = 'none'; }, 3000);
-    }
-
+    // Ticker & Clock
     db.ref("users/" + clientID + "/tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
-        document.getElementById('scroll-bot').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
+        document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
+        document.getElementById('sub-info').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
+        document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
         document.getElementById('watermark').innerText = (d.watermarkText || "SUKHDEEP TV").toUpperCase();
         document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 
     setInterval(() => {
-        const clockEl = document.getElementById('live-clock');
         const now = new Date();
-        clockEl.innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     }, 1000);
 
-    setInterval(() => {
-        const wm = document.getElementById('watermark');
-        const maxX = window.innerWidth - 200;
-        const maxY = window.innerHeight - 200;
-        wm.style.left = Math.random() * maxX + 'px';
-        wm.style.top = (Math.random() * (maxY - 150) + 150) + 'px';
-    }, 7000);
+    function triggerGoal() {
+        const overlay = document.getElementById('goal-overlay');
+        overlay.style.display = 'flex';
+        setTimeout(() => { overlay.style.display = 'none'; }, 3000);
+    }
 </script>
 </body>
 </html>
