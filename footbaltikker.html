@@ -2,23 +2,25 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Professional Overlay</title>
+    <title>Sukhdeep TV - Final Master Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
-    <!-- Icons ਲਈ FontAwesome -->
+    <!-- Icons ਲਈ Link -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
+            --arrow-width: 20px;
+            --arrow-height: 50px;
+            --label-padding: 25px;
             --main-red: #cc0000;
             --pure-white: #ffffff;
             --pure-black: #000000;
-            --wa-green: #25D366;
         }
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- Scoreboard Layout --- */
+        /* --- 1. Scoreboard Wrapper --- */
         #scoreboard-wrapper {
             position: absolute; top: 25px; left: 20px;
             display: flex; flex-direction: column; gap: 2px; z-index: 100;
@@ -31,42 +33,44 @@
             overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.6); background: var(--pure-black);
         }
 
-        /* Jersey Color Strips */
-        .jersey-strip { width: 15px; height: 60px; transition: background 0.5s; }
+        /* Jersey Color Strips - Nva Added */
+        .jersey-strip { width: 12px; height: 60px; }
 
         .score-unit { display: flex; height: 60px; align-items: center; }
-        .team-display { width: 220px; padding: 0 15px; font-size: 26px; font-weight: 900; text-transform: uppercase; color: white; }
-        .score-box { width: 65px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; background: rgba(255,255,255,0.1); color: white; }
+        .team-display { width: 230px; padding: 0 20px; font-size: 26px; font-weight: 900; text-transform: uppercase; }
+        .score-box { width: 70px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; }
 
-        /* Timer Box - Dynamic Display */
+        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
+        .side-b { background: var(--pure-white); color: var(--main-red); }
+
+        /* Timer Box - Hun udo hi dikhega jdo start hovega */
         #match-timer-box {
             background: var(--main-red); color: white; height: 60px;
-            display: none; /* Default Hide */
-            align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900;
-            border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0;
+            display: none; align-items: center; padding: 0 15px;
+            font-size: 32px; font-weight: 900; border: 3px solid white;
+            border-left: none; border-radius: 0 6px 6px 0;
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.4);
         }
 
-        /* --- Contact Flasher (Above Ticker) --- */
-        #contact-flasher {
-            position: absolute; bottom: 125px; right: 20px;
-            background: rgba(0,0,0,0.85); color: white; padding: 8px 18px;
-            border-radius: 50px; border: 2px solid var(--main-red);
-            font-size: 24px; font-weight: 900; display: flex; align-items: center; gap: 12px;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 1000;
-            transition: all 0.5s ease-in-out;
+        /* Contact Flasher - Tikker de upr */
+        #contact-flash-box {
+            position: absolute; bottom: 120px; right: 20px;
+            background: rgba(0,0,0,0.8); color: white; padding: 5px 15px;
+            border-radius: 5px; border-left: 4px solid var(--main-red);
+            font-size: 22px; font-weight: 900; display: flex; align-items: center; gap: 10px;
+            z-index: 1001; transition: all 0.5s;
         }
 
-        /* --- Footer Ticker --- */
-        #master-footer {
-            position: absolute; bottom: 10px; left: 0; right: 0;
-            display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999;
-        }
-        .bar { display: flex; height: 50px; width: 100%; overflow: hidden; border: 2px solid var(--main-red); border-radius: 4px; }
+        /* --- Baki Purani Settings --- */
+        #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 18px; font-weight: 700; text-shadow: 2px 2px 4px #000; text-transform: uppercase; width: 610px; }
+        #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999; }
+        .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
         .top-bg { background: var(--pure-white); }
         .bottom-bg { background: var(--main-red); }
-        marquee { width: 100%; font-size: 24px; font-weight: 900; text-transform: uppercase; line-height: 45px; }
-        
-        #watermark { position: fixed; color: rgba(255,255,255,0.4); font-size: 26px; font-weight: 900; z-index: 2000; transition: all 1.2s; pointer-events: none; }
+        marquee { width: 100%; font-size: 24px; font-weight: 900; text-transform: uppercase; padding-left: 130px; }
+        .txt-red { color: var(--main-red); }
+        .txt-white { color: var(--pure-white); }
+        #watermark { position: fixed; color: rgba(255,255,255,0.4); font-size: 26px; font-weight: 900; z-index: 2000; text-shadow: 2px 2px 4px black; transition: all 1.2s ease-in-out; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -74,32 +78,41 @@
     <div id="watermark">SUKHDEEP TV</div>
 
     <!-- Contact Flasher -->
-    <div id="contact-flasher">
-        <i id="contact-icon" class="fas fa-phone-alt"></i>
-        <span id="contact-number">86996-40061</span>
+    <div id="contact-flash-box">
+        <i id="flash-icon" class="fas fa-phone-alt"></i>
+        <span id="flash-number">86996-40061</span>
     </div>
 
     <div id="scoreboard-wrapper">
         <div id="scoreboard-main-row">
             <div id="scoreboard-container">
-                <div id="stripA" class="jersey-strip"></div>
-                <div class="score-unit">
+                <div id="jColorA" class="jersey-strip"></div> <!-- Jersey Color A -->
+                <div class="score-unit side-a">
                     <div class="score-box" id="scoreA">0</div>
                     <div class="team-display" id="nameA">TEAM A</div>
                 </div>
-                <div class="score-unit" style="border-left: 2px solid white;">
+                <div class="score-unit side-b">
                     <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
                     <div class="score-box" id="scoreB">0</div>
                 </div>
-                <div id="stripB" class="jersey-strip"></div>
+                <div id="jColorB" class="jersey-strip"></div> <!-- Jersey Color B -->
             </div>
             <div id="match-timer-box">00:00</div>
+        </div>
+        
+        <div id="match-details">
+            <span id="round-detail">ROUND: 1</span>
+            <span id="half-detail">FIRST HALF</span>
         </div>
     </div>
 
     <div id="master-footer">
-        <div class="bar top-bg"><marquee id="tour-name" style="color: #cc0000;">TOURNAMENT NAME</marquee></div>
-        <div class="bar bottom-bg"><marquee id="scroll-bot" style="color: #ffffff;">LIVE FROM PUNJAB</marquee></div>
+        <div class="bar top-bg">
+            <marquee id="tour-name" class="txt-red">TOURNAMENT</marquee>
+        </div>
+        <div class="bar bottom-bg">
+            <marquee id="scroll-bot" class="txt-white">LIVE COVERAGE</marquee>
+        </div>
     </div>
 
 <script>
@@ -107,7 +120,7 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    // --- Scoreboard & Jersey Logic ---
+    // --- Scoreboard Logic ---
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
@@ -115,50 +128,42 @@
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
         
-        // Jersey Colors
-        document.getElementById('stripA').style.backgroundColor = d.colorA || "#ff0000";
-        document.getElementById('stripB').style.backgroundColor = d.colorB || "#ffffff";
+        // Jersey Update
+        document.getElementById('jColorA').style.backgroundColor = d.colorA || "#cc0000";
+        document.getElementById('jColorB').style.backgroundColor = d.colorB || "#ffffff";
 
-        // Timer Auto-Show/Hide Logic
-        const timeVal = d.matchTime || "00:00";
-        const timerBox = document.getElementById('match-timer-box');
-        timerBox.innerText = timeVal;
-        
-        if (timeVal === "00:00") {
-            timerBox.style.display = "none";
-        } else {
-            timerBox.style.display = "flex";
-        }
+        // Time Box Show/Hide Logic
+        let mTime = d.matchTime || "00:00";
+        const tBox = document.getElementById('match-timer-box');
+        tBox.innerText = mTime;
+        tBox.style.display = (mTime === "00:00" || mTime === "") ? "none" : "flex";
 
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    // --- Contact Flasher Logic (15 Seconds Toggle) ---
-    let isWhatsApp = false;
-    function toggleContact() {
-        const icon = document.getElementById('contact-icon');
-        const flasher = document.getElementById('contact-flasher');
-        
-        if (isWhatsApp) {
+    // --- Contact Flasher (15 Sec) ---
+    let isWA = false;
+    function flashContact() {
+        const icon = document.getElementById('flash-icon');
+        const num = document.getElementById('flash-number');
+        if (isWA) {
             icon.className = "fab fa-whatsapp";
             icon.style.color = "#25D366";
-            flasher.style.borderColor = "#25D366";
         } else {
             icon.className = "fas fa-phone-alt";
             icon.style.color = "white";
-            flasher.style.borderColor = "#cc0000";
         }
-        isWhatsApp = !isWhatsApp;
+        isWA = !isWA;
     }
-    setInterval(toggleContact, 15000); // 15 ਸੈਕਿੰਡ ਬਾਅਦ ਬਦਲੇਗਾ
+    setInterval(flashContact, 15000);
 
-    // --- Ticker Logic ---
+    // --- Ticker & Watermark ---
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
         document.getElementById('scroll-bot').innerText = (d.prizes || "LIVE COVERAGE").toUpperCase();
         document.getElementById('watermark').innerText = (d.watermarkText || "SUKHDEEP TV").toUpperCase();
-        document.getElementById('contact-number').innerText = d.contact || "86996-40061";
+        document.getElementById('flash-number').innerText = d.contact || "86996-40061";
     });
 
     // --- Watermark Movement ---
@@ -166,9 +171,8 @@
         const wm = document.getElementById('watermark');
         const maxX = window.innerWidth - wm.offsetWidth - 50;
         const maxY = window.innerHeight - 200; 
-        const minY = 150; 
         wm.style.left = Math.floor(Math.random() * maxX) + 'px';
-        wm.style.top = Math.floor(Math.random() * (maxY - minY)) + minY + 'px';
+        wm.style.top = Math.floor(Math.random() * (maxY - 150)) + 150 + 'px';
     }
     setInterval(moveWatermark, 7000);
     window.onload = moveWatermark;
