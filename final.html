@@ -163,13 +163,14 @@
         lastA = d.scoreA || 0; lastB = d.scoreB || 0;
 
         // 2. CARD ANIMATION LOGIC (ਟੀਮ ਅਤੇ ਪਲੇਅਰ ਨੰਬਰ ਦੇ ਨਾਲ)
-        // Team A Card logic
-        if (d.cardsA && (d.cardsA !== lastCardA || d.playerNameA !== lastPlayerA)) { 
-            triggerCardFlash(d.cardsA, d.playerNameA, d.nameA || "TEAM A"); 
+      // Team A ਲਈ
+        if (d.cardsA && d.cardsA !== "") {  
+            triggerCardFlash(d.cardsA, d.playerNameA, d.nameA || "TEAM A", "A"); 
         }
-        // Team B Card logic
-        if (d.cardsB && (d.cardsB !== lastCardB || d.playerNameB !== lastPlayerB)) { 
-            triggerCardFlash(d.cardsB, d.playerNameB, d.nameB || "TEAM B"); 
+        
+        // Team B ਲਈ
+        if (d.cardsB && d.cardsB !== "") {  
+            triggerCardFlash(d.cardsB, d.playerNameB, d.nameB || "TEAM B", "B"); 
         }
         
         lastCardA = d.cardsA || ""; 
@@ -195,31 +196,34 @@
         updateCardIndicator('cardB', d.cardsB);
     });
 
-    // 3. ਮੇਨ ਕਾਰਡ ਐਨੀਮੇਸ਼ਨ ਫੰਕਸ਼ਨ (ਸਿਰਫ਼ ਇੱਕ ਵਾਰ ਰੱਖੋ)
-    function triggerCardFlash(type, playerNum, teamName) {
+// 3. ਅਪਡੇਟ ਕੀਤਾ ਐਨੀਮੇਸ਼ਨ ਫੰਕਸ਼ਨ - ਜੋ ਕਾਰਡ ਦਿਖਾ ਕੇ ਡਾਟਾਬੇਸ ਵਿੱਚੋਂ ਹਟਾ ਦੇਵੇਗਾ
+    function triggerCardFlash(type, playerNum, teamName, teamKey) {
         const overlay = document.getElementById('card-overlay');
         const text = document.getElementById('card-flash-text');
         
         // ਰੰਗ ਸੈੱਟ ਕਰੋ
         text.className = "flash-text " + (type === "yellow" ? "yellow-text" : "red-text");
         
-        // ਡਿਸਪਲੇਅ: "TEAM A: YELLOW CARD - 10"
+        // ਡਿਸਪਲੇਅ ਸੈੱਟ ਕਰੋ
         let displayNo = playerNum ? (" - " + playerNum) : "";
         text.innerText = teamName.toUpperCase() + ": " + (type === "yellow" ? "YELLOW CARD" : "RED CARD") + displayNo;
         
+        // ਐਨੀਮੇਸ਼ਨ ਦਿਖਾਓ
         overlay.style.display = 'flex';
         
+        // 4 ਸੈਕਿੰਡ ਬਾਅਦ ਐਨੀਮੇਸ਼ਨ ਬੰਦ ਕਰੋ
         setTimeout(() => { 
             overlay.style.display = 'none'; 
+            
+            // ਸਭ ਤੋਂ ਜ਼ਰੂਰੀ: ਐਨੀਮੇਸ਼ਨ ਤੋਂ ਬਾਅਦ ਡਾਟਾਬੇਸ ਵਿੱਚ ਕਾਰਡ ਨੂੰ ਖਾਲੀ ਕਰੋ
+            // ਤਾਂ ਜੋ ਇਹ ਬਾਰ-ਬਾਰ ਫਲੈਸ਼ ਨਾ ਹੋਵੇ
+            let updates = {};
+            updates["/users/" + clientID + "/matchData/cards" + teamKey] = ""; 
+            // ਉਦਾਹਰਣ ਲਈ: cardsA = "" ਜਾਂ cardsB = ""
+            db.ref().update(updates);
+            
         }, 4000);
     }
-
-    function triggerFlash(overlayId) {
-        const overlay = document.getElementById(overlayId);
-        overlay.style.display = 'flex';
-        setTimeout(() => { overlay.style.display = 'none'; }, 3000);
-    }
-
     // ਸਕੋਰਬੋਰਡ ਉੱਤੇ ਛੋਟਾ ਕਾਰਡ ਦਿਖਾਉਣ ਲਈ ਫੰਕਸ਼ਨ
     function updateCardIndicator(id, type) {
         const el = document.getElementById(id);
