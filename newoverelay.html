@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Professional Overlay</title>
+    <title>Sukhdeep TV Style - Professional Scoreboard</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -16,16 +16,15 @@
             --pure-black: #000000;
         }
 
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; height: 100vh; width: 100vw; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- Watermark Styles --- */
+        /* --- Watermark Style --- */
         #wm-img {
             position: absolute;
-            width: 120px; 
-            opacity: 0.8;
+            width: 150px; /* ਲੋਗੋ ਦਾ ਸਾਈਜ਼ */
+            z-index: 9999;
             display: none;
-            z-index: 1000;
-            filter: drop-shadow(2px 2px 4px rgba(0,0,0,0.5));
+            filter: drop-shadow(2px 2px 5px rgba(0,0,0,0.5));
         }
 
         /* --- Scoreboard Style --- */
@@ -35,7 +34,7 @@
             left: 20px;
             display: flex;
             flex-direction: column;
-            z-index: 500;
+            gap: 5px;
         }
 
         #scoreboard-container {
@@ -53,19 +52,19 @@
         .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
         .side-b { background: var(--pure-white); color: var(--main-red); }
 
-        /* --- Round & Half Info (Transparent) --- */
+        /* --- Round & Half Info Style --- */
         #match-meta-info {
             display: flex;
-            gap: 20px;
-            padding: 5px 10px;
-            color: var(--pure-white);
-            font-size: 18px;
+            gap: 15px;
+            color: white;
+            font-size: 20px;
             font-weight: 900;
             text-transform: uppercase;
-            text-shadow: 2px 2px 4px rgba(0,0,0,0.8);
+            text-shadow: 2px 2px 4px #000;
+            padding-left: 5px;
         }
 
-        /* --- Ticker Style (No Changes) --- */
+        /* --- Ticker Style (Pehle Vangu) --- */
         #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 6px; padding: 0 10px; }
         .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
         .top-bg { background: var(--pure-white); }
@@ -86,8 +85,10 @@
 </head>
 <body>
 
+    <!-- Watermark Image -->
     <img src="" id="wm-img">
 
+    <!-- Scoreboard and Round Info -->
     <div id="scoreboard-wrapper">
         <div id="scoreboard-container">
             <div class="score-unit side-a">
@@ -99,13 +100,13 @@
                 <div class="score-box" id="scoreB">0</div>
             </div>
         </div>
-        <!-- Round & Half Info Under Scoreboard -->
         <div id="match-meta-info">
-            <span id="round-text"></span>
-            <span id="half-text"></span>
+            <span id="round-val"></span>
+            <span id="half-val"></span>
         </div>
     </div>
 
+    <!-- Ticker Section -->
     <div id="master-footer">
         <div class="bar top-bg">
             <div class="box-left">
@@ -135,46 +136,34 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
+    // Watermark Logic
     const wm = document.getElementById('wm-img');
-    let wmMode = "blink"; 
-    let posX = 100, posY = 100, velX = 3, velY = 3;
-    let animId = null;
+    let currentMode = "";
+    let animFrame;
 
-    function resetWM() {
-        cancelAnimationFrame(animId);
-        wm.style.display = "none";
-    }
-
-    function runWatermark() {
-        resetWM();
-        if (wmMode === "scroll") {
-            let startY = (window.innerHeight * 0.35) + (Math.random() * (window.innerHeight * 0.35));
-            wm.style.top = startY + "px";
-            let curX = window.innerWidth;
-            wm.style.display = "block";
-            function move() {
-                curX -= 4;
-                wm.style.left = curX + "px";
-                if(curX > -150) animId = requestAnimationFrame(move);
-                else setTimeout(runWatermark, 2000);
+    function startWatermark(mode) {
+        cancelAnimationFrame(animFrame);
+        wm.style.display = "block";
+        
+        if (mode === "blink") {
+            function blink() {
+                wm.style.left = Math.random() * (window.innerWidth - 150) + "px";
+                wm.style.top = Math.random() * (window.innerHeight - 150) + "px";
+                wm.style.opacity = 1;
+                setTimeout(() => { wm.style.opacity = 0; }, 4000);
             }
-            move();
-        } else if (wmMode === "blink") {
-            let rX = Math.random() * (window.innerWidth - 150);
-            let rY = Math.random() * (window.innerHeight - 150);
-            wm.style.left = rX + "px"; wm.style.top = rY + "px";
-            wm.style.display = "block";
-            setTimeout(() => { wm.style.display = "none"; setTimeout(runWatermark, 5000); }, 5000);
-        } else if (wmMode === "bounce") {
-            wm.style.display = "block";
-            function bounce() {
-                posX += velX; posY += velY;
-                if (posX + 120 >= window.innerWidth || posX <= 0) velX *= -1;
-                if (posY + 120 >= window.innerHeight || posY <= 0) velY *= -1;
-                wm.style.left = posX + "px"; wm.style.top = posY + "px";
-                animId = requestAnimationFrame(bounce);
+            blink();
+            setInterval(blink, 8000);
+        } else if (mode === "scroll") {
+            let x = window.innerWidth;
+            function scroll() {
+                x -= 3;
+                if (x < -150) x = window.innerWidth;
+                wm.style.left = x + "px";
+                wm.style.top = "20%";
+                animFrame = requestAnimationFrame(scroll);
             }
-            bounce();
+            scroll();
         }
     }
 
@@ -185,19 +174,18 @@
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
         
-        // Round & Half Text Update
-        document.getElementById('round-text').innerText = d.round || "";
-        document.getElementById('half-text').innerText = d.halfStatus || "";
+        // Round ate Half Update
+        document.getElementById('round-val').innerText = d.round || "";
+        document.getElementById('half-val').innerText = d.halfStatus || "";
         
         document.getElementById('scoreboard-container').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
         document.getElementById('match-meta-info').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
 
-        if(d.logoUrl) { 
-            wm.src = d.logoUrl; 
-            if(d.wmMode && d.wmMode !== wmMode) {
-                wmMode = d.wmMode;
-                runWatermark();
-            }
+        // Watermark Database Update
+        if (d.logoUrl && d.wmMode && d.wmMode !== currentMode) {
+            wm.src = d.logoUrl;
+            currentMode = d.wmMode;
+            startWatermark(currentMode);
         }
     });
 
@@ -216,7 +204,6 @@
     }
     setInterval(updateClock, 1000);
     updateClock();
-    runWatermark();
 </script>
 </body>
 </html>
