@@ -3,109 +3,117 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manpreet Admin - Penalty & Match Pro</title>
+    <title>Manpreet Admin - Pro Broadcast Control</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         .card { background: #161b22; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #30363d; overflow: hidden; margin-bottom: 12px; box-sizing: border-box; }
-        .header { background: #238636; color: white; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 12px; }
-        .teams-container { display: flex; padding: 10px; gap: 5px; background: #0d1117; align-items: center; }
-        .team-box { flex: 2; text-align: center; padding: 10px; border-radius: 8px; background: #161b22; border-top: 4px solid #fff; }
-        .score-val { font-size: 38px; font-weight: 900; color: #2ecc71; margin: 2px 0; }
-        .btn-pm { border: none; color: white; padding: 5px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 2px; }
-        .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 10px; flex: 1; width: 100%; }
-        .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
-        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .section-divider { border-bottom: 1px solid #30363d; margin: 10px 0; padding-bottom: 5px; color: #2ecc71; font-size: 11px; font-weight: bold; text-transform: uppercase; }
-        .penalty-log { font-size: 11px; color: #f1c40f; margin-top: 5px; min-height: 15px; background: #0d1117; border-radius: 4px; padding: 2px; }
+        .header { background: #238636; color: white; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 11px; letter-spacing: 1px; }
+        .teams-container { display: flex; padding: 10px; gap: 5px; background: #0d1117; align-items: stretch; }
+        .team-box { flex: 2; text-align: center; padding: 10px; border-radius: 8px; background: #161b22; border-top: 5px solid #fff; transition: 0.3s; }
+        .score-val { font-size: 42px; font-weight: 900; color: #2ecc71; margin: 5px 0; }
+        .btn-pm { border: none; color: white; padding: 8px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 2px; }
+        .card-btn { padding: 10px; border-radius: 6px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 10px; flex: 1; width: 100%; }
+        .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
+        .std-textarea { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; resize: none; min-height: 60px; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; }
+        .section-divider { border-bottom: 1px solid #30363d; margin: 15px 0 10px 0; padding-bottom: 5px; color: #2ecc71; font-size: 11px; font-weight: bold; text-transform: uppercase; display: flex; align-items: center; gap: 10px; }
+        .section-divider::after { content: ""; flex: 1; height: 1px; background: #30363d; }
+        .color-picker-wrap { display: flex; align-items: center; gap: 5px; margin-bottom: 8px; background: #0d1117; padding: 5px; border-radius: 5px; border: 1px solid #30363d; }
+        .color-picker-wrap label { font-size: 9px; color: #8b949e; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div id="main-content" style="width: 100%; max-width: 500px;">
     
-    <!-- SCOREBOARD & PENALTY BOX -->
+    <!-- JERSEY COLOR & SCORE SECTION -->
     <div class="card">
-        <div class="header">Scoreboard & Penalty Box</div>
+        <div class="header"><i class="fas fa-tshirt"></i> Team Match Control</div>
         <div class="teams-container">
+            <!-- Team A -->
             <div class="team-box" id="boxA">
-                <input type="text" id="nameA" class="std-input" placeholder="Team A" oninput="updateMatchDB()">
+                <div class="color-picker-wrap">
+                    <label>Jersey</label>
+                    <input type="color" id="colorA" value="#ffffff" oninput="updateMatchDB()" style="flex:1; height:25px; border:none; background:none; cursor:pointer;">
+                </div>
+                <input type="text" id="nameA" class="std-input" placeholder="Team A Name" oninput="updateMatchDB()">
                 <div class="score-val" id="dispA">0</div>
-                <div style="display:flex; margin-bottom: 8px;">
+                <div style="display:flex;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
                 </div>
-                <!-- Penalty Controls Team A -->
-                <input type="text" id="pNumA" class="std-input" style="margin-bottom:4px;" placeholder="Player No.">
-                <div class="grid-2">
-                    <button class="card-btn" style="background:#f1c40f; color:black;" onclick="giveCard('A', 'Yellow')">Yellow</button>
-                    <button class="card-btn" style="background:#da3633;" onclick="giveCard('A', 'Red')">Red</button>
-                </div>
-                <div class="penalty-log" id="logA">No Cards</div>
             </div>
 
-            <div style="flex:1; text-align:center;">
-                <button id="visBtn" class="card-btn" style="background:#238636; margin-bottom:5px;" onclick="toggleVis()">SHOW</button>
+            <div style="flex:1; text-align:center; display:flex; flex-direction:column; justify-content:center; gap:8px;">
+                <button id="visBtn" class="card-btn" style="background:#238636;" onclick="toggleVis()">SHOW</button>
                 <button class="card-btn" style="background:#333;" onclick="resetMatch()">RESET</button>
             </div>
 
+            <!-- Team B -->
             <div class="team-box" id="boxB">
-                <input type="text" id="nameB" class="std-input" placeholder="Team B" oninput="updateMatchDB()">
+                <div class="color-picker-wrap">
+                    <label>Jersey</label>
+                    <input type="color" id="colorB" value="#ffffff" oninput="updateMatchDB()" style="flex:1; height:25px; border:none; background:none; cursor:pointer;">
+                </div>
+                <input type="text" id="nameB" class="std-input" placeholder="Team B Name" oninput="updateMatchDB()">
                 <div class="score-val" id="dispB">0</div>
-                <div style="display:flex; margin-bottom: 8px;">
+                <div style="display:flex;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
                 </div>
-                <!-- Penalty Controls Team B -->
-                <input type="text" id="pNumB" class="std-input" style="margin-bottom:4px;" placeholder="Player No.">
-                <div class="grid-2">
-                    <button class="card-btn" style="background:#f1c40f; color:black;" onclick="giveCard('B', 'Yellow')">Yellow</button>
-                    <button class="card-btn" style="background:#da3633;" onclick="giveCard('B', 'Red')">Red</button>
-                </div>
-                <div class="penalty-log" id="logB">No Cards</div>
             </div>
         </div>
     </div>
 
-    <!-- TIMER & MATCH SETTINGS -->
+    <!-- MATCH & UPCOMING BOX -->
     <div class="card">
-        <div class="header">Persistent Timer & Match Box</div>
-        <div style="padding:15px; text-align:center; background:#0d1117;">
-            <div id="timerShow" style="font-size:45px; color:#f1c40f; font-family:monospace; margin-bottom:10px;">00:00</div>
+        <div class="header"><i class="fas fa-calendar-alt"></i> Match Info & Upcoming</div>
+        <div style="padding:15px; background:#0d1117;">
+            <div class="section-divider">Current Match Details</div>
             <div class="grid-2">
-                <button id="timerBtn" class="card-btn" style="background:#238636; height:45px;" onclick="handleTimerClick()">START</button>
-                <button class="card-btn" style="background:#333; height:45px;" onclick="resetTimer()">RESET TIME</button>
-            </div>
-            
-            <div class="section-divider">Match Details</div>
-            <div class="grid-2">
-                <input type="text" id="matchTitle" class="std-input" placeholder="Match (e.g. Semi-Final)" oninput="updateMatchDB()">
+                <input type="text" id="matchTitle" class="std-input" placeholder="Match Type (e.g. Final)" oninput="updateMatchDB()">
                 <input type="text" id="roundInp" class="std-input" placeholder="Round (e.g. 1st Half)" oninput="updateMatchDB()">
             </div>
-            <input type="number" id="matchDuration" class="std-input" placeholder="Auto-Stop (Min)" oninput="updateMatchDB()">
+            
+            <div class="section-divider">Upcoming Match</div>
+            <textarea id="upcomingMatch" class="std-textarea" placeholder="Next Match: Team X vs Team Y (Time: 4:00 PM)" oninput="updateTickerInfo()"></textarea>
+            
+            <div class="section-divider">Participating Team List</div>
+            <textarea id="teamList" class="std-textarea" placeholder="1. TEAM A  2. TEAM B  3. TEAM C..." oninput="this.value = this.value.toUpperCase(); updateTickerInfo();"></textarea>
         </div>
     </div>
 
-    <!-- BROADCAST INFO & WATERMARK -->
+    <!-- WATERMARK & CONTACTS SECTION -->
     <div class="card">
-        <div class="header">Broadcast & Watermark</div>
+        <div class="header"><i class="fas fa-broadcast-tower"></i> Broadcast Branding</div>
         <div style="padding:15px;">
-            <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
-            <input type="text" id="watermarkText" class="std-input" placeholder="Watermark (Channel Name)">
-            <input type="text" id="prizeInfo" class="std-input" placeholder="Prize Details">
+            <div class="section-divider">Branding</div>
+            <input type="text" id="watermarkText" class="std-input" placeholder="Channel Name / Watermark" oninput="updateTickerInfo()">
+            
+            <div class="section-divider">Contact & Prize</div>
             <div class="grid-2">
-                <input type="text" id="callNum" class="std-input" placeholder="Call No.">
-                <input type="text" id="whatsappNum" class="std-input" placeholder="WhatsApp No.">
+                <div class="color-picker-wrap" style="margin-bottom:0;">
+                    <i class="fab fa-whatsapp" style="color:#25d366; margin:0 5px;"></i>
+                    <input type="text" id="whatsappNum" class="std-input" style="margin:0; border:none;" placeholder="WhatsApp" oninput="updateTickerInfo()">
+                </div>
+                <div class="color-picker-wrap" style="margin-bottom:0;">
+                    <i class="fas fa-phone-alt" style="color:#3498db; margin:0 5px;"></i>
+                    <input type="text" id="callNum" class="std-input" style="margin:0; border:none;" placeholder="Call No." oninput="updateTickerInfo()">
+                </div>
             </div>
-            <button class="card-btn" style="background:#238636; padding:12px;" onclick="updateTickerInfo()">UPDATE BROADCAST INFO</button>
+            <input type="text" id="prizeInfo" class="std-input" style="margin-top:8px;" placeholder="Prize Details (e.g. 1st 51000, 2nd 31000)" oninput="updateTickerInfo()">
+            
+            <button class="card-btn" style="background:#238636; padding:15px; margin-top:10px; font-size:12px;" onclick="alert('Data Synced with Firebase!')">SAVE ALL SETTINGS</button>
         </div>
     </div>
 
 </div>
 
 <script>
+    // Firebase Config
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
@@ -115,17 +123,20 @@
     const matchRef = db.ref("users/" + clientID + "/matchData");
     const tickerRef = db.ref("users/" + clientID + "/tickerData");
 
-    let isRunning = false, startTime = 0, elapsedTime = 0, sVis = true;
-    let cardsA = {}, cardsB = {}; // Local card tracking
+    let sVis = true;
 
     function updateMatchDB() {
         matchRef.update({
             nameA: document.getElementById('nameA').value,
             nameB: document.getElementById('nameB').value,
+            colorA: document.getElementById('colorA').value,
+            colorB: document.getElementById('colorB').value,
             matchTitle: document.getElementById('matchTitle').value,
-            round: document.getElementById('roundInp').value,
-            duration: document.getElementById('matchDuration').value
+            round: document.getElementById('roundInp').value
         });
+        // Update local border color for visual feedback
+        document.getElementById('boxA').style.borderTopColor = document.getElementById('colorA').value;
+        document.getElementById('boxB').style.borderTopColor = document.getElementById('colorB').value;
     }
 
     function changeScore(team, val) {
@@ -134,118 +145,49 @@
         });
     }
 
-    // --- PENALTY LOGIC (PLANTI BOX) ---
-    function giveCard(team, type) {
-        let pNum = document.getElementById('pNum' + team).value;
-        if (!pNum) return alert("Enter Player Number First!");
-
-        matchRef.child('cards' + team).once('value', snap => {
-            let data = snap.val() || {};
-            let count = data[pNum] || 0;
-
-            if (type === 'Yellow') {
-                count++;
-                if (count >= 2) {
-                    alert("Player " + pNum + " got 2 Yellows. Sending Red!");
-                    data[pNum] = "RED"; // Auto Red on 2nd Yellow
-                } else {
-                    data[pNum] = count;
-                }
-            } else {
-                data[pNum] = "RED";
-            }
-
-            matchRef.child('cards' + team).set(data);
-            document.getElementById('pNum' + team).value = ""; // Clear input
-        });
-    }
-
     function toggleVis() { matchRef.child('scoreVisible').set(!sVis); }
-
-    function resetMatch() {
-        if(confirm("Reset Everything?")) {
-            matchRef.update({ scoreA: 0, scoreB: 0, cardsA: {}, cardsB: {} });
-        }
-    }
-
-    // --- TIMER LOGIC ---
-    function handleTimerClick() {
-        const now = Date.now();
-        if (!isRunning) {
-            matchRef.update({ timerRunning: true, startTime: now - elapsedTime });
-        } else {
-            matchRef.update({ timerRunning: false, elapsedTime: Date.now() - startTime });
-        }
-    }
-
-    function resetTimer() {
-        if(confirm("Reset Timer?")) {
-            matchRef.update({ timerRunning: false, startTime: 0, elapsedTime: 0, matchTime: "00:00" });
-        }
-    }
-
-    function updateTimerDisplay() {
-        let ms = isRunning ? (Date.now() - startTime) : elapsedTime;
-        let totalSec = Math.floor(ms / 1000);
-        let m = Math.floor(totalSec / 60), s = totalSec % 60;
-        let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
-        document.getElementById('timerShow').innerText = timeStr;
-        matchRef.child('matchTime').set(timeStr);
-    }
+    function resetMatch() { if(confirm("Reset Score?")) matchRef.update({ scoreA: 0, scoreB: 0 }); }
 
     function updateTickerInfo() {
         tickerRef.update({
-            tournamentName: document.getElementById('tourName').value,
             watermark: document.getElementById('watermarkText').value,
-            prizeInfo: document.getElementById('prizeInfo').value,
+            whatsappNumber: document.getElementById('whatsappNum').value,
             callNumber: document.getElementById('callNum').value,
-            whatsappNumber: document.getElementById('whatsappNum').value
+            prizeInfo: document.getElementById('prizeInfo').value,
+            upcomingMatch: document.getElementById('upcomingMatch').value,
+            participatingTeams: document.getElementById('teamList').value
         });
-        alert("Broadcast Info Updated!");
     }
 
-    // --- REALTIME SYNC ---
+    // REALTIME LISTENERS
     matchRef.on("value", snap => {
         const data = snap.val() || {};
         document.getElementById('dispA').innerText = data.scoreA || 0;
         document.getElementById('dispB').innerText = data.scoreB || 0;
         document.getElementById('nameA').value = data.nameA || "";
         document.getElementById('nameB').value = data.nameB || "";
+        document.getElementById('colorA').value = data.colorA || "#ffffff";
+        document.getElementById('colorB').value = data.colorB || "#ffffff";
         document.getElementById('matchTitle').value = data.matchTitle || "";
         document.getElementById('roundInp').value = data.round || "";
-        document.getElementById('matchDuration').value = data.duration || "";
-
-        // Sync Cards Visual
-        const renderCards = (cardData) => {
-            if (!cardData) return "No Cards";
-            return Object.entries(cardData).map(([p, v]) => 
-                v === "RED" ? `P${p}:🟥` : `P${p}:` + "🟨".repeat(v)
-            ).join(" | ");
-        };
-        document.getElementById('logA').innerHTML = renderCards(data.cardsA);
-        document.getElementById('logB').innerHTML = renderCards(data.cardsB);
+        
+        document.getElementById('boxA').style.borderTopColor = data.colorA || "#fff";
+        document.getElementById('boxB').style.borderTopColor = data.colorB || "#fff";
 
         sVis = !!data.scoreVisible;
         document.getElementById('visBtn').innerText = sVis ? "HIDE" : "SHOW";
         document.getElementById('visBtn').style.background = sVis ? "#da3633" : "#238636";
-
-        isRunning = !!data.timerRunning;
-        startTime = data.startTime || 0;
-        elapsedTime = data.elapsedTime || 0;
-        document.getElementById('timerBtn').innerText = isRunning ? "STOP" : "START";
-        document.getElementById('timerBtn').style.background = isRunning ? "#da3633" : "#238636";
     });
 
     tickerRef.on("value", snap => {
         const data = snap.val() || {};
-        document.getElementById('tourName').value = data.tournamentName || "";
         document.getElementById('watermarkText').value = data.watermark || "";
-        document.getElementById('prizeInfo').value = data.prizeInfo || "";
-        document.getElementById('callNum').value = data.callNumber || "";
         document.getElementById('whatsappNum').value = data.whatsappNumber || "";
+        document.getElementById('callNum').value = data.callNumber || "";
+        document.getElementById('prizeInfo').value = data.prizeInfo || "";
+        document.getElementById('upcomingMatch').value = data.upcomingMatch || "";
+        document.getElementById('teamList').value = data.participatingTeams || "";
     });
-
-    setInterval(updateTimerDisplay, 1000);
 </script>
 </body>
 </html>
