@@ -125,7 +125,18 @@
         .txt-white { color: var(--pure-white); }
         .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
 
-        #watermark { position: fixed; color: #FFFFFF !important; font-size: 35px; font-weight: 1000; letter-spacing:2px; z-index: 9999; opacity: 1 !important text-shadow: 4px 4px 8px rgba (0,0,0,1); filter: drop shadow(0px 0px 5px rgba (255,255,255,0.5));   (1.5); transition: all 1.2s ease-in-out; pointer-events: none; }
+       #watermark { 
+    position: fixed; 
+    color: #FFFFFF !important; /* ਬਿਲਕੁਲ ਓਹੀ ਚਿੱਟਾ ਜੋ ਨੰਬਰ ਦਾ ਹੈ */
+    font-size: 40px; /* ਅੱਖਰਾਂ ਦਾ ਸਾਈਜ਼ */
+    font-weight: 900; /* ਅੱਖਰਾਂ ਦੀ ਮੋਟਾਈ */
+    z-index: 9999; 
+    opacity: 1 !important; /* ਧੁੰਦਲਾਪਣ ਬਿਲਕੁਲ ਖਤਮ (100% Solid) */
+    text-shadow: 2px 2px 0px #000000, 3px 3px 5px rgba(0,0,0,0.8); /* ਗੂੜ੍ਹੀ ਆਊਟਲਾਈਨ ਤਾਂ ਜੋ ਚਿੱਟਾ ਰੰਗ ਉੱਭਰ ਕੇ ਆਵੇ */
+    transition: all 1.2s ease-in-out; 
+    pointer-events: none; 
+    text-transform: uppercase;
+}
         #goal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 80vh; display: none; justify-content: center; align-items: center; z-index: 500; pointer-events: none; }
         .goal-text { font-size: 180px; color: #fff; font-weight: 900; text-shadow: 0 0 20px #ff0000; animation: ghaintGoal 0.5s ease-in-out infinite alternate; }
         @keyframes ghaintGoal { from { transform: scale(0.8); } to { transform: scale(1.1); } }
