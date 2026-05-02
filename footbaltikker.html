@@ -2,10 +2,11 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Ultimate Overlay</title>
+    <title>Sukhdeep TV - Professional Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+    <!-- Icons ਲਈ FontAwesome -->
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
@@ -17,8 +18,12 @@
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- Scoreboard Wrapper --- */
-        #scoreboard-wrapper { position: absolute; top: 25px; left: 20px; display: flex; flex-direction: column; gap: 2px; z-index: 100; }
+        /* --- Scoreboard Layout --- */
+        #scoreboard-wrapper {
+            position: absolute; top: 25px; left: 20px;
+            display: flex; flex-direction: column; gap: 2px; z-index: 100;
+        }
+
         #scoreboard-main-row { display: flex; align-items: flex-start; }
 
         #scoreboard-container {
@@ -26,36 +31,42 @@
             overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.6); background: var(--pure-black);
         }
 
-        .jersey-bar { width: 12px; height: 60px; }
+        /* Jersey Color Strips */
+        .jersey-strip { width: 15px; height: 60px; transition: background 0.5s; }
+
         .score-unit { display: flex; height: 60px; align-items: center; }
         .team-display { width: 220px; padding: 0 15px; font-size: 26px; font-weight: 900; text-transform: uppercase; color: white; }
         .score-box { width: 65px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; background: rgba(255,255,255,0.1); color: white; }
 
         /* Timer Box - Dynamic Display */
         #match-timer-box {
-            background: var(--main-red); color: white; height: 60px; display: none; 
+            background: var(--main-red); color: white; height: 60px;
+            display: none; /* Default Hide */
             align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900;
             border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0;
         }
 
-        /* --- Contact Flasher --- */
+        /* --- Contact Flasher (Above Ticker) --- */
         #contact-flasher {
-            position: absolute; bottom: 120px; right: 20px;
-            background: rgba(0,0,0,0.8); color: white; padding: 8px 15px;
-            border-radius: 5px; border-left: 5px solid var(--main-red);
-            font-size: 22px; font-weight: 900; display: flex; align-items: center; gap: 10px;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.5); z-index: 1000;
-            transition: opacity 0.5s;
+            position: absolute; bottom: 125px; right: 20px;
+            background: rgba(0,0,0,0.85); color: white; padding: 8px 18px;
+            border-radius: 50px; border: 2px solid var(--main-red);
+            font-size: 24px; font-weight: 900; display: flex; align-items: center; gap: 12px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.5); z-index: 1000;
+            transition: all 0.5s ease-in-out;
         }
 
-        /* --- Ticker & Others --- */
-        #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999; }
+        /* --- Footer Ticker --- */
+        #master-footer {
+            position: absolute; bottom: 10px; left: 0; right: 0;
+            display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999;
+        }
         .bar { display: flex; height: 50px; width: 100%; overflow: hidden; border: 2px solid var(--main-red); border-radius: 4px; }
         .top-bg { background: var(--pure-white); }
         .bottom-bg { background: var(--main-red); }
         marquee { width: 100%; font-size: 24px; font-weight: 900; text-transform: uppercase; line-height: 45px; }
         
-        #watermark { position: fixed; color: rgba(255,255,255,0.4); font-size: 26px; font-weight: 900; transition: all 1.2s; pointer-events: none; }
+        #watermark { position: fixed; color: rgba(255,255,255,0.4); font-size: 26px; font-weight: 900; z-index: 2000; transition: all 1.2s; pointer-events: none; }
     </style>
 </head>
 <body>
@@ -64,14 +75,14 @@
 
     <!-- Contact Flasher -->
     <div id="contact-flasher">
-        <i id="contact-icon" class="fas fa-phone-alt" style="color: white;"></i>
-        <span id="contact-text">86996-40061</span>
+        <i id="contact-icon" class="fas fa-phone-alt"></i>
+        <span id="contact-number">86996-40061</span>
     </div>
 
     <div id="scoreboard-wrapper">
         <div id="scoreboard-main-row">
             <div id="scoreboard-container">
-                <div id="jColorA" class="jersey-bar"></div>
+                <div id="stripA" class="jersey-strip"></div>
                 <div class="score-unit">
                     <div class="score-box" id="scoreA">0</div>
                     <div class="team-display" id="nameA">TEAM A</div>
@@ -80,16 +91,15 @@
                     <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
                     <div class="score-box" id="scoreB">0</div>
                 </div>
-                <div id="jColorB" class="jersey-bar"></div>
+                <div id="stripB" class="jersey-strip"></div>
             </div>
             <div id="match-timer-box">00:00</div>
         </div>
     </div>
 
-    <!-- Ticker -->
     <div id="master-footer">
-        <div class="bar top-bg"><marquee id="tour-name" class="txt-red">TOURNAMENT</marquee></div>
-        <div class="bar bottom-bg"><marquee id="scroll-bot" class="txt-white">LIVE COVERAGE</marquee></div>
+        <div class="bar top-bg"><marquee id="tour-name" style="color: #cc0000;">TOURNAMENT NAME</marquee></div>
+        <div class="bar bottom-bg"><marquee id="scroll-bot" style="color: #ffffff;">LIVE FROM PUNJAB</marquee></div>
     </div>
 
 <script>
@@ -97,64 +107,66 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    // --- Scoreboard Logic ---
+    // --- Scoreboard & Jersey Logic ---
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('nameA').innerText = (d.nameA || "TEAM A");
-        document.getElementById('nameB').innerText = (d.nameB || "TEAM B");
+        document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
+        document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
-        document.getElementById('jColorA').style.backgroundColor = d.colorA || "#ffffff";
-        document.getElementById('jColorB').style.backgroundColor = d.colorB || "#ffffff";
         
-        // Timer Show/Hide Logic
-        let time = d.matchTime || "00:00";
-        document.getElementById('match-timer-box').innerText = time;
-        document.getElementById('match-timer-box').style.display = (time !== "00:00") ? "flex" : "none";
+        // Jersey Colors
+        document.getElementById('stripA').style.backgroundColor = d.colorA || "#ff0000";
+        document.getElementById('stripB').style.backgroundColor = d.colorB || "#ffffff";
+
+        // Timer Auto-Show/Hide Logic
+        const timeVal = d.matchTime || "00:00";
+        const timerBox = document.getElementById('match-timer-box');
+        timerBox.innerText = timeVal;
         
+        if (timeVal === "00:00") {
+            timerBox.style.display = "none";
+        } else {
+            timerBox.style.display = "flex";
+        }
+
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    // --- Ticker & Watermark ---
+    // --- Contact Flasher Logic (15 Seconds Toggle) ---
+    let isWhatsApp = false;
+    function toggleContact() {
+        const icon = document.getElementById('contact-icon');
+        const flasher = document.getElementById('contact-flasher');
+        
+        if (isWhatsApp) {
+            icon.className = "fab fa-whatsapp";
+            icon.style.color = "#25D366";
+            flasher.style.borderColor = "#25D366";
+        } else {
+            icon.className = "fas fa-phone-alt";
+            icon.style.color = "white";
+            flasher.style.borderColor = "#cc0000";
+        }
+        isWhatsApp = !isWhatsApp;
+    }
+    setInterval(toggleContact, 15000); // 15 ਸੈਕਿੰਡ ਬਾਅਦ ਬਦਲੇਗਾ
+
+    // --- Ticker Logic ---
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
         document.getElementById('scroll-bot').innerText = (d.prizes || "LIVE COVERAGE").toUpperCase();
         document.getElementById('watermark').innerText = (d.watermarkText || "SUKHDEEP TV").toUpperCase();
-        document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
-        window.userContact = d.contact || "86996-40061"; // ਐਡਮਿਨ ਪੈਨਲ ਤੋਂ ਨੰਬਰ
+        document.getElementById('contact-number').innerText = d.contact || "86996-40061";
     });
 
-    // --- Contact Flasher Logic (Every 15 Sec) ---
-    let showWhatsApp = false;
-    function toggleContact() {
-        const icon = document.getElementById('contact-icon');
-        const text = document.getElementById('contact-text');
-        const flasher = document.getElementById('contact-flasher');
-        
-        flasher.style.opacity = 0;
-        setTimeout(() => {
-            if (showWhatsApp) {
-                icon.className = "fab fa-whatsapp";
-                icon.style.color = "#25D366";
-                text.innerText = window.userContact || "86996-40061";
-            } else {
-                icon.className = "fas fa-phone-alt";
-                icon.style.color = "white";
-                text.innerText = window.userContact || "86996-40061";
-            }
-            flasher.style.opacity = 1;
-            showWhatsApp = !showWhatsApp;
-        }, 500);
-    }
-    setInterval(toggleContact, 15000);
-
-    // --- Moving Watermark ---
+    // --- Watermark Movement ---
     function moveWatermark() {
         const wm = document.getElementById('watermark');
         const maxX = window.innerWidth - wm.offsetWidth - 50;
-        const maxY = window.innerHeight - 150; 
-        const minY = 120; 
+        const maxY = window.innerHeight - 200; 
+        const minY = 150; 
         wm.style.left = Math.floor(Math.random() * maxX) + 'px';
         wm.style.top = Math.floor(Math.random() * (maxY - minY)) + minY + 'px';
     }
