@@ -2,23 +2,21 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Full Setup</title>
+    <title>Sukhdeep TV - Professional Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
         :root {
-            --arrow-width: 20px;
-            --arrow-height: 50px;
-            --label-padding: 25px;
             --main-red: #cc0000;
             --pure-white: #ffffff;
             --pure-black: #000000;
+            --silver-grad: linear-gradient(145deg, #bdc3c7, #7f8c8d);
         }
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- 1. Scoreboard Wrapper --- */
+        /* --- Scoreboard Wrapper --- */
         #scoreboard-wrapper {
             position: absolute;
             top: 25px;
@@ -26,10 +24,9 @@
             display: flex;
             flex-direction: column;
             gap: 2px;
-            z-index: 100;
         }
 
-        #scoreboard-container {
+        #scoreboard-main {
             display: flex;
             border: 3px solid var(--pure-white);
             border-radius: 6px;
@@ -38,134 +35,116 @@
             background: var(--pure-black);
         }
 
+        /* Jersey Color Strip */
+        .jersey-color { width: 12px; height: 60px; }
+        #colorA { background: var(--main-red); } /* Firebase ਨਾਲ ਬਦਲ ਸਕਦਾ ਹੈ */
+        #colorB { background: var(--pure-white); }
+
         .score-unit { display: flex; height: 60px; align-items: center; }
-        .team-display { width: 250px; padding: 0 20px; font-size: 26px; font-weight: 900; text-transform: uppercase; }
-        .score-box { width: 80px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; }
+        .team-name { width: 220px; padding: 0 15px; font-size: 26px; font-weight: 900; text-transform: uppercase; color: white; }
+        
+        /* Score Box with Partition */
+        .score-area { 
+            display: flex; 
+            align-items: center; 
+            font-size: 40px; 
+            font-weight: 900; 
+            background: rgba(255,255,255,0.1); 
+        }
+        .partition { color: rgba(255,255,255,0.5); padding: 0 5px; font-weight: 300; }
+        .score-num { width: 60px; text-align: center; color: white; }
 
-        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
-        .side-b { background: var(--pure-white); color: var(--main-red); }
+        .side-b .team-name { text-align: right; }
 
+        /* Round/Half Info */
         #match-details {
             display: flex;
             justify-content: space-between;
-            padding: 0 5px;
+            padding: 2px 8px;
             color: var(--pure-white);
             font-size: 18px;
             font-weight: 700;
-            text-shadow: 2px 2px 4px #000;
             text-transform: uppercase;
+            background: rgba(0,0,0,0.7);
+            border-radius: 0 0 4px 4px;
         }
 
-        /* --- 2. Penalty System (Silver Color) --- */
+        /* --- Penalty Box (Silver) --- */
         #penalty-shots-container {
-            display: none; /* Firebase ਨਾਲ ਕੰਟਰੋਲ ਹੋਵੇਗਾ */
+            display: none; 
             justify-content: space-between;
-            background: linear-gradient(145deg, #bdc3c7, #2c3e50); 
-            padding: 10px;
+            align-items: center;
+            background: var(--silver-grad); 
+            padding: 8px 15px;
             border: 2px solid white;
             border-radius: 8px;
-            margin-top: 5px;
-            width: 710px;
+            margin-top: 8px;
+            width: 680px;
             box-shadow: 0 4px 10px rgba(0,0,0,0.5);
         }
 
-        .team-shots { display: flex; gap: 8px; align-items: center; }
+        .team-shots { display: flex; gap: 10px; }
         .ball {
-            width: 28px; height: 28px; border-radius: 50%;
-            background: #555; border: 2px solid #fff;
+            width: 30px; height: 30px; border-radius: 50%;
+            background: #444; border: 2px solid #fff;
             display: flex; align-items: center; justify-content: center;
-            font-size: 16px; font-weight: bold; color: white;
+            font-size: 18px; font-weight: bold; color: white;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.5);
         }
-        .ball.goal { background: #00ff00; color: #000; } 
-        .ball.miss { background: #ff0000; color: #fff; }
+        .ball.goal { background: #2ecc71; color: #fff; text-shadow: 0 0 5px black; } /* Green Ball */
+        .ball.miss { background: #e74c3c; color: #fff; } /* Red X */
 
-        /* --- 3. Ghaint Goal Animation --- */
-        #goal-overlay { 
-            position: fixed; top: 0; left: 0; width: 100%; height: 80vh; 
-            display: none; justify-content: center; align-items: center; 
-            z-index: 500; pointer-events: none; 
-        }
-        .goal-text { 
-            font-size: 180px; color: #fff; font-weight: 900; text-transform: uppercase;
-            text-shadow: 0 0 20px #ff0000, 0 10px 10px rgba(0,0,0,0.5);
-            animation: ghaintGoal 0.5s ease-in-out infinite alternate;
-        }
-        @keyframes ghaintGoal { 
-            from { transform: scale(0.8) rotate(-3deg); } 
-            to { transform: scale(1.1) rotate(3deg); } 
-        }
-
-        /* --- 4. Ticker Section --- */
-        #master-footer {
-            position: absolute; bottom: 10px; left: 0; right: 0;
-            display: flex; flex-direction: column; gap: 4px; padding: 0 10px;
-            z-index: 999;
-        }
-        .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
-        .top-bg { background: var(--pure-white); }
-        .bottom-bg { background: var(--main-red); }
-        .box-left, .box-right { width: 50%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
-        .hint-label { height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 var(--label-padding); font-weight: 900; font-size: 20px; text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100; }
-        .hint-label::after { content: ""; position: absolute; right: calc(var(--arrow-width) * -1); top: 0; border-top: 25px solid transparent; border-bottom: 25px solid transparent; }
-        .hint-red { background: var(--main-red); color: var(--pure-white); }
-        .hint-red::after { border-left: var(--arrow-width) solid var(--main-red); }
-        .hint-white { background: var(--pure-white); color: var(--main-red); }
-        .hint-white::after { border-left: var(--arrow-width) solid var(--pure-white); }
-        marquee { width: 100%; font-size: 24px; font-weight: 900; text-transform: uppercase; padding-left: 130px; }
-        .txt-red { color: var(--main-red); }
-        .txt-white { color: var(--pure-white); }
-        .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
-        
-        #watermark { position: fixed; top: 20px; right: 20px; color: rgba(255,255,255,0.7); font-size: 24px; font-weight: 900; }
+        /* Goal Overlay */
+        #goal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 80vh; display: none; justify-content: center; align-items: center; z-index: 1000; pointer-events: none; }
+        .goal-text { font-size: 200px; color: white; font-weight: 900; text-shadow: 0 0 30px red; animation: ghaint 0.5s infinite alternate; }
+        @keyframes ghaint { from { transform: scale(0.9); } to { transform: scale(1.1); } }
     </style>
 </head>
 <body>
 
     <div id="goal-overlay"><div class="goal-text">GOAL !!!</div></div>
-    <div id="watermark">SUKHDEEP TV</div>
 
     <div id="scoreboard-wrapper">
-        <div id="scoreboard-container">
-            <div class="score-unit side-a">
-                <div class="score-box" id="scoreA">0</div>
-                <div class="team-display" id="nameA">TEAM A</div>
+        <div id="scoreboard-main">
+            <!-- Team A -->
+            <div id="colorA" class="jersey-color"></div>
+            <div class="score-unit">
+                <div class="team-name" id="nameA">TEAM A</div>
+                <div class="score-area">
+                    <span class="partition">|</span>
+                    <span class="score-num" id="scoreA">0</span>
+                </div>
             </div>
-            <div class="score-unit side-b">
-                <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
-                <div class="score-box" id="scoreB">0</div>
+
+            <!-- Team B -->
+            <div class="score-unit side-b" style="border-left: 2px solid white;">
+                <div class="score-area">
+                    <span class="score-num" id="scoreB">0</span>
+                    <span class="partition">|</span>
+                </div>
+                <div class="team-name" id="nameB">TEAM B</div>
             </div>
+            <div id="colorB" class="jersey-color"></div>
         </div>
         
         <div id="match-details">
-            <span id="round-detail">ROUND: 1</span>
-            <span id="half-detail">FIRST HALF</span>
+            <span id="round-detail">ROUND 1</span>
+            <span id="half-detail">1ST HALF</span>
         </div>
 
-        <!-- Penalty Section -->
+        <!-- Penalty Box Under Half Info -->
         <div id="penalty-shots-container">
             <div class="team-shots" id="shotsA">
                 <div class="ball" id="a1">1</div><div class="ball" id="a2">2</div>
                 <div class="ball" id="a3">3</div><div class="ball" id="a4">4</div>
                 <div class="ball" id="a5">5</div>
             </div>
-            <div style="color: white; font-weight: 900; font-size: 14px;">PENALTY</div>
+            <div style="color: #2c3e50; font-weight: 900; font-size: 16px; letter-spacing: 1px;">PENALTY</div>
             <div class="team-shots" id="shotsB">
                 <div class="ball" id="b1">1</div><div class="ball" id="b2">2</div>
                 <div class="ball" id="b3">3</div><div class="ball" id="b4">4</div>
                 <div class="ball" id="b5">5</div>
             </div>
-        </div>
-    </div>
-
-    <!-- Ticker -->
-    <div id="master-footer">
-        <div class="bar top-bg">
-            <div class="box-left"><div class="hint-label hint-red">LIVE</div><marquee id="tour-name" class="txt-red">TOURNAMENT</marquee></div>
-            <div class="box-right"><div class="hint-label hint-red">TEAMS</div><marquee id="scroll-top" class="txt-red">UPCOMING</marquee></div>
-        </div>
-        <div class="bar bottom-bg">
-            <div class="box-left"><div class="hint-label hint-white">INFO</div><marquee id="sub-info" class="txt-white">LIVE COVERAGE</marquee></div>
-            <div class="box-right"><div class="hint-label hint-white">PRIZES</div><marquee id="scroll-bot" class="txt-white">UPDATING...</marquee><div class="clock-area" id="live-clock">00:00 AM</div></div>
         </div>
     </div>
 
@@ -186,50 +165,39 @@
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
-        document.getElementById('round-detail').innerText = "ROUND: " + (d.roundNum || "1");
-        document.getElementById('half-detail').innerText = (d.halfName || "FIRST HALF").toUpperCase();
+        document.getElementById('round-detail').innerText = "ROUND " + (d.roundNum || "1");
+        document.getElementById('half-detail').innerText = (d.halfName || "1ST HALF").toUpperCase();
+        
+        // Jersey Colors from Firebase
+        if(d.teamColorA) document.getElementById('colorA').style.background = d.teamColorA;
+        if(d.teamColorB) document.getElementById('colorB').style.background = d.teamColorB;
 
         // Penalty Logic
         for (let i = 1; i <= 5; i++) {
-            let bA = document.getElementById('a' + i);
-            let sA = d['a' + i]; 
-            if (sA === "goal") { bA.className = "ball goal"; bA.innerText = "●"; }
-            else if (sA === "miss") { bA.className = "ball miss"; bA.innerText = "X"; }
-            else { bA.className = "ball"; bA.innerText = i; }
-
-            let bB = document.getElementById('b' + i);
-            let sB = d['b' + i];
-            if (sB === "goal") { bB.className = "ball goal"; bB.innerText = "●"; }
-            else if (sB === "miss") { bB.className = "ball miss"; bB.innerText = "X"; }
-            else { bB.className = "ball"; bB.innerText = i; }
+            updateBall('a', i, d['a' + i]);
+            updateBall('b', i, d['b' + i]);
         }
 
         document.getElementById('penalty-shots-container').style.display = (d.showPenalty === true) ? 'flex' : 'none';
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    db.ref("tickerData").on("value", (snap) => {
-        const d = snap.val() || {};
-        document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
-        document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
-        document.getElementById('sub-info').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
-        document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
-        document.getElementById('watermark').innerText = (d.watermarkText || "SUKHDEEP TV").toUpperCase();
-        document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
-    });
+    function updateBall(team, num, status) {
+        let el = document.getElementById(team + num);
+        if (status === "goal") { 
+            el.className = "ball goal"; el.innerText = "●"; 
+        } else if (status === "miss") { 
+            el.className = "ball miss"; el.innerText = "X"; 
+        } else { 
+            el.className = "ball"; el.innerText = num; 
+        }
+    }
 
     function triggerGoal() {
         const overlay = document.getElementById('goal-overlay');
         overlay.style.display = 'flex';
         setTimeout(() => { overlay.style.display = 'none'; }, 3000);
     }
-
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
 </script>
 </body>
 </html>
