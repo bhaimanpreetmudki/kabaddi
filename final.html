@@ -184,9 +184,53 @@
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
         
+      let localMatchTime = 0; // ਟਾਈਮ ਨੂੰ ਸੈਕਿੰਡਾਂ ਵਿੱਚ ਰੱਖਣ ਲਈ
+    let timerInterval = null;
+
+    db.ref("users/" + clientID + "/matchData").on("value", (snap) => {
+        const d = snap.val() || {};
+        
+        // --- ਪੁਰਾਣਾ ਟਾਈਮਰ ਲੋਜਿਕ ਹਟਾ ਕੇ ਇਹ ਲਗਾਓ ---
         let mTime = d.matchTime || "00:00";
-        document.getElementById('match-timer-box').innerText = mTime;
-        document.getElementById('match-timer-box').style.display = (mTime === "00:00" || mTime === "") ? "none" : "flex";
+        
+        // ਜੇਕਰ ਪੈਨਲ ਤੋਂ ਨਵਾਂ ਟਾਈਮ ਆਇਆ ਹੈ, ਤਾਂ ਲੋਕਲ ਟਾਈਮਰ ਨੂੰ ਅਪਡੇਟ ਕਰੋ
+        const parts = mTime.split(':');
+        const newSeconds = parseInt(parts[0]) * 60 + parseInt(parts[1]);
+        
+        // ਸਿਰਫ ਉਦੋਂ ਅਪਡੇਟ ਕਰੋ ਜੇਕਰ ਟਾਈਮ ਵਿੱਚ 5 ਸੈਕਿੰਡ ਤੋਂ ਵੱਧ ਦਾ ਫਰਕ ਹੋਵੇ (ਸਿੰਕ ਕਰਨ ਲਈ)
+        if (Math.abs(newSeconds - localMatchTime) > 5 || localMatchTime === 0) {
+            localMatchTime = newSeconds;
+        }
+
+        // ਜੇਕਰ ਟਾਈਮਰ ਚੱਲ ਰਿਹਾ ਹੈ (Admin Panel ਮੁਤਾਬਕ)
+        if (d.timerRunning === true) { // ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਤੁਹਾਡੇ ਪੈਨਲ ਵਿੱਚ timerRunning ਸਟੇਟ ਹੈ
+            if (!timerInterval) {
+                timerInterval = setInterval(() => {
+                    localMatchTime++;
+                    updateTimerDisplay();
+                }, 1000);
+            }
+        } else {
+            clearInterval(timerInterval);
+            timerInterval = null;
+            updateTimerDisplay();
+        }
+        
+        // ਬਾਕੀ ਸਾਰਾ UI ਅਪਡੇਟ (Score, Names, etc.) ਇੱਥੇ ਹੀ ਰਹਿਣ ਦਿਓ...
+    });
+
+    // ਟਾਈਮ ਨੂੰ 00:00 ਫਾਰਮੈਟ ਵਿੱਚ ਦਿਖਾਉਣ ਲਈ ਫੰਕਸ਼ਨ
+    function updateTimerDisplay() {
+        const mins = Math.floor(localMatchTime / 60);
+        const secs = localMatchTime % 60;
+        const formattedTime = 
+            (mins < 10 ? "0" : "") + mins + ":" + 
+            (secs < 10 ? "0" : "") + secs;
+        
+        const timerBox = document.getElementById('match-timer-box');
+        timerBox.innerText = formattedTime;
+        timerBox.style.display = (formattedTime === "00:00") ? "none" : "flex";
+    }
 
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
