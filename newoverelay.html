@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Professional Sports Overlay - Ultimate Edition</title>
+    <title>Sukhdeep TV Style - Professional Scoreboard</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -15,173 +15,244 @@
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- Goal Animation --- */
-        #goal-overlay {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(204, 0, 0, 0.8);
-            display: none; align-items: center; justify-content: center;
-            z-index: 10000; font-size: 150px; color: white; font-weight: 900;
-            text-transform: uppercase; animation: flash 0.5s infinite;
-        }
-        @keyframes flash { 0% { opacity: 1; } 50% { opacity: 0.5; } 100% { opacity: 1; } }
-
-        /* --- Tournament Name (Top Center) --- */
-        #tour-top {
-            position: absolute; top: 5px; left: 50%; transform: translateX(-50%);
-            background: var(--main-red); color: white; padding: 2px 30px;
-            font-size: 20px; border-radius: 0 0 10px 10px; border: 2px solid white;
-        }
-
-        /* --- Main Scoreboard --- */
+        /* --- Scoreboard Container --- */
         #scoreboard-wrapper {
-            position: absolute; top: 40px; left: 50%; transform: translateX(-50%);
-            display: flex; flex-direction: column; align-items: center; gap: 5px;
+            position: absolute;
+            top: 40px;
+            left: 20px;
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            filter: drop-shadow(0 5px 15px rgba(0,0,0,0.5));
         }
 
-        #main-board {
-            display: flex; align-items: center; background: rgba(0,0,0,0.8);
-            border: 3px solid white; border-radius: 8px; overflow: hidden;
+        /* --- Top Stats (Round & Half) --- */
+        .top-stats {
+            display: flex;
+            justify-content: space-between;
+            background: rgba(0,0,0,0.8);
+            border: 2px solid var(--pure-white);
+            border-bottom: none;
+            padding: 2px 10px;
+            font-size: 16px;
+            color: gold;
+            text-transform: uppercase;
         }
 
-        .team-section { display: flex; align-items: center; width: 350px; height: 60px; padding: 0 15px; }
-        .jersey-color { width: 15px; height: 40px; border: 1px solid white; margin-right: 10px; }
-        .team-name { flex-grow: 1; font-size: 28px; color: white; text-transform: uppercase; overflow: hidden; }
-        .score-box { width: 80px; height: 60px; display: flex; align-items: center; justify-content: center; font-size: 45px; font-weight: 900; }
-        
-        .side-a { background: var(--main-red); border-right: 2px solid white; }
-        .side-b { background: var(--pure-white); color: var(--main-red); flex-direction: row-reverse; }
-        .score-a { background: black; color: white; }
-        .score-b { background: white; color: black; }
-
-        /* --- Stats (Round & Half) --- */
-        #stats-bar { display: flex; gap: 20px; font-size: 20px; color: white; font-weight: bold; text-shadow: 2px 2px 4px black; }
-
-        /* --- Time Box --- */
-        #time-box {
-            background: black; color: #f1c40f; padding: 5px 15px; border: 2px solid white;
-            font-size: 24px; border-radius: 5px; margin-top: 5px;
+        #scoreboard-container {
+            display: flex;
+            border: 3px solid var(--pure-white);
+            border-radius: 4px;
+            overflow: hidden;
+            height: 60px;
+            background: var(--pure-black);
         }
 
-        /* --- Penalty Box (Balls) --- */
-        #penalty-container {
-            display: none; margin-top: 10px; background: rgba(0,0,0,0.7);
-            padding: 10px; border-radius: 10px; border: 1px solid white;
-        }
-        .p-row { display: flex; gap: 10px; align-items: center; margin: 5px 0; }
-        .ball { width: 25px; height: 25px; border-radius: 50%; border: 2px solid white; font-size: 16px; display: flex; align-items: center; justify-content: center; }
-        .goal-ball { background: #2ecc71; } /* Green for Goal */
-        .miss-ball { background: #e74c3c; } /* Red for Miss */
+        .score-unit { display: flex; align-items: center; height: 100%; }
 
-        /* --- Watermark Text --- */
-        #wm-text { position: absolute; bottom: 80px; left: 20px; color: white; font-size: 24px; font-weight: 900; display: none; }
+        /* ਟੀਮ ਬਾਕਸ ਵੱਡਾ ਕੀਤਾ ਗਿਆ ਹੈ */
+        .team-display { 
+            width: 280px; 
+            height: 100%;
+            display: flex; 
+            align-items: center; 
+            padding: 0 20px; 
+            font-size: 26px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+        }
+
+        .score-box { 
+            width: 70px; 
+            height: 100%;
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 40px; 
+            font-weight: 900; 
+            background: #111; 
+            color: var(--pure-white); 
+        }
+
+        /* ਵਿਚਕਾਰਲਾ ਟਾਈਮ ਬਾਕਸ */
+        .time-box {
+            width: 90px;
+            background: var(--pure-white);
+            color: var(--main-red);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            font-weight: 900;
+            border-left: 2px solid var(--main-red);
+            border-right: 2px solid var(--main-red);
+        }
+
+        /* ਪੈਨਲਟੀ ਬਾਲ ਸਿਸਟਮ */
+        #penalty-bar {
+            display: none;
+            background: rgba(0,0,0,0.9);
+            border: 2px solid var(--pure-white);
+            border-top: none;
+            padding: 5px 15px;
+            justify-content: space-between;
+            font-size: 20px;
+        }
+
+        /* ਗੋਲ ਐਨੀਮੇਸ਼ਨ */
+        #goal-anim {
+            position: fixed;
+            top: 40%;
+            left: 50%;
+            transform: translate(-50%, -50%) scale(0);
+            font-size: 120px;
+            color: #2ecc71;
+            text-shadow: 0 0 20px #000;
+            font-weight: 900;
+            z-index: 1000;
+            transition: 0.5s cubic-bezier(0.175, 0.885, 0.32, 1.275);
+        }
+        .show-goal { transform: translate(-50%, -50%) scale(1) !important; }
+
+        /* Ticker Style - Same as before */
+        #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 6px; padding: 0 10px; }
+        .bar { display: flex; height: 50px; width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
+        .top-bg { background: var(--pure-white); }
+        .bottom-bg { background: var(--main-red); }
+        .box-left { width: 45%; height: 100%; position: relative; display: flex; align-items: center; }
+        .box-right { width: 55%; height: 100%; position: relative; display: flex; align-items: center; }
+        .hint-label { height: 100%; display: flex; align-items: center; padding: 0 25px; font-weight: 900; font-size: 22px; text-transform: uppercase; position: absolute; z-index: 100; }
+        .hint-red { background: var(--main-red); color: var(--pure-white); }
+        .hint-white { background: var(--pure-white); color: var(--main-red); }
+        marquee { width: 100%; font-size: 24px; font-weight: 900; padding-left: 110px; }
+        .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; border-left: 2px solid var(--main-red); }
     </style>
 </head>
 <body>
 
-    <div id="goal-overlay">GOAL !!!</div>
-    <div id="tour-top">TOURNAMENT NAME</div>
+    <div id="goal-anim">GOAL!!!</div>
 
     <div id="scoreboard-wrapper">
-        <div id="main-board">
-            <div class="team-section side-a">
-                <div id="jA" class="jersey-color"></div>
-                <div id="nameA" class="team-name">TEAM A</div>
-                <div id="scoreA" class="score-box score-a">0</div>
+        <!-- Round & Half Stats -->
+        <div class="top-stats">
+            <span id="stat-round">ROUND</span>
+            <span id="stat-half">HALF</span>
+        </div>
+
+        <div id="scoreboard-container">
+            <!-- Team A -->
+            <div class="score-unit" id="unitA">
+                <div class="score-box" id="scoreA">0</div>
+                <div class="team-display" id="nameA">TEAM A</div>
             </div>
-            <div class="team-section side-b">
-                <div id="jB" class="jersey-color"></div>
-                <div id="nameB" class="team-name" style="text-align: right; margin-right: 10px;">TEAM B</div>
-                <div id="scoreB" class="score-box score-b">0</div>
+
+            <!-- Match Time -->
+            <div class="time-box" id="match-time">00:00</div>
+
+            <!-- Team B -->
+            <div class="score-unit" id="unitB">
+                <div class="team-display" id="nameB" style="text-align: right; justify-content: flex-end;">TEAM B</div>
+                <div class="score-box" id="scoreB">0</div>
             </div>
         </div>
 
-        <div id="stats-bar">
-            <span id="round-disp">ROUND STATS</span>
-            <span style="color: red;">|</span>
-            <span id="half-disp">HALF STATS</span>
+        <!-- Penalty Box -->
+        <div id="penalty-bar">
+            <div id="ballsA"></div>
+            <div style="color:white; font-size:14px;">PENALTY</div>
+            <div id="ballsB"></div>
         </div>
+    </div>
 
-        <div id="time-box">00:00</div>
-
-        <div id="penalty-container">
-            <div class="p-row">
-                <span style="color: white; width: 60px;">TEAM A:</span>
-                <div id="pA-balls" style="display: flex; gap: 5px;"></div>
+    <!-- Ticker Section -->
+    <div id="master-footer">
+        <div class="bar top-bg">
+            <div class="box-left">
+                <div class="hint-label hint-red">LIVE</div>
+                <marquee scrollamount="5" class="txt-red"><span id="tour-name">LOADING...</span></marquee>
             </div>
-            <div class="p-row">
-                <span style="color: white; width: 60px;">TEAM B:</span>
-                <div id="pB-balls" style="display: flex; gap: 5px;"></div>
+            <div class="box-right">
+                <div class="hint-label hint-red">NEXT MATCH</div>
+                <marquee scrollamount="6" class="txt-red"><span id="scroll-top">LOADING...</span></marquee>
+            </div>
+        </div>
+        <div class="bar bottom-bg">
+            <div class="box-left">
+                <div class="hint-label hint-white">INFO</div>
+                <marquee scrollamount="4" style="color:white"><span id="sub-info">LOADING...</span></marquee>
+            </div>
+            <div class="box-right">
+                <div class="hint-label hint-white">PRIZES</div>
+                <marquee scrollamount="5" style="color:white; width: calc(100% - 140px);"><span id="scroll-bot">LOADING...</span></marquee>
+                <div class="clock-area" id="live-clock">00:00 AM</div>
             </div>
         </div>
     </div>
 
-    <div id="wm-text"></div>
-
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
-    firebase.initializeApp(firebaseConfig);
+    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
     let lastScoreA = 0, lastScoreB = 0;
 
-    function renderBalls(containerId, dataString) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        if(!dataString) return;
-        
-        // ਪੈਨਲਟੀ ਸਟਰਿੰਗ ਨੂੰ ਤੋੜ ਕੇ ਬਾਲ ਬਣਾਉਣਾ (✅/❌)
-        const symbols = dataString.match(/✅|❌/g) || [];
-        symbols.forEach(s => {
-            const ball = document.createElement('div');
-            ball.className = s === '✅' ? 'ball goal-ball' : 'ball miss-ball';
-            ball.innerText = s === '✅' ? '⚽' : 'X';
-            container.appendChild(ball);
-        });
-    }
-
-    function triggerGoalAnim() {
-        const div = document.getElementById('goal-overlay');
-        div.style.display = 'flex';
-        setTimeout(() => { div.style.display = 'none'; }, 4000);
-    }
-
-    // --- Firebase Logic ---
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         
-        // Goal Animation check
-        if(d.scoreA > lastScoreA || d.scoreB > lastScoreB) triggerGoalAnim();
-        lastScoreA = d.scoreA || 0; lastScoreB = d.scoreB || 0;
-
+        // ਟੀਮਾਂ ਦੇ ਨਾਮ ਅਤੇ ਸਕੋਰ
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
-        document.getElementById('scoreA').innerText = d.scoreA || "0";
-        document.getElementById('scoreB').innerText = d.scoreB || "0";
-        document.getElementById('time-box').innerText = d.matchTime || "00:00";
-        document.getElementById('round-disp').innerText = d.matchRound || "ROUND";
-        document.getElementById('half-disp').innerText = d.round || "HALF";
         
-        // Jersey Colors
-        document.getElementById('jA').style.backgroundColor = d.colorA || "white";
-        document.getElementById('jB').style.backgroundColor = d.colorB || "white";
+        // ਸਕੋਰ ਐਨੀਮੇਸ਼ਨ ਚੈੱਕ
+        if(d.scoreA > lastScoreA || d.scoreB > lastScoreB) {
+            showGoalAnim();
+        }
+        lastScoreA = d.scoreA || 0;
+        lastScoreB = d.scoreB || 0;
 
-        // Penalty Logic
-        document.getElementById('penalty-container').style.display = d.penaltyVisible ? 'block' : 'none';
-        renderBalls('pA-balls', d.penaltyA);
-        renderBalls('pB-balls', d.penaltyB);
+        document.getElementById('scoreA').innerText = lastScoreA;
+        document.getElementById('scoreB').innerText = lastScoreB;
 
-        // Watermark Text
-        const wm = document.getElementById('wm-text');
-        if(d.watermarkText && d.wmMode !== 'off') {
-            wm.innerText = d.watermarkText;
-            wm.style.display = 'block';
-        } else { wm.style.display = 'none'; }
+        // ਜਰਸੀ ਕਲਰ ਸੈਟਿੰਗ
+        document.getElementById('unitA').style.background = d.colorA || "var(--main-red)";
+        document.getElementById('unitA').style.color = (d.colorA === "#ffffff") ? "black" : "white";
+        document.getElementById('unitB').style.background = d.colorB || "var(--pure-white)";
+        document.getElementById('unitB').style.color = (d.colorB === "#ffffff") ? "var(--main-red)" : "white";
+
+        // ਰਾਊਂਡ ਅਤੇ ਹਾਫ ਸਟੈਟਸ
+        document.getElementById('stat-round').innerText = d.matchRound || "ROUND";
+        document.getElementById('stat-half').innerText = d.round || "MATCH START";
+        document.getElementById('match-time').innerText = d.matchTime || "00:00";
+
+        // ਪੈਨਲਟੀ ਬਾਲ ਸਿਸਟਮ
+        document.getElementById('penalty-bar').style.display = d.penaltyVisible ? 'flex' : 'none';
+        document.getElementById('ballsA').innerText = d.penaltyA || "";
+        document.getElementById('ballsB').innerText = d.penaltyB || "";
+
+        document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('tour-top').innerText = (d.tournamentName || "TOURNAMENT 2026").toUpperCase();
+        document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT 2026").toUpperCase();
+        document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
+        document.getElementById('sub-info').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
+        document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
+        document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
+
+    function showGoalAnim() {
+        const el = document.getElementById('goal-anim');
+        el.classList.add('show-goal');
+        setTimeout(() => el.classList.remove('show-goal'), 2500);
+    }
+
+    function updateClock() {
+        const now = new Date();
+        document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }
+    setInterval(updateClock, 1000);
+    updateClock();
 </script>
 </body>
 </html>
