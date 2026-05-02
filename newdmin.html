@@ -2,232 +2,219 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV Style - Professional Overlay</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Sukhdeep TV - Admin Panel</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --arrow-width: 20px;
-            --arrow-height: 50px;
-            --label-padding: 25px;
-            --main-red: #cc0000;
-            --pure-white: #ffffff;
-            --pure-black: #000000;
-        }
-
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; height: 100vh; width: 100vw; }
-
-        /* --- Watermark Style --- */
-        #wm-img {
-            position: absolute;
-            width: 130px; 
-            z-index: 9999;
-            display: none;
-            filter: drop-shadow(2px 2px 8px rgba(0,0,0,0.6));
-            transition: opacity 0.5s ease-in-out;
-        }
-
-        /* --- Scoreboard & Round Section --- */
-        #scoreboard-wrapper {
-            position: absolute;
-            top: 25px;
-            left: 20px;
-            display: flex;
-            flex-direction: column;
-            gap: 2px;
-        }
-
-        #scoreboard-container {
-            display: flex;
-            flex-direction: row;
-            border: 3px solid var(--pure-white);
-            border-radius: 6px;
-            overflow: hidden;
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
-        }
-
-        .score-unit { display: flex; height: 55px; align-items: center; }
-        .team-display { width: 250px; height: 100%; display: flex; align-items: center; padding: 0 20px; font-size: 22px; font-weight: 900; text-transform: uppercase; }
-        .score-box { width: 70px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; background: var(--pure-black); color: var(--pure-white); }
-        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
-        .side-b { background: var(--pure-white); color: var(--main-red); }
-
-        /* --- Round / Half Text (Transparent) --- */
-        #match-meta-info {
-            display: flex;
-            gap: 15px;
-            color: #ffffff;
-            font-size: 22px;
-            font-weight: 900;
-            text-transform: uppercase;
-            text-shadow: 2px 2px 4px #000000;
-            padding: 5px 10px;
-        }
-
-        /* --- Ticker Style (No Changes) --- */
-        #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 6px; padding: 0 10px; }
-        .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
-        .top-bg { background: var(--pure-white); }
-        .bottom-bg { background: var(--main-red); }
-        .box-left { width: 45%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
-        .box-right { width: 55%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
-        .hint-label { height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 var(--label-padding); font-weight: 900; font-size: 22px; text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100; }
-        .hint-label::after { content: ""; position: absolute; right: calc(var(--arrow-width) * -1); top: 0; width: 0; height: 0; border-top: calc(var(--arrow-height) / 2) solid transparent; border-bottom: calc(var(--arrow-height) / 2) solid transparent; z-index: 100; }
-        .hint-red { background: var(--main-red); color: var(--pure-white); }
-        .hint-red::after { border-left: var(--arrow-width) solid var(--main-red); }
-        .hint-white { background: var(--pure-white); color: var(--main-red); }
-        .hint-white::after { border-left: var(--arrow-width) solid var(--pure-white); }
-        marquee { width: 100%; font-size: 24px; font-weight: 900; text-transform: uppercase; z-index: 10; padding-left: 110px; }
-        .txt-red { color: var(--main-red); }
-        .txt-white { color: var(--pure-white); }
-        .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
+        body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
+        .card { background: #161b22; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #30363d; overflow: hidden; margin-bottom: 12px; box-sizing: border-box; }
+        .header { background: #cc0000; color: white; padding: 10px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; }
+        .teams-container { display: flex; padding: 10px; gap: 5px; background: #0d1117; align-items: center; }
+        .team-box { flex: 2; text-align: center; padding: 10px; border-radius: 8px; background: #161b22; border-top: 4px solid #fff; }
+        .mid-controls { flex: 1; display: flex; flex-direction: column; gap: 8px; align-items: center; }
+        .score-val { font-size: 38px; font-weight: 900; color: #2ecc71; margin: 2px 0; }
+        .btn-pm { border: none; color: white; padding: 10px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 2px; }
+        .card-btn { padding: 10px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 11px; flex: 1; width: 100%; }
+        .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
+        .label-title { font-size: 11px; color: #8b949e; display: block; margin-top: 10px; text-align: left; text-transform: uppercase; font-weight: bold; padding-left: 5px; }
+        .content { padding: 15px; }
+        .btn-update { background: #238636; color: white; padding: 12px; border-radius: 6px; border:none; cursor:pointer; width:100%; font-weight:bold; margin-top: 10px;}
+        .btn-mode { background: #30363d; color: white; font-size: 12px; padding: 12px; border: none; border-radius: 4px; cursor: pointer; text-transform: uppercase; }
+        .btn-active { border: 2px solid #fff !important; background: #cc0000 !important; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
     </style>
 </head>
 <body>
 
-    <img src="" id="wm-img">
+<div id="main-content" style="width: 100%; max-width: 500px;">
+    
+    <!-- 1. SCOREBOARD -->
+    <div class="card">
+        <div class="header">Scoreboard Control</div>
+        <div class="teams-container">
+            <div class="team-box" id="boxA">
+                <input type="text" id="nameA" class="std-input" placeholder="Team A" oninput="updateMatchDB()">
+                <div class="score-val" id="dispA">0</div>
+                <div style="display:flex;">
+                    <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
+                    <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
+                </div>
+            </div>
 
-    <div id="scoreboard-wrapper">
-        <div id="scoreboard-container">
-            <div class="score-unit side-a">
-                <div class="score-box" id="scoreA">0</div>
-                <div class="team-display" id="nameA">TEAM A</div>
+            <div class="mid-controls">
+                <button id="visBtn" class="card-btn" style="background:#238636;" onclick="toggleScoreVis()">SHOW</button>
+                <button class="card-btn" style="background:#333;" onclick="resetScore()">RESET</button>
+                <div style="font-weight:bold; color:#444;">VS</div>
             </div>
-            <div class="score-unit side-b">
-                <div class="team-display" id="nameB" style="text-align: right; justify-content: flex-end;">TEAM B</div>
-                <div class="score-box" id="scoreB">0</div>
+
+            <div class="team-box" id="boxB">
+                <input type="text" id="nameB" class="std-input" placeholder="Team B" oninput="updateMatchDB()">
+                <div class="score-val" id="dispB">0</div>
+                <div style="display:flex;">
+                    <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
+                    <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
+                </div>
             </div>
-        </div>
-        <div id="match-meta-info">
-            <span id="round-disp"></span>
-            <span id="half-disp"></span>
         </div>
     </div>
 
-    <div id="master-footer">
-        <div class="bar top-bg">
-            <div class="box-left">
-                <div class="hint-label hint-red">LIVE</div>
-                <marquee scrollamount="5" class="txt-red"><span id="tour-name">LOADING...</span></marquee>
-            </div>
-            <div class="box-right">
-                <div class="hint-label hint-red">NEXT MATCH</div>
-                <marquee scrollamount="6" class="txt-red"><span id="scroll-top">LOADING...</span></marquee>
-            </div>
-        </div>
-        <div class="bar bottom-bg">
-            <div class="box-left">
-                <div class="hint-label hint-white">INFO</div>
-                <marquee scrollamount="4" class="txt-white"><span id="sub-info">LOADING...</span></marquee>
-            </div>
-            <div class="box-right">
-                <div class="hint-label hint-white">PRIZES</div>
-                <marquee scrollamount="5" class="txt-white" style="width: calc(100% - 140px);"><span id="scroll-bot">LOADING...</span></marquee>
-                <div class="clock-area" id="live-clock">00:00 AM</div>
+    <!-- 2. MATCH DETAILS (Round & Half) -->
+    <div class="card">
+        <div class="header">Match Details</div>
+        <div class="content">
+            <div class="grid-2">
+                <div>
+                    <span class="label-title">Round</span>
+                    <input type="text" id="matchRound" class="std-input" placeholder="e.g. Semi Final" oninput="updateMatchDB()">
+                </div>
+                <div>
+                    <span class="label-title">Half Status</span>
+                    <input type="text" id="halfStatus" class="std-input" placeholder="e.g. 1st Half" oninput="updateMatchDB()">
+                </div>
             </div>
         </div>
     </div>
+
+    <!-- 3. WATERMARK / LOGO CONTROL -->
+    <div class="card">
+        <div class="header">Watermark & Logo</div>
+        <div class="content">
+            <span class="label-title">Logo Image URL</span>
+            <input type="text" id="logoUrl" class="std-input" placeholder="Paste Logo Link Here" oninput="updateMatchDB()">
+            
+            <span class="label-title">Animation Mode</span>
+            <div class="grid-3">
+                <button id="wm-off" class="btn-mode" onclick="setWMMode('off')">OFF</button>
+                <button id="wm-blink" class="btn-mode" onclick="setWMMode('blink')">BLINK</button>
+                <button id="wm-scroll" class="btn-mode" onclick="setWMMode('scroll')">SCROLL</button>
+                <button id="wm-bounce" class="btn-mode" onclick="setWMMode('bounce')">BOUNCE</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. TICKER CONTROL -->
+    <div class="card">
+        <div class="header">Ticker Information</div>
+        <div class="content">
+            <button id="tickerVisBtn" class="btn-update" style="margin-bottom:10px;" onclick="toggleTickerVis()">TICKER: ON</button>
+            
+            <span class="label-title">Tournament Name</span>
+            <input type="text" id="tourName" class="std-input">
+            
+            <span class="label-title">Participating Teams</span>
+            <input type="text" id="teamsList" class="std-input">
+
+            <span class="label-title">Prizes / Info</span>
+            <input type="text" id="prizeList" class="std-input">
+
+            <span class="label-title">Next Program</span>
+            <input type="text" id="nextProg" class="std-input">
+
+            <button class="btn-update" onclick="updateTickerDB()">UPDATE TICKER INFO</button>
+        </div>
+    </div>
+
+</div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    const wm = document.getElementById('wm-img');
-    let currentWMMode = "";
-    let wmInterval;
-    let animId;
+    let sVis = true;
+    let tVis = true;
+    let currentScoreA = 0;
+    let currentScoreB = 0;
 
-    // --- Watermark Logic ---
-    function stopWM() {
-        clearInterval(wmInterval);
-        cancelAnimationFrame(animId);
-        wm.style.display = "none";
-        wm.style.opacity = 1;
+    // --- Update Score & Match Details ---
+    function updateMatchDB() {
+        db.ref("matchData").update({
+            nameA: document.getElementById('nameA').value,
+            nameB: document.getElementById('nameB').value,
+            round: document.getElementById('matchRound').value,
+            halfStatus: document.getElementById('halfStatus').value,
+            logoUrl: document.getElementById('logoUrl').value
+        });
     }
 
-    function runWatermark(mode, url) {
-        stopWM();
-        if (!url || mode === "off") return;
-        
-        wm.src = url;
-        wm.style.display = "block";
-        currentWMMode = mode;
+    function changeScore(team, val) {
+        let newVal = (team === 'scoreA' ? currentScoreA : currentScoreB) + val;
+        if(newVal < 0) newVal = 0;
+        db.ref("matchData").update({ [team]: newVal });
+    }
 
-        if (mode === "blink") {
-            const doBlink = () => {
-                wm.style.left = Math.random() * (window.innerWidth - 150) + "px";
-                wm.style.top = Math.random() * (window.innerHeight - 250) + "px";
-                wm.style.opacity = 1;
-                setTimeout(() => { wm.style.opacity = 0; }, 3000);
-            };
-            doBlink();
-            wmInterval = setInterval(doBlink, 7000);
-        } 
-        else if (mode === "scroll") {
-            let xPos = window.innerWidth;
-            wm.style.top = "30%";
-            const doScroll = () => {
-                xPos -= 3;
-                if (xPos < -150) xPos = window.innerWidth;
-                wm.style.left = xPos + "px";
-                animId = requestAnimationFrame(doScroll);
-            };
-            doScroll();
-        }
-        else if (mode === "bounce") {
-            let px = 100, py = 100, vx = 2, vy = 2;
-            const doBounce = () => {
-                px += vx; py += vy;
-                if (px + 130 >= window.innerWidth || px <= 0) vx *= -1;
-                if (py + 130 >= window.innerHeight || py <= 0) vy *= -1;
-                wm.style.left = px + "px";
-                wm.style.top = py + "px";
-                animId = requestAnimationFrame(doBounce);
-            };
-            doBounce();
+    function toggleScoreVis() {
+        sVis = !sVis;
+        db.ref("matchData").update({ scoreVisible: sVis });
+    }
+
+    function resetScore() {
+        if(confirm("Reset Score?")) {
+            db.ref("matchData").update({ scoreA: 0, scoreB: 0 });
         }
     }
 
-    // --- Firebase Listeners ---
+    // --- Watermark Mode ---
+    function setWMMode(mode) {
+        db.ref("matchData").update({ wmMode: mode });
+    }
+
+    // --- Ticker Updates ---
+    function toggleTickerVis() {
+        tVis = !tVis;
+        db.ref("tickerData").update({ tickerVis: tVis });
+    }
+
+    function updateTickerDB() {
+        db.ref("tickerData").update({
+            tournamentName: document.getElementById('tourName').value,
+            participatingTeams: document.getElementById('teamsList').value,
+            prizes: document.getElementById('prizeList').value,
+            nextProgram: document.getElementById('nextProg').value
+        });
+        alert("Ticker Updated!");
+    }
+
+    // --- Sync Data from Firebase ---
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
-        document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
-        document.getElementById('scoreA').innerText = d.scoreA || "0";
-        document.getElementById('scoreB').innerText = d.scoreB || "0";
+        currentScoreA = d.scoreA || 0;
+        currentScoreB = d.scoreB || 0;
+        document.getElementById('dispA').innerText = currentScoreA;
+        document.getElementById('dispB').innerText = currentScoreB;
+        document.getElementById('nameA').value = d.nameA || "";
+        document.getElementById('nameB').value = d.nameB || "";
+        document.getElementById('matchRound').value = d.round || "";
+        document.getElementById('halfStatus').value = d.halfStatus || "";
+        document.getElementById('logoUrl').value = d.logoUrl || "";
         
-        // Round & Half Display (Ensure Keys match your Panel)
-        document.getElementById('round-disp').innerText = d.round || "";
-        document.getElementById('half-disp').innerText = d.halfStatus || "";
-        
-        document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
+        sVis = !!d.scoreVisible;
+        const vBtn = document.getElementById('visBtn');
+        vBtn.innerText = sVis ? "HIDE" : "SHOW";
+        vBtn.style.background = sVis ? "#da3633" : "#238636";
 
-        // Watermark Trigger
-        if (d.logoUrl && d.wmMode && d.wmMode !== currentWMMode) {
-            runWatermark(d.wmMode, d.logoUrl);
-        } else if (d.wmMode === "off") {
-            stopWM();
-            currentWMMode = "off";
-        }
+        // Active Watermark Button
+        const modes = ['off', 'blink', 'scroll', 'bounce'];
+        modes.forEach(m => {
+            document.getElementById('wm-'+m).className = (d.wmMode === m) ? 'btn-mode btn-active' : 'btn-mode';
+        });
     });
 
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT 2026").toUpperCase();
-        document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
-        document.getElementById('sub-info').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
-        document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
-        document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
+        document.getElementById('tourName').value = d.tournamentName || "";
+        document.getElementById('teamsList').value = d.participatingTeams || "";
+        document.getElementById('prizeList').value = d.prizes || "";
+        document.getElementById('nextProg').value = d.nextProgram || "";
+        
+        tVis = !!d.tickerVis;
+        const tBtn = document.getElementById('tickerVisBtn');
+        tBtn.innerText = tVis ? "TICKER: SHOWING" : "TICKER: HIDDEN";
+        tBtn.style.background = tVis ? "#238636" : "#da3633";
     });
-
-    function updateClock() {
-        const now = new Date();
-        document.getElementById('live-clock').innerText = now.toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
-    }
-    setInterval(updateClock, 1000);
-    updateClock();
 </script>
 </body>
 </html>
