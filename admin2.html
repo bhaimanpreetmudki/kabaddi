@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Ultimate Admin - Pro Timer & Score</title>
+    <title>Manpreet Admin - Penalty & Match Pro</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
@@ -19,42 +19,59 @@
         .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .section-divider { border-bottom: 1px solid #30363d; margin: 10px 0; padding-bottom: 5px; color: #2ecc71; font-size: 11px; font-weight: bold; text-transform: uppercase; }
+        .penalty-log { font-size: 11px; color: #f1c40f; margin-top: 5px; min-height: 15px; background: #0d1117; border-radius: 4px; padding: 2px; }
     </style>
 </head>
 <body>
 
 <div id="main-content" style="width: 100%; max-width: 500px;">
     
-    <!-- SCOREBOARD -->
+    <!-- SCOREBOARD & PENALTY BOX -->
     <div class="card">
-        <div class="header">Scoreboard</div>
+        <div class="header">Scoreboard & Penalty Box</div>
         <div class="teams-container">
             <div class="team-box" id="boxA">
                 <input type="text" id="nameA" class="std-input" placeholder="Team A" oninput="updateMatchDB()">
                 <div class="score-val" id="dispA">0</div>
-                <div style="display:flex;">
+                <div style="display:flex; margin-bottom: 8px;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
                 </div>
+                <!-- Penalty Controls Team A -->
+                <input type="text" id="pNumA" class="std-input" style="margin-bottom:4px;" placeholder="Player No.">
+                <div class="grid-2">
+                    <button class="card-btn" style="background:#f1c40f; color:black;" onclick="giveCard('A', 'Yellow')">Yellow</button>
+                    <button class="card-btn" style="background:#da3633;" onclick="giveCard('A', 'Red')">Red</button>
+                </div>
+                <div class="penalty-log" id="logA">No Cards</div>
             </div>
+
             <div style="flex:1; text-align:center;">
                 <button id="visBtn" class="card-btn" style="background:#238636; margin-bottom:5px;" onclick="toggleVis()">SHOW</button>
                 <button class="card-btn" style="background:#333;" onclick="resetMatch()">RESET</button>
             </div>
+
             <div class="team-box" id="boxB">
                 <input type="text" id="nameB" class="std-input" placeholder="Team B" oninput="updateMatchDB()">
                 <div class="score-val" id="dispB">0</div>
-                <div style="display:flex;">
+                <div style="display:flex; margin-bottom: 8px;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
                 </div>
+                <!-- Penalty Controls Team B -->
+                <input type="text" id="pNumB" class="std-input" style="margin-bottom:4px;" placeholder="Player No.">
+                <div class="grid-2">
+                    <button class="card-btn" style="background:#f1c40f; color:black;" onclick="giveCard('B', 'Yellow')">Yellow</button>
+                    <button class="card-btn" style="background:#da3633;" onclick="giveCard('B', 'Red')">Red</button>
+                </div>
+                <div class="penalty-log" id="logB">No Cards</div>
             </div>
         </div>
     </div>
 
-    <!-- TIMER CONTROL (FIXED FOR BACKGROUND RUNNING) -->
+    <!-- TIMER & MATCH SETTINGS -->
     <div class="card">
-        <div class="header">Persistent Timer Control</div>
+        <div class="header">Persistent Timer & Match Box</div>
         <div style="padding:15px; text-align:center; background:#0d1117;">
             <div id="timerShow" style="font-size:45px; color:#f1c40f; font-family:monospace; margin-bottom:10px;">00:00</div>
             <div class="grid-2">
@@ -62,42 +79,33 @@
                 <button class="card-btn" style="background:#333; height:45px;" onclick="resetTimer()">RESET TIME</button>
             </div>
             
-            <div class="section-divider">Match Settings</div>
+            <div class="section-divider">Match Details</div>
             <div class="grid-2">
-                <div>
-                    <span style="font-size:9px; color:#8b949e;">ROUND / MATCH NO</span>
-                    <input type="text" id="roundInp" class="std-input" placeholder="e.g. Match 1" oninput="updateMatchDB()">
-                </div>
-                <div>
-                    <span style="font-size:9px; color:#8b949e;">HALF (1st/2nd)</span>
-                    <input type="text" id="halfInp" class="std-input" placeholder="e.g. 1st Half" oninput="updateMatchDB()">
-                </div>
+                <input type="text" id="matchTitle" class="std-input" placeholder="Match (e.g. Semi-Final)" oninput="updateMatchDB()">
+                <input type="text" id="roundInp" class="std-input" placeholder="Round (e.g. 1st Half)" oninput="updateMatchDB()">
             </div>
-            <div style="margin-top:5px;">
-                <span style="font-size:9px; color:#8b949e;">AUTO-STOP DURATION (MIN)</span>
-                <input type="number" id="matchDuration" class="std-input" placeholder="e.g. 20" oninput="updateMatchDB()">
-            </div>
+            <input type="number" id="matchDuration" class="std-input" placeholder="Auto-Stop (Min)" oninput="updateMatchDB()">
         </div>
     </div>
 
-    <!-- OTHER INFO BOXES -->
+    <!-- BROADCAST INFO & WATERMARK -->
     <div class="card">
-        <div class="header">Tournament & Prize Info</div>
+        <div class="header">Broadcast & Watermark</div>
         <div style="padding:15px;">
             <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
+            <input type="text" id="watermarkText" class="std-input" placeholder="Watermark (Channel Name)">
             <input type="text" id="prizeInfo" class="std-input" placeholder="Prize Details">
             <div class="grid-2">
                 <input type="text" id="callNum" class="std-input" placeholder="Call No.">
                 <input type="text" id="whatsappNum" class="std-input" placeholder="WhatsApp No.">
             </div>
-            <button class="card-btn" style="background:#238636; padding:12px;" onclick="updateTickerInfo()">UPDATE INFO</button>
+            <button class="card-btn" style="background:#238636; padding:12px;" onclick="updateTickerInfo()">UPDATE BROADCAST INFO</button>
         </div>
     </div>
 
 </div>
 
 <script>
-    // Firebase Setup
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
@@ -107,138 +115,137 @@
     const matchRef = db.ref("users/" + clientID + "/matchData");
     const tickerRef = db.ref("users/" + clientID + "/tickerData");
 
-    let isRunning = false;
-    let startTime = 0;
-    let elapsedTime = 0;
-    let timerInterval = null;
-    let sVis = true;
+    let isRunning = false, startTime = 0, elapsedTime = 0, sVis = true;
+    let cardsA = {}, cardsB = {}; // Local card tracking
 
-    // --- SCORE & SETTINGS LOGIC ---
     function updateMatchDB() {
         matchRef.update({
             nameA: document.getElementById('nameA').value,
             nameB: document.getElementById('nameB').value,
+            matchTitle: document.getElementById('matchTitle').value,
             round: document.getElementById('roundInp').value,
-            half: document.getElementById('halfInp').value,
             duration: document.getElementById('matchDuration').value
         });
     }
 
     function changeScore(team, val) {
         matchRef.child(team).once('value', snap => {
-            let newVal = Math.max(0, (snap.val() || 0) + val);
-            matchRef.update({ [team]: newVal });
+            matchRef.update({ [team]: Math.max(0, (snap.val() || 0) + val) });
+        });
+    }
+
+    // --- PENALTY LOGIC (PLANTI BOX) ---
+    function giveCard(team, type) {
+        let pNum = document.getElementById('pNum' + team).value;
+        if (!pNum) return alert("Enter Player Number First!");
+
+        matchRef.child('cards' + team).once('value', snap => {
+            let data = snap.val() || {};
+            let count = data[pNum] || 0;
+
+            if (type === 'Yellow') {
+                count++;
+                if (count >= 2) {
+                    alert("Player " + pNum + " got 2 Yellows. Sending Red!");
+                    data[pNum] = "RED"; // Auto Red on 2nd Yellow
+                } else {
+                    data[pNum] = count;
+                }
+            } else {
+                data[pNum] = "RED";
+            }
+
+            matchRef.child('cards' + team).set(data);
+            document.getElementById('pNum' + team).value = ""; // Clear input
         });
     }
 
     function toggleVis() { matchRef.child('scoreVisible').set(!sVis); }
 
     function resetMatch() {
-        if(confirm("Reset Score?")) matchRef.update({ scoreA: 0, scoreB: 0 });
+        if(confirm("Reset Everything?")) {
+            matchRef.update({ scoreA: 0, scoreB: 0, cardsA: {}, cardsB: {} });
+        }
     }
 
-    // --- NEW PERSISTENT TIMER LOGIC ---
+    // --- TIMER LOGIC ---
     function handleTimerClick() {
+        const now = Date.now();
         if (!isRunning) {
-            // Start: Save the current server time minus any already elapsed time
-            const now = Date.now();
-            matchRef.update({
-                timerRunning: true,
-                startTime: now - elapsedTime
-            });
+            matchRef.update({ timerRunning: true, startTime: now - elapsedTime });
         } else {
-            // Stop: Save the current elapsed time and stop
-            matchRef.update({
-                timerRunning: false,
-                elapsedTime: Date.now() - startTime
-            });
+            matchRef.update({ timerRunning: false, elapsedTime: Date.now() - startTime });
         }
     }
 
     function resetTimer() {
         if(confirm("Reset Timer?")) {
-            matchRef.update({
-                timerRunning: false,
-                startTime: 0,
-                elapsedTime: 0,
-                matchTime: "00:00"
-            });
+            matchRef.update({ timerRunning: false, startTime: 0, elapsedTime: 0, matchTime: "00:00" });
         }
     }
 
     function updateTimerDisplay() {
-        if (isRunning) {
-            const now = Date.now();
-            const diff = now - startTime;
-            displayTime(diff);
-        } else {
-            displayTime(elapsedTime);
-        }
-    }
-
-    function displayTime(ms) {
-        let totalSeconds = Math.floor(ms / 1000);
-        let m = Math.floor(totalSeconds / 60);
-        let s = totalSeconds % 60;
+        let ms = isRunning ? (Date.now() - startTime) : elapsedTime;
+        let totalSec = Math.floor(ms / 1000);
+        let m = Math.floor(totalSec / 60), s = totalSec % 60;
         let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
         document.getElementById('timerShow').innerText = timeStr;
-        
-        // Push string to DB for Overlay (only if it changes to save bandwidth)
         matchRef.child('matchTime').set(timeStr);
-
-        // Auto Stop
-        let limit = parseInt(document.getElementById('matchDuration').value);
-        if (limit > 0 && m >= limit && isRunning) {
-            handleTimerClick();
-            alert("Match Finished!");
-        }
     }
 
-    // --- TICKER LOGIC ---
     function updateTickerInfo() {
         tickerRef.update({
             tournamentName: document.getElementById('tourName').value,
+            watermark: document.getElementById('watermarkText').value,
             prizeInfo: document.getElementById('prizeInfo').value,
             callNumber: document.getElementById('callNum').value,
             whatsappNumber: document.getElementById('whatsappNum').value
         });
-        alert("Ticker Updated!");
+        alert("Broadcast Info Updated!");
     }
 
-    // --- REALTIME LISTENERS ---
-    matchRef.on("value", (snap) => {
+    // --- REALTIME SYNC ---
+    matchRef.on("value", snap => {
         const data = snap.val() || {};
-        
-        // Sync Scores
         document.getElementById('dispA').innerText = data.scoreA || 0;
         document.getElementById('dispB').innerText = data.scoreB || 0;
         document.getElementById('nameA').value = data.nameA || "";
         document.getElementById('nameB').value = data.nameB || "";
-        
-        // Sync Round & Half (Working now)
+        document.getElementById('matchTitle').value = data.matchTitle || "";
         document.getElementById('roundInp').value = data.round || "";
-        document.getElementById('halfInp').value = data.half || "";
         document.getElementById('matchDuration').value = data.duration || "";
 
-        // Sync Visibility
+        // Sync Cards Visual
+        const renderCards = (cardData) => {
+            if (!cardData) return "No Cards";
+            return Object.entries(cardData).map(([p, v]) => 
+                v === "RED" ? `P${p}:🟥` : `P${p}:` + "🟨".repeat(v)
+            ).join(" | ");
+        };
+        document.getElementById('logA').innerHTML = renderCards(data.cardsA);
+        document.getElementById('logB').innerHTML = renderCards(data.cardsB);
+
         sVis = !!data.scoreVisible;
         document.getElementById('visBtn').innerText = sVis ? "HIDE" : "SHOW";
         document.getElementById('visBtn').style.background = sVis ? "#da3633" : "#238636";
 
-        // Sync Timer State
         isRunning = !!data.timerRunning;
         startTime = data.startTime || 0;
         elapsedTime = data.elapsedTime || 0;
-
         document.getElementById('timerBtn').innerText = isRunning ? "STOP" : "START";
         document.getElementById('timerBtn').style.background = isRunning ? "#da3633" : "#238636";
-
-        if (!isRunning) displayTime(elapsedTime);
     });
 
-    // Run the display update every second
-    setInterval(updateTimerDisplay, 1000);
+    tickerRef.on("value", snap => {
+        const data = snap.val() || {};
+        document.getElementById('tourName').value = data.tournamentName || "";
+        document.getElementById('watermarkText').value = data.watermark || "";
+        document.getElementById('prizeInfo').value = data.prizeInfo || "";
+        document.getElementById('callNum').value = data.callNumber || "";
+        document.getElementById('whatsappNum').value = data.whatsappNumber || "";
+    });
 
+    setInterval(updateTimerDisplay, 1000);
 </script>
 </body>
 </html>
