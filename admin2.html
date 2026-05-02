@@ -101,17 +101,9 @@
         <div style="padding:10px;">
             <input type="text" id="tourNameInput" class="std-input" style="margin-bottom:0;" placeholder="e.g. Kabaddi Cup 2026" oninput="updateTickerInfo()">
         </div>
-    </div>
+    </div> 
 
-    <!-- 5. PRIZE DETAILS -->
-    <div class="card">
-        <div class="header">Prize Details</div>
-        <div style="padding:10px;">
-            <textarea id="prizeInput" class="std-input" style="height:50px; resize:none; margin-bottom:0;" placeholder="1st Prize: 51,000 | 2nd Prize: 31,000" oninput="updateTickerInfo()"></textarea>
-        </div>
-    </div>
-
-    <!-- 6. TEAM MATCH LIST -->
+    <!-- 5. TEAM MATCH LIST -->
     <div class="card">
         <div class="header">Team Match List</div>
         <div style="padding:10px;">
@@ -119,6 +111,25 @@
         </div>
     </div>
 
+
+    <!-- 6. PRIZE DETAILS -->
+    <div class="card">
+        <div class="header">Prize Details</div>
+        <div style="padding:10px;">
+            <textarea id="prizeInput" class="std-input" style="height:50px; resize:none; margin-bottom:0;" placeholder="1st Prize: 51,000 | 2nd Prize: 31,000" oninput="updateTickerInfo()"></textarea>
+        </div>
+    </div>
+
+    <!-- 7. Upcoming Events Box -->
+<div class="card">
+    <div class="header" style="background:#0056b3;"><i class="fas fa-calendar-alt"></i> Upcoming Events</div>
+    <div style="padding:10px;">
+        <textarea id="upcomingEventsInput" class="std-input" 
+                  style="height:60px; resize:none; margin-bottom:0;" 
+                  placeholder="e.g. Next Match: Team C vs Team D @ 5:00 PM" 
+                  oninput="updateTickerInfo()"></textarea>
+    </div>
+</div>
     <!-- 7. CHANNEL & CONTACT -->
     <div class="card">
         <div class="header">Channel & Contact</div>
@@ -190,15 +201,17 @@
     }
 
     function updateTickerInfo() {
-        tickerRef.update({
-            tournamentName: document.getElementById('tourNameInput').value,
-            prizeInfo: document.getElementById('prizeInput').value,
-            matchList: document.getElementById('matchListInput').value,
-            watermark: document.getElementById('watermarkText').value,
-            callNumber: document.getElementById('callNum').value,
-            whatsappNumber: document.getElementById('whatsappNum').value
-        });
-    }
+    tickerRef.update({
+        // ਪੁਰਾਣੇ ਫੰਕਸ਼ਨਾਂ ਦੇ ਨਾਲ ਇਹ ਲਾਈਨ ਜੋੜੋ
+        upcomingEvents: document.getElementById('upcomingEventsInput').value,
+        tournamentName: document.getElementById('tourNameInput').value,
+        prizeInfo: document.getElementById('prizeInput').value,
+        matchList: document.getElementById('matchListInput').value,
+        watermark: document.getElementById('watermarkText').value,
+        callNumber: document.getElementById('callNum').value,
+        whatsappNumber: document.getElementById('whatsappNum').value
+    });
+}
 
     function toggleVis() { matchRef.child('scoreVisible').set(!sVis); }
     function resetMatch() { if(confirm("Reset Everything?")) matchRef.update({ scoreA: 0, scoreB: 0, pA: "", pB: "" }); }
@@ -224,14 +237,17 @@
     });
 
     tickerRef.on("value", snap => {
-        const d = snap.val() || {};
-        document.getElementById('tourNameInput').value = d.tournamentName || "";
-        document.getElementById('prizeInput').value = d.prizeInfo || "";
-        document.getElementById('matchListInput').value = d.matchList || "";
-        document.getElementById('watermarkText').value = d.watermark || "";
-        document.getElementById('callNum').value = d.callNumber || "";
-        document.getElementById('whatsappNum').value = d.whatsappNumber || "";
-    });
+    const d = snap.val() || {};
+    // ਇਹ ਲਾਈਨ ਜੋੜੋ
+    document.getElementById('upcomingEventsInput').value = d.upcomingEvents || "";
+
+    document.getElementById('tourNameInput').value = d.tournamentName || "";
+    document.getElementById('prizeInput').value = d.prizeInfo || "";
+    document.getElementById('matchListInput').value = d.matchList || "";
+    document.getElementById('watermarkText').value = d.watermark || "";
+    document.getElementById('callNum').value = d.callNumber || "";
+    document.getElementById('whatsappNum').value = d.whatsappNumber || "";
+});
 
     setInterval(() => {
         let ms = isRunning ? (Date.now() - startTime) : elapsedTime;
