@@ -3,103 +3,124 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Manpreet Admin - Penalty & Match Pro</title>
+    <title>Manpreet Admin - Multi-Panel Pro</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
         .card { background: #161b22; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #30363d; overflow: hidden; margin-bottom: 12px; box-sizing: border-box; }
-        .header { background: #238636; color: white; padding: 8px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 12px; }
+        .header { background: #238636; color: white; padding: 10px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 12px; display: flex; justify-content: space-between; align-items: center; }
         .teams-container { display: flex; padding: 10px; gap: 5px; background: #0d1117; align-items: center; }
         .team-box { flex: 2; text-align: center; padding: 10px; border-radius: 8px; background: #161b22; border-top: 4px solid #fff; }
         .score-val { font-size: 38px; font-weight: 900; color: #2ecc71; margin: 2px 0; }
         .btn-pm { border: none; color: white; padding: 5px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 2px; }
-        .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 10px; flex: 1; width: 100%; }
+        .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 10px; flex: 1; }
         .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
-        .section-divider { border-bottom: 1px solid #30363d; margin: 10px 0; padding-bottom: 5px; color: #2ecc71; font-size: 11px; font-weight: bold; text-transform: uppercase; }
-        .penalty-log { font-size: 11px; color: #f1c40f; margin-top: 5px; min-height: 15px; background: #0d1117; border-radius: 4px; padding: 2px; }
+        .penalty-log { font-size: 11px; color: #f1c40f; margin-top: 5px; min-height: 20px; background: #0d1117; border-radius: 4px; padding: 5px; }
+        .hidden-panel { display: none; padding: 15px; background: #0d1117; }
+        .section-title { color: #2ecc71; font-size: 11px; font-weight: bold; margin-bottom: 8px; text-transform: uppercase; border-left: 3px solid #2ecc71; padding-left: 5px; }
     </style>
 </head>
 <body>
 
 <div id="main-content" style="width: 100%; max-width: 500px;">
     
-    <!-- SCOREBOARD & PENALTY BOX -->
+    <!-- 1. LIVE SCOREBOARD -->
     <div class="card">
-        <div class="header">Scoreboard & Penalty Box</div>
+        <div class="header">Live Scoreboard</div>
         <div class="teams-container">
             <div class="team-box" id="boxA">
                 <input type="text" id="nameA" class="std-input" placeholder="Team A" oninput="updateMatchDB()">
                 <div class="score-val" id="dispA">0</div>
-                <div style="display:flex; margin-bottom: 8px;">
+                <div style="display:flex;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
                 </div>
-                <!-- Penalty Controls Team A -->
-                <input type="text" id="pNumA" class="std-input" style="margin-bottom:4px;" placeholder="Player No.">
-                <div class="grid-2">
-                    <button class="card-btn" style="background:#f1c40f; color:black;" onclick="giveCard('A', 'Yellow')">Yellow</button>
-                    <button class="card-btn" style="background:#da3633;" onclick="giveCard('A', 'Red')">Red</button>
-                </div>
-                <div class="penalty-log" id="logA">No Cards</div>
             </div>
-
             <div style="flex:1; text-align:center;">
-                <button id="visBtn" class="card-btn" style="background:#238636; margin-bottom:5px;" onclick="toggleVis()">SHOW</button>
-                <button class="card-btn" style="background:#333;" onclick="resetMatch()">RESET</button>
+                <div id="timerShow" style="font-size:20px; color:#f1c40f; font-family:monospace; margin-bottom:5px;">00:00</div>
+                <button id="visBtn" class="card-btn" style="background:#238636; width:100%;" onclick="toggleVis()">SHOW</button>
             </div>
-
             <div class="team-box" id="boxB">
                 <input type="text" id="nameB" class="std-input" placeholder="Team B" oninput="updateMatchDB()">
                 <div class="score-val" id="dispB">0</div>
-                <div style="display:flex; margin-bottom: 8px;">
+                <div style="display:flex;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
                 </div>
-                <!-- Penalty Controls Team B -->
-                <input type="text" id="pNumB" class="std-input" style="margin-bottom:4px;" placeholder="Player No.">
-                <div class="grid-2">
-                    <button class="card-btn" style="background:#f1c40f; color:black;" onclick="giveCard('B', 'Yellow')">Yellow</button>
-                    <button class="card-btn" style="background:#da3633;" onclick="giveCard('B', 'Red')">Red</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 2. PENALTY BOX (Show/Hide Panel) -->
+    <div class="card">
+        <div class="header" onclick="togglePanel('penaltyPanel')" style="cursor:pointer;">
+            <span><i class="fa-solid fa-gavel"></i> Penalty Box (Planti)</span>
+            <i class="fa-solid fa-chevron-down"></i>
+        </div>
+        <div id="penaltyPanel" class="hidden-panel">
+            <div class="grid-2">
+                <div>
+                    <div class="section-title">Team A Cards</div>
+                    <input type="text" id="pNumA" class="std-input" placeholder="Player No.">
+                    <div class="grid-2">
+                        <button class="card-btn" style="background:#f1c40f; color:black;" onclick="giveCard('A', 'Yellow')">Yellow</button>
+                        <button class="card-btn" style="background:#da3633;" onclick="giveCard('A', 'Red')">Red</button>
+                    </div>
+                    <div class="penalty-log" id="logA">No Cards</div>
                 </div>
-                <div class="penalty-log" id="logB">No Cards</div>
+                <div>
+                    <div class="section-title">Team B Cards</div>
+                    <input type="text" id="pNumB" class="std-input" placeholder="Player No.">
+                    <div class="grid-2">
+                        <button class="card-btn" style="background:#f1c40f; color:black;" onclick="giveCard('B', 'Yellow')">Yellow</button>
+                        <button class="card-btn" style="background:#da3633;" onclick="giveCard('B', 'Red')">Red</button>
+                    </div>
+                    <div class="penalty-log" id="logB">No Cards</div>
+                </div>
             </div>
+            <button class="card-btn" style="background:#333; width:100%; margin-top:10px;" onclick="resetCards()">Clear All Cards</button>
         </div>
     </div>
 
-    <!-- TIMER & MATCH SETTINGS -->
+    <!-- 3. TEAM MATCH LIST & UPCOMING EVENTS -->
     <div class="card">
-        <div class="header">Persistent Timer & Match Box</div>
-        <div style="padding:15px; text-align:center; background:#0d1117;">
-            <div id="timerShow" style="font-size:45px; color:#f1c40f; font-family:monospace; margin-bottom:10px;">00:00</div>
-            <div class="grid-2">
-                <button id="timerBtn" class="card-btn" style="background:#238636; height:45px;" onclick="handleTimerClick()">START</button>
-                <button class="card-btn" style="background:#333; height:45px;" onclick="resetTimer()">RESET TIME</button>
-            </div>
+        <div class="header">Match & Upcoming List</div>
+        <div style="padding:15px; background:#0d1117;">
+            <div class="section-title">Current Match List</div>
+            <textarea id="matchList" class="std-input" style="height:60px;" placeholder="Team 1 vs Team 2&#10;Team 3 vs Team 4" oninput="updateTickerInfo()"></textarea>
             
-            <div class="section-divider">Match Details</div>
-            <div class="grid-2">
-                <input type="text" id="matchTitle" class="std-input" placeholder="Match (e.g. Semi-Final)" oninput="updateMatchDB()">
-                <input type="text" id="roundInp" class="std-input" placeholder="Round (e.g. 1st Half)" oninput="updateMatchDB()">
-            </div>
-            <input type="number" id="matchDuration" class="std-input" placeholder="Auto-Stop (Min)" oninput="updateMatchDB()">
+            <div class="section-title">Upcoming Events / Prizes</div>
+            <textarea id="prizeInfo" class="std-input" style="height:60px;" placeholder="Next Match: 2:00 PM&#10;First Prize: 51,000" oninput="updateTickerInfo()"></textarea>
         </div>
     </div>
 
-    <!-- BROADCAST INFO & WATERMARK -->
+    <!-- 4. WATERMARK & CONTACT INFO -->
     <div class="card">
-        <div class="header">Broadcast & Watermark</div>
-        <div style="padding:15px;">
-            <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
-            <input type="text" id="watermarkText" class="std-input" placeholder="Watermark (Channel Name)">
-            <input type="text" id="prizeInfo" class="std-input" placeholder="Prize Details">
+        <div class="header">Watermark & Contact</div>
+        <div style="padding:15px; background:#0d1117;">
+            <div class="section-title">Channel Branding</div>
+            <input type="text" id="watermarkText" class="std-input" placeholder="Channel Name (Watermark)" oninput="updateTickerInfo()">
+            
+            <div class="section-title">Contact Details</div>
             <div class="grid-2">
-                <input type="text" id="callNum" class="std-input" placeholder="Call No.">
-                <input type="text" id="whatsappNum" class="std-input" placeholder="WhatsApp No.">
+                <input type="text" id="callNum" class="std-input" placeholder="Call Number" oninput="updateTickerInfo()">
+                <input type="text" id="whatsappNum" class="std-input" placeholder="WhatsApp" oninput="updateTickerInfo()">
             </div>
-            <button class="card-btn" style="background:#238636; padding:12px;" onclick="updateTickerInfo()">UPDATE BROADCAST INFO</button>
+        </div>
+    </div>
+
+    <!-- 5. TIMER & SYSTEM CONTROLS -->
+    <div class="card">
+        <div class="header">System Controls</div>
+        <div style="padding:15px; background:#0d1117;">
+            <div class="grid-2">
+                <button id="timerBtn" class="card-btn" style="background:#238636; height:40px;" onclick="handleTimerClick()">START TIMER</button>
+                <button class="card-btn" style="background:#333; height:40px;" onclick="resetTimer()">RESET TIMER</button>
+            </div>
+            <button class="card-btn" style="background:#da3633; width:100%; margin-top:10px; height:40px;" onclick="resetMatch()">RESET FULL MATCH</button>
         </div>
     </div>
 
@@ -116,15 +137,17 @@
     const tickerRef = db.ref("users/" + clientID + "/tickerData");
 
     let isRunning = false, startTime = 0, elapsedTime = 0, sVis = true;
-    let cardsA = {}, cardsB = {}; // Local card tracking
+
+    // Toggle Panel Visibility
+    function togglePanel(id) {
+        const panel = document.getElementById(id);
+        panel.style.display = (panel.style.display === "block") ? "none" : "block";
+    }
 
     function updateMatchDB() {
         matchRef.update({
             nameA: document.getElementById('nameA').value,
-            nameB: document.getElementById('nameB').value,
-            matchTitle: document.getElementById('matchTitle').value,
-            round: document.getElementById('roundInp').value,
-            duration: document.getElementById('matchDuration').value
+            nameB: document.getElementById('nameB').value
         });
     }
 
@@ -134,94 +157,68 @@
         });
     }
 
-    // --- PENALTY LOGIC (PLANTI BOX) ---
     function giveCard(team, type) {
         let pNum = document.getElementById('pNum' + team).value;
-        if (!pNum) return alert("Enter Player Number First!");
-
+        if (!pNum) return alert("Player Number?");
         matchRef.child('cards' + team).once('value', snap => {
             let data = snap.val() || {};
-            let count = data[pNum] || 0;
-
             if (type === 'Yellow') {
-                count++;
-                if (count >= 2) {
-                    alert("Player " + pNum + " got 2 Yellows. Sending Red!");
-                    data[pNum] = "RED"; // Auto Red on 2nd Yellow
-                } else {
-                    data[pNum] = count;
-                }
+                data[pNum] = (data[pNum] || 0) + 1;
+                if (data[pNum] >= 2) data[pNum] = "RED";
             } else {
                 data[pNum] = "RED";
             }
-
             matchRef.child('cards' + team).set(data);
-            document.getElementById('pNum' + team).value = ""; // Clear input
+            document.getElementById('pNum' + team).value = "";
+        });
+    }
+
+    function resetCards() {
+        if(confirm("Clear All Cards?")) {
+            matchRef.child('cardsA').remove();
+            matchRef.child('cardsB').remove();
+        }
+    }
+
+    function updateTickerInfo() {
+        tickerRef.update({
+            matchList: document.getElementById('matchList').value,
+            prizeInfo: document.getElementById('prizeInfo').value,
+            watermark: document.getElementById('watermarkText').value,
+            callNumber: document.getElementById('callNum').value,
+            whatsappNumber: document.getElementById('whatsappNum').value
         });
     }
 
     function toggleVis() { matchRef.child('scoreVisible').set(!sVis); }
 
-    function resetMatch() {
-        if(confirm("Reset Everything?")) {
-            matchRef.update({ scoreA: 0, scoreB: 0, cardsA: {}, cardsB: {} });
-        }
-    }
-
-    // --- TIMER LOGIC ---
     function handleTimerClick() {
         const now = Date.now();
-        if (!isRunning) {
-            matchRef.update({ timerRunning: true, startTime: now - elapsedTime });
-        } else {
-            matchRef.update({ timerRunning: false, elapsedTime: Date.now() - startTime });
-        }
+        if (!isRunning) matchRef.update({ timerRunning: true, startTime: now - elapsedTime });
+        else matchRef.update({ timerRunning: false, elapsedTime: Date.now() - startTime });
     }
 
     function resetTimer() {
-        if(confirm("Reset Timer?")) {
-            matchRef.update({ timerRunning: false, startTime: 0, elapsedTime: 0, matchTime: "00:00" });
+        if(confirm("Reset Timer?")) matchRef.update({ timerRunning: false, startTime: 0, elapsedTime: 0, matchTime: "00:00" });
+    }
+
+    function resetMatch() {
+        if(confirm("Full Reset? Scores and Cards will be zero.")) {
+            matchRef.update({ scoreA: 0, scoreB: 0 });
+            resetCards();
+            resetTimer();
         }
     }
 
-    function updateTimerDisplay() {
-        let ms = isRunning ? (Date.now() - startTime) : elapsedTime;
-        let totalSec = Math.floor(ms / 1000);
-        let m = Math.floor(totalSec / 60), s = totalSec % 60;
-        let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
-        document.getElementById('timerShow').innerText = timeStr;
-        matchRef.child('matchTime').set(timeStr);
-    }
-
-    function updateTickerInfo() {
-        tickerRef.update({
-            tournamentName: document.getElementById('tourName').value,
-            watermark: document.getElementById('watermarkText').value,
-            prizeInfo: document.getElementById('prizeInfo').value,
-            callNumber: document.getElementById('callNum').value,
-            whatsappNumber: document.getElementById('whatsappNum').value
-        });
-        alert("Broadcast Info Updated!");
-    }
-
-    // --- REALTIME SYNC ---
+    // Sync Data
     matchRef.on("value", snap => {
         const data = snap.val() || {};
         document.getElementById('dispA').innerText = data.scoreA || 0;
         document.getElementById('dispB').innerText = data.scoreB || 0;
         document.getElementById('nameA').value = data.nameA || "";
         document.getElementById('nameB').value = data.nameB || "";
-        document.getElementById('matchTitle').value = data.matchTitle || "";
-        document.getElementById('roundInp').value = data.round || "";
-        document.getElementById('matchDuration').value = data.duration || "";
-
-        // Sync Cards Visual
-        const renderCards = (cardData) => {
-            if (!cardData) return "No Cards";
-            return Object.entries(cardData).map(([p, v]) => 
-                v === "RED" ? `P${p}:🟥` : `P${p}:` + "🟨".repeat(v)
-            ).join(" | ");
-        };
+        
+        const renderCards = (c) => c ? Object.entries(c).map(([p, v]) => v === "RED" ? `P${p}🟥` : `P${p}🟨`).join(" ") : "No Cards";
         document.getElementById('logA').innerHTML = renderCards(data.cardsA);
         document.getElementById('logB').innerHTML = renderCards(data.cardsB);
 
@@ -232,20 +229,26 @@
         isRunning = !!data.timerRunning;
         startTime = data.startTime || 0;
         elapsedTime = data.elapsedTime || 0;
-        document.getElementById('timerBtn').innerText = isRunning ? "STOP" : "START";
-        document.getElementById('timerBtn').style.background = isRunning ? "#da3633" : "#238636";
+        document.getElementById('timerBtn').innerText = isRunning ? "STOP TIMER" : "START TIMER";
     });
 
     tickerRef.on("value", snap => {
-        const data = snap.val() || {};
-        document.getElementById('tourName').value = data.tournamentName || "";
-        document.getElementById('watermarkText').value = data.watermark || "";
-        document.getElementById('prizeInfo').value = data.prizeInfo || "";
-        document.getElementById('callNum').value = data.callNumber || "";
-        document.getElementById('whatsappNum').value = data.whatsappNumber || "";
+        const d = snap.val() || {};
+        document.getElementById('matchList').value = d.matchList || "";
+        document.getElementById('prizeInfo').value = d.prizeInfo || "";
+        document.getElementById('watermarkText').value = d.watermark || "";
+        document.getElementById('callNum').value = d.callNumber || "";
+        document.getElementById('whatsappNum').value = d.whatsappNumber || "";
     });
 
-    setInterval(updateTimerDisplay, 1000);
+    setInterval(() => {
+        let ms = isRunning ? (Date.now() - startTime) : elapsedTime;
+        let totalSec = Math.floor(ms / 1000);
+        let m = Math.floor(totalSec / 60), s = totalSec % 60;
+        let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+        document.getElementById('timerShow').innerText = timeStr;
+        if(isRunning) matchRef.child('matchTime').set(timeStr);
+    }, 1000);
 </script>
 </body>
 </html>
