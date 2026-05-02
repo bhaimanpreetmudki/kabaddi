@@ -17,18 +17,18 @@
         .btn-pm { border: none; color: white; padding: 5px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 2px; }
         .card-btn { padding: 8px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 9px; flex: 1; width: 100%; }
         .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
-        .card-log { margin-top: 8px; padding: 5px; background: #000; border-radius: 4px; min-height: 40px; font-size: 11px; color: #f1c40f; text-align: left; border: 1px solid #333; overflow-y: auto; max-height: 60px; }
         .std-textarea { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; min-height: 45px; resize: none; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .flex-row { display: flex; gap: 5px; margin-top: 8px; }
         .label-title { font-size: 10px; color: #8b949e; display: block; margin-top: 5px; text-transform: uppercase; font-weight: bold; }
+        .section-divider { border-bottom: 1px solid #30363d; margin: 10px 0; padding-bottom: 5px; color: #2ecc71; font-size: 11px; font-weight: bold; text-transform: uppercase; }
     </style>
 </head>
 <body>
 
 <div id="main-content" style="width: 100%; max-width: 500px;">
     
-    <!-- 1. SCOREBOARD -->
+    <!-- 1. SCOREBOARD SECTION (As per your previous logic) -->
     <div class="card">
         <div class="header"><i class="fas fa-futbol"></i> Scoreboard & Cards</div>
         <div class="teams-container">
@@ -45,7 +45,7 @@
                     <button class="card-btn" style="background:#f1c40f; color:#000;" onclick="handleCard('A', 'Yellow')">YC</button>
                     <button class="card-btn" style="background:#e74c3c;" onclick="handleCard('A', 'Red')">RC</button>
                 </div>
-                <div id="logA" class="card-log">No Cards</div>
+                <div id="logA" style="margin-top:8px; font-size:11px; color:#f1c40f;">No Cards</div>
             </div>
 
             <div class="mid-controls" style="flex:1; text-align:center;">
@@ -66,42 +66,53 @@
                     <button class="card-btn" style="background:#f1c40f; color:#000;" onclick="handleCard('B', 'Yellow')">YC</button>
                     <button class="card-btn" style="background:#e74c3c;" onclick="handleCard('B', 'Red')">RC</button>
                 </div>
-                <div id="logB" class="card-log">No Cards</div>
+                <div id="logB" style="margin-top:8px; font-size:11px; color:#f1c40f;">No Cards</div>
             </div>
         </div>
     </div>
 
-    <!-- 2. UPDATED TIMER SECTION -->
+    <!-- 2. TIMER SECTION (As per your previous logic) -->
     <div class="card">
         <div class="header">Timer Control</div>
         <div style="padding:12px; background:#0d1117; text-align:center;">
             <div id="timerShow" style="font-size:40px; color:#f1c40f; font-family:monospace; margin-bottom:10px;">00:00</div>
             <div class="grid-2">
-                <button id="timerBtn" class="card-btn" style="background:#238636; height:45px; font-size:14px;" onclick="toggleTimer()">START</button>
-                <button class="card-btn" style="background:#333; height:45px;" onclick="resetTimer()">RESET TIME</button>
+                <button id="timerBtn" class="card-btn" style="background:#238636; height:45px;" onclick="toggleTimer()">START</button>
+                <button class="card-btn" style="background:#333; height:45px;" onclick="resetTimer()">RESET</button>
             </div>
             <div class="flex-row" style="margin-top:10px;">
-                <div style="flex:1;">
-                    <span class="label-title">Duration (Min)</span>
-                    <input type="number" id="matchDuration" class="std-input" placeholder="e.g. 20" oninput="updateMatchDB()">
-                </div>
-                <div style="flex:1;">
-                    <span class="label-title">Match Half</span>
-                    <input type="text" id="roundInp" class="std-input" placeholder="1st Half" oninput="updateMatchDB()">
-                </div>
+                <input type="number" id="matchDuration" class="std-input" placeholder="Duration (Min)" oninput="updateMatchDB()">
+                <input type="text" id="roundInp" class="std-input" placeholder="Half/Round" oninput="updateMatchDB()">
             </div>
         </div>
     </div>
 
-    <!-- 3. TICKER & NEXT PROGRAM -->
+    <!-- 3. NEW UPDATED TICKER & INFO SECTION -->
     <div class="card">
-        <div class="header">Ticker & Tournament Info</div>
+        <div class="header">Ticker & Broadcast Info</div>
         <div style="padding:15px;">
-            <button id="tickerToggleBtn" class="card-btn" style="background:#ff5722; height:40px; margin-bottom:10px;" onclick="confirmTickerAction('vis')">Ticker: ON/OFF</button>
+            <button id="tickerToggleBtn" class="card-btn" style="background:#ff5722; height:40px; margin-bottom:15px;" onclick="confirmTickerAction('vis')">Ticker: ON/OFF</button>
+            
+            <div class="section-divider">General Info</div>
             <input type="text" id="tourName" class="std-input" placeholder="Tournament Name">
-            <textarea id="teamsList" class="std-textarea" placeholder="Participating Teams (1. TEAM A 2. TEAM B...)" oninput="this.value = this.value.toUpperCase()"></textarea>
-            <input type="text" id="nextProg" class="std-input" placeholder="Next Program">
-            <button class="card-btn" style="background:#238636; padding:12px;" onclick="confirmTickerAction('info')">UPDATE TICKER</button>
+            <textarea id="teamsList" class="std-textarea" placeholder="Participating Teams (1. Team A 2. Team B...)" oninput="this.value = this.value.toUpperCase()"></textarea>
+            
+            <div class="section-divider">Prize Details</div>
+            <input type="text" id="prizeInfo" class="std-input" placeholder="Enter Prize Details (e.g. 1st: 51000)">
+            
+            <div class="section-divider">Program Info</div>
+            <input type="text" id="nextProg" class="std-input" placeholder="Upcoming Program">
+            
+            <div class="section-divider">Contact Info</div>
+            <div class="grid-2">
+                <input type="text" id="callNum" class="std-input" placeholder="Call Number">
+                <input type="text" id="whatsappNum" class="std-input" placeholder="WhatsApp Number">
+            </div>
+            
+            <div class="section-divider">Channel Watermark</div>
+            <input type="text" id="watermarkText" class="std-input" placeholder="Channel Name / Watermark Text">
+            
+            <button class="card-btn" style="background:#238636; padding:12px; margin-top:10px; font-size:14px;" onclick="confirmTickerAction('info')">UPDATE ALL BROADCAST DATA</button>
         </div>
     </div>
 
@@ -120,7 +131,6 @@
 
     let curA = 0, curB = 0, seconds = 0, timerInterval = null, sVis = true, tickerStatus = true;
 
-    // --- Score & Cards Logic ---
     function updateMatchDB() {
         matchRef.update({
             nameA: document.getElementById('nameA').value,
@@ -139,7 +149,7 @@
 
     function handleCard(team, type) {
         let pNo = document.getElementById('player' + team).value;
-        if(!pNo) return alert("ਪਲੇਅਰ ਨੰਬਰ ਭਰੋ");
+        if(!pNo) return alert("No. Fill Please");
         matchRef.child('cards' + team).once('value', (snap) => {
             let current = snap.val() || "";
             let icon = (type === 'Yellow' ? "🟨" : "🟥");
@@ -148,7 +158,6 @@
         document.getElementById('player' + team).value = "";
     }
 
-    // --- Updated Timer Logic ---
     function toggleTimer() {
         if (timerInterval) {
             clearInterval(timerInterval);
@@ -162,23 +171,16 @@
                 seconds++;
                 let m = Math.floor(seconds / 60), s = seconds % 60;
                 let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
-                
                 document.getElementById('timerShow').innerText = timeStr;
                 matchRef.child('matchTime').set(timeStr);
-
-                // Auto Stop Logic
                 let limit = parseInt(document.getElementById('matchDuration').value);
-                if (limit > 0 && m >= limit) {
-                    toggleTimer();
-                    alert("Match Duration Complete!");
-                }
+                if (limit > 0 && m >= limit) { toggleTimer(); alert("Time Up!"); }
             }, 1000);
         }
     }
 
     function resetTimer() {
-        seconds = 0;
-        document.getElementById('timerShow').innerText = "00:00";
+        seconds = 0; document.getElementById('timerShow').innerText = "00:00";
         matchRef.child('matchTime').set("00:00");
         if (timerInterval) toggleTimer();
     }
@@ -186,25 +188,27 @@
     function toggleVis(field) { matchRef.child(field).set(!sVis); }
 
     function resetOnlyScore() {
-        if(confirm("Reset Everything?")) matchRef.update({ scoreA: 0, scoreB: 0, cardsA: "", cardsB: "", matchTime: "00:00" });
+        if(confirm("Reset Score & Cards?")) matchRef.update({ scoreA: 0, scoreB: 0, cardsA: "", cardsB: "", matchTime: "00:00" });
     }
 
-    // --- Ticker Logic ---
     function confirmTickerAction(type) {
         if (type === 'info') {
             tickerRef.update({
-                tournamentName: tourName.value,
-                nextProgram: nextProg.value,
-                participatingTeams: teamsList.value
+                tournamentName: document.getElementById('tourName').value,
+                nextProgram: document.getElementById('nextProg').value,
+                participatingTeams: document.getElementById('teamsList').value,
+                prizeInfo: document.getElementById('prizeInfo').value,
+                callNumber: document.getElementById('callNum').value,
+                whatsappNumber: document.getElementById('whatsappNum').value,
+                watermark: document.getElementById('watermarkText').value
             });
-            alert("Updated!");
+            alert("Ticker Info Updated!");
         } else if (type === 'vis') {
             tickerStatus = !tickerStatus;
             tickerRef.child('tickerVis').set(tickerStatus);
         }
     }
 
-    // --- Realtime Sync ---
     matchRef.on("value", (snap) => {
         const data = snap.val() || {};
         curA = data.scoreA || 0; curB = data.scoreB || 0;
@@ -221,8 +225,17 @@
     tickerRef.on("value", (snap) => {
         const data = snap.val() || {};
         tickerStatus = !!data.tickerVis;
-        tickerToggleBtn.innerText = tickerStatus ? "Ticker: ON" : "Ticker: OFF";
-        tickerToggleBtn.style.background = tickerStatus ? "#238636" : "#da3633";
+        document.getElementById('tickerToggleBtn').innerText = tickerStatus ? "Ticker: ON" : "Ticker: OFF";
+        document.getElementById('tickerToggleBtn').style.background = tickerStatus ? "#238636" : "#da3633";
+        
+        // Load existing values into inputs
+        document.getElementById('tourName').value = data.tournamentName || "";
+        document.getElementById('nextProg').value = data.nextProgram || "";
+        document.getElementById('teamsList').value = data.participatingTeams || "";
+        document.getElementById('prizeInfo').value = data.prizeInfo || "";
+        document.getElementById('callNum').value = data.callNumber || "";
+        document.getElementById('whatsappNum').value = data.whatsappNumber || "";
+        document.getElementById('watermarkText').value = data.watermark || "";
     });
 </script>
 </body>
