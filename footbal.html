@@ -204,17 +204,16 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    // --- ID ਫੜਨ ਵਾਲਾ ਨਵਾਂ ਹਿੱਸਾ ---
     const urlParams = new URLSearchParams(window.location.search);
     const clientID = urlParams.get('id');
 
-    if (!clientID) {
-        console.error("No Client ID found in URL!");
-    }
+    if (!clientID) { console.error("No Client ID found in URL!"); }
 
     let lastA = 0, lastB = 0;
+    let contactNum = "86996-40061"; // Default values
+    let whatsappNum = "86996-40061";
 
-    // ਹੁਣ db.ref ਵਿੱਚ clientID ਦੀ ਵਰਤੋਂ ਕੀਤੀ ਗਈ ਹੈ
+    // --- Match Data ---
     db.ref("users/" + clientID + "/matchData").on("value", (snap) => {
         const d = snap.val() || {};
         if (d.scoreA > lastA || d.scoreB > lastB) { triggerGoal(); }
@@ -234,7 +233,6 @@
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
 
-        // Card Logic
         updateCard('cardA', d.cardsA);
         updateCard('cardB', d.cardsB);
 
@@ -248,7 +246,7 @@
 
     function updateCard(elementId, type) {
         let el = document.getElementById(elementId);
-        el.className = "card-indicator"; // Reset
+        el.className = "card-indicator";
         if (type === "yellow") el.classList.add("yellow-card");
         else if (type === "red") el.classList.add("red-card");
     }
@@ -262,7 +260,7 @@
         else { ball.className = "ball"; ball.innerText = index; }
     }
 
-    // ਟਿੱਕਰ ਲਈ ਵੀ ਸਪੈਸ਼ਲ ਪਾਥ (Path)
+    // --- Ticker Data (Contact & WhatsApp Fix) ---
     db.ref("users/" + clientID + "/tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
@@ -270,18 +268,33 @@
         document.getElementById('sub-info').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
         document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
         document.getElementById('watermark').innerText = (d.watermarkText || "SUKHDEEP TV").toUpperCase();
-        document.getElementById('fl-num').innerText = d.contact || "86996-40061";
+        
+        // ਫਾਇਰਬੇਸ ਤੋਂ ਦੋਵੇਂ ਨੰਬਰ ਲੈਣੇ
+        contactNum = d.contact || "86996-40061";
+        whatsappNum = d.whatsapp || d.contact || "86996-40061"; 
+        
         document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 
-    // ਬਾਕੀ ਫੰਕਸ਼ਨ ਸੇਮ ਰਹਿਣਗੇ
+    // --- Contact/WhatsApp Flasher Logic ---
     let isW = false;
     setInterval(() => {
         const icon = document.getElementById('fl-icon');
-        icon.className = isW ? "fab fa-whatsapp" : "fas fa-phone-alt";
-        icon.style.color = isW ? "#25D366" : "white";
+        const numText = document.getElementById('fl-num');
+        
+        if (!isW) {
+            // WhatsApp ਦਿਖਾਓ
+            icon.className = "fab fa-whatsapp";
+            icon.style.color = "#25D366";
+            numText.innerText = whatsappNum;
+        } else {
+            // Call ਨੰਬਰ ਦਿਖਾਓ
+            icon.className = "fas fa-phone-alt";
+            icon.style.color = "white";
+            numText.innerText = contactNum;
+        }
         isW = !isW;
-    }, 15000);
+    }, 10000); // ਹਰ 10 ਸੈਕਿੰਡ ਬਾਅਦ ਬਦਲੇਗਾ
 
     function moveWatermark() {
         const wm = document.getElementById('watermark');
