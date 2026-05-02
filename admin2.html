@@ -308,24 +308,43 @@
     function resetMatch() { if(confirm("Reset Everything?")) matchRef.update({ scoreA: 0, scoreB: 0, pA: "", pB: "" }); }
     function resetTimer() { if(confirm("Reset Timer?")) matchRef.update({ timerRunning: false, startTime: 0, elapsedTime: 0, matchTime: "00:00" }); }
 
-    matchRef.on("value", snap => {
-        const data = snap.val() || {};
-        document.getElementById('dispA').innerText = data.scoreA || 0;
-        document.getElementById('dispB').innerText = data.scoreB || 0;
-        document.getElementById('nameA').value = data.nameA || "";
-        document.getElementById('nameB').value = data.nameB || "";
-        
-        const renderP = (s) => !s ? "---" : s.split("").map(x => x === 'G' ? '✅' : '❌').join(" ");
-        document.getElementById('logA').innerHTML = renderP(data.pA);
-        document.getElementById('logB').innerHTML = renderP(data.pB);
+   // 1. ਡਾਟਾ ਲਿਸਨਰ ਵਿੱਚ ਬਟਨ ਦਾ ਟੈਕਸਟ ਅਤੇ ਰੰਗ ਬਦਲਣ ਲਈ
+matchRef.on("value", snap => {
+    const data = snap.val() || {};
+    // ... ਬਾਕੀ ਕੋਡ ...
+    
+    isRunning = !!data.timerRunning;
+    startTime = data.startTime || 0;
+    elapsedTime = data.elapsedTime || 0;
 
-        isRunning = !!data.timerRunning;
-        startTime = data.startTime || 0;
-        elapsedTime = data.elapsedTime || 0;
-        sVis = !!data.scoreVisible;
-        document.getElementById('visBtn').innerText = sVis ? "HIDE" : "SHOW";
-        document.getElementById('visBtn').style.background = sVis ? "#da3633" : "#238636";
-    });
+    // ਬਟਨ ਦੀ ਸੈਟਿੰਗ (Start/Stop)
+    const tBtnSmall = document.getElementById('timerBtnSmall');
+    if (tBtnSmall) {
+        tBtnSmall.innerText = isRunning ? "STOP" : "START";
+        tBtnSmall.style.background = isRunning ? "#da3633" : "#238636";
+    }
+    
+    // ਦੂਜੇ ਟਾਈਮਰ ਬਟਨ ਲਈ ਵੀ (ਜੇਕਰ Persistent Timer ਬਾਕਸ ਵਰਤ ਰਹੇ ਹੋ)
+    const tBtnBig = document.getElementById('timerBtn');
+    if (tBtnBig) {
+        tBtnBig.innerText = isRunning ? "STOP" : "START";
+        tBtnBig.style.background = isRunning ? "#da3633" : "#238636";
+    }
+});
+
+// 2. ਸਮਾਂ ਦਿਖਾਉਣ ਲਈ setInterval ਵਿੱਚ ਦੋਵੇਂ ਆਈਡੀਜ਼ ਅਪਡੇਟ ਕਰੋ
+setInterval(() => {
+    let ms = isRunning ? (Date.now() - startTime) : elapsedTime;
+    let totalSec = Math.floor(ms / 1000);
+    let m = Math.floor(totalSec / 60), s = totalSec % 60;
+    let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+    
+    // ਦੋਵਾਂ ਥਾਵਾਂ 'ਤੇ ਸਮਾਂ ਅਪਡੇਟ ਕਰੋ
+    if(document.getElementById('timerShow')) document.getElementById('timerShow').innerText = timeStr;
+    if(document.getElementById('timerShowSmall')) document.getElementById('timerShowSmall').innerText = timeStr;
+    
+    if(isRunning) matchRef.child('matchTime').set(timeStr);
+}, 1000);
 
     tickerRef.on("value", snap => {
     const d = snap.val() || {};
