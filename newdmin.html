@@ -36,7 +36,7 @@
         
         #penaltyControlSection { display: none; background: #1c2128; padding: 15px; border-top: 3px solid #f39c12; }
 
-        /* Updated Watermark Box Style */
+        /* Watermark Box Style - Button Removed */
         .watermark-box { border: 2px solid #3498db; padding: 15px; border-radius: 10px; background: #0d1117; margin-top: 15px; }
     </style>
 </head>
@@ -161,13 +161,10 @@
             
             <button class="btn-update" style="background: #238636;" onclick="confirmTickerAction('info')">Update All Ticker Info</button>
             
-            <!-- WATERMARK SECTION UPDATED -->
+            <!-- WATERMARK SECTION - BUTTON REMOVED, AUTO-UPDATE ADDED -->
             <div class="watermark-box">
-                <span class="label-title" style="color:#3498db; margin-bottom:10px; display:block;">Channel Watermark (Branding)</span>
-                <div style="display:flex; gap:8px;">
-                    <input type="text" id="wmText" class="std-input" placeholder="e.g. SUKHDEEP TV" style="margin:0; flex: 1;">
-                    <button class="btn-update" style="width:100px; margin:0; background:#3498db;" onclick="confirmTickerAction('wm')">UPDATE</button>
-                </div>
+                <span class="label-title" style="color:#3498db; margin-bottom:10px; display:block;">Channel Watermark (Auto-Save)</span>
+                <input type="text" id="wmText" class="std-input" placeholder="e.g. SUKHDEEP TV" oninput="updateWatermarkDirectly(this.value)">
             </div>
             
             <div class="grid-effects">
@@ -188,7 +185,6 @@
 </div>
 
 <script>
-    // Firebase Configuration
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     
@@ -218,6 +214,11 @@
             duration: document.getElementById('matchDuration').value,
             matchTime: document.getElementById('timerShow').innerText
         });
+    }
+
+    // New Function for Auto Watermark Update
+    function updateWatermarkDirectly(val) {
+        tickerRef.update({ watermarkText: val });
     }
 
     function changeScore(team, val) {
@@ -271,7 +272,6 @@
         }
     }
 
-    // Updated Action Function
     function confirmTickerAction(type, subType = null) {
         if (confirm("ਕੀ ਤੁਸੀਂ ਅਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
             if (type === 'info') {
@@ -283,17 +283,11 @@
                     participatingTeams: document.getElementById('teamsList').value
                 });
             }
-            else if (type === 'wm') {
-                const newWM = document.getElementById('wmText').value;
-                tickerRef.update({ watermarkText: newWM });
-                alert("ਵਾਟਰਮਾਰਕ ਅਪਡੇਟ ਹੋ ਗਿਆ!");
-            }
             else if (type === 'vis') { tickerStatus = !tickerStatus; tickerRef.child('tickerVis').set(tickerStatus); }
             else if (type === 'effect') { effectStates[subType] = !effectStates[subType]; tickerRef.child('effects').child(subType).set(effectStates[subType]); }
         }
     }
 
-    // Sync Match Data
     matchRef.on("value", (snap) => {
         const data = snap.val() || {};
         curA = data.scoreA || 0; curB = data.scoreB || 0;
@@ -318,7 +312,6 @@
         document.getElementById('pVisBtn').innerText = pVis ? "Hide Penalty" : "Show Penalty";
     });
 
-    // Sync Ticker Data
     tickerRef.on("value", (snap) => {
         const data = snap.val() || {};
         document.getElementById('tourName').value = data.tournamentName || "";
