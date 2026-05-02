@@ -98,46 +98,34 @@
         </div>
     </div>
   <!-- 2. MATCH INFO -->
-    <div class="card">
-        <div class="header"><i class="fas fa-info-circle"></i> Match Information</div>
-        <div style="padding:12px; background:#0d1117;">
-            <div class="grid-2">
-                <div style="text-align:center; border-right: 1px solid #333; padding-right:10px;">
-                    <div id="timerShow" style="font-size:32px; color:#f1c40f; font-family:monospace;">00:00</div>
-                    <div class="flex-row">
-                        <button class="card-btn" style="background:#238636;" onclick="startTimer()">Start</button>
-                        <button class="card-btn" style="background:#f39c12;" onclick="pauseTimer()">Pause</button>
-                        <button class="card-btn" style="background:#333;" onclick="resetTimer()">00</button>
-                    </div>
-                    <span class="label-text">Duration</span>
-                    <input type="text" id="matchDuration" class="std-input" placeholder="e.g. 20m" oninput="updateMatchDB()">
+<div class="card">
+    <div class="header"><i class="fas fa-info-circle"></i> Match Information</div>
+    <div style="padding:12px; background:#0d1117;">
+        <div class="grid-2">
+            <div style="text-align:center; border-right: 1px solid #333; padding-right:10px;">
+                <div id="timerShowSmall" style="font-size:32px; color:#f1c40f; font-family:monospace;">00:00</div>
+                <div class="grid-2" style="margin-top:5px;">
+                    <!-- ਇੱਕੋ ਬਟਨ Start/Stop ਲਈ -->
+                    <button id="timerBtnSmall" class="card-btn" style="background:#238636;" onclick="handleTimerClick()">Start</button>
+                    <!-- ਨਾਮ ਬਦਲ ਕੇ Reset Time -->
+                    <button class="card-btn" style="background:#333;" onclick="resetTimer()">Reset Time</button>
                 </div>
-                <div style="padding-left:5px;">
-                    <span class="label-text" style="color:#2ecc71;">Match Round</span>
-                    <input type="text" id="matchRound" class="std-input" placeholder="Semi-Final" oninput="updateMatchDB()">
-                    <span class="label-text" style="color:#f1c40f;">Match Half</span>
-                    <input type="text" id="roundInp" class="std-input" placeholder="1st Half" oninput="updateMatchDB()">
-                    <div class="flex-row">
-                        <button class="card-btn" style="background:#30363d; font-size:8px;" onclick="setHalf('1st Half')">1st Half</button>
-                        <button class="card-btn" style="background:#30363d; font-size:8px;" onclick="setHalf('2nd Half')">2nd Half</button>
-                    </div>
+                <span class="label-text" style="margin-top:8px;">Duration</span>
+                <input type="text" id="matchDuration" class="std-input" placeholder="e.g. 20m" oninput="updateMatchDB()">
+            </div>
+            <div style="padding-left:5px;">
+                <span class="label-text" style="color:#2ecc71;">Match Round</span>
+                <input type="text" id="matchRound" class="std-input" placeholder="Semi-Final" oninput="updateMatchDB()">
+                <span class="label-text" style="color:#f1c40f;">Match Half</span>
+                <input type="text" id="roundInp" class="std-input" placeholder="1st Half" oninput="updateMatchDB()">
+                <div class="flex-row" style="display:flex; gap:5px;">
+                    <button class="card-btn" style="background:#30363d; font-size:8px;" onclick="setHalf('1st Half')">1st Half</button>
+                    <button class="card-btn" style="background:#30363d; font-size:8px;" onclick="setHalf('2nd Half')">2nd Half</button>
                 </div>
             </div>
         </div>
     </div>
-
-    <!-- 3. TIMER -->
-    <div class="card">
-        <div class="header">Persistent Timer</div>
-        <div style="padding:15px; text-align:center; background:#0d1117;">
-            <div id="timerShow" style="font-size:45px; color:#f1c40f; font-family:monospace; margin-bottom:10px;">00:00</div>
-            <div class="grid-2">
-                <button id="timerBtn" class="card-btn" style="background:#238636; height:45px;" onclick="handleTimerClick()">START</button>
-                <button class="card-btn" style="background:#333; height:45px;" onclick="resetTimer()">RESET TIME</button>
-            </div>
-        </div>
-    </div>
-
+</div>
     <!-- 4. TOURNAMENT NAME -->
     <div class="card">
         <div class="header">Tournament Name</div>
