@@ -3,40 +3,59 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sukhdeep TV - Admin Panel</title>
+    <title>Sukhdeep TV - Ultimate Admin</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         body { font-family: 'Segoe UI', sans-serif; background: #0b0d0f; color: white; margin: 0; padding: 10px; display: flex; flex-direction: column; align-items: center; }
-        .card { background: #161b22; width: 100%; max-width: 500px; border-radius: 12px; border: 1px solid #30363d; overflow: hidden; margin-bottom: 12px; box-sizing: border-box; }
-        .header { background: #cc0000; color: white; padding: 10px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; }
-        .teams-container { display: flex; padding: 10px; gap: 5px; background: #0d1117; align-items: center; }
-        .team-box { flex: 2; text-align: center; padding: 10px; border-radius: 8px; background: #161b22; border-top: 4px solid #fff; }
-        .mid-controls { flex: 1; display: flex; flex-direction: column; gap: 8px; align-items: center; }
-        .score-val { font-size: 38px; font-weight: 900; color: #2ecc71; margin: 2px 0; }
-        .btn-pm { border: none; color: white; padding: 10px; border-radius: 5px; font-size: 20px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 2px; }
-        .card-btn { padding: 10px; border-radius: 5px; border: none; font-weight: bold; cursor: pointer; color: white; text-transform: uppercase; font-size: 11px; flex: 1; width: 100%; }
-        .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
-        .label-title { font-size: 11px; color: #8b949e; display: block; margin-top: 10px; text-align: left; text-transform: uppercase; font-weight: bold; padding-left: 5px; }
-        .content { padding: 15px; }
-        .btn-update { background: #238636; color: white; padding: 12px; border-radius: 6px; border:none; cursor:pointer; width:100%; font-weight:bold; margin-top: 10px;}
-        .btn-mode { background: #30363d; color: white; font-size: 12px; padding: 12px; border: none; border-radius: 4px; cursor: pointer; text-transform: uppercase; }
-        .btn-active { border: 2px solid #fff !important; background: #cc0000 !important; }
+        .card { background: #161b22; width: 100%; max-width: 550px; border-radius: 12px; border: 1px solid #30363d; overflow: hidden; margin-bottom: 12px; box-sizing: border-box; }
+        .header { background: #cc0000; color: white; padding: 12px; text-align: center; font-weight: bold; text-transform: uppercase; font-size: 14px; letter-spacing: 1px; }
+        
+        /* ਟੀਮ ਬਾਕਸ ਵੱਡਾ ਕੀਤਾ ਗਿਆ ਹੈ */
+        .teams-container { display: flex; padding: 15px; gap: 10px; background: #0d1117; align-items: stretch; }
+        .team-box { flex: 2; text-align: center; padding: 15px; border-radius: 10px; background: #1c2128; border-top: 5px solid #fff; }
+        
+        .score-val { font-size: 50px; font-weight: 900; color: #2ecc71; margin: 5px 0; font-family: monospace; }
+        .btn-pm { border: none; color: white; padding: 12px; border-radius: 6px; font-size: 24px; font-weight: bold; cursor: pointer; flex: 1; margin: 0 4px; transition: 0.2s; }
+        .btn-pm:active { transform: scale(0.9); }
+        
+        .std-input { width: 100%; padding: 12px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 6px; box-sizing: border-box; margin-bottom: 10px; font-size: 14px; }
+        .label-title { font-size: 11px; color: #8b949e; display: block; margin-bottom: 5px; text-transform: uppercase; font-weight: bold; }
+        
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
-        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 8px; margin-top: 10px; }
+        .btn-update { background: #238636; color: white; padding: 15px; border-radius: 8px; border:none; cursor:pointer; width:100%; font-weight:bold; font-size: 14px; margin-top: 10px; }
+        
+        /* ਪੈਨਲਟੀ ਸੈਕਸ਼ਨ */
+        #penaltySection { background: #1c2128; padding: 15px; border-top: 4px solid #f39c12; display: none; }
+        .ball-btn { padding: 12px; border: none; border-radius: 6px; color: white; font-weight: bold; cursor: pointer; flex: 1; font-size: 16px; }
+        
+        /* ਟਾਈਮਰ ਡਿਸਪਲੇਅ */
+        .timer-display { font-size: 30px; color: #f1c40f; background: #000; padding: 10px; border-radius: 8px; text-align: center; font-family: monospace; border: 1px solid #333; margin-bottom: 10px; }
     </style>
 </head>
 <body>
 
-<div id="main-content" style="width: 100%; max-width: 500px;">
-    
-    <!-- 1. SCOREBOARD -->
+<div style="width: 100%; max-width: 550px;">
+
+    <!-- 1. TOURNAMENT NAME (TOP) -->
     <div class="card">
-        <div class="header">Scoreboard Control</div>
+        <div class="header">Tournament Branding</div>
+        <div style="padding:15px;">
+            <span class="label-title">Tournament Name (ਸਭ ਤੋਂ ਉੱਪਰ ਦਿਖੇਗਾ)</span>
+            <input type="text" id="tourName" class="std-input" placeholder="e.g. KABADDI CUP 2026" oninput="updateTicker()">
+        </div>
+    </div>
+    
+    <!-- 2. MAIN SCOREBOARD -->
+    <div class="card">
+        <div class="header">Score & Jersey Control</div>
         <div class="teams-container">
+            <!-- Team A -->
             <div class="team-box" id="boxA">
-                <input type="text" id="nameA" class="std-input" placeholder="Team A" oninput="updateMatchDB()">
+                <span class="label-title">Jersey</span>
+                <input type="color" id="colorA" oninput="updateMatchDB()" style="width:100%; height:30px; border:none; cursor:pointer; margin-bottom:10px; border-radius:4px;">
+                <input type="text" id="nameA" class="std-input" placeholder="Team A Name" oninput="updateMatchDB()">
                 <div class="score-val" id="dispA">0</div>
                 <div style="display:flex;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
@@ -44,14 +63,18 @@
                 </div>
             </div>
 
-            <div class="mid-controls">
-                <button id="visBtn" class="card-btn" style="background:#238636;" onclick="toggleScoreVis()">SHOW</button>
-                <button class="card-btn" style="background:#333;" onclick="resetScore()">RESET</button>
-                <div style="font-weight:bold; color:#444;">VS</div>
+            <!-- Middle Controls -->
+            <div style="flex:0.8; display:flex; flex-direction:column; gap:12px; justify-content: center;">
+                <button id="visBtn" class="btn-update" style="margin:0; background:#238636;" onclick="toggleVis('scoreVisible')">SHOW</button>
+                <button class="btn-update" style="margin:0; background:#333;" onclick="resetScores()">RESET</button>
+                <div style="text-align:center; font-weight:bold; color:#444;">VS</div>
             </div>
 
+            <!-- Team B -->
             <div class="team-box" id="boxB">
-                <input type="text" id="nameB" class="std-input" placeholder="Team B" oninput="updateMatchDB()">
+                <span class="label-title">Jersey</span>
+                <input type="color" id="colorB" oninput="updateMatchDB()" style="width:100%; height:30px; border:none; cursor:pointer; margin-bottom:10px; border-radius:4px;">
+                <input type="text" id="nameB" class="std-input" placeholder="Team B Name" oninput="updateMatchDB()">
                 <div class="score-val" id="dispB">0</div>
                 <div style="display:flex;">
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
@@ -61,159 +84,160 @@
         </div>
     </div>
 
-    <!-- 2. MATCH DETAILS (Round & Half) -->
+    <!-- 3. STATS & TIMER -->
     <div class="card">
-        <div class="header">Match Details</div>
-        <div class="content">
+        <div class="header">Round, Half & Time</div>
+        <div style="padding:15px;">
             <div class="grid-2">
                 <div>
-                    <span class="label-title">Round</span>
+                    <span class="label-title">Round Stats (Left Side)</span>
                     <input type="text" id="matchRound" class="std-input" placeholder="e.g. Semi Final" oninput="updateMatchDB()">
                 </div>
                 <div>
-                    <span class="label-title">Half Status</span>
-                    <input type="text" id="halfStatus" class="std-input" placeholder="e.g. 1st Half" oninput="updateMatchDB()">
+                    <span class="label-title">Half Stats (Right Side)</span>
+                    <input type="text" id="roundInp" class="std-input" placeholder="e.g. 2nd Half" oninput="updateMatchDB()">
+                </div>
+            </div>
+            
+            <span class="label-title">Match Clock</span>
+            <div class="timer-display" id="timerShow">00:00</div>
+            <div class="grid-2">
+                <div style="display:flex; gap:5px;">
+                    <button class="ball-btn" style="background:#238636;" onclick="startTimer()">START</button>
+                    <button class="ball-btn" style="background:#f39c12;" onclick="pauseTimer()">PAUSE</button>
+                </div>
+                <button class="ball-btn" style="background:#333;" onclick="resetTimer()">RESET TIME</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 4. PENALTY SHOOTOUT (BALLS) -->
+    <div class="card">
+        <div class="header" style="background:#f39c12; color:black;">Penalty Balls Control</div>
+        <div style="padding:15px; display:flex; gap:10px;">
+            <button id="pVisBtn" class="btn-update" style="background:#f39c12; color:black; margin:0;" onclick="toggleVis('penaltyVisible')">SHOW PENALTY BOX</button>
+            <button class="btn-update" style="background:#333; margin:0;" onclick="resetPenalty()">RESET BALLS</button>
+        </div>
+        
+        <div id="penaltySection">
+            <div class="grid-2">
+                <div>
+                    <span class="label-title">Team A Balls</span>
+                    <input type="text" id="pA" class="std-input" readonly>
+                    <div style="display:flex; gap:5px;">
+                        <button class="ball-btn" style="background:#2ecc71;" onclick="addBall('pA', '✅')">GOAL</button>
+                        <button class="ball-btn" style="background:#e74c3c;" onclick="addBall('pA', '❌')">MISS</button>
+                    </div>
+                </div>
+                <div>
+                    <span class="label-title">Team B Balls</span>
+                    <input type="text" id="pB" class="std-input" readonly>
+                    <div style="display:flex; gap:5px;">
+                        <button class="ball-btn" style="background:#2ecc71;" onclick="addBall('pB', '✅')">GOAL</button>
+                        <button class="ball-btn" style="background:#e74c3c;" onclick="addBall('pB', '❌')">MISS</button>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
 
-    <!-- 3. WATERMARK / LOGO CONTROL -->
+    <!-- 5. WATERMARK -->
     <div class="card">
-        <div class="header">Watermark & Logo</div>
-        <div class="content">
-            <span class="label-title">Logo Image URL</span>
-            <input type="text" id="logoUrl" class="std-input" placeholder="Paste Logo Link Here" oninput="updateMatchDB()">
-            
-            <span class="label-title">Animation Mode</span>
-            <div class="grid-3">
-                <button id="wm-off" class="btn-mode" onclick="setWMMode('off')">OFF</button>
-                <button id="wm-blink" class="btn-mode" onclick="setWMMode('blink')">BLINK</button>
-                <button id="wm-scroll" class="btn-mode" onclick="setWMMode('scroll')">SCROLL</button>
-                <button id="wm-bounce" class="btn-mode" onclick="setWMMode('bounce')">BOUNCE</button>
-            </div>
-        </div>
-    </div>
-
-    <!-- 4. TICKER CONTROL -->
-    <div class="card">
-        <div class="header">Ticker Information</div>
-        <div class="content">
-            <button id="tickerVisBtn" class="btn-update" style="margin-bottom:10px;" onclick="toggleTickerVis()">TICKER: ON</button>
-            
-            <span class="label-title">Tournament Name</span>
-            <input type="text" id="tourName" class="std-input">
-            
-            <span class="label-title">Participating Teams</span>
-            <input type="text" id="teamsList" class="std-input">
-
-            <span class="label-title">Prizes / Info</span>
-            <input type="text" id="prizeList" class="std-input">
-
-            <span class="label-title">Next Program</span>
-            <input type="text" id="nextProg" class="std-input">
-
-            <button class="btn-update" onclick="updateTickerDB()">UPDATE TICKER INFO</button>
+        <div class="header" style="background:#444;">Watermark Text</div>
+        <div style="padding:15px;">
+            <input type="text" id="wmText" class="std-input" placeholder="e.g. LIVE FROM SUKHDEEP TV" oninput="updateMatchDB()">
         </div>
     </div>
 
 </div>
 
 <script>
+    // --- Firebase Configuration ---
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    let sVis = true;
-    let tVis = true;
-    let currentScoreA = 0;
-    let currentScoreB = 0;
+    let curA = 0, curB = 0, seconds = 0, timerInterval = null, sVis = true, pVis = false;
 
-    // --- Update Score & Match Details ---
+    // --- Sync Data to Firebase ---
     function updateMatchDB() {
         db.ref("matchData").update({
             nameA: document.getElementById('nameA').value,
             nameB: document.getElementById('nameB').value,
-            round: document.getElementById('matchRound').value,
-            halfStatus: document.getElementById('halfStatus').value,
-            logoUrl: document.getElementById('logoUrl').value
+            colorA: document.getElementById('colorA').value,
+            colorB: document.getElementById('colorB').value,
+            matchRound: document.getElementById('matchRound').value,
+            round: document.getElementById('roundInp').value,
+            watermarkText: document.getElementById('wmText').value,
+            wmMode: "scroll"
         });
     }
 
     function changeScore(team, val) {
-        let newVal = (team === 'scoreA' ? currentScoreA : currentScoreB) + val;
-        if(newVal < 0) newVal = 0;
-        db.ref("matchData").update({ [team]: newVal });
+        let current = (team === 'scoreA' ? curA : curB);
+        db.ref("matchData").update({ [team]: Math.max(0, current + val) });
     }
 
-    function toggleScoreVis() {
-        sVis = !sVis;
-        db.ref("matchData").update({ scoreVisible: sVis });
+    function toggleVis(field) {
+        let current = (field === 'scoreVisible' ? sVis : pVis);
+        db.ref("matchData").update({ [field]: !current });
     }
 
-    function resetScore() {
-        if(confirm("Reset Score?")) {
-            db.ref("matchData").update({ scoreA: 0, scoreB: 0 });
-        }
+    function addBall(id, symbol) {
+        let inp = document.getElementById(id);
+        if(inp.value.length >= 10) return; // Max 5 Balls
+        db.ref("matchData").update({ [id === 'pA' ? 'penaltyA' : 'penaltyB']: inp.value + symbol });
     }
 
-    // --- Watermark Mode ---
-    function setWMMode(mode) {
-        db.ref("matchData").update({ wmMode: mode });
+    function resetPenalty() { db.ref("matchData").update({ penaltyA: "", penaltyB: "" }); }
+    function resetScores() { if(confirm("Reset Everything?")) db.ref("matchData").update({ scoreA: 0, scoreB: 0 }); }
+
+    // --- Clock Functions ---
+    function startTimer() {
+        if (timerInterval) return;
+        timerInterval = setInterval(() => {
+            seconds++;
+            let m = Math.floor(seconds/60), s = seconds%60;
+            let timeStr = (m<10?"0"+m:m)+":"+(s<10?"0"+s:s);
+            document.getElementById('timerShow').innerText = timeStr;
+            db.ref("matchData").child('matchTime').set(timeStr);
+        }, 1000);
+    }
+    function pauseTimer() { clearInterval(timerInterval); timerInterval = null; }
+    function resetTimer() { seconds = 0; db.ref("matchData").child('matchTime').set("00:00"); }
+
+    function updateTicker() {
+        db.ref("tickerData").update({ tournamentName: document.getElementById('tourName').value });
     }
 
-    // --- Ticker Updates ---
-    function toggleTickerVis() {
-        tVis = !tVis;
-        db.ref("tickerData").update({ tickerVis: tVis });
-    }
-
-    function updateTickerDB() {
-        db.ref("tickerData").update({
-            tournamentName: document.getElementById('tourName').value,
-            participatingTeams: document.getElementById('teamsList').value,
-            prizes: document.getElementById('prizeList').value,
-            nextProgram: document.getElementById('nextProg').value
-        });
-        alert("Ticker Updated!");
-    }
-
-    // --- Sync Data from Firebase ---
+    // --- Listen to Firebase Changes (Realtime Sync) ---
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
-        currentScoreA = d.scoreA || 0;
-        currentScoreB = d.scoreB || 0;
-        document.getElementById('dispA').innerText = currentScoreA;
-        document.getElementById('dispB').innerText = currentScoreB;
+        curA = d.scoreA || 0; curB = d.scoreB || 0;
+        sVis = !!d.scoreVisible; pVis = !!d.penaltyVisible;
+        
+        document.getElementById('dispA').innerText = curA;
+        document.getElementById('dispB').innerText = curB;
         document.getElementById('nameA').value = d.nameA || "";
         document.getElementById('nameB').value = d.nameB || "";
-        document.getElementById('matchRound').value = d.round || "";
-        document.getElementById('halfStatus').value = d.halfStatus || "";
-        document.getElementById('logoUrl').value = d.logoUrl || "";
+        document.getElementById('colorA').value = d.colorA || "#ffffff";
+        document.getElementById('colorB').value = d.colorB || "#ffffff";
+        document.getElementById('matchRound').value = d.matchRound || "";
+        document.getElementById('roundInp').value = d.round || "";
+        document.getElementById('wmText').value = d.watermarkText || "";
+        document.getElementById('pA').value = d.penaltyA || "";
+        document.getElementById('pB').value = d.penaltyB || "";
         
-        sVis = !!d.scoreVisible;
-        const vBtn = document.getElementById('visBtn');
-        vBtn.innerText = sVis ? "HIDE" : "SHOW";
-        vBtn.style.background = sVis ? "#da3633" : "#238636";
-
-        // Active Watermark Button
-        const modes = ['off', 'blink', 'scroll', 'bounce'];
-        modes.forEach(m => {
-            document.getElementById('wm-'+m).className = (d.wmMode === m) ? 'btn-mode btn-active' : 'btn-mode';
-        });
+        document.getElementById('visBtn').innerText = sVis ? "HIDE SCORE" : "SHOW SCORE";
+        document.getElementById('visBtn').style.background = sVis ? "#da3633" : "#238636";
+        document.getElementById('penaltySection').style.display = pVis ? "block" : "none";
+        document.getElementById('pVisBtn').innerText = pVis ? "HIDE PENALTY BOX" : "SHOW PENALTY BOX";
+        if(!timerInterval) document.getElementById('timerShow').innerText = d.matchTime || "00:00";
     });
 
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tourName').value = d.tournamentName || "";
-        document.getElementById('teamsList').value = d.participatingTeams || "";
-        document.getElementById('prizeList').value = d.prizes || "";
-        document.getElementById('nextProg').value = d.nextProgram || "";
-        
-        tVis = !!d.tickerVis;
-        const tBtn = document.getElementById('tickerVisBtn');
-        tBtn.innerText = tVis ? "TICKER: SHOWING" : "TICKER: HIDDEN";
-        tBtn.style.background = tVis ? "#238636" : "#da3633";
     });
 </script>
 </body>
