@@ -151,23 +151,34 @@
     const urlParams = new URLSearchParams(window.location.search);
     const clientID = urlParams.get('id');
 
+    // --- Script ਟੈਗ ਦੇ ਅੰਦਰ ਸਿਰਫ ਇਸ ਹਿੱਸੇ ਨੂੰ ਅਪਡੇਟ ਕਰੋ ---
+
     let lastA = 0, lastB = 0;
     let lastCardA = "", lastCardB = "";
-    let contactNum = "86996-40061";
-    let whatsappNum = "86996-40061";
+    let lastPlayerA = "", lastPlayerB = ""; // ਨਵਾਂ: ਪਲੇਅਰ ਨੰਬਰ ਟਰੈਕ ਕਰਨ ਲਈ
 
     db.ref("users/" + clientID + "/matchData").on("value", (snap) => {
         const d = snap.val() || {};
         
-        // Goal Animation Logic
+        // 1. GOAL ANIMATION
         if (d.scoreA > lastA || d.scoreB > lastB) { triggerFlash('goal-overlay'); }
         lastA = d.scoreA || 0; lastB = d.scoreB || 0;
 
-        // Card Animation Logic
-        if (d.cardsA && d.cardsA !== lastCardA) { triggerCardFlash(d.cardsA); }
-        if (d.cardsB && d.cardsB !== lastCardB) { triggerCardFlash(d.cardsB); }
-        lastCardA = d.cardsA || ""; lastCardB = d.cardsB || "";
+        // 2. CARD ANIMATION LOGIC (ਅਪਡੇਟ ਕੀਤਾ)
+        // ਜੇਕਰ ਕਾਰਡ ਦੀ ਟਾਈਪ ਬਦਲੀ ਹੈ ਜਾਂ ਪਲੇਅਰ ਦਾ ਨੰਬਰ ਬਦਲਿਆ ਹੈ ਤਾਂ ਐਨੀਮੇਸ਼ਨ ਚੱਲੇਗੀ
+        if (d.cardsA && (d.cardsA !== lastCardA || d.playerNameA !== lastPlayerA)) { 
+            triggerCardFlash(d.cardsA, d.playerNameA); 
+        }
+        if (d.cardsB && (d.cardsB !== lastCardB || d.playerNameB !== lastPlayerB)) { 
+            triggerCardFlash(d.cardsB, d.playerNameB); 
+        }
+        
+        lastCardA = d.cardsA || ""; 
+        lastCardB = d.cardsB || "";
+        lastPlayerA = d.playerNameA || "";
+        lastPlayerB = d.playerNameB || "";
 
+        // ਬਾਕੀ ਸਾਰਾ ਡਾਟਾ ਅਪਡੇਟ ਕਰੋ
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
         document.getElementById('scoreA').innerText = d.scoreA || "0";
@@ -193,13 +204,25 @@
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    function updateCardIndicator(elementId, type) {
-        let el = document.getElementById(elementId);
-        el.className = "card-indicator";
-        if (type === "yellow") el.classList.add("yellow-card");
-        else if (type === "red") el.classList.add("red-card");
+    // 3. ਅਪਡੇਟ ਕੀਤਾ ਐਨੀਮੇਸ਼ਨ ਫੰਕਸ਼ਨ (ਪਲੇਅਰ ਨੰਬਰ ਦੇ ਨਾਲ)
+    function triggerCardFlash(type, playerNum) {
+        const overlay = document.getElementById('card-overlay');
+        const text = document.getElementById('card-flash-text');
+        
+        // ਕਾਰਡ ਦੀ ਟਾਈਪ ਦੇ ਮੁਤਾਬਕ ਰੰਗ ਸੈੱਟ ਕਰੋ
+        text.className = "flash-text " + (type === "yellow" ? "yellow-text" : "red-text");
+        
+        // ਸਕ੍ਰੀਨ ਤੇ ਲਿਖਿਆ ਆਵੇਗਾ: YELLOW CARD - 10
+        let displayNo = playerNum ? (" - " + playerNum) : "";
+        text.innerText = (type === "yellow" ? "YELLOW CARD" : "RED CARD") + displayNo;
+        
+        overlay.style.display = 'flex';
+        
+        // 4 ਸੈਕਿੰਡ ਬਾਅਦ ਐਨੀਮੇਸ਼ਨ ਹਟਾ ਦਿਓ
+        setTimeout(() => { 
+            overlay.style.display = 'none'; 
+        }, 4000);
     }
-
     function triggerFlash(overlayId) {
         const overlay = document.getElementById(overlayId);
         overlay.style.display = 'flex';
