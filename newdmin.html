@@ -36,8 +36,8 @@
         
         #penaltyControlSection { display: none; background: #1c2128; padding: 15px; border-top: 3px solid #f39c12; }
 
-        /* Watermark Specific Style */
-        .watermark-box { border: 1px solid #444; padding: 10px; border-radius: 8px; background: #0d1117; margin-top: 15px; }
+        /* Updated Watermark Box Style */
+        .watermark-box { border: 2px solid #3498db; padding: 15px; border-radius: 10px; background: #0d1117; margin-top: 15px; }
     </style>
 </head>
 <body>
@@ -161,12 +161,12 @@
             
             <button class="btn-update" style="background: #238636;" onclick="confirmTickerAction('info')">Update All Ticker Info</button>
             
-            <!-- WATERMARK SECTION CORRECTED -->
+            <!-- WATERMARK SECTION UPDATED -->
             <div class="watermark-box">
-                <span class="label-title" style="color:#3498db; margin-bottom:10px; display:block;">Watermark (Branding)</span>
-                <div style="display:flex; gap:5px;">
-                    <input type="text" id="wmText" class="std-input" placeholder="e.g. SUKHDEEP TV" style="margin:0;">
-                    <button class="btn-update" style="width:100px; margin:0; background:#3498db;" onclick="confirmTickerAction('wm')">SET NAME</button>
+                <span class="label-title" style="color:#3498db; margin-bottom:10px; display:block;">Channel Watermark (Branding)</span>
+                <div style="display:flex; gap:8px;">
+                    <input type="text" id="wmText" class="std-input" placeholder="e.g. SUKHDEEP TV" style="margin:0; flex: 1;">
+                    <button class="btn-update" style="width:100px; margin:0; background:#3498db;" onclick="confirmTickerAction('wm')">UPDATE</button>
                 </div>
             </div>
             
@@ -188,6 +188,7 @@
 </div>
 
 <script>
+    // Firebase Configuration
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     
@@ -201,13 +202,7 @@
 
     function autoExpand(field) {
         field.style.height = 'inherit';
-        const computed = window.getComputedStyle(field);
-        const height = parseInt(computed.getPropertyValue('border-top-width'), 10)
-                     + parseInt(computed.getPropertyValue('padding-top'), 10)
-                     + field.scrollHeight
-                     + parseInt(computed.getPropertyValue('padding-bottom'), 10)
-                     + parseInt(computed.getPropertyValue('border-bottom-width'), 10);
-        field.style.height = height + 'px';
+        field.style.height = field.scrollHeight + 'px';
     }
 
     function updateMatchDB() {
@@ -276,6 +271,7 @@
         }
     }
 
+    // Updated Action Function
     function confirmTickerAction(type, subType = null) {
         if (confirm("ਕੀ ਤੁਸੀਂ ਅਪਡੇਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
             if (type === 'info') {
@@ -288,14 +284,16 @@
                 });
             }
             else if (type === 'wm') {
-                tickerRef.update({ watermarkText: document.getElementById('wmText').value });
+                const newWM = document.getElementById('wmText').value;
+                tickerRef.update({ watermarkText: newWM });
+                alert("ਵਾਟਰਮਾਰਕ ਅਪਡੇਟ ਹੋ ਗਿਆ!");
             }
             else if (type === 'vis') { tickerStatus = !tickerStatus; tickerRef.child('tickerVis').set(tickerStatus); }
             else if (type === 'effect') { effectStates[subType] = !effectStates[subType]; tickerRef.child('effects').child(subType).set(effectStates[subType]); }
         }
     }
 
-    // Sync Data
+    // Sync Match Data
     matchRef.on("value", (snap) => {
         const data = snap.val() || {};
         curA = data.scoreA || 0; curB = data.scoreB || 0;
@@ -320,6 +318,7 @@
         document.getElementById('pVisBtn').innerText = pVis ? "Hide Penalty" : "Show Penalty";
     });
 
+    // Sync Ticker Data
     tickerRef.on("value", (snap) => {
         const data = snap.val() || {};
         document.getElementById('tourName').value = data.tournamentName || "";
