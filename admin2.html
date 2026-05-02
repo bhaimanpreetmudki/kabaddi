@@ -72,8 +72,13 @@
                 <div class="grid-2">
                     <button class="card-btn" style="background:#f1c40f; color:000;" onclick="handleCard('A', 'Yellow')">YC</button>
                     <button class="card-btn" style="background:#e74c3c;" onclick="handleCard('A', 'Red')">RC</button>
-                </div>
-            </div>
+                <!-- ਕਾਰਡ ਡਿਟੇਲ ਬਾਕਸ -->
+<div class="card">
+    <div class="header" style="background:#d35400;"><i class="fas fa-id-card"></i> Card History & Details</div>
+    <div style="padding:10px; background:#0d1117; max-height:150px; overflow-y:auto;" id="cardLog">
+        <div style="color:#8b949e; text-align:center; font-size:12px;">No cards issued yet</div>
+    </div>
+</div>
 
             <div class="mid-controls">
                 <button id="visBtn" class="card-btn" style="background:#238636;" onclick="toggleVis('scoreVisible')">SHOW</button>
@@ -211,19 +216,42 @@
         matchRef.update({ [team]: Math.max(0, current + val) });
     }
 
-    function handleCard(team, type) {
-        let pDetail = document.getElementById('player' + team).value;
-        if(!pDetail) { alert("Enter Player No!"); return; }
-        let key = team + "_" + pDetail;
-        let eventMsg = "";
-        if(type === 'Yellow') {
-            yellowCounts[key] = (yellowCounts[key] || 0) + 1;
-            eventMsg = (yellowCounts[key] >= 2 ? "RED (2nd Yellow): " : "Yellow Card: ") + pDetail;
+   function handleCard(team, type) {
+    let pDetail = document.getElementById('player' + team).value;
+    let teamName = document.getElementById('name' + team).value || (team === 'A' ? 'Home' : 'Away');
+    
+    if(!pDetail) { alert("Enter Player No!"); return; }
+    
+    let key = team + "_" + pDetail;
+    let eventMsg = "";
+    let cardColor = (type === 'Yellow') ? "#f1c40f" : "#e74c3c";
+
+    if(type === 'Yellow') {
+        yellowCounts[key] = (yellowCounts[key] || 0) + 1;
+        if(yellowCounts[key] >= 2) {
+            eventMsg = "RED (2nd Yellow): " + pDetail + " (" + teamName + ")";
+            cardColor = "#e74c3c"; // ਦੂਜੇ ਯੈੱਲੋ ਤੋਂ ਬਾਅਡ ਰੈੱਡ
         } else {
-            eventMsg = "Red Card: " + pDetail;
+            eventMsg = "Yellow Card: " + pDetail + " (" + teamName + ")";
         }
-        matchRef.child('lastEvent').set(eventMsg);
+    } else {
+        eventMsg = "Red Card: " + pDetail + " (" + teamName + ")";
     }
+
+    // ਫਾਇਰਬੇਸ ਵਿੱਚ ਲਾਸਟ ਇਵੈਂਟ ਅਪਡੇਟ ਕਰੋ
+    matchRef.child('lastEvent').set(eventMsg);
+
+    // ਕਾਰਡ ਹਿਸਟਰੀ ਵਿੱਚ ਨਵਾਂ ਡਾਟਾ ਪਾਓ
+    let newCardRef = matchRef.child('cardHistory').push();
+    newCardRef.set({
+        msg: eventMsg,
+        color: cardColor,
+        time: document.getElementById('timerShowSmall').innerText
+    });
+    
+    // ਇਨਪੁਟ ਸਾਫ਼ ਕਰੋ
+    document.getElementById('player' + team).value = "";
+}
 
     function startTimer() {
         if (timerInterval) return;
@@ -305,17 +333,38 @@
 }
 
     function toggleVis() { matchRef.child('scoreVisible').set(!sVis); }
-    function resetMatch() { if(confirm("Reset Everything?")) matchRef.update({ scoreA: 0, scoreB: 0, pA: "", pB: "" }); }
+    function resetMatch() {
+    if(confirm("Reset Everything?")) {
+        matchRef.update({ 
+            scoreA: 0, 
+            scoreB: 0, 
+            pA: "", 
+            pB: "", 
+            cardHistory: null, // ਲਿਸਟ ਸਾਫ਼ ਕਰਨ ਲਈ
+            lastEvent: "" 
+        });
+        yellowCounts = {}; // ਲੋਕਲ ਕਾਊਂਟ ਵੀ ਜ਼ੀਰੋ ਕਰੋ
+    }
+}
     function resetTimer() { if(confirm("Reset Timer?")) matchRef.update({ timerRunning: false, startTime: 0, elapsedTime: 0, matchTime: "00:00" }); }
 
-   // 1. ਡਾਟਾ ਲਿਸਨਰ ਵਿੱਚ ਬਟਨ ਦਾ ਟੈਕਸਟ ਅਤੇ ਰੰਗ ਬਦਲਣ ਲਈ
-matchRef.on("value", snap => {
+  matchRef.on("value", snap => {
     const data = snap.val() || {};
-    // ... ਬਾਕੀ ਕੋਡ ...
     
-    isRunning = !!data.timerRunning;
-    startTime = data.startTime || 0;
-    elapsedTime = data.elapsedTime || 0;
+    // ... ਤੁਹਾਡਾ ਪੁਰਾਣਾ ਕੋਡ (isRunning, score ਆਦਿ) ...
+
+    // ਕਾਰਡ ਹਿਸਟਰੀ ਅਪਡੇਟ ਕਰਨਾ
+    const cardLog = document.getElementById('cardLog');
+    if (data.cardHistory) {
+        cardLog.innerHTML = ""; // ਪੁਰਾਣਾ ਸਾਫ਼ ਕਰੋ
+        Object.values(data.cardHistory).reverse().forEach(card => {
+            let item = document.createElement('div');
+            item.style.cssText = `padding:5px; border-bottom:1px solid #333; font-size:13px; color:${card.color}; font-weight:bold;`;
+            item.innerHTML = `<i class="fas fa-stop"></i> [${card.time}] ${card.msg}`;
+            cardLog.appendChild(item);
+        });
+    }
+});
 
     // ਬਟਨ ਦੀ ਸੈਟਿੰਗ (Start/Stop)
     const tBtnSmall = document.getElementById('timerBtnSmall');
