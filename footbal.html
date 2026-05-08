@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Scrolling Team Names</title>
+    <title>Sukhdeep TV - Smart Timer Auto-Hide</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -33,45 +33,40 @@
             background: var(--pure-black); 
         }
 
-        .jersey-strip { width: 22px; height: 60px; flex-shrink: 0; }
+        .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
         .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; overflow: hidden; }
         
-        /* --- Scrolling Team Name Logic --- */
-        .team-display-wrapper {
-            flex-grow: 1;
-            overflow: hidden;
-            display: flex;
-            align-items: center;
-            height: 100%;
-            padding: 0 10px;
-        }
+        .team-display-wrapper { flex-grow: 1; overflow: hidden; display: flex; align-items: center; height: 100%; padding: 0 10px; }
+        .team-display { font-size: 36px; font-weight: 900; text-transform: uppercase; white-space: nowrap; display: inline-block; position: relative; }
 
-        .team-display { 
-            font-size: 36px; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            white-space: nowrap;
-            display: inline-block;
-            position: relative;
-        }
-
-        /* Scrolling Animation */
         @keyframes scrollName {
             0% { transform: translateX(0); }
             10% { transform: translateX(0); }
-            90% { transform: translateX(calc(-100% + 200px)); } /* Adjust 200px based on box width */
+            90% { transform: translateX(calc(-100% + 180px)); }
             100% { transform: translateX(0); }
         }
 
         .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; z-index: 10; }
-        
         .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
         .side-b { background: var(--pure-white); color: var(--main-red); }
 
-        #match-timer-box { background: var(--main-red); color: white; height: 60px; display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; box-shadow: 5px 5px 15px rgba(0,0,0,0.4); }
+        #match-timer-box { 
+            background: var(--main-red); 
+            color: white; 
+            height: 60px; 
+            display: none; 
+            align-items: center; 
+            padding: 0 15px; 
+            font-size: 32px; 
+            font-weight: 900; 
+            border: 3px solid white; 
+            border-left: none; 
+            border-radius: 0 6px 6px 0; 
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.4);
+            transition: opacity 0.5s ease;
+        }
 
         #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 26px; font-weight: 700; text-shadow: 2px 2px 4px #000; text-transform: uppercase; width: var(--container-width); }
-
         #penalty-shots-container { display: none; justify-content: space-between; align-items: center; background: var(--main-red); padding: 10px; border: 3px solid white; border-radius: 8px; margin-top: 5px; width: var(--container-width); color: white; }
         .team-shots { display: flex; gap: 3px; }
         .ball { width: 25px; height: 25px; border-radius: 50%; background: #fff; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #000; }
@@ -161,22 +156,18 @@
 
     let localTimerInterval = null;
     let lastScoreA = 0, lastScoreB = 0;
+    let hideTimerTimeout = null;
 
-    // --- Team Name Auto-Scroll Function ---
     function checkScroll(elementId) {
         const el = document.getElementById(elementId);
         const parent = el.parentElement;
-        
-        // Reset animation
         el.style.animation = "none";
-        
         if (el.scrollWidth > parent.offsetWidth) {
-            const duration = (el.scrollWidth / 50) + 2; // Calculate speed based on length
+            const duration = (el.scrollWidth / 45) + 2; 
             el.style.animation = `scrollName ${duration}s linear infinite alternate`;
         }
     }
 
-    // --- Match Data Sync ---
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         
@@ -184,15 +175,9 @@
         lastScoreA = d.scoreA || 0; 
         lastScoreB = d.scoreB || 0;
 
-        // Set names and check for scrolling
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
-        
-        // Small delay to ensure text is rendered before measuring width
-        setTimeout(() => {
-            checkScroll('nameA');
-            checkScroll('nameB');
-        }, 100);
+        setTimeout(() => { checkScroll('nameA'); checkScroll('nameB'); }, 100);
 
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
@@ -201,24 +186,37 @@
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
 
+        // --- Smart Timer Logic ---
+        const timerBox = document.getElementById('match-timer-box');
+        
         if (d.timerRunning && d.startTime) {
+            // Cancel any pending hide timeout
+            if(hideTimerTimeout) clearTimeout(hideTimerTimeout);
+            
+            timerBox.style.display = "flex"; 
             if (!localTimerInterval) {
                 localTimerInterval = setInterval(() => {
                     const diff = Math.floor((Date.now() - d.startTime) / 1000);
                     if (diff < 0) return;
                     let m = Math.floor(diff / 60);
                     let s = diff % 60;
-                    let timeStr = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-                    document.getElementById('match-timer-box').innerText = timeStr;
-                    document.getElementById('match-timer-box').style.display = "flex";
+                    timerBox.innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
                 }, 1000);
             }
         } else {
             clearInterval(localTimerInterval);
             localTimerInterval = null;
+            
             let sTime = d.matchTime || "00:00";
-            document.getElementById('match-timer-box').innerText = sTime;
-            document.getElementById('match-timer-box').style.display = (sTime === "00:00") ? "none" : "flex";
+            timerBox.innerText = sTime;
+
+            // Start 1-minute hide timer if paused or at 00:00
+            if (timerBox.style.display === "flex") {
+                if(hideTimerTimeout) clearTimeout(hideTimerTimeout);
+                hideTimerTimeout = setTimeout(() => {
+                    timerBox.style.display = "none";
+                }, 60000); // 60,000ms = 1 Minute
+            }
         }
 
         renderPenalties('shotsA', d.pA || ""); 
