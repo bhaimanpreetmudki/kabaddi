@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Final Score Edges</title>
+    <title>Sukhdeep TV - Fixed Layout</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -34,13 +34,14 @@
         }
 
         .jersey-strip { width: 15px; height: 60px; flex-shrink: 0; }
-        .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; }
         
-        /* Team Layouts: Score boxes at the extreme edges */
-        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; flex-direction: row; }
-        .side-b { background: var(--pure-white); color: var(--main-red); flex-direction: row-reverse; }
+        /* Fixed Sides */
+        .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; }
+        
+        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; justify-content: flex-start; }
+        .side-b { background: var(--pure-white); color: var(--main-red); justify-content: flex-end; }
 
-        /* Small Score Box (Fits 00 comfortably) */
+        /* Score Box - Small and Fixed at Edges */
         .score-box { 
             width: 55px; 
             height: 100%; 
@@ -50,16 +51,19 @@
             font-size: 38px; 
             font-weight: 900; 
             flex-shrink: 0; 
-            background: rgba(0,0,0,0.2); 
+            background: rgba(0,0,0,0.15); 
         }
 
         .team-display { flex-grow: 1; padding: 0 12px; font-size: 34px; font-weight: 900; text-transform: uppercase; overflow: hidden; white-space: nowrap; }
+        
+        /* Aligning names correctly */
+        #nameA { text-align: left; }
+        #nameB { text-align: right; }
 
         #match-timer-box { background: var(--main-red); color: white; height: 60px; display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; box-shadow: 5px 5px 15px rgba(0,0,0,0.4); }
 
         #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 26px; font-weight: 700; text-shadow: 2px 2px 4px #000; text-transform: uppercase; width: var(--container-width); }
 
-        /* Penalty and Ticker Styles */
         #penalty-shots-container { display: none; justify-content: space-between; align-items: center; background: var(--main-red); padding: 10px; border: 3px solid white; border-radius: 8px; margin-top: 5px; width: var(--container-width); color: white; }
         .team-shots { display: flex; gap: 3px; }
         .ball { width: 25px; height: 25px; border-radius: 50%; background: #fff; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #000; }
@@ -100,11 +104,13 @@
             <div id="scoreboard-container">
                 <div id="jA" class="jersey-strip"></div>
                 <div class="score-unit side-a">
-                    <div class="score-box" id="scoreA">0</div> <div class="team-display" id="nameA">TEAM A</div>
+                    <div class="score-box" id="scoreA">0</div>
+                    <div class="team-display" id="nameA">TEAM A</div>
                 </div>
                 <div class="score-unit side-b">
-                    <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
-                    <div class="score-box" id="scoreB">0</div> </div>
+                    <div class="team-display" id="nameB">TEAM B</div>
+                    <div class="score-box" id="scoreB">0</div>
+                </div>
                 <div id="jB" class="jersey-strip"></div>
             </div>
             <div id="match-timer-box">00:00</div>
