@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Fixed Auto Scroll</title>
+    <title>Sukhdeep TV - 11 Char Scroll Limit</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -41,7 +41,6 @@
         .side-a { background: var(--main-red); color: var(--pure-white); border-right: 1px solid white; flex-direction: row; }
         .side-b { background: var(--pure-white); color: var(--main-red); border-left: 1px solid white; flex-direction: row-reverse; }
 
-        /* Score Box - "00" size */
         .score-box { 
             width: 55px; 
             height: 100%; 
@@ -55,12 +54,12 @@
             background: rgba(0,0,0,0.1); 
         }
 
-        /* Team Name Area with Fix for Scroll */
         .team-display-wrapper { 
             flex: 1; 
             overflow: hidden; 
             display: flex; 
             align-items: center; 
+            justify-content: center; /* Center by default */
             height: 100%; 
             padding: 0 5px;
             position: relative;
@@ -72,12 +71,11 @@
             text-transform: uppercase; 
             white-space: nowrap; 
             display: inline-block;
-            position: absolute; /* Fixed position for scrolling logic */
             will-change: transform;
         }
 
-        /* Dynamic Animation */
-        @keyframes scrollText {
+        /* Scroll Animation */
+        @keyframes scrollNameAction {
             0% { transform: translateX(0); }
             20% { transform: translateX(0); }
             80% { transform: translateX(var(--scroll-dist)); }
@@ -91,7 +89,7 @@
 
         #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 24px; font-weight: 700; width: var(--container-width); text-transform: uppercase; }
 
-        /* Ticker - Original */
+        /* Ticker Original Style */
         #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; }
         .bar { display: flex; height: 50px; width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
         .top-bg { background: var(--pure-white); }
@@ -106,7 +104,7 @@
         marquee { width: 100%; font-size: 36px; font-weight: 900; text-transform: uppercase; padding-left: 130px; }
         .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
         
-        #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000; text-transform: uppercase; }
+        #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000; }
         #contact-flasher { position: absolute; bottom: 120px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 6px 15px; border-radius: 5px; border-left: 4px solid var(--main-red); font-size: 36px; font-weight: 900; display: flex; align-items: center; gap: 10px; }
     </style>
 </head>
@@ -132,7 +130,7 @@
                 <div class="score-unit side-b">
                     <div class="score-box" id="scoreB">0</div>
                     <div class="team-display-wrapper">
-                        <div class="team-display" id="nameB" style="right: 5px;">TEAM B</div>
+                        <div class="team-display" id="nameB">TEAM B</div>
                     </div>
                 </div>
                 <div id="jB" class="jersey-strip"></div>
@@ -162,34 +160,52 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    function applyScroll(elId) {
+    function checkAndScroll(elId) {
         const el = document.getElementById(elId);
         const parent = el.parentElement;
-        
-        // Reset animation
+        const text = el.innerText;
+
+        // Reset
         el.style.animation = 'none';
+        el.style.position = 'static';
         el.style.transform = 'translateX(0)';
 
-        setTimeout(() => {
-            const diff = el.offsetWidth - parent.offsetWidth;
-            if (diff > 0) {
-                // If Team B, scroll should be negative to show right side
-                const moveDist = (elId === 'nameB') ? diff : -diff;
-                el.style.setProperty('--scroll-dist', moveDist + 'px');
-                const speed = (el.offsetWidth / 30) + 2;
-                el.style.animation = `scrollText ${speed}s linear infinite alternate`;
-            }
-        }, 200);
+        // 11 Character Limit Check
+        if (text.length > 11) {
+            el.style.position = 'absolute';
+            if(elId === 'nameA') el.style.left = '5px';
+            if(elId === 'nameB') el.style.right = '5px';
+
+            setTimeout(() => {
+                const scrollWidth = el.offsetWidth;
+                const parentWidth = parent.offsetWidth;
+                const diff = scrollWidth - parentWidth + 10;
+
+                if (diff > 0) {
+                    const moveDist = (elId === 'nameB') ? diff : -diff;
+                    el.style.setProperty('--scroll-dist', moveDist + 'px');
+                    const duration = (scrollWidth / 30) + 2;
+                    el.style.animation = `scrollNameAction ${duration}s linear infinite alternate`;
+                }
+            }, 150);
+        } else {
+            // Keep centered if less than or equal to 11 chars
+            el.style.position = 'static';
+        }
     }
 
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
-        document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
-        document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
         
-        // Call Scroll
-        applyScroll('nameA');
-        applyScroll('nameB');
+        const nA = (d.nameA || "TEAM A").toUpperCase();
+        const nB = (d.nameB || "TEAM B").toUpperCase();
+        
+        document.getElementById('nameA').innerText = nA;
+        document.getElementById('nameB').innerText = nB;
+
+        // Apply logic
+        checkAndScroll('nameA');
+        checkAndScroll('nameB');
 
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
@@ -215,12 +231,10 @@
         document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 
-    // Simple Clock
     setInterval(() => {
         document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     }, 1000);
 
-    // Watermark Random Move
     function moveWM() {
         const wm = document.getElementById('watermark');
         wm.style.left = Math.random() * (window.innerWidth - 200) + 'px';
