@@ -157,42 +157,93 @@
 </div>
 
 <script>
+    // --- 1. Firebase Config & Initialization ---
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
     const matchRef = db.ref("matchData");
     const tickerRef = db.ref("tickerData");
 
-    // --- Realtime Sync ---
+    let seconds = 0;
+    let timerInterval = null;
+
+    // --- 2. Realtime Sync: Firebase ਤੋਂ ਡਾਟਾ ਲੈ ਕੇ Admin ਵਿੱਚ ਦਿਖਾਉਣਾ ---
     matchRef.on("value", (snap) => {
         const d = snap.val() || {};
+        // ਸਕੋਰ ਅਤੇ ਨਾਮ
         document.getElementById('dispA').innerText = d.scoreA || 0;
         document.getElementById('dispB').innerText = d.scoreB || 0;
         document.getElementById('nameA').value = d.nameA || "";
         document.getElementById('nameB').value = d.nameB || "";
         document.getElementById('colorA').value = d.colorA || "#cc0000";
         document.getElementById('colorB').value = d.colorB || "#ffffff";
-        document.getElementById('pA').value = d.pA || "";
-        document.getElementById('pB').value = d.pB || "";
+        
+        // ਮੈਚ ਡੀਟੇਲ
+        document.getElementById('matchRound').value = d.matchRound || "";
+        document.getElementById('roundInp').value = d.round || "";
+        
+      // *** ਇਹ ਹਿੱਸਾ Penalty Box ਨੂੰ SHOW/HIDE ਕਰੇਗਾ ***
+    const pSec = document.getElementById('penaltyControlSection');
+    const pBtn = document.getElementById('pVisBtn');
+    
+    if (d.penaltyVisible) {
+        pSec.style.display = "block";  // ਬਾਕਸ ਦਿਖਾਓ
+        pBtn.innerText = "Hide Penalty";
+        pBtn.style.background = "#da3633"; // ਰੰਗ ਲਾਲ (Hide ਲਈ)
+    } else {
+        pSec.style.display = "none";   // ਬਾਕਸ ਛੁਪਾਓ
+        pBtn.innerText = "Show Penalty";
+        pBtn.style.background = "#f39c12"; // ਰੰਗ ਪੀਲਾ (Show ਲਈ)
+    }
 
-        // Penalty Visibility Logic (Admin Panel Control)
-        const pSec = document.getElementById('penaltyControlSection');
-        const pBtn = document.getElementById('pVisBtn');
-        if (d.penaltyVisible) {
-            pSec.style.display = "block";
-            pBtn.innerText = "Hide Penalty";
-            pBtn.style.background = "#da3633";
-            pBtn.style.color = "#fff";
+        // ਟਾਈਮਰ ਸਿੰਕ
+        if (d.timerRunning) {
+            document.getElementById('mainTimerBtn').innerText = "STOP";
+            document.getElementById('mainTimerBtn').style.background = "#da3633";
+            startLocalTimer(d.startTime);
         } else {
-            pSec.style.display = "none";
-            pBtn.innerText = "Show Penalty";
-            pBtn.style.background = "#f39c12";
-            pBtn.style.color = "#000";
+            document.getElementById('mainTimerBtn').innerText = "START";
+            document.getElementById('mainTimerBtn').style.background = "#238636";
+            clearInterval(timerInterval);
+            timerInterval = null;
+            document.getElementById('timerShow').innerText = d.matchTime || "00:00";
+            // ਸੇਵ ਕੀਤੇ ਸੈਕਿੰਡ ਅਪਡੇਟ ਕਰੋ ਤਾਂ ਜੋ ਰੀਸਟਾਰਟ ਉਥੋਂ ਹੀ ਹੋਵੇ
+            let parts = (d.matchTime || "00:00").split(':');
+            seconds = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
         }
     });
 
+    // Ticker Data Sync
+    tickerRef.on("value", (snap) => {
+        const d = snap.val() || {};
+        document.getElementById('tourName').value = d.tournamentName || "";
+        document.getElementById('prizeList').value = d.prizes || "";
+        document.getElementById('contactInfo').value = d.contact || "";
+        document.getElementById('whatsappNumber').value = d.whatsapp || "";
+        document.getElementById('teamsList').value = d.participatingTeams || "";
+        document.getElementById('nextProg').value = d.nextProgram || "";
+        document.getElementById('wmText').value = d.watermarkText || "";
+        
+        const tBtn = document.getElementById('tickerToggleBtn');
+        if (d.tickerVis === false) {
+            tBtn.innerText = "Ticker: OFF";
+            tBtn.style.background = "#da3633";
+        } else {
+            tBtn.innerText = "Ticker: ON";
+            tBtn.style.background = "#238636";
+        }
+    });
+
+    // --- 3. Functions: Score & Visibility ---
     function changeScore(team, val) {
         matchRef.child(team).transaction(c => (c || 0) + val);
+    }
+
+    function toggleVis(field) {
+        matchRef.once("value", snap => {
+            let curr = snap.val()[field];
+            matchRef.update({ [field]: (curr === false) });
+        });
     }
 
     function updateMatchDB() {
@@ -200,10 +251,64 @@
             nameA: document.getElementById('nameA').value,
             nameB: document.getElementById('nameB').value,
             colorA: document.getElementById('colorA').value,
-            colorB: document.getElementById('colorB').value
+            colorB: document.getElementById('colorB').value,
+            matchRound: document.getElementById('matchRound').value,
+            round: document.getElementById('roundInp').value
         });
     }
 
+    // --- 4. Cards (Yellow/Red) ---
+    function handleCard(team, type) {
+        let playerNo = document.getElementById('player' + team).value;
+        if (!playerNo) { alert("Please enter player number!"); return; }
+        
+        let cardKey = "card" + team; // cardA or cardB
+        matchRef.update({ [cardKey]: type.toLowerCase() });
+
+        let recordBox = document.getElementById('cardRecord' + team);
+        recordBox.innerHTML += `<span class="card-tag" style="background:${type==='Yellow'?'#f1c40f':'#e74c3c'}; color:${type==='Yellow'?'#000':'#fff'}">${playerNo} ${type[0]}</span>`;
+        
+        // 7 ਸੈਕਿੰਡ ਬਾਅਦ ਓਵਰਲੇਅ ਤੋਂ ਹਟਾ ਦਿਓ
+        setTimeout(() => { matchRef.update({ [cardKey]: "" }); }, 7000);
+    }
+
+    // --- 5. Timer Logic ---
+    function toggleTimer() {
+        matchRef.once("value", snap => {
+            const d = snap.val() || {};
+            if (d.timerRunning) {
+                matchRef.update({ timerRunning: false });
+            } else {
+                let startTime = Date.now() - (seconds * 1000);
+                matchRef.update({ timerRunning: true, startTime: startTime });
+            }
+        });
+    }
+
+    function startLocalTimer(startTime) {
+        clearInterval(timerInterval);
+        timerInterval = setInterval(() => {
+            seconds = Math.floor((Date.now() - startTime) / 1000);
+            let m = Math.floor(seconds / 60), s = seconds % 60;
+            let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
+            document.getElementById('timerShow').innerText = timeStr;
+            matchRef.child('matchTime').set(timeStr);
+        }, 1000);
+    }
+
+    function resetTimer() {
+        seconds = 0;
+        matchRef.update({ timerRunning: false, startTime: null, matchTime: "00:00" });
+    }
+
+    // --- 6. Penalty Logic ---
+    function addPenalty(team, icon) {
+        matchRef.child(team).once("value", snap => {
+            let current = snap.val() || "";
+            matchRef.update({ [team]: current + icon });
+        });
+    }
+    
     function togglePenaltyVis() {
         matchRef.once("value", snap => {
             let v = snap.val().penaltyVisible;
@@ -211,23 +316,41 @@
         });
     }
 
-    function addPenalty(team, icon) {
-        matchRef.child(team).once("value", snap => {
-            let current = snap.val() || "";
-            matchRef.update({ [team]: current + icon });
-        });
-    }
-
-    function resetPenaltyOnly() { matchRef.update({ pA: "", pB: "" }); }
-    function resetOnlyScore() { matchRef.update({ scoreA: 0, scoreB: 0 }); }
-
-    function fullReset() {
-        if (confirm("Everything Reset?")) {
-            matchRef.update({
-                scoreA: 0, scoreB: 0, pA: "", pB: "", penaltyVisible: false
+    // --- 7. Ticker Actions ---
+    function confirmTickerAction(type) {
+        if (type === 'info') {
+            tickerRef.update({
+                tournamentName: document.getElementById('tourName').value,
+                prizes: document.getElementById('prizeList').value,
+                contact: document.getElementById('contactInfo').value,
+                whatsapp: document.getElementById('whatsappNumber').value,
+                participatingTeams: document.getElementById('teamsList').value,
+                nextProgram: document.getElementById('nextProg').value
+            }).then(() => alert("Data Updated!"));
+        } else if (type === 'wm') {
+            tickerRef.update({ watermarkText: document.getElementById('wmText').value });
+        } else if (type === 'vis') {
+            tickerRef.once("value", snap => {
+                let v = snap.val().tickerVis;
+                tickerRef.update({ tickerVis: (v === false) });
             });
         }
     }
+
+    // --- 8. Resets ---
+    function resetOnlyScore() { matchRef.update({ scoreA: 0, scoreB: 0 }); }
+    function resetPenaltyOnly() { matchRef.update({ pA: "", pB: "" }); }
+    
+    function fullReset() {
+        if (confirm("Reset everything?")) {
+            matchRef.set({
+                scoreA: 0, scoreB: 0, nameA: "TEAM A", nameB: "TEAM B",
+                colorA: "#cc0000", colorB: "#ffffff",
+                matchTime: "00:00", timerRunning: false,
+                pA: "", pB: "", penaltyVisible: false,
+                scoreVisible: true, cardA: "", cardB: ""
+            });
+            document.querySelectorAll('.card-record-box').forEach(b => b.innerHTML = "Record: -");
+        }
+    }
 </script>
-</body>
-</html>
