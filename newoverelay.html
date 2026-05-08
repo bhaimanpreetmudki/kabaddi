@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Smart Timer Auto-Hide</title>
+    <title>Sukhdeep TV - Final Fixed Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -33,47 +33,27 @@
             background: var(--pure-black); 
         }
 
-        .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
-        .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; overflow: hidden; }
+        .jersey-strip { width: 20px; height: 60px; flex-shrink: 2; }
+        .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; }
+        .team-display { flex-grow: 1; padding: 0 15px; font-size: 36px; font-weight: 900; text-transform: uppercase; overflow: hidden; white-space: nowrap; }
+        .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; }
         
-        .team-display-wrapper { flex-grow: 1; overflow: hidden; display: flex; align-items: center; height: 100%; padding: 0 10px; }
-        .team-display { font-size: 36px; font-weight: 900; text-transform: uppercase; white-space: nowrap; display: inline-block; position: relative; }
-
-        @keyframes scrollName {
-            0% { transform: translateX(0); }
-            10% { transform: translateX(0); }
-            90% { transform: translateX(calc(-100% + 180px)); }
-            100% { transform: translateX(0); }
-        }
-
-        .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; z-index: 10; }
         .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
         .side-b { background: var(--pure-white); color: var(--main-red); }
 
-        #match-timer-box { 
-            background: var(--main-red); 
-            color: white; 
-            height: 60px; 
-            display: none; 
-            align-items: center; 
-            padding: 0 15px; 
-            font-size: 32px; 
-            font-weight: 900; 
-            border: 3px solid white; 
-            border-left: none; 
-            border-radius: 0 6px 6px 0; 
-            box-shadow: 5px 5px 15px rgba(0,0,0,0.4);
-            transition: opacity 0.5s ease;
-        }
+        #match-timer-box { background: var(--main-red); color: white; height: 60px; display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; box-shadow: 5px 5px 15px rgba(0,0,0,0.4); }
 
         #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 26px; font-weight: 700; text-shadow: 2px 2px 4px #000; text-transform: uppercase; width: var(--container-width); }
+
         #penalty-shots-container { display: none; justify-content: space-between; align-items: center; background: var(--main-red); padding: 10px; border: 3px solid white; border-radius: 8px; margin-top: 5px; width: var(--container-width); color: white; }
         .team-shots { display: flex; gap: 3px; }
         .ball { width: 25px; height: 25px; border-radius: 50%; background: #fff; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #000; }
         .ball.goal { background: #00ff00; color: #000; border-color: #fff; }
         .ball.miss { background: #000000; color: #fff; border-color: #fff; }
 
+        /* Contact Flasher */
         #contact-flasher { position: absolute; bottom: 120px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 6px 15px; border-radius: 5px; border-left: 4px solid var(--main-red); font-size: 36px; font-weight: 900; display: flex; align-items: center; gap: 10px; z-index: 1001; }
+
         #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000, 3px 3px 5px rgba(0,0,0,0.8); text-transform: uppercase; transition: all 1.2s ease-in-out; pointer-events: none; }
 
         #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999; }
@@ -111,14 +91,10 @@
                 <div id="jA" class="jersey-strip"></div>
                 <div class="score-unit side-a">
                     <div class="score-box" id="scoreA">0</div>
-                    <div class="team-display-wrapper">
-                        <div class="team-display" id="nameA">TEAM A</div>
-                    </div>
+                    <div class="team-display" id="nameA">TEAM A</div>
                 </div>
                 <div class="score-unit side-b">
-                    <div class="team-display-wrapper" style="justify-content: flex-end;">
-                        <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
-                    </div>
+                    <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
                     <div class="score-box" id="scoreB">0</div>
                 </div>
                 <div id="jB" class="jersey-strip"></div>
@@ -156,18 +132,8 @@
 
     let localTimerInterval = null;
     let lastScoreA = 0, lastScoreB = 0;
-    let hideTimerTimeout = null;
 
-    function checkScroll(elementId) {
-        const el = document.getElementById(elementId);
-        const parent = el.parentElement;
-        el.style.animation = "none";
-        if (el.scrollWidth > parent.offsetWidth) {
-            const duration = (el.scrollWidth / 45) + 2; 
-            el.style.animation = `scrollName ${duration}s linear infinite alternate`;
-        }
-    }
-
+    // --- Match Data Sync ---
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         
@@ -177,8 +143,6 @@
 
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
-        setTimeout(() => { checkScroll('nameA'); checkScroll('nameB'); }, 100);
-
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
         document.getElementById('round-detail').innerText = "ROUND: " + (d.matchRound || "1");
@@ -186,37 +150,25 @@
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
 
-        // --- Smart Timer Logic ---
-        const timerBox = document.getElementById('match-timer-box');
-        
+        // TIMER LOGIC
         if (d.timerRunning && d.startTime) {
-            // Cancel any pending hide timeout
-            if(hideTimerTimeout) clearTimeout(hideTimerTimeout);
-            
-            timerBox.style.display = "flex"; 
             if (!localTimerInterval) {
                 localTimerInterval = setInterval(() => {
                     const diff = Math.floor((Date.now() - d.startTime) / 1000);
                     if (diff < 0) return;
                     let m = Math.floor(diff / 60);
                     let s = diff % 60;
-                    timerBox.innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+                    let timeStr = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+                    document.getElementById('match-timer-box').innerText = timeStr;
+                    document.getElementById('match-timer-box').style.display = "flex";
                 }, 1000);
             }
         } else {
             clearInterval(localTimerInterval);
             localTimerInterval = null;
-            
             let sTime = d.matchTime || "00:00";
-            timerBox.innerText = sTime;
-
-            // Start 1-minute hide timer if paused or at 00:00
-            if (timerBox.style.display === "flex") {
-                if(hideTimerTimeout) clearTimeout(hideTimerTimeout);
-                hideTimerTimeout = setTimeout(() => {
-                    timerBox.style.display = "none";
-                }, 60000); // 60,000ms = 1 Minute
-            }
+            document.getElementById('match-timer-box').innerText = sTime;
+            document.getElementById('match-timer-box').style.display = (sTime === "00:00") ? "none" : "flex";
         }
 
         renderPenalties('shotsA', d.pA || ""); 
@@ -240,6 +192,7 @@
         }
     }
 
+    // Ticker & Contact Sync
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
@@ -251,6 +204,7 @@
         document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 
+    // Flasher Logic
     let isW = false;
     setInterval(() => {
         const icon = document.getElementById('fl-icon');
@@ -258,10 +212,12 @@
         db.ref("tickerData").once("value", (snap) => {
             const d = snap.val() || {};
             if (isW) {
-                icon.className = "fab fa-whatsapp"; icon.style.color = "#25D366";
+                icon.className = "fab fa-whatsapp";
+                icon.style.color = "#25D366";
                 numSpan.innerText = d.whatsapp || "86996-40061";
             } else {
-                icon.className = "fas fa-phone-alt"; icon.style.color = "white";
+                icon.className = "fas fa-phone-alt";
+                icon.style.color = "white";
                 numSpan.innerText = d.contact || "86996-40061";
             }
             isW = !isW;
