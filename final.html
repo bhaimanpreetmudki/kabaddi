@@ -2,13 +2,15 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Fixed Layout with Cards & Penalty</title>
+    <title>Sukhdeep TV - Full Professional Scoreboard & Ticker</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
+            --arrow-width: 25px;
+            --arrow-height: 50px;
             --main-red: #cc0000;
             --pure-white: #ffffff;
             --pure-black: #000000;
@@ -17,83 +19,56 @@
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
+        /* Scoreboard Section */
         #scoreboard-wrapper { position: absolute; top: 25px; left: 20px; display: flex; flex-direction: column; gap: 2px; z-index: 100; }
         #scoreboard-main-row { display: flex; align-items: flex-start; }
-        
-        #scoreboard-container { 
-            display: flex; 
-            width: var(--container-width); 
-            border: 3px solid var(--pure-white); 
-            border-radius: 6px; 
-            overflow: hidden; 
-            background: var(--pure-black); 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6); 
-        }
-
-        .jersey-strip { width: 22px; height: 60px; flex-shrink: 0; }
+        #scoreboard-container { display: flex; width: var(--container-width); border: 3px solid white; border-radius: 6px; overflow: hidden; background: black; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
+        .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
         .score-unit { display: flex; height: 60px; align-items: center; width: 50%; position: relative; overflow: hidden; }
-        
         .team-display-wrapper { flex: 1; overflow: hidden; display: flex; align-items: center; height: 100%; padding: 0 10px; position: relative; }
-        .team-display { font-size: 36px; font-weight: 900; text-transform: uppercase; white-space: nowrap; width: 100%; position: absolute; }
+        .team-display { font-size: 36px; font-weight: 900; text-transform: uppercase; white-space: nowrap; width: 100%; position: absolute; color: white; }
+        .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; z-index: 10; }
+        .side-a { background: var(--main-red); color: white; border-right: 2px solid white; }
+        .side-b { background: white; color: var(--main-red); border-left: 2px solid white; }
 
-        @keyframes marqueeScroll {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
+        /* Timer & Details */
+        #match-timer-box { background: var(--main-red); color: white; height: 60px; display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; }
+        #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: white; font-size: 26px; font-weight: 700; text-shadow: 2px 2px 4px #000; text-transform: uppercase; width: var(--container-width); }
 
-        .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; z-index: 10; }
-        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
-        .side-b { background: var(--pure-white); color: var(--main-red); border-left: 2px solid white; }
-
-        #match-timer-box { 
-            background: var(--main-red); color: white; height: 60px; 
-            display: none; align-items: center; padding: 0 15px; font-size: 32px; 
-            font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0;
-        }
-
-        #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 26px; font-weight: 700; text-shadow: 2px 2px 4px #000; text-transform: uppercase; width: var(--container-width); }
-
-        /* Penalty Section - Fixed Style */
-        #penalty-shots-container { 
-            display: none; justify-content: space-between; align-items: center; 
-            background: var(--main-red); padding: 10px; border: 3px solid white; 
-            border-radius: 8px; margin-top: 5px; width: var(--container-width); color: white; 
-        }
-        .team-shots { display: flex; gap: 5px; }
-        .ball { width: 28px; height: 28px; border-radius: 50%; background: #fff; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #000; }
-        .ball.goal { background: #00ff00; color: #000; border-color: #fff; }
-        .ball.miss { background: #000000; color: #fff; border-color: #fff; }
-
-        /* Card Alerts - Flash Style */
-        #card-alert-overlay { position: fixed; top: 160px; left: 20px; z-index: 1000; display: none; }
-        .card-box { display: flex; align-items: center; gap: 15px; background: rgba(0,0,0,0.9); padding: 12px 25px; border-radius: 8px; border-left: 10px solid gold; color: white; border: 2px solid rgba(255,255,255,0.2); }
-        .card-rect { width: 45px; height: 65px; border-radius: 4px; }
-        .yellow-card { background: gold; }
-        .red-card { background: red; }
-        .card-player { font-size: 32px; font-weight: 900; text-transform: uppercase; display: block; }
-        .card-type { font-size: 20px; font-weight: 700; color: #ffcc00; }
-
-        @keyframes slideIn { from { transform: translateX(-110%); } to { transform: translateX(0); } }
-
-        /* Watermark & Footer */
-        #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 4px #000; text-transform: uppercase; transition: all 1.2s ease-in-out; }
+        /* Footer Ticker System */
         #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999; }
-        .bar { display: flex; height: 50px; width: 100%; overflow: hidden; border: 2px solid var(--main-red); border-radius: 4px; position: relative; }
-        .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
+        .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
+        .top-bg { background: white; }
+        .bottom-bg { background: var(--main-red); }
+        .box-left, .box-right { width: 50%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
+        
+        .hint-label { height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 20px; font-weight: 900; font-size: 30px; text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100; }
+        .hint-red { background: var(--main-red); color: white; }
+        .hint-white { background: white; color: var(--main-red); }
+        
+        marquee { width: 100%; font-size: 34px; font-weight: 900; text-transform: uppercase; padding-left: 110px; }
+        .clock-area { position: absolute; right: 0; background: white; color: var(--main-red); min-width: 150px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 32px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
+
+        /* Goal & Watermark */
+        #goal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 80vh; display: none; justify-content: center; align-items: center; z-index: 500; pointer-events: none; }
+        .goal-text { font-size: 150px; color: #fff; font-weight: 900; text-shadow: 0 0 20px #ff0000; animation: scaleUp 0.5s infinite alternate; }
+        @keyframes scaleUp { from { transform: scale(1); } to { transform: scale(1.1); } }
+        #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000; text-transform: uppercase; pointer-events: none; }
+        
+        /* Contact Flasher (Bottom Right) */
+        #contact-flasher { position: absolute; bottom: 130px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 8px 15px; border-radius: 5px; border-left: 5px solid var(--main-red); font-size: 34px; font-weight: 900; display: flex; align-items: center; gap: 10px; z-index: 1001; }
+
+        @keyframes marqueeScroll { 0% { transform: translateX(100%); } 100% { transform: translateX(-100%); } }
     </style>
 </head>
 <body>
 
+    <div id="goal-overlay"><div class="goal-text">GOAL !!!</div></div>
     <div id="watermark">SUKHDEEP TV</div>
 
-    <div id="card-alert-overlay">
-        <div class="card-box" id="card-box-main">
-            <div id="card-rect-color" class="card-rect"></div>
-            <div class="card-info">
-                <span class="card-player" id="card-player-name">PLAYER NAME</span>
-                <span class="card-type" id="card-type-text">YELLOW CARD</span>
-            </div>
-        </div>
+    <div id="contact-flasher">
+        <i id="fl-icon" class="fas fa-phone-alt"></i>
+        <span id="fl-num">86996-40061</span>
     </div>
 
     <div id="scoreboard-wrapper">
@@ -112,26 +87,20 @@
             </div>
             <div id="match-timer-box">00:00</div>
         </div>
-        
         <div id="match-details">
             <span id="round-detail">ROUND: 1</span>
             <span id="half-detail">FIRST HALF</span>
         </div>
-
-        <div id="penalty-shots-container">
-            <div class="team-shots" id="shotsA"></div>
-            <div style="font-weight: 900; font-size: 22px;">PENALTY</div>
-            <div class="team-shots" id="shotsB"></div>
-        </div>
     </div>
 
     <div id="master-footer">
-        <div class="bar" style="background: white;">
-            <marquee id="tour-name" style="color: black; font-size: 36px; font-weight: 900;">TOURNAMENT NAME</marquee>
+        <div class="bar top-bg">
+            <div class="box-left"><div class="hint-label hint-red">LIVE</div><marquee id="tour-name">TOURNAMENT</marquee></div>
+            <div class="box-right"><div class="hint-label hint-red">TEAMS</div><marquee id="scroll-top">UPCOMING...</marquee></div>
         </div>
-        <div class="bar" style="background: #cc0000;">
-            <marquee id="scroll-top" style="color: white; font-size: 36px; font-weight: 900;">LIVE UPDATES...</marquee>
-            <div class="clock-area" id="live-clock">00:00 AM</div>
+        <div class="bar bottom-bg">
+            <div class="box-left"><div class="hint-label hint-white">INFO</div><marquee id="sub-info" style="color:white">LIVE COVERAGE</marquee></div>
+            <div class="box-right"><div class="hint-label hint-white">PRIZES</div><marquee id="scroll-bot" style="color:white">UPDATING...</marquee><div class="clock-area" id="live-clock">00:00 AM</div></div>
         </div>
     </div>
 
@@ -140,38 +109,17 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    let lastCardId = "";
+    let lastScoreA = 0, lastScoreB = 0;
 
-    function applyMarquee(elId) {
-        const el = document.getElementById(elId);
-        const text = el.innerText;
-        el.style.animation = 'none';
-        el.style.left = '0';
-        el.style.textAlign = elId === 'nameA' ? 'left' : 'right';
-        if (text.length > 10) {
-            el.style.animation = `marqueeScroll 8s linear infinite`;
-        }
-    }
-
-    function showCardAlert(name, type) {
-        const overlay = document.getElementById('card-alert-overlay');
-        const rect = document.getElementById('card-rect-color');
-        document.getElementById('card-player-name').innerText = name.toUpperCase();
-        document.getElementById('card-type-text').innerText = type === 'yellow' ? 'YELLOW CARD' : 'RED CARD';
-        rect.className = `card-rect ${type === 'yellow' ? 'yellow-card' : 'red-card'}`;
-        
-        overlay.style.display = 'block';
-        overlay.style.animation = 'slideIn 0.5s ease-out forwards';
-        setTimeout(() => { overlay.style.display = 'none'; }, 5000);
-    }
-
+    // --- SCOREBOARD DATA ---
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         
+        if (d.scoreA > lastScoreA || d.scoreB > lastScoreB) { triggerGoal(); }
+        lastScoreA = d.scoreA || 0; lastScoreB = d.scoreB || 0;
+
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
-        applyMarquee('nameA'); applyMarquee('nameB');
-
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
         document.getElementById('round-detail').innerText = "ROUND: " + (d.matchRound || "1");
@@ -179,53 +127,58 @@
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
 
-        // Penalty Show/Hide
-        renderPenalties('shotsA', d.pA || ""); 
-        renderPenalties('shotsB', d.pB || ""); 
-        document.getElementById('penalty-shots-container').style.display = d.penaltyVisible ? 'flex' : 'none';
-
-        // Card Check
-        if (d.cardAlert && d.cardAlert.id !== lastCardId) {
-            lastCardId = d.cardAlert.id;
-            showCardAlert(d.cardAlert.playerName, d.cardAlert.type);
-        }
-
         const timerBox = document.getElementById('match-timer-box');
         timerBox.style.display = d.timerRunning ? "flex" : "none";
         timerBox.innerText = d.matchTime || "00:00";
+        
+        document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    function renderPenalties(containerId, penaltyString) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        const pArray = Array.from(penaltyString);
-        for(let i=0; i<5; i++) {
-            let ball = document.createElement("div");
-            ball.className = "ball";
-            let status = pArray[i];
-            if (status === "✅") { ball.className = "ball goal"; ball.innerText = "●"; }
-            else if (status === "❌") { ball.className = "ball miss"; ball.innerText = "X"; }
-            else { ball.innerText = i + 1; }
-            container.appendChild(ball);
-        }
-    }
-
-    // Ticker & Clock
+    // --- TICKER DATA ---
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
-        document.getElementById('scroll-top').innerText = (d.participatingTeams || "LIVE COVERAGE...").toUpperCase();
+        document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
+        document.getElementById('sub-info').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
+        document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
+        document.getElementById('watermark').innerText = (d.watermarkText || "SUKHDEEP TV").toUpperCase();
+        document.getElementById('fl-num').innerText = d.contact || "86996-40061";
+        document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
+
+    // --- CONTACT FLASHER (WhatsApp/Phone) ---
+    let isW = false;
+    setInterval(() => {
+        const icon = document.getElementById('fl-icon');
+        const numSpan = document.getElementById('fl-num');
+        db.ref("tickerData").once("value", (snap) => {
+            const d = snap.val() || {};
+            if (isW) {
+                icon.className = "fab fa-whatsapp"; icon.style.color = "#25D366";
+                numSpan.innerText = d.whatsapp || "86996-40061";
+            } else {
+                icon.className = "fas fa-phone-alt"; icon.style.color = "white";
+                numSpan.innerText = d.contact || "86996-40061";
+            }
+            isW = !isW;
+        });
+    }, 10000);
+
+    // --- UTILS ---
+    function triggerGoal() {
+        const overlay = document.getElementById('goal-overlay');
+        overlay.style.display = 'flex';
+        setTimeout(() => { overlay.style.display = 'none'; }, 3000);
+    }
 
     setInterval(() => {
         document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
     }, 1000);
 
-    // Watermark Random Move
     function moveWatermark() {
         const wm = document.getElementById('watermark');
-        wm.style.left = Math.random() * (window.innerWidth - 200) + 'px';
-        wm.style.top = (Math.random() * (window.innerHeight - 300) + 150) + 'px';
+        wm.style.left = Math.random() * (window.innerWidth - 250) + 'px';
+        wm.style.top = (Math.random() * (window.innerHeight - 400) + 150) + 'px';
     }
     setInterval(moveWatermark, 10000);
     window.onload = moveWatermark;
