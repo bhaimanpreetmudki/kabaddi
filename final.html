@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Fixed Layout</title>
+    <title>Sukhdeep TV - Fixed Score Layout</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -33,37 +33,47 @@
             background: var(--pure-black); 
         }
 
-        .jersey-strip { width: 15px; height: 60px; flex-shrink: 0; }
+        .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
         
-        /* Fixed Sides */
-        .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; }
+        /* Fixed Sides Logic */
+        .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; overflow: hidden; }
         
-        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; justify-content: flex-start; }
-        .side-b { background: var(--pure-white); color: var(--main-red); justify-content: flex-end; }
+        /* Side A: Score on Left */
+        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; flex-direction: row; }
+        
+        /* Side B: Score on Right */
+        .side-b { background: var(--pure-white); color: var(--main-red); flex-direction: row-reverse; }
 
-        /* Score Box - Small and Fixed at Edges */
-        .score-box { 
-            width: 55px; 
-            height: 100%; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 38px; 
-            font-weight: 900; 
-            flex-shrink: 0; 
-            background: rgba(0,0,0,0.15); 
+        .team-display-wrapper { flex-grow: 1; overflow: hidden; display: flex; align-items: center; height: 100%; padding: 0 10px; }
+        .team-display { font-size: 36px; font-weight: 900; text-transform: uppercase; white-space: nowrap; display: inline-block; position: relative; }
+
+        @keyframes scrollName {
+            0% { transform: translateX(0); }
+            10% { transform: translateX(0); }
+            90% { transform: translateX(calc(-100% + 180px)); }
+            100% { transform: translateX(0); }
         }
 
-        .team-display { flex-grow: 1; padding: 0 12px; font-size: 34px; font-weight: 900; text-transform: uppercase; overflow: hidden; white-space: nowrap; }
-        
-        /* Aligning names correctly */
-        #nameA { text-align: left; }
-        #nameB { text-align: right; }
+        /* Score box always at the outer edges */
+        .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; z-index: 10; background: rgba(0,0,0,0.1); }
 
-        #match-timer-box { background: var(--main-red); color: white; height: 60px; display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; box-shadow: 5px 5px 15px rgba(0,0,0,0.4); }
+        #match-timer-box { 
+            background: var(--main-red); 
+            color: white; 
+            height: 60px; 
+            display: none; 
+            align-items: center; 
+            padding: 0 15px; 
+            font-size: 32px; 
+            font-weight: 900; 
+            border: 3px solid white; 
+            border-left: none; 
+            border-radius: 0 6px 6px 0; 
+            box-shadow: 5px 5px 15px rgba(0,0,0,0.4);
+            transition: opacity 0.5s ease;
+        }
 
         #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 26px; font-weight: 700; text-shadow: 2px 2px 4px #000; text-transform: uppercase; width: var(--container-width); }
-
         #penalty-shots-container { display: none; justify-content: space-between; align-items: center; background: var(--main-red); padding: 10px; border: 3px solid white; border-radius: 8px; margin-top: 5px; width: var(--container-width); color: white; }
         .team-shots { display: flex; gap: 3px; }
         .ball { width: 25px; height: 25px; border-radius: 50%; background: #fff; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: bold; color: #000; }
@@ -73,16 +83,20 @@
         #contact-flasher { position: absolute; bottom: 120px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 6px 15px; border-radius: 5px; border-left: 4px solid var(--main-red); font-size: 36px; font-weight: 900; display: flex; align-items: center; gap: 10px; z-index: 1001; }
         #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000, 3px 3px 5px rgba(0,0,0,0.8); text-transform: uppercase; transition: all 1.2s ease-in-out; pointer-events: none; }
 
+        /* Ticker Design remains exactly the same */
         #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999; }
         .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
         .top-bg { background: var(--pure-white); }
         .bottom-bg { background: var(--main-red); }
         .box-left, .box-right { width: 50%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
-        .hint-label { height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 15px; font-weight: 900; font-size: 32px; text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100; }
+        .hint-label { height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 var(--label-padding); font-weight: 900; font-size: 36px; text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100; }
+        .hint-label::after { content: ""; position: absolute; right: calc(var(--arrow-width) * -1); top: 0; border-top: 25px solid transparent; border-bottom: 25px solid transparent; }
         .hint-red { background: var(--main-red); color: var(--pure-white); }
+        .hint-red::after { border-left: var(--arrow-width) solid var(--main-red); }
         .hint-white { background: var(--pure-white); color: var(--main-red); }
-        marquee { width: 100%; font-size: 34px; font-weight: 900; text-transform: uppercase; padding-left: 115px; }
-        .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
+        .hint-white::after { border-left: var(--arrow-width) solid var(--pure-white); }
+        marquee { width: 100%; font-size: 36px; font-weight: 900; text-transform: uppercase; padding-left: 130px; }
+        .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
         
         #goal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 80vh; display: none; justify-content: center; align-items: center; z-index: 500; pointer-events: none; }
         .goal-text { font-size: 180px; color: #fff; font-weight: 900; text-shadow: 0 0 20px #ff0000; animation: ghaintGoal 0.5s ease-in-out infinite alternate; }
@@ -105,11 +119,15 @@
                 <div id="jA" class="jersey-strip"></div>
                 <div class="score-unit side-a">
                     <div class="score-box" id="scoreA">0</div>
-                    <div class="team-display" id="nameA">TEAM A</div>
+                    <div class="team-display-wrapper">
+                        <div class="team-display" id="nameA">TEAM A</div>
+                    </div>
                 </div>
                 <div class="score-unit side-b">
-                    <div class="team-display" id="nameB">TEAM B</div>
                     <div class="score-box" id="scoreB">0</div>
+                    <div class="team-display-wrapper">
+                        <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
+                    </div>
                 </div>
                 <div id="jB" class="jersey-strip"></div>
             </div>
@@ -146,14 +164,29 @@
 
     let localTimerInterval = null;
     let lastScoreA = 0, lastScoreB = 0;
+    let hideTimerTimeout = null;
+
+    function checkScroll(elementId) {
+        const el = document.getElementById(elementId);
+        const parent = el.parentElement;
+        el.style.animation = "none";
+        if (el.scrollWidth > parent.offsetWidth) {
+            const duration = (el.scrollWidth / 45) + 2; 
+            el.style.animation = `scrollName ${duration}s linear infinite alternate`;
+        }
+    }
 
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
+        
         if (d.scoreA > lastScoreA || d.scoreB > lastScoreB) { triggerGoal(); }
-        lastScoreA = d.scoreA || 0; lastScoreB = d.scoreB || 0;
+        lastScoreA = d.scoreA || 0; 
+        lastScoreB = d.scoreB || 0;
 
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
+        setTimeout(() => { checkScroll('nameA'); checkScroll('nameB'); }, 100);
+
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
         document.getElementById('round-detail').innerText = "ROUND: " + (d.matchRound || "1");
@@ -161,23 +194,36 @@
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
 
+        const timerBox = document.getElementById('match-timer-box');
+        
         if (d.timerRunning && d.startTime) {
+            if(hideTimerTimeout) clearTimeout(hideTimerTimeout);
+            timerBox.style.display = "flex"; 
             if (!localTimerInterval) {
                 localTimerInterval = setInterval(() => {
                     const diff = Math.floor((Date.now() - d.startTime) / 1000);
                     if (diff < 0) return;
-                    let m = Math.floor(diff / 60), s = diff % 60;
-                    document.getElementById('match-timer-box').innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-                    document.getElementById('match-timer-box').style.display = "flex";
+                    let m = Math.floor(diff / 60);
+                    let s = diff % 60;
+                    timerBox.innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
                 }, 1000);
             }
         } else {
-            clearInterval(localTimerInterval); localTimerInterval = null;
+            clearInterval(localTimerInterval);
+            localTimerInterval = null;
             let sTime = d.matchTime || "00:00";
-            document.getElementById('match-timer-box').innerText = sTime;
-            document.getElementById('match-timer-box').style.display = (sTime === "00:00") ? "none" : "flex";
+            timerBox.innerText = sTime;
+
+            if (timerBox.style.display === "flex") {
+                if(hideTimerTimeout) clearTimeout(hideTimerTimeout);
+                hideTimerTimeout = setTimeout(() => {
+                    timerBox.style.display = "none";
+                }, 60000); 
+            }
         }
-        renderPenalties('shotsA', d.pA || ""); renderPenalties('shotsB', d.pB || ""); 
+
+        renderPenalties('shotsA', d.pA || ""); 
+        renderPenalties('shotsB', d.pB || ""); 
         document.getElementById('penalty-shots-container').style.display = d.penaltyVisible ? 'flex' : 'none';
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
@@ -227,8 +273,10 @@
 
     function moveWatermark() {
         const wm = document.getElementById('watermark');
-        wm.style.left = Math.floor(Math.random() * (window.innerWidth - wm.offsetWidth - 50)) + 'px';
-        wm.style.top = (Math.floor(Math.random() * (window.innerHeight - 350)) + 150) + 'px';
+        const maxX = window.innerWidth - wm.offsetWidth - 50;
+        const maxY = window.innerHeight - 200;
+        wm.style.left = Math.floor(Math.random() * maxX) + 'px';
+        wm.style.top = (Math.floor(Math.random() * (maxY - 150)) + 150) + 'px';
     }
     setInterval(moveWatermark, 7000);
 
