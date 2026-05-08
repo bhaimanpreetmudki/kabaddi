@@ -2,11 +2,10 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Final Scroll Fix</title>
+    <title>Sukhdeep TV - Right to Left Scroll Fix</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
         :root {
             --main-red: #cc0000;
@@ -52,7 +51,7 @@
             font-weight: 900; 
             flex-shrink: 0; 
             z-index: 10; 
-            background: rgba(0,0,0,0.15); 
+            background: rgba(0,0,0,0.2); 
         }
 
         .team-display-wrapper { 
@@ -61,24 +60,25 @@
             height: 100%; 
             display: flex;
             align-items: center;
+            position: relative;
             padding: 0 5px;
         }
         
+        /* 10 ਅੱਖਰਾਂ ਤੋਂ ਵੱਧ ਹੋਣ ਤੇ ਇਹ ਚੱਲੇਗਾ */
         .team-display { 
             font-size: 34px; 
             font-weight: 900; 
             text-transform: uppercase; 
             white-space: nowrap; 
-            display: block;
-            margin: 0 auto; /* ਛੋਟੇ ਨਾਮ ਸੈਂਟਰ ਕਰਨ ਲਈ */
-            will-change: transform;
+            position: absolute;
+            width: 100%;
+            text-align: center;
         }
 
-        @keyframes scrollNameAction {
-            0% { transform: translateX(0); }
-            20% { transform: translateX(0); }
-            80% { transform: translateX(var(--scroll-dist)); }
-            100% { transform: translateX(var(--scroll-dist)); }
+        /* Right to Left Continuous Scroll */
+        @keyframes marqueeScroll {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
         }
 
         #match-timer-box { 
@@ -88,7 +88,7 @@
 
         #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 24px; font-weight: 700; width: var(--container-width); text-transform: uppercase; }
 
-        /* Ticker - Fixed as before */
+        /* Ticker & Watermark */
         #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; }
         .bar { display: flex; height: 50px; width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
         .top-bg { background: var(--pure-white); }
@@ -102,8 +102,7 @@
         .hint-white::after { border-left: 20px solid var(--pure-white); }
         marquee { width: 100%; font-size: 36px; font-weight: 900; text-transform: uppercase; padding-left: 130px; }
         .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
-        
-        #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000; }
+        #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000; bottom: 150px; left: 20px; }
     </style>
 </head>
 <body>
@@ -153,32 +152,21 @@
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
 
-    function applyFinalScroll(elId) {
+    function applyMarquee(elId) {
         const el = document.getElementById(elId);
-        const parent = el.parentElement;
         const text = el.innerText;
 
         // Reset
         el.style.animation = 'none';
-        el.style.margin = '0 auto';
+        el.style.left = '0';
+        el.style.textAlign = 'center';
 
-        // 11 ਅੱਖਰਾਂ ਤੋਂ ਵੱਧ ਹੋਣ 'ਤੇ ਚੈੱਕ ਕਰੋ
-        if (text.length > 11) {
-            setTimeout(() => {
-                const scrollWidth = el.scrollWidth;
-                const parentWidth = parent.clientWidth;
-                const diff = scrollWidth - parentWidth + 10;
-
-                if (diff > 0) {
-                    // Margin ਖਤਮ ਕਰਕੇ ਸਾਈਡ ਤੋਂ ਸਟਾਰਟ ਕਰੋ
-                    el.style.margin = '0';
-                    const moveDist = (elId === 'nameB') ? diff : -diff;
-                    el.style.setProperty('--scroll-dist', moveDist + 'px');
-                    
-                    const duration = (scrollWidth / 30) + 2;
-                    el.style.animation = `scrollNameAction ${duration}s linear infinite alternate`;
-                }
-            }, 200);
+        // 10 ਅੱਖਰਾਂ ਵਾਲੀ ਕੰਡੀਸ਼ਨ
+        if (text.length > 10) {
+            el.style.textAlign = 'left';
+            // Speed control: ਲੰਬੇ ਨਾਮ ਲਈ ਟਾਈਮ ਵੱਧ
+            const duration = (text.length < 15) ? '6s' : '10s';
+            el.style.animation = `marqueeScroll ${duration} linear infinite`;
         }
     }
 
@@ -188,9 +176,9 @@
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
 
-        // ਸਕ੍ਰੋਲ ਲਾਗੂ ਕਰੋ
-        applyFinalScroll('nameA');
-        applyFinalScroll('nameB');
+        // ਲਾਗੂ ਕਰੋ
+        applyMarquee('nameA');
+        applyMarquee('nameB');
 
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
