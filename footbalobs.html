@@ -2,109 +2,139 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Final Fixed Overlay</title>
+    <title>Sukhdeep TV - Live Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
     <style>
-        :root { --main-red: #cc0000; --pure-white: #ffffff; --container-width: 610px; }
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Arial', sans-serif; background: transparent; }
         
-        #scoreboard-wrapper { position: absolute; top: 25px; left: 20px; display: flex; flex-direction: column; gap: 2px; }
-        #scoreboard-container { display: flex; width: var(--container-width); border: 3px solid white; border-radius: 6px; overflow: hidden; background: black; box-shadow: 0 5px 15px rgba(0,0,0,0.6); }
-        
-        .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; }
-        .team-display { flex-grow: 1; padding: 0 15px; font-size: 36px; font-weight: 900; text-transform: uppercase; }
-        .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; }
-        
-        .side-a { background: var(--main-red); color: white; border-right: 2px solid white; }
-        .side-b { background: white; color: var(--main-red); }
-
-        #match-timer-box { 
-            background: var(--main-red); color: white; height: 60px; 
-            display: flex; align-items: center; padding: 0 15px; 
-            font-size: 32px; font-weight: 900; border: 3px solid white; 
-            border-left: none; border-radius: 0 6px 6px 0; 
+        #overlay-container {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            display: flex;
+            align-items: center;
+            opacity: 0;
+            transition: opacity 0.5s ease;
         }
 
-        #watermark { position: fixed; color: white; font-size: 35px; font-weight: 900; text-shadow: 2px 2px 0 #000; z-index: 9999; text-transform: uppercase; }
+        /* Scoreboard Style */
+        .score-box {
+            display: flex;
+            background: rgba(0, 0, 0, 0.8);
+            color: white;
+            padding: 10px 20px;
+            border-radius: 5px;
+            border-bottom: 4px solid #cc0000;
+            font-weight: bold;
+            font-size: 24px;
+        }
+
+        .team { display: flex; align-items: center; gap: 10px; }
+        .score { font-size: 32px; color: #f1c40f; padding: 0 15px; }
+        
+        .timer-box {
+            background: #cc0000;
+            color: white;
+            padding: 10px 15px;
+            margin-left: 10px;
+            border-radius: 5px;
+            font-size: 24px;
+            min-width: 80px;
+            text-align: center;
+            font-family: monospace;
+        }
+
+        /* Penalty Section */
+        #penalty-overlay {
+            position: absolute;
+            bottom: 50px;
+            left: 50%;
+            transform: translateX(-50%);
+            background: rgba(0, 0, 0, 0.9);
+            padding: 15px;
+            border-radius: 10px;
+            display: none;
+            color: white;
+            border-top: 4px solid #f39c12;
+        }
+        .penalty-row { font-size: 20px; margin: 5px 0; letter-spacing: 3px; }
     </style>
 </head>
 <body>
 
-    <div id="watermark">SUKHDEEP TV</div>
-
-    <div id="scoreboard-wrapper">
-        <div style="display: flex; align-items: flex-start;">
-            <div id="scoreboard-container">
-                <div class="score-unit side-a">
-                    <div class="score-box" id="scoreA">0</div>
-                    <div class="team-display" id="nameA">TEAM A</div>
-                </div>
-                <div class="score-unit side-b">
-                    <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
-                    <div class="score-box" id="scoreB">0</div>
-                </div>
-            </div>
-            <div id="match-timer-box">00:00</div>
+<div id="overlay-container">
+    <div class="score-box">
+        <div class="team">
+            <span id="nameA">TEAM A</span>
+            <span class="score" id="dispA">0</span>
+        </div>
+        <div style="border-left: 2px solid #555; margin: 0 15px;"></div>
+        <div class="team">
+            <span class="score" id="dispB">0</span>
+            <span id="nameB">TEAM B</span>
         </div>
     </div>
+    <div class="timer-box" id="timerShow">00:00</div>
+</div>
+
+<div id="penalty-overlay">
+    <div style="text-align:center; font-weight:bold; color:#f39c12; margin-bottom:10px;">PENALTY SHOOTOUT</div>
+    <div class="penalty-row">A: <span id="pA"></span></div>
+    <div class="penalty-row">B: <span id="pB"></span></div>
+</div>
 
 <script>
+    // ਫਾਇਰਬੇਸ ਕਨਫਿਗਰੇਸ਼ਨ - ਇਹ ਤੁਹਾਡੇ ਪੈਨਲ ਵਾਲੀ ਹੀ ਹੈ
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
+    const matchRef = firebase.database().ref("matchData");
 
-    // ਟਾਈਮਰ ਲਈ ਵੱਖਰੇ ਵੇਰੀਏਬਲ
     let serverStartTime = 0;
     let serverElapsed = 0;
     let serverIsPaused = true;
 
-    // 1. ਸਿਰਫ਼ ਸਕੋਰ ਅਤੇ ਨਾਮ ਅਪਡੇਟ ਕਰਨ ਲਈ
-    db.ref("matchData").on("value", (snap) => {
-        const d = snap.val() || {};
-        document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
-        document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
-        document.getElementById('scoreA').innerText = d.scoreA || "0";
-        document.getElementById('scoreB').innerText = d.scoreB || "0";
+    // ਡਾਟਾ ਰੀਡ ਕਰਨਾ
+    matchRef.on("value", (snap) => {
+        const data = snap.val() || {};
         
-        // ਟਾਈਮਰ ਦਾ ਡਾਟਾ ਸਰਵਰ ਤੋਂ ਲੈਣਾ
-        serverStartTime = d.startTime || 0;
-        serverElapsed = d.elapsedTime || 0;
-        serverIsPaused = (d.isPaused !== false); 
+        // ਸਕੋਰ ਅਤੇ ਨਾਮ
+        document.getElementById('dispA').innerText = data.scoreA || 0;
+        document.getElementById('dispB').innerText = data.scoreB || 0;
+        document.getElementById('nameA').innerText = (data.nameA || "TEAM A").toUpperCase();
+        document.getElementById('nameB').innerText = (data.nameB || "TEAM B").toUpperCase();
+        
+        // ਵਿਜ਼ੀਬਿਲਟੀ (ਦਿਖਾਉਣਾ ਜਾਂ ਛੁਪਾਉਣਾ)
+        document.getElementById('overlay-container').style.opacity = data.scoreVisible ? "1" : "0";
+        document.getElementById('penalty-overlay').style.display = data.penaltyVisible ? "block" : "none";
+        
+        // ਪੈਨਲਟੀ ਡਾਟਾ
+        document.getElementById('pA').innerText = data.penaltyA || "";
+        document.getElementById('pB').innerText = data.penaltyB || "";
 
-        document.getElementById('match-timer-box').style.display = (d.timerVisible === false) ? "none" : "flex";
+        // ਟਾਈਮਰ ਡਾਟਾ ਅਪਡੇਟ
+        serverStartTime = data.startTime || 0;
+        serverElapsed = data.elapsedTime || 0;
+        serverIsPaused = (data.isPaused !== false);
     });
 
-    // 2. ਟਾਈਮਰ ਲੋਜਿਕ - ਜੋ ਕਦੇ ਨਹੀਂ ਰੁਕੇਗਾ (ਚਾਹੇ ਮੋਬਾਈਲ ਲੌਕ ਹੋਵੇ ਜਾਂ ਸਕੋਰ ਅਪਡੇਟ ਹੋਵੇ)
+    // ਟਾਈਮਰ ਡਿਸਪਲੇਅ ਲੋਜਿਕ (ਹਰ ਸੈਕਿੰਡ ਚੱਲੇਗਾ)
     setInterval(() => {
-        let displaySeconds = 0;
+        let totalSeconds = 0;
         
         if (!serverIsPaused && serverStartTime > 0) {
-            // ਜੇ ਮੈਚ ਚੱਲ ਰਿਹਾ ਹੈ: (ਹੁਣ ਦਾ ਟਾਈਮ - ਸ਼ੁਰੂਆਤੀ ਟਾਈਮ) + ਪਹਿਲਾਂ ਬੀਤਿਆ ਸਮਾਂ
-            const now = Date.now();
-            const sessionSeconds = Math.floor((now - serverStartTime) / 1000);
-            displaySeconds = sessionSeconds + serverElapsed;
+            // ਜੇਕਰ ਟਾਈਮਰ ਚੱਲ ਰਿਹਾ ਹੈ: (ਹੁਣ ਦਾ ਟਾਈਮ - ਸਟਾਰਟ ਟਾਈਮ) + ਪੁਰਾਣਾ ਬਚਿਆ ਸਮਾਂ
+            totalSeconds = Math.floor((Date.now() - serverStartTime) / 1000) + serverElapsed;
         } else {
-            // ਜੇ ਮੈਚ ਪਾਜ਼ ਹੈ: ਸਿਰਫ਼ ਬੀਤਿਆ ਹੋਇਆ ਸਮਾਂ ਦਿਖਾਓ
-            displaySeconds = serverElapsed;
+            // ਜੇਕਰ ਰੁਕਿਆ ਹੋਇਆ ਹੈ: ਸਿਰਫ ਪੁਰਾਣਾ ਸੇਵ ਕੀਤਾ ਸਮਾਂ
+            totalSeconds = serverElapsed;
         }
 
-        if (displaySeconds < 0) displaySeconds = 0;
-
-        const mins = Math.floor(displaySeconds / 60).toString().padStart(2, '0');
-        const secs = (displaySeconds % 60).toString().padStart(2, '0');
-        document.getElementById('match-timer-box').innerText = `${mins}:${secs}`;
+        const mins = Math.floor(totalSeconds / 60).toString().padStart(2, '0');
+        const secs = (totalSeconds % 60).toString().padStart(2, '0');
+        document.getElementById('timerShow').innerText = `${mins}:${secs}`;
     }, 1000);
-
-    // ਵਾਟਰਮਾਰਕ ਮੂਵਮੈਂਟ
-    function moveWatermark() {
-        const wm = document.getElementById('watermark');
-        wm.style.left = Math.random() * (window.innerWidth - 200) + 'px';
-        wm.style.top = Math.random() * (window.innerHeight - 100) + 'px';
-    }
-    setInterval(moveWatermark, 10000);
-    window.onload = moveWatermark;
 </script>
+
 </body>
 </html>
