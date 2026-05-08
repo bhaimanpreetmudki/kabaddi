@@ -251,13 +251,32 @@
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    function updateTimerUI() {
-        let m = Math.floor(localSecs / 60);
-        let s = localSecs % 60;
-        let timeStr = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-        document.getElementById('match-timer-box').innerText = timeStr;
-        document.getElementById('match-timer-box').style.display = (localSecs > 0) ? "flex" : "none";
+   // --- Timer Fix Logic ---
+    if (d.timerRunning && d.startTime) {
+        if (!localTimerInterval) {
+            localTimerInterval = setInterval(() => {
+                const now = Date.now();
+                const diff = Math.floor((now - d.startTime) / 1000);
+                
+                let m = Math.floor(diff / 60);
+                let s = diff % 60;
+                
+                // UI ਅਪਡੇਟ
+                let timeStr = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+                document.getElementById('match-timer-box').innerText = timeStr;
+                document.getElementById('match-timer-box').style.display = "flex";
+            }, 1000);
+        }
+    } else {
+        // ਜੇ ਟਾਈਮਰ ਰੁਕਿਆ ਹੋਇਆ ਹੈ
+        clearInterval(localTimerInterval);
+        localTimerInterval = null;
+        
+        let sTime = d.matchTime || "00:00";
+        document.getElementById('match-timer-box').innerText = sTime;
+        document.getElementById('match-timer-box').style.display = (sTime === "00:00") ? "none" : "flex";
     }
+});
 
     function renderPenalties(containerId, penaltyString) {
         const container = document.getElementById(containerId);
