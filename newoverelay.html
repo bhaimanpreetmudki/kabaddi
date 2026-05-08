@@ -34,7 +34,7 @@
             background: var(--pure-black); 
         }
 
-        .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
+        .jersey-strip { width: 20px; height: 60px; flex-shrink: 2; }
 
         .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; }
         .team-display { 
@@ -208,60 +208,101 @@
     let timerInt = null;
     let lastScoreA = 0, lastScoreB = 0;
 
-    // --- Data Sync ---
+    // --- Match Data Sync ---
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
+        
+        // ਗੋਲ ਐਨੀਮੇਸ਼ਨ ਚੈੱਕ
         if (d.scoreA > lastScoreA || d.scoreB > lastScoreB) { triggerGoal(); }
-        lastScoreA = d.scoreA || 0; lastScoreB = d.scoreB || 0;
+        lastScoreA = d.scoreA || 0; 
+        lastScoreB = d.scoreB || 0;
 
+        // ਸਕੋਰ ਅਤੇ ਨਾਮ (Capital Letters)
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
+        
+        // ਰਾਊਂਡ ਅਤੇ ਹਾਫ
         document.getElementById('round-detail').innerText = "ROUND: " + (d.matchRound || "1");
         document.getElementById('half-detail').innerText = (d.round || "FIRST HALF").toUpperCase();
+        
+        // ਟੀਮ ਦੇ ਰੰਗ (Jersey Strip)
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
 
+        // ਟਾਈਮਰ ਲੋਜਿਕ
         let serverTime = d.matchTime || "00:00";
         let parts = serverTime.split(':');
         let serverTotalSecs = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
-        if (Math.abs(serverTotalSecs - localSecs) > 2) { localSecs = serverTotalSecs; }
-
-        if (d.timerRunning) {
-            if (!timerInt) { timerInt = setInterval(() => { localSecs++; updateTimerUI(); }, 1000); }
-        } else {
-            clearInterval(timerInt); timerInt = null; updateTimerUI();
+        
+        // ਸਰਵਰ ਨਾਲ ਟਾਈਮ ਮਿਲਾਉਣਾ
+        if (Math.abs(serverTotalSecs - localSecs) > 1) { 
+            localSecs = serverTotalSecs; 
         }
+        updateTimerUI();
 
-        renderPenalties('shotsA', d.penaltyA);
-        renderPenalties('shotsB', d.penaltyB);
+        // ਪੇਨਲਟੀ ਰੈਂਡਰਿੰਗ (Admin ਦੇ penaltyA ਅਤੇ penaltyB ਨਾਲ ਲਿੰਕ)
+        renderPenalties('shotsA', d.penaltyA || ""); 
+        renderPenalties('shotsB', d.penaltyB || ""); 
+        
+        // ਵਿਜ਼ੀਬਿਲਟੀ ਕੰਟਰੋਲ
         document.getElementById('penalty-shots-container').style.display = d.penaltyVisible ? 'flex' : 'none';
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    function updateTimerUI() {
-        let m = Math.floor(localSecs / 60);
-        let s = localSecs % 60;
-        document.getElementById('match-timer-box').innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-        document.getElementById('match-timer-box').style.display = (localSecs > 0) ? "flex" : "none";
+   // --- Timer Fix Logic ---
+    if (d.timerRunning && d.startTime) {
+        if (!localTimerInterval) {
+            localTimerInterval = setInterval(() => {
+                const now = Date.now();
+                const diff = Math.floor((now - d.startTime) / 1000);
+                
+                let m = Math.floor(diff / 60);
+                let s = diff % 60;
+                
+                // UI ਅਪਡੇਟ
+                let timeStr = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+                document.getElementById('match-timer-box').innerText = timeStr;
+                document.getElementById('match-timer-box').style.display = "flex";
+            }, 1000);
+        }
+    } else {
+        // ਜੇ ਟਾਈਮਰ ਰੁਕਿਆ ਹੋਇਆ ਹੈ
+        clearInterval(localTimerInterval);
+        localTimerInterval = null;
+        
+        let sTime = d.matchTime || "00:00";
+        document.getElementById('match-timer-box').innerText = sTime;
+        document.getElementById('match-timer-box').style.display = (sTime === "00:00") ? "none" : "flex";
     }
+});
 
     function renderPenalties(containerId, penaltyString) {
         const container = document.getElementById(containerId);
         container.innerHTML = "";
-        if (!penaltyString) return;
-        Array.from(penaltyString).forEach((s, i) => {
+        
+        // 5 ਬਾਲਾਂ ਦਾ ਡਿਜ਼ਾਈਨ
+        for(let i=0; i<5; i++) {
             let ball = document.createElement("div");
             ball.className = "ball";
-            if (s === "✅") { ball.className = "ball goal"; ball.innerText = "●"; }
-            else if (s === "❌") { ball.className = "ball miss"; ball.innerText = "X"; }
-            else { ball.innerText = i + 1; }
+            // penaltyString ਵਿੱਚੋਂ ਚੈੱਕ ਕਰੋ ਕਿ ✅ ਹੈ ਜਾਂ ❌
+            let status = Array.from(penaltyString)[i];
+            
+            if (status === "✅") { 
+                ball.className = "ball goal"; 
+                ball.innerText = "●"; 
+            } else if (status === "❌") { 
+                ball.className = "ball miss"; 
+                ball.innerText = "X"; 
+            } else { 
+                ball.innerText = i + 1; 
+            }
             container.appendChild(ball);
-        });
+        }
     }
 
-    // Ticker Update
+    // Ticker Data Sync
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
@@ -273,7 +314,7 @@
         document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 
-    // --- Flasher Logic Fixed ---
+    // ਫਲੈਸ਼ਰ ਲੋਜਿਕ (WhatsApp ਅਤੇ Call ਬਦਲਣ ਲਈ)
     let isW = false;
     setInterval(() => {
         const icon = document.getElementById('fl-icon');
@@ -283,7 +324,7 @@
             if (isW) {
                 icon.className = "fab fa-whatsapp";
                 icon.style.color = "#25D366";
-                numSpan.innerText = d.whatsapp || d.contact || "86996-40061";
+                numSpan.innerText = d.whatsapp || "86996-40061";
             } else {
                 icon.className = "fas fa-phone-alt";
                 icon.style.color = "white";
