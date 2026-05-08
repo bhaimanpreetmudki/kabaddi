@@ -26,7 +26,10 @@
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .flex-row { display: flex; gap: 5px; margin-top: 8px; }
         #penaltyControlSection { display: none; background: #1c2128; padding: 15px; border-top: 3px solid #f39c12; }
-        .card-record { font-size: 10px; margin-top: 5px; padding: 2px; border-radius: 3px; display: none; }
+        
+        /* ਕਾਰਡ ਰਿਕਾਰਡ ਬਾਕਸ */
+        .card-record-box { margin-top: 8px; padding: 5px; background: #0d1117; border-radius: 4px; font-size: 10px; min-height: 20px; border: 1px dashed #444; }
+        .card-tag { display: inline-block; padding: 2px 5px; border-radius: 3px; margin: 2px; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -44,12 +47,12 @@
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
                 </div>
-                <input type="text" id="playerA" class="std-input" placeholder="Name/No" style="border-color:#f1c40f;">
+                <input type="text" id="playerA" class="std-input" placeholder="Player No" style="border-color:#f1c40f;">
                 <div class="grid-2">
                     <button class="card-btn" style="background:#f1c40f; color:#000;" onclick="handleCard('A', 'yellow')">YC</button>
                     <button class="card-btn" style="background:#e74c3c;" onclick="handleCard('A', 'red')">RC</button>
                 </div>
-                <div id="recordA" class="card-record"></div>
+                <div id="cardRecordA" class="card-record-box">Record: -</div>
             </div>
 
             <div class="mid-controls">
@@ -66,12 +69,12 @@
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
                 </div>
-                <input type="text" id="playerB" class="std-input" placeholder="Name/No" style="border-color:#f1c40f;">
+                <input type="text" id="playerB" class="std-input" placeholder="Player No" style="border-color:#f1c40f;">
                 <div class="grid-2">
                     <button class="card-btn" style="background:#f1c40f; color:#000;" onclick="handleCard('B', 'yellow')">YC</button>
                     <button class="card-btn" style="background:#e74c3c;" onclick="handleCard('B', 'red')">RC</button>
                 </div>
-                <div id="recordB" class="card-record"></div>
+                <div id="cardRecordB" class="card-record-box">Record: -</div>
             </div>
         </div>
     </div>
@@ -90,7 +93,7 @@
                 </div>
                 <div style="padding-left:5px;">
                     <span class="label-text" style="color:#2ecc71;">Round</span>
-                    <input type="text" id="matchRound" class="std-input" placeholder="Semi-Final" oninput="updateMatchDB()">
+                    <input type="text" id="matchRound" class="std-input" placeholder="Final" oninput="updateMatchDB()">
                     <span class="label-text" style="color:#f1c40f;">Half</span>
                     <input type="text" id="roundInp" class="std-input" placeholder="1st Half" oninput="updateMatchDB()">
                 </div>
@@ -99,45 +102,20 @@
     </div>
 
     <div class="card">
-        <div class="header" style="background:#f39c12; color:#000;">Penalty Shootout</div>
-        <div style="padding:10px; display:flex; gap:5px;">
-            <button id="pVisBtn" class="card-btn" style="background:#f39c12; color:#000;" onclick="togglePenaltyVis()">Show Penalty</button>
-            <button class="card-btn" style="background:#333;" onclick="resetPenaltyOnly()">Reset Penalty</button>
-        </div>
-        <div id="penaltyControlSection">
-            <div class="grid-2">
-                <div><input type="text" id="pA" class="std-input" readonly style="text-align:center;"><button class="card-btn" style="background:#2ecc71;" onclick="addPenalty('pA', '✅')">Goal</button></div>
-                <div><input type="text" id="pB" class="std-input" readonly style="text-align:center;"><button class="card-btn" style="background:#2ecc71;" onclick="addPenalty('pB', '✅')">Goal</button></div>
-            </div>
-        </div>
-    </div>
-
-    <div class="card">
         <div style="padding:10px;">
-            <button class="card-btn" style="background:#e74c3c; padding:12px; font-size:12px;" onclick="fullReset()">RESET EVERYTHING (ALL DATA & CARDS)</button>
+            <button class="card-btn" style="background:#e74c3c; padding:12px; font-size:12px;" onclick="fullReset()">FULL RESET (ALL DATA)</button>
         </div>
     </div>
-
 </div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-    
     const matchRef = firebase.database().ref("matchData");
-    let curA = 0, curB = 0, timerInterval = null, sVis = true, pVis = false, seconds = 0;
+    
+    let timerInterval = null, seconds = 0, curA = 0, curB = 0, sVis = true, pVis = false;
 
-    // --- 1. CARD SYSTEM ---
-    function handleCard(team, type) {
-        let pDetail = document.getElementById('player' + team).value;
-        if(!pDetail) { alert("Player No/Name ਭਰੋ!"); return; }
-        matchRef.update({
-            ['card' + team]: type,
-            ['card' + team + '_player']: pDetail
-        });
-    }
-
-    // --- 2. TIMER SYNC SYSTEM ---
+    // --- 1. SERVER TIMER LOGIC (Fixes the Sync Issue) ---
     function startTimer() {
         if (timerInterval) return;
         const startTime = Date.now() - (seconds * 1000);
@@ -147,7 +125,7 @@
     function pauseTimer() {
         clearInterval(timerInterval);
         timerInterval = null;
-        matchRef.update({ timerRunning: false, matchTime: document.getElementById('timerShow').innerText, savedSeconds: seconds });
+        matchRef.update({ timerRunning: false, savedSeconds: seconds });
     }
 
     function resetTimer() {
@@ -156,16 +134,21 @@
         matchRef.update({ startTime: null, savedSeconds: 0, matchTime: "00:00" });
     }
 
-    function runTimerLogic(data) {
+    function runTimerSync(data) {
         clearInterval(timerInterval);
         timerInterval = null;
+
         if (data.timerRunning && data.startTime) {
             timerInterval = setInterval(() => {
                 const now = Date.now();
                 seconds = Math.floor((now - data.startTime) / 1000);
+                if (seconds < 0) seconds = 0;
+                
                 let m = Math.floor(seconds / 60), s = seconds % 60;
                 let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
                 document.getElementById('timerShow').innerText = timeStr;
+                
+                // ਓਵਰਲੇਅ ਲਈ ਟਾਈਮ ਅਪਡੇਟ (Optional, overlay can also calculate this)
                 matchRef.child('matchTime').set(timeStr);
             }, 1000);
         } else {
@@ -173,6 +156,17 @@
             let m = Math.floor(seconds / 60), s = seconds % 60;
             document.getElementById('timerShow').innerText = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
         }
+    }
+
+    // --- 2. CARD RECORD SYSTEM ---
+    function handleCard(team, type) {
+        let pNo = document.getElementById('player' + team).value;
+        if(!pNo) { alert("ਪਲੇਅਰ ਨੰਬਰ ਲਿਖੋ!"); return; }
+        
+        matchRef.update({
+            ['card' + team]: type,
+            ['card' + team + '_player']: pNo
+        });
     }
 
     // --- 3. DATABASE UPDATES ---
@@ -192,27 +186,28 @@
         matchRef.update({ [team]: Math.max(0, current + val) });
     }
 
+    function toggleVis(field) { matchRef.child(field).set(!sVis); }
+
     function fullReset() {
-        if(confirm("ਕੀ ਤੁਸੀਂ ਸਭ ਕੁਝ ਰੀਸੈੱਟ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ? (ਸਕੋਰ, ਟਾਈਮਰ, ਕਾਰਡ)")) {
-            pauseTimer();
-            seconds = 0;
+        if(confirm("ਕੀ ਤੁਸੀਂ ਸਾਰਾ ਡਾਟਾ ਅਤੇ ਕਾਰਡ ਕਲੀਅਰ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
+            resetTimer();
             matchRef.update({
-                scoreA: 0, scoreB: 0, matchTime: "00:00", timerRunning: false,
-                startTime: null, savedSeconds: 0, penaltyA: "", penaltyB: "",
-                penaltyVisible: false, cardA: "", cardA_player: "", cardB: "", cardB_player: ""
+                scoreA: 0, scoreB: 0, penaltyA: "", penaltyB: "",
+                cardA: "", cardA_player: "", cardB: "", cardB_player: "",
+                lastEvent: "", penaltyVisible: false
             });
-            document.getElementById('playerA').value = "";
-            document.getElementById('playerB').value = "";
         }
     }
 
     // --- 4. REALTIME LISTENER ---
     matchRef.on("value", (snap) => {
         const data = snap.val() || {};
-        runTimerLogic(data);
         
+        // ਟਾਈਮਰ ਸਿੰਕ ਚਲਾਓ
+        runTimerSync(data);
+
         curA = data.scoreA || 0; curB = data.scoreB || 0;
-        sVis = !!data.scoreVisible; pVis = !!data.penaltyVisible;
+        sVis = !!data.scoreVisible;
         
         document.getElementById('dispA').innerText = curA;
         document.getElementById('dispB').innerText = curB;
@@ -220,44 +215,26 @@
         document.getElementById('nameB').value = data.nameB || "";
         document.getElementById('colorA').value = data.colorA || "#ffffff";
         document.getElementById('colorB').value = data.colorB || "#ffffff";
-        document.getElementById('pA').value = data.penaltyA || "";
-        document.getElementById('pB').value = data.penaltyB || "";
         document.getElementById('matchRound').value = data.matchRound || "";
         document.getElementById('roundInp').value = data.round || "";
-        
-        // Card Record Display on Admin
-        const recA = document.getElementById('recordA');
-        if(data.cardA) {
-            recA.style.display = "block";
-            recA.innerText = data.cardA.toUpperCase() + ": " + data.cardA_player;
-            recA.style.background = data.cardA === 'yellow' ? '#f1c40f' : '#e74c3c';
-            recA.style.color = data.cardA === 'yellow' ? 'black' : 'white';
-        } else { recA.style.display = "none"; }
 
-        const recB = document.getElementById('recordB');
+        // ਕਾਰਡ ਰਿਕਾਰਡ ਐਡਮਿਨ 'ਤੇ ਦਿਖਾਓ
+        const recA = document.getElementById('cardRecordA');
+        if(data.cardA) {
+            recA.innerHTML = `<span class="card-tag" style="background:${data.cardA === 'yellow' ? '#f1c40f' : '#e74c3c'}; color:${data.cardA === 'yellow' ? '#000' : '#fff'}">${data.cardA.toUpperCase()} - No. ${data.cardA_player}</span>`;
+        } else { recA.innerText = "Record: -"; }
+
+        const recB = document.getElementById('cardRecordB');
         if(data.cardB) {
-            recB.style.display = "block";
-            recB.innerText = data.cardB.toUpperCase() + ": " + data.cardB_player;
-            recB.style.background = data.cardB === 'yellow' ? '#f1c40f' : '#e74c3c';
-            recB.style.color = data.cardB === 'yellow' ? 'black' : 'white';
-        } else { recB.style.display = "none"; }
+            recB.innerHTML = `<span class="card-tag" style="background:${data.cardB === 'yellow' ? '#f1c40f' : '#e74c3c'}; color:${data.cardB === 'yellow' ? '#000' : '#fff'}">${data.cardB.toUpperCase()} - No. ${data.cardB_player}</span>`;
+        } else { recB.innerText = "Record: -"; }
 
         document.getElementById('boxA').style.borderTopColor = data.colorA;
         document.getElementById('boxB').style.borderTopColor = data.colorB;
         document.getElementById('visBtn').innerText = sVis ? "HIDE" : "SHOW";
         document.getElementById('visBtn').style.background = sVis ? "#da3633" : "#238636";
-        document.getElementById('penaltyControlSection').style.display = pVis ? "block" : "none";
-        document.getElementById('pVisBtn').innerText = pVis ? "Hide Penalty" : "Show Penalty";
     });
 
-    function togglePenaltyVis() { matchRef.child('penaltyVisible').set(!pVis); }
-    function toggleVis(field) { matchRef.child(field).set(!sVis); }
-    function addPenalty(id, icon) {
-        let inp = document.getElementById(id);
-        inp.value = inp.value + icon;
-        matchRef.update({ [id === 'pA' ? 'penaltyA' : 'penaltyB']: inp.value });
-    }
-    function resetPenaltyOnly() { matchRef.update({ penaltyA: "", penaltyB: "" }); }
     function resetOnlyScore() { if(confirm("Reset Score?")) matchRef.update({ scoreA: 0, scoreB: 0 }); }
 </script>
 </body>
