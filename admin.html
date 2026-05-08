@@ -83,28 +83,31 @@
         </div>
     </div>
 
-    <div class="card">
-        <div class="header"><i class="fas fa-info-circle"></i> Match Information</div>
-        <div style="padding:12px; background:#0d1117;">
-            <div class="grid-2">
-                <div style="text-align:center; border-right: 1px solid #333; padding-right:10px;">
-                    <div class="flex-row" style="margin-top: 0; margin-bottom: 10px;">
-                        <button id="mainTimerBtn" class="card-btn" style="background:#238636; height: 40px;" onclick="toggleTimer()">START</button>
-                        <button class="card-btn" style="background:#333; height: 40px; flex: 0.6;" onclick="resetTimer()">00</button>
-                    </div>
-                    
-                    <div id="timerShow" style="font-size:36px; color:#f1c40f; font-family:monospace; background: #161b22; border-radius: 4px; border: 1px solid #30363d; padding: 5px;">00:00</div>
+ <div class="card">
+    <div class="header"><i class="fas fa-info-circle"></i> Match Information</div>
+    <div style="padding:12px; background:#0d1117;">
+        <div class="grid-2">
+            <div style="text-align:center; border-right: 1px solid #333; padding-right:10px;">
+                <div class="flex-row" style="margin-top: 0; margin-bottom: 10px;">
+                    <button id="mainTimerBtn" class="card-btn" style="background:#238636; height: 40px;" onclick="toggleTimer()">START</button>
+                    <button class="card-btn" style="background:#333; height: 40px; flex: 0.6;" onclick="resetTimer()">00</button>
                 </div>
                 
-                <div style="padding-left:5px;">
-                    <span class="label-text" style="color:#2ecc71;">Match Round</span>
-                    <input type="text" id="matchRound" class="std-input" placeholder="Final" oninput="updateMatchDB()">
-                    <span class="label-text" style="color:#f1c40f;">Match Half</span>
-                    <input type="text" id="roundInp" class="std-input" placeholder="1st Half" oninput="updateMatchDB()">
-                </div>
+                <div id="timerShow" style="font-size:36px; color:#f1c40f; font-family:monospace; background: #161b22; border-radius: 4px; border: 1px solid #30363d; padding: 5px; margin-bottom: 8px;">00:00</div>
+                
+                <span class="label-text" style="color:#8b949e; font-size: 9px;">Total Match Time</span>
+                <input type="text" id="matchTotalTime" class="std-input" placeholder="e.g. 15:00" oninput="updateMatchDB()" style="text-align: center; margin-top: 4px; border-color: #444;">
+            </div>
+            
+            <div style="padding-left:5px;">
+                <span class="label-text" style="color:#2ecc71;">Match Round</span>
+                <input type="text" id="matchRound" class="std-input" placeholder="Final" oninput="updateMatchDB()">
+                <span class="label-text" style="color:#f1c40f;">Match Half</span>
+                <input type="text" id="roundInp" class="std-input" placeholder="1st Half" oninput="updateMatchDB()">
             </div>
         </div>
     </div>
+</div>
 
     <div class="card">
         <div class="header" style="background:#f39c12; color:#000;">Penalty Shootout</div>
