@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Final Fixed Overlay</title>
+    <title>Sukhdeep TV - Score At Edges</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -20,7 +20,6 @@
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* Scoreboard Wrapper */
         #scoreboard-wrapper { position: absolute; top: 25px; left: 20px; display: flex; flex-direction: column; gap: 2px; z-index: 100; }
         #scoreboard-main-row { display: flex; align-items: flex-start; }
         
@@ -34,15 +33,27 @@
             background: var(--pure-black); 
         }
 
-        .jersey-strip { width: 20px; height: 60px; flex-shrink: 0; }
+        .jersey-strip { width: 15px; height: 60px; flex-shrink: 0; }
         .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; }
         
-        /* Team Layouts with Scores at Edges */
+        /* Layout Fix: Score at Edges */
         .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; flex-direction: row; }
         .side-b { background: var(--pure-white); color: var(--main-red); flex-direction: row-reverse; }
 
-        .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; background: rgba(0,0,0,0.1); }
-        .team-display { flex-grow: 1; padding: 0 15px; font-size: 36px; font-weight: 900; text-transform: uppercase; overflow: hidden; white-space: nowrap; }
+        /* Small Score Box (Fits 00) */
+        .score-box { 
+            width: 55px; 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 38px; 
+            font-weight: 900; 
+            flex-shrink: 0; 
+            background: rgba(0,0,0,0.15); 
+        }
+
+        .team-display { flex-grow: 1; padding: 0 12px; font-size: 34px; font-weight: 900; text-transform: uppercase; overflow: hidden; white-space: nowrap; }
 
         #match-timer-box { background: var(--main-red); color: white; height: 60px; display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; box-shadow: 5px 5px 15px rgba(0,0,0,0.4); }
 
@@ -54,25 +65,20 @@
         .ball.goal { background: #00ff00; color: #000; border-color: #fff; }
         .ball.miss { background: #000000; color: #fff; border-color: #fff; }
 
-        /* Contact Flasher */
         #contact-flasher { position: absolute; bottom: 120px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 6px 15px; border-radius: 5px; border-left: 4px solid var(--main-red); font-size: 36px; font-weight: 900; display: flex; align-items: center; gap: 10px; z-index: 1001; }
+        #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000; text-transform: uppercase; pointer-events: none; }
 
-        #watermark { position: fixed; color: #FFFFFF; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000, 3px 3px 5px rgba(0,0,0,0.8); text-transform: uppercase; transition: all 1.2s ease-in-out; pointer-events: none; }
-
-        /* Master Footer / Ticker */
+        /* Footer Ticker */
         #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999; }
         .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
         .top-bg { background: var(--pure-white); }
         .bottom-bg { background: var(--main-red); }
         .box-left, .box-right { width: 50%; height: 100%; position: relative; display: flex; align-items: center; overflow: hidden; }
-        .hint-label { height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 var(--label-padding); font-weight: 900; font-size: 36px; text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100; }
-        .hint-label::after { content: ""; position: absolute; right: calc(var(--arrow-width) * -1); top: 0; border-top: 25px solid transparent; border-bottom: 25px solid transparent; }
+        .hint-label { height: 100%; display: flex; align-items: center; justify-content: center; padding: 0 15px; font-weight: 900; font-size: 32px; text-transform: uppercase; position: absolute; left: 0; top: 0; z-index: 100; }
         .hint-red { background: var(--main-red); color: var(--pure-white); }
-        .hint-red::after { border-left: var(--arrow-width) solid var(--main-red); }
         .hint-white { background: var(--pure-white); color: var(--main-red); }
-        .hint-white::after { border-left: var(--arrow-width) solid var(--pure-white); }
-        marquee { width: 100%; font-size: 36px; font-weight: 900; text-transform: uppercase; padding-left: 130px; }
-        .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
+        marquee { width: 100%; font-size: 34px; font-weight: 900; text-transform: uppercase; padding-left: 110px; }
+        .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 34px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
         
         #goal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 80vh; display: none; justify-content: center; align-items: center; z-index: 500; pointer-events: none; }
         .goal-text { font-size: 180px; color: #fff; font-weight: 900; text-shadow: 0 0 20px #ff0000; animation: ghaintGoal 0.5s ease-in-out infinite alternate; }
@@ -94,13 +100,11 @@
             <div id="scoreboard-container">
                 <div id="jA" class="jersey-strip"></div>
                 <div class="score-unit side-a">
-                    <div class="score-box" id="scoreA">0</div>
-                    <div class="team-display" id="nameA">TEAM A</div>
+                    <div class="score-box" id="scoreA">0</div> <div class="team-display" id="nameA">TEAM A</div>
                 </div>
                 <div class="score-unit side-b">
                     <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
-                    <div class="score-box" id="scoreB">0</div>
-                </div>
+                    <div class="score-box" id="scoreB">0</div> </div>
                 <div id="jB" class="jersey-strip"></div>
             </div>
             <div id="match-timer-box">00:00</div>
@@ -137,7 +141,6 @@
     let localTimerInterval = null;
     let lastScoreA = 0, lastScoreB = 0;
 
-    // Match Sync
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         if (d.scoreA > lastScoreA || d.scoreB > lastScoreB) { triggerGoal(); }
@@ -188,7 +191,6 @@
         }
     }
 
-    // Ticker Sync
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
@@ -200,7 +202,6 @@
         document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 
-    // WhatsApp/Phone Switcher
     let isW = false;
     setInterval(() => {
         const icon = document.getElementById('fl-icon');
