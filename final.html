@@ -2,7 +2,7 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Adjusted Score Box</title>
+    <title>Sukhdeep TV - Fixed 50-50 Layout</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
@@ -15,7 +15,7 @@
             --main-red: #cc0000;
             --pure-white: #ffffff;
             --pure-black: #000000;
-            --container-width: 610px; /* Standard width adjusted back */
+            --container-width: 610px;
         }
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
@@ -33,44 +33,68 @@
             background: var(--pure-black); 
         }
 
-        .jersey-strip { width: 22px; height: 65px; flex-shrink: 0; }
+        .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
         
-        .score-unit { display: flex; height: 65px; align-items: center; flex-grow: 1; position: relative; overflow: hidden; }
-        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; flex-direction: row; }
-        .side-b { background: var(--pure-white); color: var(--main-red); flex-direction: row-reverse; }
-
-        .team-display-wrapper { flex-grow: 1; overflow: hidden; display: flex; align-items: center; height: 100%; padding: 0 10px; position: relative; }
-        .team-display { font-size: 34px; font-weight: 900; text-transform: uppercase; white-space: nowrap; display: inline-block; position: relative; }
-
-        @keyframes scrollName {
-            0% { transform: translateX(0); }
-            15% { transform: translateX(0); }
-            85% { transform: translateX(calc(-100% + 180px)); }
-            100% { transform: translateX(0); }
+        /* 50-50 Split for Teams */
+        .score-unit { 
+            display: flex; 
+            height: 60px; 
+            align-items: center; 
+            width: 50%; /* Pura 50% kitta */
+            position: relative; 
+            overflow: hidden; 
         }
 
-        /* Score Box adjusted to be medium size */
+        .side-a { background: var(--main-red); color: var(--pure-white); border-right: 1px solid white; flex-direction: row; }
+        .side-b { background: var(--pure-white); color: var(--main-red); border-left: 1px solid white; flex-direction: row-reverse; }
+
+        /* Score Box - Chota 00 jina */
         .score-box { 
-            width: 75px; /* Width ghat kitti */
+            width: 55px; /* Shota kitta 00 lyi */
             height: 100%; 
             display: flex; 
             align-items: center; 
             justify-content: center; 
-            font-size: 45px; /* Font thoda set kitta */
+            font-size: 38px; 
             font-weight: 900; 
             flex-shrink: 0; 
             z-index: 10; 
-            background: rgba(0,0,0,0.15); 
+            background: rgba(0,0,0,0.1); 
+        }
+
+        /* Team Name Area */
+        .team-display-wrapper { 
+            flex: 1; 
+            overflow: hidden; 
+            display: flex; 
+            align-items: center; 
+            height: 100%; 
+            padding: 0 8px; 
+        }
+        
+        .team-display { 
+            font-size: 34px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            white-space: nowrap; 
+            display: inline-block;
+        }
+
+        @keyframes scrollName {
+            0% { transform: translateX(0); }
+            15% { transform: translateX(0); }
+            85% { transform: translateX(calc(-100% + 200px)); }
+            100% { transform: translateX(0); }
         }
 
         #match-timer-box { 
-            background: var(--main-red); color: white; height: 65px; 
-            display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; box-shadow: 5px 5px 15px rgba(0,0,0,0.4);
+            background: var(--main-red); color: white; height: 60px; 
+            display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0;
         }
 
         #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 24px; font-weight: 700; text-shadow: 2px 2px 4px #000; text-transform: uppercase; width: var(--container-width); }
 
-        /* Ticker Sections */
+        /* Ticker Sections - Same as before */
         #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999; }
         .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
         .top-bg { background: var(--pure-white); }
@@ -156,21 +180,23 @@
         el.style.animation = "none";
         setTimeout(() => {
             if (el.scrollWidth > parent.offsetWidth) {
-                const duration = (el.scrollWidth / 40) + 2; 
+                const duration = (el.scrollWidth / 35) + 2; 
                 el.style.animation = `scrollName ${duration}s linear infinite alternate`;
             }
-        }, 50);
+        }, 100);
     }
 
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         if (d.scoreA > lastScoreA || d.scoreB > lastScoreB) { triggerGoal(); }
-        lastScoreA = d.scoreA || 0; 
-        lastScoreB = d.scoreB || 0;
+        lastScoreA = d.scoreA || 0; lastScoreB = d.scoreB || 0;
 
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
-        checkScroll('nameA'); checkScroll('nameB');
+        
+        // Scroll check after team name updates
+        checkScroll('nameA'); 
+        checkScroll('nameB');
 
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
