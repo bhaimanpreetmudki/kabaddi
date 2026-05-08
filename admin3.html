@@ -20,16 +20,11 @@
         .std-input { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; }
         .std-textarea { width: 100%; padding: 10px; background: #0d1117; border: 1px solid #30363d; color: white; border-radius: 5px; box-sizing: border-box; margin-bottom: 8px; font-size: 13px; min-height: 45px; resize: none; overflow: hidden; }
         .label-text, .label-title { font-size: 10px; color: #8b949e; display: block; margin-top: 5px; text-align: left; text-transform: uppercase; font-weight: bold; }
-        .content { padding: 15px; }
-        .btn-update { background: #1a73e8; color: white; padding: 12px; border-radius: 6px; border:none; cursor:pointer; width:100%; font-weight:bold; margin-bottom: 10px;}
-        .btn-ticker { background: #ff5722; color: white; margin-bottom: 15px; height: 50px; font-size: 16px; border-radius: 6px; border:none; width:100%; font-weight:bold; cursor:pointer; }
         .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
         .flex-row { display: flex; gap: 5px; margin-top: 8px; }
         #penaltyControlSection { display: none; background: #1c2128; padding: 15px; border-top: 3px solid #f39c12; }
-        
-        /* ਕਾਰਡ ਰਿਕਾਰਡ ਬਾਕਸ */
-        .card-record-box { margin-top: 8px; padding: 5px; background: #0d1117; border-radius: 4px; font-size: 10px; min-height: 20px; border: 1px dashed #444; }
-        .card-tag { display: inline-block; padding: 2px 5px; border-radius: 3px; margin: 2px; font-weight: bold; }
+        .card-record-box { margin-top: 8px; padding: 5px; background: #0d1117; border-radius: 4px; font-size: 10px; min-height: 25px; border: 1px dashed #444; }
+        .card-tag { display: inline-block; padding: 2px 5px; border-radius: 3px; margin: 2px; font-weight: bold; font-size: 9px; }
     </style>
 </head>
 <body>
@@ -47,10 +42,10 @@
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreA', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreA', 1)">+</button>
                 </div>
-                <input type="text" id="playerA" class="std-input" placeholder="Player No" style="border-color:#f1c40f;">
+                <input type="text" id="playerA" class="std-input" placeholder="No" style="border-color:#f1c40f;">
                 <div class="grid-2">
-                    <button class="card-btn" style="background:#f1c40f; color:#000;" onclick="handleCard('A', 'yellow')">YC</button>
-                    <button class="card-btn" style="background:#e74c3c;" onclick="handleCard('A', 'red')">RC</button>
+                    <button class="card-btn" style="background:#f1c40f; color:#000;" onclick="handleCard('A', 'Yellow')">YC</button>
+                    <button class="card-btn" style="background:#e74c3c;" onclick="handleCard('A', 'Red')">RC</button>
                 </div>
                 <div id="cardRecordA" class="card-record-box">Record: -</div>
             </div>
@@ -69,10 +64,10 @@
                     <button class="btn-pm" style="background:#da3633;" onclick="changeScore('scoreB', -1)">-</button>
                     <button class="btn-pm" style="background:#238636;" onclick="changeScore('scoreB', 1)">+</button>
                 </div>
-                <input type="text" id="playerB" class="std-input" placeholder="Player No" style="border-color:#f1c40f;">
+                <input type="text" id="playerB" class="std-input" placeholder="No" style="border-color:#f1c40f;">
                 <div class="grid-2">
-                    <button class="card-btn" style="background:#f1c40f; color:#000;" onclick="handleCard('B', 'yellow')">YC</button>
-                    <button class="card-btn" style="background:#e74c3c;" onclick="handleCard('B', 'red')">RC</button>
+                    <button class="card-btn" style="background:#f1c40f; color:#000;" onclick="handleCard('B', 'Yellow')">YC</button>
+                    <button class="card-btn" style="background:#e74c3c;" onclick="handleCard('B', 'Red')">RC</button>
                 </div>
                 <div id="cardRecordB" class="card-record-box">Record: -</div>
             </div>
@@ -92,9 +87,9 @@
                     </div>
                 </div>
                 <div style="padding-left:5px;">
-                    <span class="label-text" style="color:#2ecc71;">Round</span>
+                    <span class="label-text" style="color:#2ecc71;">Match Round</span>
                     <input type="text" id="matchRound" class="std-input" placeholder="Final" oninput="updateMatchDB()">
-                    <span class="label-text" style="color:#f1c40f;">Half</span>
+                    <span class="label-text" style="color:#f1c40f;">Match Half</span>
                     <input type="text" id="roundInp" class="std-input" placeholder="1st Half" oninput="updateMatchDB()">
                 </div>
             </div>
@@ -103,19 +98,20 @@
 
     <div class="card">
         <div style="padding:10px;">
-            <button class="card-btn" style="background:#e74c3c; padding:12px; font-size:12px;" onclick="fullReset()">FULL RESET (ALL DATA)</button>
+            <button class="card-btn" style="background:#e74c3c; padding:12px; font-size:12px;" onclick="fullReset()">FULL RESET (ALL DATA & CARDS)</button>
         </div>
     </div>
+
 </div>
 
 <script>
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-    const matchRef = firebase.database().ref("matchData");
     
-    let timerInterval = null, seconds = 0, curA = 0, curB = 0, sVis = true, pVis = false;
+    const matchRef = firebase.database().ref("matchData");
+    let timerInterval = null, seconds = 0, curA = 0, curB = 0, sVis = true;
 
-    // --- 1. SERVER TIMER LOGIC (Fixes the Sync Issue) ---
+    // --- 1. FIXED SYNC TIMER ---
     function startTimer() {
         if (timerInterval) return;
         const startTime = Date.now() - (seconds * 1000);
@@ -137,18 +133,14 @@
     function runTimerSync(data) {
         clearInterval(timerInterval);
         timerInterval = null;
-
         if (data.timerRunning && data.startTime) {
             timerInterval = setInterval(() => {
                 const now = Date.now();
                 seconds = Math.floor((now - data.startTime) / 1000);
                 if (seconds < 0) seconds = 0;
-                
                 let m = Math.floor(seconds / 60), s = seconds % 60;
                 let timeStr = (m < 10 ? "0"+m : m) + ":" + (s < 10 ? "0"+s : s);
                 document.getElementById('timerShow').innerText = timeStr;
-                
-                // ਓਵਰਲੇਅ ਲਈ ਟਾਈਮ ਅਪਡੇਟ (Optional, overlay can also calculate this)
                 matchRef.child('matchTime').set(timeStr);
             }, 1000);
         } else {
@@ -162,9 +154,8 @@
     function handleCard(team, type) {
         let pNo = document.getElementById('player' + team).value;
         if(!pNo) { alert("ਪਲੇਅਰ ਨੰਬਰ ਲਿਖੋ!"); return; }
-        
         matchRef.update({
-            ['card' + team]: type,
+            ['card' + team]: type.toLowerCase(),
             ['card' + team + '_player']: pNo
         });
     }
@@ -189,22 +180,21 @@
     function toggleVis(field) { matchRef.child(field).set(!sVis); }
 
     function fullReset() {
-        if(confirm("ਕੀ ਤੁਸੀਂ ਸਾਰਾ ਡਾਟਾ ਅਤੇ ਕਾਰਡ ਕਲੀਅਰ ਕਰਨਾ ਚਾਹੁੰਦੇ ਹੋ?")) {
+        if(confirm("RESET EVERYTHING?")) {
             resetTimer();
             matchRef.update({
-                scoreA: 0, scoreB: 0, penaltyA: "", penaltyB: "",
-                cardA: "", cardA_player: "", cardB: "", cardB_player: "",
-                lastEvent: "", penaltyVisible: false
+                scoreA: 0, scoreB: 0, cardA: "", cardA_player: "", cardB: "", cardB_player: "",
+                penaltyA: "", penaltyB: "", lastEvent: "", penaltyVisible: false
             });
+            document.getElementById('playerA').value = "";
+            document.getElementById('playerB').value = "";
         }
     }
 
     // --- 4. REALTIME LISTENER ---
     matchRef.on("value", (snap) => {
         const data = snap.val() || {};
-        
-        // ਟਾਈਮਰ ਸਿੰਕ ਚਲਾਓ
-        runTimerSync(data);
+        runTimerSync(data); // ਟਾਈਮਰ ਸਿੰਕ
 
         curA = data.scoreA || 0; curB = data.scoreB || 0;
         sVis = !!data.scoreVisible;
@@ -215,10 +205,8 @@
         document.getElementById('nameB').value = data.nameB || "";
         document.getElementById('colorA').value = data.colorA || "#ffffff";
         document.getElementById('colorB').value = data.colorB || "#ffffff";
-        document.getElementById('matchRound').value = data.matchRound || "";
-        document.getElementById('roundInp').value = data.round || "";
 
-        // ਕਾਰਡ ਰਿਕਾਰਡ ਐਡਮਿਨ 'ਤੇ ਦਿਖਾਓ
+        // Admin Card Record Display
         const recA = document.getElementById('cardRecordA');
         if(data.cardA) {
             recA.innerHTML = `<span class="card-tag" style="background:${data.cardA === 'yellow' ? '#f1c40f' : '#e74c3c'}; color:${data.cardA === 'yellow' ? '#000' : '#fff'}">${data.cardA.toUpperCase()} - No. ${data.cardA_player}</span>`;
