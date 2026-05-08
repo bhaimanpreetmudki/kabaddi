@@ -23,14 +23,19 @@
         #scoreboard-wrapper { position: absolute; top: 25px; left: 20px; display: flex; flex-direction: column; gap: 2px; z-index: 100; }
         #scoreboard-main-row { display: flex; align-items: flex-start; }
         
-        #scoreboard-container { 
+      /* Wadda Score Box */
+        .score-box { 
+            width: 50px; /* Width vadhayi */
+            height: 100%; 
             display: flex; 
-            width: var(--container-width); 
-            border: 3px solid var(--pure-white); 
-            border-radius: 6px; 
-            overflow: hidden; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6); 
-            background: var(--pure-black); 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 55px; /* Font size vadda kitta */
+            font-weight: 900; 
+            flex-shrink: 0; 
+            z-index: 10; 
+            background: rgba(0,0,0,0.2); 
+            text-shadow: 2px 2px 5px rgba(0,0,0,0.5);
         }
 
         .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
