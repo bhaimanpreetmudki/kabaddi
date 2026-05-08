@@ -337,9 +337,23 @@
         }
     }
 
-    // --- 8. Resets ---
-    function resetOnlyScore() { matchRef.update({ scoreA: 0, scoreB: 0 }); }
-    function resetPenaltyOnly() { matchRef.update({ pA: "", pB: "" }); }
+   function resetOnlyScore() {
+    // 1. Firebase ਵਿੱਚ ਸਕੋਰ ਅਤੇ ਕਾਰਡਸ ਨੂੰ ਜ਼ੀਰੋ/ਖਾਲੀ ਕਰੋ
+    matchRef.update({ 
+        scoreA: 0, 
+        scoreB: 0, 
+        cardA: "", 
+        cardB: "" 
+    });
+
+    // 2. ਐਡਮਿਨ ਪੈਨਲ ਵਿੱਚ ਜੋ ਕਾਰਡਸ ਦੀ ਲਿਸਟ (YC/RC) ਦਿਖ ਰਹੀ ਹੈ, ਉਸਨੂੰ ਵੀ ਸਾਫ਼ ਕਰੋ
+    document.getElementById('cardRecordA').innerHTML = "Record: -";
+    document.getElementById('cardRecordB').innerHTML = "Record: -";
+    
+    // 3. ਪਲੇਅਰ ਨੰਬਰ ਵਾਲੇ ਇਨਪੁਟ ਵੀ ਖਾਲੀ ਕਰ ਦਿਓ (Optional)
+    document.getElementById('playerA').value = "";
+    document.getElementById('playerB').value = "";
+}
     
     function fullReset() {
         if (confirm("Reset everything?")) {
