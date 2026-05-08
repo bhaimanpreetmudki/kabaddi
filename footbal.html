@@ -20,31 +20,95 @@
 
         body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
 
-        /* --- Scoreboard Section --- */
+        /* --- 1. Scoreboard Wrapper --- */
         #scoreboard-wrapper { position: absolute; top: 25px; left: 20px; display: flex; flex-direction: column; gap: 2px; z-index: 100; }
         #scoreboard-main-row { display: flex; align-items: flex-start; }
-        #scoreboard-container { display: flex; width: var(--container-width); border: 3px solid var(--pure-white); border-radius: 6px; overflow: hidden; box-shadow: 0 5px 15px rgba(0,0,0,0.6); background: var(--pure-black); }
+        
+        #scoreboard-container { 
+            display: flex; 
+            width: var(--container-width); 
+            border: 3px solid var(--pure-white); 
+            border-radius: 6px; 
+            overflow: hidden; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6); 
+            background: var(--pure-black); 
+        }
+
         .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
+
         .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; }
-        .team-display { flex-grow: 1; padding: 0 15px; font-size: 36px; font-weight: 900; text-transform: uppercase; overflow: hidden; white-space: nowrap; }
+        .team-display { 
+            flex-grow: 1; 
+            padding: 0 15px; 
+            font-size: 36px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            overflow: hidden;
+            white-space: nowrap;
+        }
         .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; }
+        
+        /* --- Card Styles --- */
+        .card-indicator {
+            width: 15px;
+            height: 22px;
+            border-radius: 2px;
+            display: none;
+            position: absolute;
+            bottom: 5px;
+            border: 1px solid rgba(0,0,0,0.3);
+            box-shadow: 0 0 5px rgba(0,0,0,0.5);
+        }
+        #cardA { right: 10px; }
+        #cardB { left: 10px; }
+        .yellow-card { background: #ffd700; display: block; }
+        .red-card { background: #ff0000; display: block; }
+
         .side-a { background: var(--main-red); color: var(--pure-white); border-right: 2px solid white; }
         .side-b { background: var(--pure-white); color: var(--main-red); }
-        #match-timer-box { background: var(--main-red); color: white; height: 60px; display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; }
+
+        #match-timer-box { background: var(--main-red); color: white; height: 60px; display: none; align-items: center; padding: 0 15px; font-size: 32px; font-weight: 900; border: 3px solid white; border-left: none; border-radius: 0 6px 6px 0; box-shadow: 5px 5px 15px rgba(0,0,0,0.4); }
+
         #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 26px; font-weight: 700; text-shadow: 2px 2px 4px #000; text-transform: uppercase; width: var(--container-width); }
 
-        /* --- Penalty System (Unlimited) --- */
-        #penalty-shots-container { display: none; justify-content: space-between; align-items: center; background: var(--main-red); padding: 10px; border: 3px solid white; border-radius: 8px; margin-top: 5px; width: var(--container-width); box-shadow: 0 4px 10px rgba(0,0,0,0.5); box-sizing: border-box; }
-        .team-shots { display: flex; gap: 4px; flex-wrap: wrap; }
-        .ball { width: 26px; height: 26px; border-radius: 50%; background: #fff; border: 2px solid #000; display: flex; align-items: center; justify-content: center; font-size: 16px; font-weight: bold; color: #000; }
-        .ball.goal { background: #00ff00; color: #000; border-color: #fff; }
-        .ball.miss { background: #000000; color: #fff; border-color: #fff; }
+      /* --- Penalty System Updated --- */
+#penalty-shots-container { 
+    display: none; 
+    justify-content: space-between; 
+    align-items: center; 
+    background: var(--main-red); /* ਬੈਕਗਰਾਊਂਡ ਲਾਲ ਕਰ ਦਿੱਤੀ */
+    padding: 10px; 
+    border: 3px solid white; /* ਚਿੱਟਾ ਬਾਰਡਰ */
+    border-radius: 8px; 
+    margin-top: 5px; 
+    width: var(--container-width); 
+    box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
+    color: white; /* ਅੱਖਰਾਂ ਦਾ ਰੰਗ ਚਿੱਟਾ */
+}
 
-        /* --- Contact & Watermark --- */
+.team-shots { display: flex; gap: 3px; }
+
+.ball { 
+    width: 25px; /* ਸਾਈਜ਼ ਥੋੜਾ ਵੱਡਾ ਕੀਤਾ */
+    height: 25px; 
+    border-radius: 50%; 
+    background: #fff; /* ਖਾਲੀ ਬਾਲ ਹੁਣ ਚਿੱਟੀ ਦਿਖੇਗੀ */
+    border: 2px solid #000; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 18px; 
+    font-weight: bold; 
+    color: #000; 
+}
+
+.ball.goal { background: #00ff00; color: #000; border-color: #fff; } /* ਗੋਲ ਹੋਣ ਤੇ ਹਰੀ ਬਾਲ */
+.ball.miss { background: #000000; color: #fff; border-color: #fff; } /* ਮਿਸ ਹੋਣ ਤੇ ਕਾਲੀ ਬਾਲ */
+
+        /* Contact Flasher */
         #contact-flasher { position: absolute; bottom: 120px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 6px 15px; border-radius: 5px; border-left: 4px solid var(--main-red); font-size: 36px; font-weight: 900; display: flex; align-items: center; gap: 10px; z-index: 1001; }
-        #watermark { position: fixed; color: #FFFFFF !important; font-size: 35px; font-weight: 900; z-index: 9999; text-shadow: 2px 2px 0px #000, 3px 3px 5px rgba(0,0,0,0.8); pointer-events: none; text-transform: uppercase; }
 
-        /* --- Ticker (Your Original Style) --- */
+        /* --- 4. Ticker --- */
         #master-footer { position: absolute; bottom: 10px; left: 0; right: 0; display: flex; flex-direction: column; gap: 4px; padding: 0 10px; z-index: 999; }
         .bar { display: flex; height: var(--arrow-height); width: 100%; overflow: hidden; position: relative; border: 2px solid var(--main-red); border-radius: 4px; }
         .top-bg { background: var(--pure-white); }
@@ -61,6 +125,18 @@
         .txt-white { color: var(--pure-white); }
         .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
 
+       #watermark { 
+    position: fixed; 
+    color: #FFFFFF !important; /* ਬਿਲਕੁਲ ਓਹੀ ਚਿੱਟਾ ਜੋ ਨੰਬਰ ਦਾ ਹੈ */
+    font-size: 35px; /* ਅੱਖਰਾਂ ਦਾ ਸਾਈਜ਼ */
+    font-weight: 900; /* ਅੱਖਰਾਂ ਦੀ ਮੋਟਾਈ */
+    z-index: 9999; 
+    opacity: 1 !important; /* ਧੁੰਦਲਾਪਣ ਬਿਲਕੁਲ ਖਤਮ (100% Solid) */
+    text-shadow: 2px 2px 0px #000000, 3px 3px 5px rgba(0,0,0,0.8); /* ਗੂੜ੍ਹੀ ਆਊਟਲਾਈਨ ਤਾਂ ਜੋ ਚਿੱਟਾ ਰੰਗ ਉੱਭਰ ਕੇ ਆਵੇ */
+    transition: all 1.2s ease-in-out; 
+    pointer-events: none; 
+    text-transform: uppercase;
+}
         #goal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 80vh; display: none; justify-content: center; align-items: center; z-index: 500; pointer-events: none; }
         .goal-text { font-size: 180px; color: #fff; font-weight: 900; text-shadow: 0 0 20px #ff0000; animation: ghaintGoal 0.5s ease-in-out infinite alternate; }
         @keyframes ghaintGoal { from { transform: scale(0.8); } to { transform: scale(1.1); } }
@@ -73,7 +149,7 @@
 
     <div id="contact-flasher">
         <i id="fl-icon" class="fas fa-phone-alt"></i>
-        <span id="fl-num">Loading...</span>
+        <span id="fl-num">86996-40061</span>
     </div>
 
     <div id="scoreboard-wrapper">
@@ -83,8 +159,10 @@
                 <div class="score-unit side-a">
                     <div class="score-box" id="scoreA">0</div>
                     <div class="team-display" id="nameA">TEAM A</div>
+                    <div id="cardA" class="card-indicator"></div>
                 </div>
                 <div class="score-unit side-b">
+                    <div id="cardB" class="card-indicator"></div>
                     <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
                     <div class="score-box" id="scoreB">0</div>
                 </div>
@@ -99,12 +177,17 @@
         </div>
 
         <div id="penalty-shots-container">
-            <div class="team-shots" id="shotsA"></div>
+            <div class="team-shots" id="shotsA">
+                <div class="ball" id="a1">1</div><div class="ball" id="a2">2</div><div class="ball" id="a3">3</div><div class="ball" id="a4">4</div><div class="ball" id="a5">5</div>
+            </div>
             <div style="color: white; font-weight: 900;">PENALTY</div>
-            <div class="team-shots" id="shotsB"></div>
+            <div class="team-shots" id="shotsB">
+                <div class="ball" id="b1">1</div><div class="ball" id="b2">2</div><div class="ball" id="b3">3</div><div class="ball" id="b4">4</div><div class="ball" id="b5">5</div>
+            </div>
         </div>
     </div>
 
+    <!-- Ticker Same as before -->
     <div id="master-footer">
         <div class="bar top-bg">
             <div class="box-left"><div class="hint-label hint-red">LIVE</div><marquee id="tour-name" class="txt-red">TOURNAMENT</marquee></div>
@@ -125,42 +208,61 @@
     let timerInt = null;
     let lastScoreA = 0, lastScoreB = 0;
 
-    // --- Data Sync ---
+    // --- ਡਾਟਾ ਸਿੰਕ (Cards Update ਦੇ ਨਾਲ) ---
     db.ref("matchData").on("value", (snap) => {
         const d = snap.val() || {};
         
-        // Goal Animation
+        // ਗੋਲ ਐਨੀਮੇਸ਼ਨ
         if (d.scoreA > lastScoreA || d.scoreB > lastScoreB) { triggerGoal(); }
         lastScoreA = d.scoreA || 0; lastScoreB = d.scoreB || 0;
 
+        // ਨਾਮ ਅਤੇ ਸਕੋਰ
         document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
         document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
+
+        // --- Yellow/Red Card Update ---
+        const cardA = document.getElementById('cardA');
+        const cardB = document.getElementById('cardB');
+
+        // Team A Card Logic
+        cardA.className = "card-indicator"; // ਪਹਿਲਾਂ ਸਾਫ ਕਰੋ
+        if(d.cardA === "yellow") { cardA.classList.add("yellow-card"); cardA.style.display = "block"; }
+        else if(d.cardA === "red") { cardA.classList.add("red-card"); cardA.style.display = "block"; }
+        else { cardA.style.display = "none"; }
+
+        // Team B Card Logic
+        cardB.className = "card-indicator"; // ਪਹਿਲਾਂ ਸਾਫ ਕਰੋ
+        if(d.cardB === "yellow") { cardB.classList.add("yellow-card"); cardB.style.display = "block"; }
+        else if(d.cardB === "red") { cardB.classList.add("red-card"); cardB.style.display = "block"; }
+        else { cardB.style.display = "none"; }
+
+        // ਰਾਊਂਡ ਅਤੇ ਹਾਫ
         document.getElementById('round-detail').innerText = "ROUND: " + (d.matchRound || "1");
         document.getElementById('half-detail').innerText = (d.round || "FIRST HALF").toUpperCase();
+        
+        // ਰੰਗ ਸੈਟਿੰਗ
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
 
-        // Persistent Timer Sync
+        // ਟਾਈਮਰ ਲੋਜਿਕ
         let serverTime = d.matchTime || "00:00";
         let parts = serverTime.split(':');
         let serverTotalSecs = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
-
         if (Math.abs(serverTotalSecs - localSecs) > 2) { localSecs = serverTotalSecs; }
 
         if (d.timerRunning) {
-            if (!timerInt) {
-                timerInt = setInterval(() => { localSecs++; updateTimerUI(); }, 1000);
+            if (!timerInt) { 
+                timerInt = setInterval(() => { localSecs++; updateTimerUI(); }, 1000); 
             }
         } else {
-            clearInterval(timerInt);
-            timerInt = null;
-            updateTimerUI();
+            clearInterval(timerInt); timerInt = null; updateTimerUI();
         }
 
-        renderPenalties('shotsA', d.penaltyA);
-        renderPenalties('shotsB', d.penaltyB);
+        // ਪੇਨਲਟੀ ਅਤੇ ਵਿਜ਼ੀਬਿਲਟੀ
+        renderPenalties('shotsA', d.pA || ""); 
+        renderPenalties('shotsB', d.pB || ""); 
         document.getElementById('penalty-shots-container').style.display = d.penaltyVisible ? 'flex' : 'none';
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
@@ -169,17 +271,15 @@
         let m = Math.floor(localSecs / 60);
         let s = localSecs % 60;
         let timeStr = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-        let tBox = document.getElementById('match-timer-box');
-        tBox.innerText = timeStr;
-        tBox.style.display = (localSecs > 0) ? "flex" : "none";
+        document.getElementById('match-timer-box').innerText = timeStr;
+        document.getElementById('match-timer-box').style.display = (localSecs > 0 || timerInt) ? "flex" : "none";
     }
 
     function renderPenalties(containerId, penaltyString) {
         const container = document.getElementById(containerId);
         container.innerHTML = "";
         if (!penaltyString) return;
-        const symbols = Array.from(penaltyString);
-        symbols.forEach((s, i) => {
+        Array.from(penaltyString).forEach((s, i) => {
             let ball = document.createElement("div");
             ball.className = "ball";
             if (s === "✅") { ball.className = "ball goal"; ball.innerText = "●"; }
@@ -189,6 +289,7 @@
         });
     }
 
+    // Ticker Update
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
@@ -200,13 +301,23 @@
         document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
     });
 
+    // Flasher (Call/WA)
     let isW = false;
     setInterval(() => {
         const icon = document.getElementById('fl-icon');
-        icon.className = isW ? "fab fa-whatsapp" : "fas fa-phone-alt";
-        icon.style.color = isW ? "#25D366" : "white";
-        isW = !isW;
-    }, 15000);
+        const numSpan = document.getElementById('fl-num');
+        db.ref("tickerData").once("value", (snap) => {
+            const d = snap.val() || {};
+            if (isW) {
+                icon.className = "fab fa-whatsapp"; icon.style.color = "#25D366";
+                numSpan.innerText = d.whatsapp || d.contact || "86996-40061";
+            } else {
+                icon.className = "fas fa-phone-alt"; icon.style.color = "white";
+                numSpan.innerText = d.contact || "86996-40061";
+            }
+            isW = !isW;
+        });
+    }, 10000);
 
     function moveWatermark() {
         const wm = document.getElementById('watermark');
