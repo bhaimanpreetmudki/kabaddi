@@ -72,39 +72,75 @@
         #match-details { display: flex; justify-content: space-between; padding: 0 5px; color: var(--pure-white); font-size: 26px; font-weight: 700; text-shadow: 2px 2px 4px #000; text-transform: uppercase; width: var(--container-width); }
 
       /* --- Penalty System Updated --- */
-#penalty-shots-container { 
-    display: none; 
-    justify-content: space-between; 
-    align-items: center; 
-    background: var(--main-red); /* ਬੈਕਗਰਾਊਂਡ ਲਾਲ ਕਰ ਦਿੱਤੀ */
-    padding: 10px; 
-    border: 3px solid white; /* ਚਿੱਟਾ ਬਾਰਡਰ */
-    border-radius: 8px; 
-    margin-top: 5px; 
-    width: var(--container-width); 
-    box-shadow: 0 4px 10px rgba(0,0,0,0.5); 
-    color: white; /* ਅੱਖਰਾਂ ਦਾ ਰੰਗ ਚਿੱਟਾ */
+#penalty-board{
+    display:none;
+    width:650px;
+    background:#0d2d8c;
+    border:3px solid #fff;
+    border-radius:8px;
+    overflow:hidden;
 }
 
-.team-shots { display: flex; gap: 3px; }
-
-.ball { 
-    width: 25px; /* ਸਾਈਜ਼ ਥੋੜਾ ਵੱਡਾ ਕੀਤਾ */
-    height: 25px; 
-    border-radius: 50%; 
-    background: #fff; /* ਖਾਲੀ ਬਾਲ ਹੁਣ ਚਿੱਟੀ ਦਿਖੇਗੀ */
-    border: 2px solid #000; 
-    display: flex; 
-    align-items: center; 
-    justify-content: center; 
-    font-size: 18px; 
-    font-weight: bold; 
-    color: #000; 
+.penalty-title{
+    background:#1140c5;
+    color:#fff;
+    text-align:center;
+    font-size:34px;
+    font-weight:900;
+    padding:8px;
 }
 
-.ball.goal { background: #00ff00; color: #000; border-color: #fff; } /* ਗੋਲ ਹੋਣ ਤੇ ਹਰੀ ਬਾਲ */
-.ball.miss { background: #000000; color: #fff; border-color: #fff; } /* ਮਿਸ ਹੋਣ ਤੇ ਕਾਲੀ ਬਾਲ */
+.penalty-row{
+    display:flex;
+    align-items:center;
+    height:55px;
+    border-top:2px solid rgba(255,255,255,.2);
+}
 
+.p-team{
+    width:120px;
+    color:#fff;
+    font-size:30px;
+    font-weight:900;
+    padding-left:10px;
+}
+
+.team-shots{
+    flex:1;
+    display:flex;
+    gap:4px;
+}
+
+.ball{
+    width:42px;
+    height:42px;
+    border-radius:0;
+    background:#fff;
+    color:#000;
+    font-size:28px;
+    font-weight:900;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+}
+
+.ball.goal{
+    background:#55ff55;
+    color:#000;
+}
+
+.ball.miss{
+    background:#ff2d55;
+    color:#fff;
+}
+
+.p-score{
+    width:50px;
+    text-align:center;
+    color:#fff;
+    font-size:32px;
+    font-weight:900;
+}
         /* Contact Flasher */
         #contact-flasher { position: absolute; bottom: 120px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 6px 15px; border-radius: 5px; border-left: 4px solid var(--main-red); font-size: 36px; font-weight: 900; display: flex; align-items: center; gap: 10px; z-index: 1001; }
 
@@ -186,6 +222,21 @@
             </div>
         </div>
     </div>
+    <div id="penalty-board">
+    <div class="penalty-title">PENALTIES</div>
+
+    <div class="penalty-row">
+        <div class="p-team" id="pNameA">TEAM A</div>
+        <div class="team-shots" id="shotsA"></div>
+        <div class="p-score" id="pScoreA">0</div>
+    </div>
+
+    <div class="penalty-row">
+        <div class="p-team" id="pNameB">TEAM B</div>
+        <div class="team-shots" id="shotsB"></div>
+        <div class="p-score" id="pScoreB">0</div>
+    </div>
+</div>
 
     <!-- Ticker Same as before -->
     <div id="master-footer">
@@ -268,18 +319,41 @@ renderPenalties('shotsB', d.pB);
     }
 
     function renderPenalties(containerId, penaltyString) {
-        const container = document.getElementById(containerId);
-        container.innerHTML = "";
-        if (!penaltyString) return;
-        Array.from(penaltyString).forEach((s, i) => {
-            let ball = document.createElement("div");
-            ball.className = "ball";
-            if (s === "✅") { ball.className = "ball goal"; ball.innerText = "●"; }
-            else if (s === "❌") { ball.className = "ball miss"; ball.innerText = "X"; }
-            else { ball.innerText = i + 1; }
-            container.appendChild(ball);
-        });
+
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    let goals = 0;
+
+    for(let i=0;i<5;i++){
+
+        const box = document.createElement("div");
+        box.className = "ball";
+
+        const val = penaltyString ? penaltyString[i] : "";
+
+        if(val === "✅"){
+            box.className = "ball goal";
+            box.innerHTML = "O";
+            goals++;
+        }
+        else if(val === "❌"){
+            box.className = "ball miss";
+            box.innerHTML = "✕";
+        }
+        else{
+            box.innerHTML = "";
+        }
+
+        container.appendChild(box);
     }
+
+    if(containerId === "shotsA"){
+        document.getElementById("pScoreA").innerText = goals;
+    }else{
+        document.getElementById("pScoreB").innerText = goals;
+    }
+}
 
     // Ticker Update
     db.ref("tickerData").on("value", (snap) => {
