@@ -374,7 +374,7 @@ renderPenalties('penaltyB', d.pB);
         document.getElementById('match-timer-box').style.display = (localSecs > 0) ? "flex" : "none";
     }
 
- function renderPenalties(containerId, penaltyString){
+function renderPenalties(containerId, penaltyString){
 
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -387,35 +387,34 @@ renderPenalties('penaltyB', d.pB);
 
     const totalGoals = shots.filter(v => v === "✅").length;
 
-    shots.forEach((val,index)=>{
+    // ਸਿਰਫ ਆਖਰੀ 5 penalties ਦਿਖਾਓ
+    const lastFive = shots.slice(-5);
+
+    for(let i=0;i<5;i++){
 
         const box = document.createElement("div");
+        box.className = "ball";
 
-        if(val==="✅"){
-            box.className="ball goal";
-            box.innerHTML="✓";
-        }else{
-            box.className="ball miss";
-            box.innerHTML="✕";
+        const val = lastFive[i];
+
+        if(val === "✅"){
+            box.className = "ball goal";
+            box.innerHTML = "✓";
+        }
+        else if(val === "❌"){
+            box.className = "ball miss";
+            box.innerHTML = "✕";
         }
 
         container.appendChild(box);
-
-        /* ਹਰ 5 ਬਾਕਸ ਤੋਂ ਬਾਅਦ ਨਵੀਂ ਲਾਈਨ */
-        if((index+1)%5===0){
-            const br=document.createElement("div");
-            br.style.flexBasis="100%";
-            container.appendChild(br);
-        }
-    });
-
-    if(containerId==="penaltyA"){
-        document.getElementById("pScoreA").innerText=totalGoals;
-    }else{
-        document.getElementById("pScoreB").innerText=totalGoals;
     }
-}
-    
+
+    if(containerId === "penaltyA"){
+        document.getElementById("pScoreA").innerText = totalGoals;
+    }else{
+        document.getElementById("pScoreB").innerText = totalGoals;
+    }
+}    
     // Ticker Update
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
