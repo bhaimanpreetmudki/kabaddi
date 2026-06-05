@@ -378,12 +378,41 @@ renderPenalties('penaltyB', d.pB);
         document.getElementById('match-timer-box').style.display = (localSecs > 0) ? "flex" : "none";
     }
 
- .penalty-row{
-    display:flex;
-    align-items:center;
-    height:60px;
-    background:#cc0000;
-    border-top:1px solid #ffffff;
+ function renderPenalties(containerId, penaltyString){
+
+    const container = document.getElementById(containerId);
+    container.innerHTML = "";
+
+    penaltyString = penaltyString || "";
+
+    let totalGoals = (penaltyString.match(/✅/g) || []).length;
+
+    let lastFive = penaltyString.slice(-5);
+
+    for(let i=0;i<5;i++){
+
+        const box = document.createElement("div");
+        box.className = "ball";
+
+        const val = lastFive[i] || "";
+
+        if(val === "✅"){
+            box.className = "ball goal";
+            box.innerHTML = "✓";
+        }
+        else if(val === "❌"){
+            box.className = "ball miss";
+            box.innerHTML = "✕";
+        }
+
+        container.appendChild(box);
+    }
+
+    if(containerId === "penaltyA"){
+        document.getElementById("pScoreA").innerText = totalGoals;
+    }else{
+        document.getElementById("pScoreB").innerText = totalGoals;
+    }
 }
     
     // Ticker Update
