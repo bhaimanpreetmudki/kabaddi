@@ -36,31 +36,51 @@
 
         .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
 
-        .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; }
+        .score-unit{
+    display:flex;
+    height:60px;
+    align-items:center;
+    flex:1;
+    position:relative;
+    overflow:hidden;
+}
  
-        .name-area { 
-            width: 220px;
-                    height: 100%; 
-                    display: flex; 
-                    align-items: center; 
-                    overflow: hidden; 
-                    white-space: nowrap; 
-                
-                    font-size: 28px; 
-                    font-weight: bold; 
-                    text-align: center; 
-                    padding: 0 10px; 
-                    box-sizing: border-box; 
-
-                    text-transform: uppercase;
-        }
-                 
-
-/* SCROLL CONTAINER */
- .team-scroller { display: inline-block; padding-left: 100%; animation: team-scroll 8s linear infinite; }
-        @keyframes team-scroll { 0% { transform: translateX(0); } 100% { transform: translateX(-100%); } }
-        .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; }
+        .name-area{
+    flex:1;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    overflow:hidden;
+    white-space:nowrap;
+    font-size:28px;
+    font-weight:900;
+    text-transform:uppercase;
+    padding:0 10px;
+}
         
+            .team-scroller{
+    display:inline-block;
+    white-space:nowrap;
+    padding-left:100%;
+    animation: team-scroll 10s linear infinite;
+}
+
+@keyframes team-scroll{
+    0%{ transform: translateX(0); }
+    100%{ transform: translateX(-100%); }
+}
+       /* SCORE BOX FIX */
+.score-box{
+    width:75px;
+    height:100%;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    font-size:40px;
+    font-weight:900;
+    flex-shrink:0;
+}        
         /* --- Card Styles --- */
         .card-indicator {
             width: 15px;
@@ -408,16 +428,26 @@ renderPenalties('penaltyB', d.pB);
     });
 
 function setTeamName(containerId, txt) {
-        const el = document.getElementById(containerId);
-        el.innerHTML = txt.length > 12 ? `<div class="team-scroller">${txt}</div>` : `<div style="width:100%; text-align:center;">${txt}</div>`;
-    }
-    function updateTimerUI() {
-        let m = Math.floor(localSecs / 60);
-        let s = localSecs % 60;
-        document.getElementById('match-timer-box').innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-        document.getElementById('match-timer-box').style.display = (localSecs > 0) ? "flex" : "none";
-    }
+    const el = document.getElementById(containerId);
+    txt = (txt || "").toUpperCase();
 
+    el.innerHTML = "";
+
+    const span = document.createElement("div");
+    span.style.width = "100%";
+    span.style.textAlign = "center";
+    span.innerText = txt;
+
+    // scroll only when text is long
+    if (txt.length > 10) {
+        const scroller = document.createElement("div");
+        scroller.className = "team-scroller";
+        scroller.innerText = txt + "   •   " + txt;
+        el.appendChild(scroller);
+    } else {
+        el.appendChild(span);
+    }
+}
 function renderPenalties(containerId, penaltyString){
 
     const container = document.getElementById(containerId);
