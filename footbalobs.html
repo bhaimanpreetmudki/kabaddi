@@ -88,28 +88,23 @@
 
 .team-shots { display: flex; gap: 3px; }
 
-.ball{
-    width:40px;
-    height:40px;
-    border-radius:6px;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    font-size:24px;
-    font-weight:900;
-    background:#444;
-    border:2px solid #fff;
+.ball { 
+    width: 25px; /* ਸਾਈਜ਼ ਥੋੜਾ ਵੱਡਾ ਕੀਤਾ */
+    height: 25px; 
+    border-radius: 50%; 
+    background: #fff; /* ਖਾਲੀ ਬਾਲ ਹੁਣ ਚਿੱਟੀ ਦਿਖੇਗੀ */
+    border: 2px solid #000; 
+    display: flex; 
+    align-items: center; 
+    justify-content: center; 
+    font-size: 18px; 
+    font-weight: bold; 
+    color: #000; 
 }
 
-.ball.goal{
-    background:#00cc00;
-    color:#fff;
-}
+.ball.goal { background: #00ff00; color: #000; border-color: #fff; } /* ਗੋਲ ਹੋਣ ਤੇ ਹਰੀ ਬਾਲ */
+.ball.miss { background: #000000; color: #fff; border-color: #fff; } /* ਮਿਸ ਹੋਣ ਤੇ ਕਾਲੀ ਬਾਲ */
 
-.ball.miss{
-    background:#cc0000;
-    color:#fff;
-}
         /* Contact Flasher */
         #contact-flasher { position: absolute; bottom: 120px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 6px 15px; border-radius: 5px; border-left: 4px solid var(--main-red); font-size: 36px; font-weight: 900; display: flex; align-items: center; gap: 10px; z-index: 1001; }
 
@@ -181,25 +176,16 @@
             <span id="half-detail">FIRST HALF</span>
         </div>
 
-       <div id="penalty-shots-container">
-    <div style="display:flex;flex-direction:column;align-items:center;">
-        <div id="pTeamA" style="font-size:24px;font-weight:900;margin-bottom:8px;">
-            TEAM A
+        <div id="penalty-shots-container">
+            <div class="team-shots" id="shotsA">
+                <div class="ball" id="a1">1</div><div class="ball" id="a2">2</div><div class="ball" id="a3">3</div><div class="ball" id="a4">4</div><div class="ball" id="a5">5</div>
+            </div>
+            <div style="color: white; font-weight: 900;">PENALTY</div>
+            <div class="team-shots" id="shotsB">
+                <div class="ball" id="b1">1</div><div class="ball" id="b2">2</div><div class="ball" id="b3">3</div><div class="ball" id="b4">4</div><div class="ball" id="b5">5</div>
+            </div>
         </div>
-        <div class="team-shots" id="shotsA"></div>
     </div>
-
-    <div style="font-size:30px;font-weight:900;">
-        PENALTY
-    </div>
-
-    <div style="display:flex;flex-direction:column;align-items:center;">
-        <div id="pTeamB" style="font-size:24px;font-weight:900;margin-bottom:8px;">
-            TEAM B
-        </div>
-        <div class="team-shots" id="shotsB"></div>
-    </div>
-</div>
 
     <!-- Ticker Same as before -->
     <div id="master-footer">
@@ -236,8 +222,26 @@
         document.getElementById('half-detail').innerText = (d.round || "FIRST HALF").toUpperCase();
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
-        document.getElementById('pTeamA').innerText=d.nameA || "TEAM A";
-document.getElementById('pTeamB').innerText=d.nameB || "TEAM B";
+
+        const cardA = document.getElementById("cardA");
+cardA.className = "card-indicator";
+
+if(d.cardA === "yellow"){
+    cardA.classList.add("yellow-card");
+}
+else if(d.cardA === "red"){
+    cardA.classList.add("red-card");
+}
+
+const cardB = document.getElementById("cardB");
+cardB.className = "card-indicator";
+
+if(d.cardB === "yellow"){
+    cardB.classList.add("yellow-card");
+}
+else if(d.cardB === "red"){
+    cardB.classList.add("red-card");
+}
 
         let serverTime = d.matchTime || "00:00";
         let parts = serverTime.split(':');
@@ -250,8 +254,8 @@ document.getElementById('pTeamB').innerText=d.nameB || "TEAM B";
             clearInterval(timerInt); timerInt = null; updateTimerUI();
         }
 
-        renderPenalties('shotsA', d.penaltyA);
-        renderPenalties('shotsB', d.penaltyB);
+renderPenalties('shotsA', d.pA);
+renderPenalties('shotsB', d.pB);
         document.getElementById('penalty-shots-container').style.display = d.penaltyVisible ? 'flex' : 'none';
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
@@ -263,42 +267,20 @@ document.getElementById('pTeamB').innerText=d.nameB || "TEAM B";
         document.getElementById('match-timer-box').style.display = (localSecs > 0) ? "flex" : "none";
     }
 
-   function renderPenalties(containerId, penaltyString){
-
-    const container=document.getElementById(containerId);
-
-    container.innerHTML="";
-
-    const pArray=Array.from(penaltyString);
-
-    for(let i=0;i<5;i++){
-
-        let box=document.createElement("div");
-
-        box.className="ball";
-
-        let status=pArray[i];
-
-        if(status==="✅"){
-
-            box.className="ball goal";
-            box.innerHTML="✓";
-
-        }
-        else if(status==="❌"){
-
-            box.className="ball miss";
-            box.innerHTML="✕";
-
-        }
-        else{
-
-            box.innerHTML="";
-        }
-
-        container.appendChild(box);
+    function renderPenalties(containerId, penaltyString) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        if (!penaltyString) return;
+        Array.from(penaltyString).forEach((s, i) => {
+            let ball = document.createElement("div");
+            ball.className = "ball";
+            if (s === "✅") { ball.className = "ball goal"; ball.innerText = "●"; }
+            else if (s === "❌") { ball.className = "ball miss"; ball.innerText = "X"; }
+            else { ball.innerText = i + 1; }
+            container.appendChild(ball);
+        });
     }
-}
+
     // Ticker Update
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
