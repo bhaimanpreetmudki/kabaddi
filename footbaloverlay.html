@@ -344,8 +344,8 @@ TEAM B
         if (d.scoreA > lastScoreA || d.scoreB > lastScoreB) { triggerGoal(); }
         lastScoreA = d.scoreA || 0; lastScoreB = d.scoreB || 0;
 
-        document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
-        document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
+setTeamName("nameA", d.nameA || "TEAM A");
+setTeamName("nameB", d.nameB || "TEAM B");
         document.getElementById('scoreA').innerText = d.scoreA || "0";
         document.getElementById('scoreB').innerText = d.scoreB || "0";
         document.getElementById('round-detail').innerText = "ROUND: " + (d.matchRound || "1");
