@@ -364,6 +364,17 @@ document.getElementById('pB').value = d.pB || "";
     document.getElementById('playerA').value = "";
     document.getElementById('playerB').value = "";
 }
+
+    function resetPenaltyOnly() {
+
+    document.getElementById('pA').value = "";
+    document.getElementById('pB').value = "";
+
+    matchRef.update({
+        pA: "",
+        pB: ""
+    });
+}
     
     function fullReset() {
         if (confirm("Reset everything?")) {
