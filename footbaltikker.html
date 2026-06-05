@@ -104,14 +104,12 @@
 }
 
 .p-team{
-    width:80px;
-    color:#fff;
-    font-size:32px;
-    font-weight:900;
-    text-align:center;
-
+    width:120px;
+    height:60px;
     overflow:hidden;
     white-space:nowrap;
+    display:flex;
+    align-items:center;
 }
 
 
@@ -315,11 +313,11 @@ TEAM B
         document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
         document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
 
-        document.getElementById("pNameA").innerText =
-(d.nameA || "TEAM A").toUpperCase();
+ document.getElementById("pNameA").innerHTML =
+'<marquee scrollamount="3">'+(d.nameA || "TEAM A").toUpperCase()+'</marquee>';
 
-document.getElementById("pNameB").innerText =
-(d.nameB || "TEAM B").toUpperCase();
+document.getElementById("pNameB").innerHTML =
+'<marquee scrollamount="3">'+(d.nameB || "TEAM B").toUpperCase()+'</marquee>';
 
 if(d.penaltyVisible){
 
