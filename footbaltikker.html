@@ -393,40 +393,41 @@ renderPenalties('penaltyB', d.pB);
         document.getElementById('match-timer-box').style.display = (localSecs > 0) ? "flex" : "none";
     }
 
-function renderPenalties(containerId, penaltyString){
+const shots = [...penaltyString].filter(v =>
+    v==="✅" || v==="❌"
+);
 
-    const container = document.getElementById(containerId);
-    container.innerHTML = "";
+const totalGoals = shots.filter(v=>v==="✅").length;
 
-    penaltyString = penaltyString || "";
+// ਹਰ 5 ਤੋਂ ਬਾਅਦ reset
+const currentRound = shots.length % 5;
 
-    const shots = [...penaltyString].filter(v =>
-        v === "✅" || v === "❌"
-    );
+let showShots = [];
 
-    const totalGoals = shots.filter(v => v === "✅").length;
+if(currentRound === 0 && shots.length > 0){
+    showShots = shots.slice(-5);
+}else{
+    showShots = shots.slice(-(currentRound));
+}
 
-    // ਸਿਰਫ ਆਖਰੀ 5 penalties ਦਿਖਾਓ
-    const lastFive = shots.slice(-5);
+for(let i=0;i<5;i++){
 
-    for(let i=0;i<5;i++){
+    const box = document.createElement("div");
+    box.className="ball";
 
-        const box = document.createElement("div");
-        box.className = "ball";
+    const val = showShots[i];
 
-        const val = lastFive[i];
-
-        if(val === "✅"){
-            box.className = "ball goal";
-            box.innerHTML = "✓";
-        }
-        else if(val === "❌"){
-            box.className = "ball miss";
-            box.innerHTML = "✕";
-        }
-
-        container.appendChild(box);
+    if(val==="✅"){
+        box.className="ball goal";
+        box.innerHTML="✓";
     }
+    else if(val==="❌"){
+        box.className="ball miss";
+        box.innerHTML="✕";
+    }
+
+    container.appendChild(box);
+}
 
     if(containerId === "penaltyA"){
         document.getElementById("pScoreA").innerText = totalGoals;
