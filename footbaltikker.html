@@ -96,20 +96,17 @@
 }
 
 .penalty-row{
-    min-height:60px;
-    height:auto;
-    padding:4px 0;
+    display:flex;
+    align-items:center;
+    min-height:55px;
+    padding:2px 5px;
 }
 
 .p-team{
-    width:90px;   /* ਪਹਿਲਾਂ 160px ਸੀ */
-    height:60px;
+    width:90px;
     overflow:hidden;
-    position:relative;
-    display:flex;
-    align-items:center;
-    color:#fff;
-    font-size:24px;
+    white-space:nowrap;
+    font-size:22px;
     font-weight:900;
 }
 
@@ -127,17 +124,15 @@
 .team-shots{
     flex:1;
     display:flex;
-    gap:3px;
-    justify-content:flex-start;
     flex-wrap:wrap;
-    padding:0 5px;
+    gap:2px;
+    align-content:flex-start;
 }
 
 .ball{
-    width:30px;
-    height:30px;
-    font-size:18px;
-    font-weight:900;
+    width:26px;
+    height:26px;
+    font-size:16px;
 }
 .ball.goal{
     background:#55ff55;
