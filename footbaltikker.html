@@ -345,15 +345,16 @@ if(d.penaltyVisible){
     document.getElementById("scoreboard-container").style.display="flex";
     document.getElementById("match-details").style.display="flex";
     document.getElementById("penalty-board").style.display="none";
-}document.getElementById("pNameA").innerHTML =
-'<marquee scrollamount="4">'+
-(d.nameA || "TEAM A").toUpperCase()+
-'</marquee>';
+}
+        document.getElementById("pNameA").innerHTML =
+'<marquee scrollamount="4">&nbsp;&nbsp;&nbsp;&nbsp;' +
+(d.nameA || "TEAM A").toUpperCase() +
+'&nbsp;&nbsp;&nbsp;&nbsp;</marquee>';
 
 document.getElementById("pNameB").innerHTML =
-'<marquee scrollamount="4">'+
-(d.nameB || "TEAM B").toUpperCase()+
-'</marquee>';
+'<marquee scrollamount="4">&nbsp;&nbsp;&nbsp;&nbsp;' +
+(d.nameB || "TEAM B").toUpperCase() +
+'&nbsp;&nbsp;&nbsp;&nbsp;</marquee>';
 
         const cardA = document.getElementById("cardA");
 cardA.className = "card-indicator";
