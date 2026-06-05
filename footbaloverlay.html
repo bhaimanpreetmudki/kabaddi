@@ -419,29 +419,21 @@ renderPenalties('penaltyB', d.pB);
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
- function setTeamName(containerId, txt) {
+function setTeamName(containerId, txt) {
     const el = document.getElementById(containerId);
     txt = (txt || "").toUpperCase();
 
-    el.innerHTML = "";
-
-    const span = document.createElement("div");
-    span.style.width = "100%";
-    span.style.textAlign = "center";
-    span.innerText = txt;
-
-    // 👉 scroll only if long name
-    if(txt.length > 7){
-        const scroller = document.createElement("div");
-        scroller.className = "team-scroller";
-        scroller.innerText = txt + "   •   " + txt;
-
-        el.appendChild(scroller);
+    // scroll only if long name
+    if(txt.length > 8){
+        el.innerHTML = `
+            <div class="team-scroller">
+                <span>${txt} • ${txt} • ${txt} • ${txt}</span>
+            </div>
+        `;
     } else {
-        el.appendChild(span);
+        el.innerHTML = `<span style="width:100%; text-align:center; display:block;">${txt}</span>`;
     }
 }
-
     function updateTimerUI() {
         let m = Math.floor(localSecs / 60);
         let s = localSecs % 60;
