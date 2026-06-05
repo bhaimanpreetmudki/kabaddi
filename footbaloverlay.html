@@ -44,30 +44,31 @@
             background: rgba(255,255,255,0.1);
         }
 
-        .name-area { 
-            flex: 1; 
-            height: 100%; 
-            display: flex; 
-            align-items: center; 
-            padding: 0 10px; 
-            font-size: 28px; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            overflow: hidden;
-            white-space: nowrap;
-        }
+        /* ਨਾਮ ਸਕ੍ਰੌਲਿੰਗ ਲਈ ਨਵੀਂ CSS */
+.name-area { 
+    flex: 1; 
+    height: 100%; 
+    display: flex; 
+    align-items: center; 
+    padding: 0 10px; 
+    font-size: 28px; 
+    font-weight: 900; 
+    text-transform: uppercase; 
+    overflow: hidden; /* ਬਾਹਰ ਜਾਣ ਵਾਲਾ ਟੈਕਸਟ ਲੁਕਾਉਣ ਲਈ */
+    position: relative;
+}
 
-        /* ਟੀਮ ਨਾਮ ਸਕ੍ਰੋਲਿੰਗ */
-        .scroller {
-            display: inline-block;
-            white-space: nowrap;
-            animation: marquee 10s linear infinite;
-        }
+.scroller {
+    display: inline-block;
+    white-space: nowrap;
+    padding-left: 100%;
+    animation: marquee 10s linear infinite;
+}
 
-        @keyframes marquee {
-            0% { transform: translateX(100%); }
-            100% { transform: translateX(-100%); }
-        }
+@keyframes marquee {
+    0% { transform: translate(0, 0); }
+    100% { transform: translate(-100%, 0); }
+}
 
         .side-a { border-right: 2px solid #ffffff; }
         .side-b { border-left: 2px solid #ffffff; }
@@ -429,13 +430,16 @@ renderPenalties('penaltyB', d.pB);
     });
 
 function updateTeamName(id, name) {
-        const el = document.getElementById(id);
-        if (name.length > 8) {
-            el.innerHTML = `<div class="scroller">${name.toUpperCase()} &nbsp;&nbsp;&nbsp; ${name.toUpperCase()}</div>`;
-        } else {
-            el.innerText = name.toUpperCase();
-        }
+    const el = document.getElementById(id);
+    name = (name || "").toUpperCase();
+    
+    // ਜੇ ਨਾਮ ਲੰਬਾ ਹੈ ਤਾਂ ਸਕ੍ਰੌਲ ਲਗਾਓ
+    if (name.length > 8) {
+        el.innerHTML = `<div class="scroller">${name} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp; ${name}</div>`;
+    } else {
+        el.innerHTML = `<div>${name}</div>`;
     }
+}
 function renderPenalties(containerId, penaltyString){
 
     const container = document.getElementById(containerId);
