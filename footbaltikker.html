@@ -87,30 +87,36 @@
 }
 
 .penalty-title{
-    background:#cc0000;
-    color:#fff;
-    text-align:center;
-    font-size:46px;
+    background:linear-gradient(90deg,#111,#333,#111);
+    color:#ffd700;
+    font-size:32px;
     font-weight:900;
-    padding:12px;
+    text-align:center;
+    padding:8px;
+    border-bottom:2px solid #ffd700;
+    text-shadow:2px 2px 4px #000;
 }
 
 .penalty-row{
     display:flex;
     align-items:center;
-    min-height:55px;
-    padding:2px 5px;
+    height:55px;
+    background:linear-gradient(90deg,#cc0000,#ff2222,#cc0000);
+    border-top:1px solid #ffd700;
 }
 
 .p-team{
-    width:140px;
+    width:170px;
+    background:linear-gradient(180deg,#111,#222);
     color:#fff;
-    font-size:24px;
+    font-size:26px;
     font-weight:900;
-    overflow:hidden;
-    white-space:nowrap;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-right:2px solid #ffd700;
+    text-shadow:2px 2px 3px #000;
 }
-
 .p-team span{
     position:absolute;
     white-space:nowrap;
@@ -123,11 +129,13 @@
     to{transform:translateX(-100%);}
 }
 .team-shots{
-    width:260px;
-    display:grid;
-    grid-template-columns:repeat(5,40px);
+    flex:1;
+    background:#ffffff;
+    padding:4px;
+    display:flex;
     gap:4px;
     justify-content:center;
+    align-items:center;
 }
 
 .ball{
@@ -137,19 +145,30 @@
 }
 
 .ball.goal{
-    background:#55ff55;
+    background:#00ff44;
     color:#000;
+    border:2px solid #008f25;
+    box-shadow:0 0 8px #00ff44;
 }
 
 .ball.miss{
-    background:#ff2d2d;
+    background:#ff2222;
     color:#fff;
+    border:2px solid #990000;
+    box-shadow:0 0 8px #ff2222;
 }
 
 .p-score{
-    width:60px;
-    font-size:38px;
-    text-align:center;
+    width:70px;
+    background:linear-gradient(180deg,#111,#222);
+    color:#ffd700;
+    font-size:40px;
+    font-weight:900;
+    display:flex;
+    align-items:center;
+    justify-content:center;
+    border-left:2px solid #ffd700;
+    text-shadow:2px 2px 4px #000;
 }
         
         /* Contact Flasher */
