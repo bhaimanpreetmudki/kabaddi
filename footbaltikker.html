@@ -87,12 +87,7 @@
 }
 
 .penalty-title{
-    background:#1140c5;
-    color:#fff;
-    text-align:center;
-    font-size:40px;
-    font-weight:900;
-    padding:10px;
+    background:#cc0000;
 }
 
 .penalty-row{
@@ -378,7 +373,7 @@ renderPenalties('penaltyB', d.pB);
         document.getElementById('match-timer-box').style.display = (localSecs > 0) ? "flex" : "none";
     }
 
-    function renderPenalties(containerId, penaltyString) {
+ function renderPenalties(containerId, penaltyString){
 
     const container = document.getElementById(containerId);
     container.innerHTML = "";
@@ -394,12 +389,12 @@ renderPenalties('penaltyB', d.pB);
 
         if(val === "✅"){
             box.className = "ball goal";
-            box.innerHTML = "O";
+            box.innerHTML = "✅";
             goals++;
         }
         else if(val === "❌"){
             box.className = "ball miss";
-            box.innerHTML = "✕";
+            box.innerHTML = "❌";
         }
         else{
             box.innerHTML = "";
@@ -408,9 +403,10 @@ renderPenalties('penaltyB', d.pB);
         container.appendChild(box);
     }
 
-    if(containerId === "shotsA"){
+    if(containerId === "penaltyA"){
         document.getElementById("pScoreA").innerText = goals;
-    }else{
+    }
+    else{
         document.getElementById("pScoreB").innerText = goals;
     }
 }
