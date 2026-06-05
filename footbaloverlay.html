@@ -53,15 +53,16 @@
 }
 
 /* scroll only when needed */
-.scroll-text{
-    padding-left: 100%;
-    animation: nameScroll 8s linear infinite;
-    white-space: nowrap;
+.team-scroller{
+    display:inline-block;
+    white-space:nowrap;
+    padding-left:100%;
+    animation: teamScrollLeft 8s linear infinite;
 }
 
-@keyframes nameScroll{
+@keyframes teamScrollLeft{
     0%{
-        transform: translateX(0%);
+        transform: translateX(0);
     }
     100%{
         transform: translateX(-100%);
@@ -418,16 +419,26 @@ renderPenalties('penaltyB', d.pB);
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-    function setTeamName(id, name){
-    const el = document.getElementById(id);
-    const text = (name || "").toUpperCase();
+ function setTeamName(containerId, txt) {
+    const el = document.getElementById(containerId);
+    txt = (txt || "").toUpperCase();
 
-    el.classList.remove("scroll-text");
-    el.innerText = text;
+    el.innerHTML = "";
 
-    // 👉 ONLY SCOREBOARD LOGIC
-    if(text.length > 7){
-        el.classList.add("scroll-text");
+    const span = document.createElement("div");
+    span.style.width = "100%";
+    span.style.textAlign = "center";
+    span.innerText = txt;
+
+    // 👉 scroll only if long name
+    if(txt.length > 7){
+        const scroller = document.createElement("div");
+        scroller.className = "team-scroller";
+        scroller.innerText = txt + "   •   " + txt;
+
+        el.appendChild(scroller);
+    } else {
+        el.appendChild(span);
     }
 }
 
