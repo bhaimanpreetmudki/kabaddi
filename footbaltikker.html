@@ -96,11 +96,9 @@
 }
 
 .penalty-row{
-    display:flex;
-    align-items:center;
-    height:60px;
-    background:#cc0000;
-    border-top:1px solid #ffffff;
+    min-height:60px;
+    height:auto;
+    padding:4px 0;
 }
 
 .p-team{
@@ -129,21 +127,21 @@
 .team-shots{
     flex:1;
     display:flex;
-    gap:6px;
+    gap:4px;
     justify-content:center;
+    flex-wrap:wrap;
 }
 
 .ball{
-    width:50px;
-    height:50px;
+    width:38px;      /* ਪਹਿਲਾਂ 50px ਸੀ */
+    height:38px;     /* ਪਹਿਲਾਂ 50px ਸੀ */
+    font-size:24px;  /* ਪਹਿਲਾਂ 32px ਸੀ */
+    font-weight:900;
     background:#fff;
     display:flex;
     align-items:center;
     justify-content:center;
-    font-size:32px;
-    font-weight:900;
 }
-
 .ball.goal{
     background:#55ff55;
     color:#000;
@@ -390,37 +388,31 @@ renderPenalties('penaltyB', d.pB);
 
     penaltyString = penaltyString || "";
 
-    const shots = [...penaltyString].filter(x =>
-        x === "✅" || x === "❌"
-    );
+    const shots = Array.from(penaltyString)
+        .filter(v => v === "✅" || v === "❌");
 
-    const totalGoals = shots.filter(x => x === "✅").length;
+    const totalGoals = shots.filter(v => v === "✅").length;
 
-    const lastFive = shots.slice(-5);
-
-    for(let i=0;i<5;i++){
+    shots.forEach(val => {
 
         const box = document.createElement("div");
-        box.className = "ball";
-
-        const val = lastFive[i];
 
         if(val === "✅"){
             box.className = "ball goal";
             box.innerHTML = "✓";
         }
-        else if(val === "❌"){
+        else{
             box.className = "ball miss";
             box.innerHTML = "✕";
         }
 
         container.appendChild(box);
-    }
+    });
 
     if(containerId === "penaltyA"){
-        document.getElementById("pScoreA").innerText = totalGoals;
+        pScoreA.innerText = totalGoals;
     }else{
-        document.getElementById("pScoreB").innerText = totalGoals;
+        pScoreB.innerText = totalGoals;
     }
 }
     
