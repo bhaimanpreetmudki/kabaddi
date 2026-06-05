@@ -408,20 +408,9 @@ renderPenalties('penaltyB', d.pB);
     });
 
 function setTeamName(containerId, txt) {
-    const el = document.getElementById(containerId);
-    txt = (txt || "").toUpperCase();
-
-    // scroll only if long name
-    if(txt.length > 8){
-        el.innerHTML = `
-            <div class="team-scroller">
-                <span>${txt} • ${txt} • ${txt} • ${txt}</span>
-            </div>
-        `;
-    } else {
-        el.innerHTML = `<span style="width:100%; text-align:center; display:block;">${txt}</span>`;
+        const el = document.getElementById(containerId);
+        el.innerHTML = txt.length > 12 ? `<div class="team-scroller">${txt}</div>` : `<div style="width:100%; text-align:center;">${txt}</div>`;
     }
-}
     function updateTimerUI() {
         let m = Math.floor(localSecs / 60);
         let s = localSecs % 60;
