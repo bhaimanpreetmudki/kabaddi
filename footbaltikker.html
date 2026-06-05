@@ -76,15 +76,14 @@
     display:none;
     position:absolute;
     top:25px;
-    left:320px;
-    transform:translateX(-50%);
-    width:550px;
-    background:#0d2d8c;
-    border:4px solid #fff;
-    border-radius:10px;
+    left:20px;     /* scoreboard ਵਾਲੀ same position */
+    width:610px;   /* scoreboard ਦੇ ਬਰਾਬਰ */
+    background:#cc0000; /* ticker ਵਾਲਾ red color */
+    border:3px solid #fff;
+    border-radius:6px;
     overflow:hidden;
     z-index:1000;
-    box-shadow:0 0 20px rgba(0,0,0,.7);
+    box-shadow:0 5px 15px rgba(0,0,0,.6);
 }
 
 .penalty-title{
@@ -99,14 +98,17 @@
 .penalty-row{
     display:flex;
     align-items:center;
-    height:70px;
-    border-top:2px solid rgba(255,255,255,.2);
+    height:55px;
+    background:#ffffff;
+    border-top:1px solid #cc0000;
 }
 
 .p-team{
     width:140px;
-    overflow:hidden;
-    white-space:nowrap;
+    color:#cc0000;
+    font-size:28px;
+    font-weight:900;
+    text-align:center;
 }
 
 .p-team span{
@@ -138,21 +140,21 @@
 }
 
 .ball.goal{
-    background:#00ff55;
+    background:#55ff55;
     color:#000;
 }
 
 .ball.miss{
-    background:#ff0000;
+    background:#ff2d2d;
     color:#fff;
 }
 
 .p-score{
-    width:80px;
-    text-align:center;
-    color:#fff;
-    font-size:40px;
+    width:60px;
+    color:#cc0000;
+    font-size:34px;
     font-weight:900;
+    text-align:center;
 }  
         /* Contact Flasher */
         #contact-flasher { position: absolute; bottom: 120px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 6px 15px; border-radius: 5px; border-left: 4px solid var(--main-red); font-size: 36px; font-weight: 900; display: flex; align-items: center; gap: 10px; z-index: 1001; }
