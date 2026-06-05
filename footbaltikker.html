@@ -102,14 +102,14 @@
 }
 
 .p-team{
-    width:160px;
+    width:90px;   /* ਪਹਿਲਾਂ 160px ਸੀ */
     height:60px;
     overflow:hidden;
     position:relative;
     display:flex;
     align-items:center;
     color:#fff;
-    font-size:28px;
+    font-size:24px;
     font-weight:900;
 }
 
@@ -127,20 +127,17 @@
 .team-shots{
     flex:1;
     display:flex;
-    gap:4px;
-    justify-content:center;
+    gap:3px;
+    justify-content:flex-start;
     flex-wrap:wrap;
+    padding:0 5px;
 }
 
 .ball{
-    width:38px;      /* ਪਹਿਲਾਂ 50px ਸੀ */
-    height:38px;     /* ਪਹਿਲਾਂ 50px ਸੀ */
-    font-size:24px;  /* ਪਹਿਲਾਂ 32px ਸੀ */
+    width:30px;
+    height:30px;
+    font-size:18px;
     font-weight:900;
-    background:#fff;
-    display:flex;
-    align-items:center;
-    justify-content:center;
 }
 .ball.goal{
     background:#55ff55;
@@ -388,31 +385,38 @@ renderPenalties('penaltyB', d.pB);
 
     penaltyString = penaltyString || "";
 
-    const shots = Array.from(penaltyString)
-        .filter(v => v === "✅" || v === "❌");
+    const shots = [...penaltyString].filter(v =>
+        v === "✅" || v === "❌"
+    );
 
     const totalGoals = shots.filter(v => v === "✅").length;
 
-    shots.forEach(val => {
+    shots.forEach((val,index)=>{
 
         const box = document.createElement("div");
 
-        if(val === "✅"){
-            box.className = "ball goal";
-            box.innerHTML = "✓";
-        }
-        else{
-            box.className = "ball miss";
-            box.innerHTML = "✕";
+        if(val==="✅"){
+            box.className="ball goal";
+            box.innerHTML="✓";
+        }else{
+            box.className="ball miss";
+            box.innerHTML="✕";
         }
 
         container.appendChild(box);
+
+        /* ਹਰ 5 ਬਾਕਸ ਤੋਂ ਬਾਅਦ ਨਵੀਂ ਲਾਈਨ */
+        if((index+1)%5===0){
+            const br=document.createElement("div");
+            br.style.flexBasis="100%";
+            container.appendChild(br);
+        }
     });
 
-    if(containerId === "penaltyA"){
-        pScoreA.innerText = totalGoals;
+    if(containerId==="penaltyA"){
+        document.getElementById("pScoreA").innerText=totalGoals;
     }else{
-        pScoreB.innerText = totalGoals;
+        document.getElementById("pScoreB").innerText=totalGoals;
     }
 }
     
