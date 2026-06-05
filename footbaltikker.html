@@ -343,11 +343,11 @@ if(d.penaltyVisible){
     document.getElementById("match-details").style.display="flex";
     document.getElementById("penalty-board").style.display="none";
 }
-        document.getElementById("pNameA").innerHTML =
-"<span>"+(d.nameA || "TEAM A").toUpperCase()+"</span>";
+        document.getElementById("pNameA").textContent =
+(d.nameA || "TEAM A").toUpperCase();
 
-document.getElementById("pNameB").innerHTML =
-"<span>"+(d.nameB || "TEAM B").toUpperCase()+"</span>";
+document.getElementById("pNameB").textContent =
+(d.nameB || "TEAM B").toUpperCase();
 
         const cardA = document.getElementById("cardA");
 cardA.className = "card-indicator";
