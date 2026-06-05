@@ -37,15 +37,36 @@
         .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
 
         .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; }
-        .team-display { 
-            flex-grow: 1; 
-            padding: 0 15px; 
-            font-size: 36px; 
-            font-weight: 900; 
-            text-transform: uppercase; 
-            overflow: hidden;
-            white-space: nowrap;
-        }
+        .team-display{
+    flex-grow: 1;
+    padding: 0 15px;
+    font-size: 36px;
+    font-weight: 900;
+    text-transform: uppercase;
+    overflow: hidden;
+    white-space: nowrap;
+    position: relative;
+}
+
+.team-display span{
+    display: inline-block;
+}
+
+/* scroll only when needed */
+.scroll-text{
+    padding-left: 100%;
+    animation: nameScroll 8s linear infinite;
+    white-space: nowrap;
+}
+
+@keyframes nameScroll{
+    0%{
+        transform: translateX(0%);
+    }
+    100%{
+        transform: translateX(-100%);
+    }
+}
         .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; }
         
         /* --- Card Styles --- */
@@ -227,12 +248,16 @@
                 <div id="jA" class="jersey-strip"></div>
                 <div class="score-unit side-a">
                     <div class="score-box" id="scoreA">0</div>
-                    <div class="team-display" id="nameA">TEAM A</div>
+                    <div class="team-display">
+  <span id="nameA">TEAM A</span>
+</div>
                     <div id="cardA" class="card-indicator"></div>
                 </div>
                 <div class="score-unit side-b">
                     <div id="cardB" class="card-indicator"></div>
-                    <div class="team-display" id="nameB" style="text-align: right;">TEAM B</div>
+                    <div class="team-display" style="text-align:right;">
+  <span id="nameB">TEAM B</span>
+</div>
                     <div class="score-box" id="scoreB">0</div>
                 </div>
                 <div id="jB" class="jersey-strip"></div>
@@ -392,6 +417,19 @@ renderPenalties('penaltyB', d.pB);
         document.getElementById('penalty-shots-container').style.display = d.penaltyVisible ? 'flex' : 'none';
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
+
+    function setTeamName(id, name){
+    const el = document.getElementById(id);
+    const text = (name || "").toUpperCase();
+
+    el.classList.remove("scroll-text");
+    el.innerText = text;
+
+    // 👉 ONLY SCOREBOARD LOGIC
+    if(text.length > 7){
+        el.classList.add("scroll-text");
+    }
+}
 
     function updateTimerUI() {
         let m = Math.floor(localSecs / 60);
