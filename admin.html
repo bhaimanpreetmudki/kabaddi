@@ -177,24 +177,26 @@
         document.getElementById('nameB').value = d.nameB || "";
         document.getElementById('colorA').value = d.colorA || "#cc0000";
         document.getElementById('colorB').value = d.colorB || "#ffffff";
+        document.getElementById('pA').value = d.pA || "";
+document.getElementById('pB').value = d.pB || "";
         
         // ਮੈਚ ਡੀਟੇਲ
         document.getElementById('matchRound').value = d.matchRound || "";
         document.getElementById('roundInp').value = d.round || "";
         
-        // ਪੇਨਲਟੀ
-        document.getElementById('pA').value = d.pA || "";
-        document.getElementById('pB').value = d.pB || "";
-
-        // SHOW/HIDE ਬਟਨ ਦਾ ਰੰਗ
-        const visBtn = document.getElementById('visBtn');
-        if (d.scoreVisible === false) {
-            visBtn.innerText = "HIDE";
-            visBtn.style.background = "#da3633";
-        } else {
-            visBtn.innerText = "SHOW";
-            visBtn.style.background = "#238636";
-        }
+      // *** ਇਹ ਹਿੱਸਾ Penalty Box ਨੂੰ SHOW/HIDE ਕਰੇਗਾ ***
+    const pSec = document.getElementById('penaltyControlSection');
+    const pBtn = document.getElementById('pVisBtn');
+    
+    if (d.penaltyVisible) {
+        pSec.style.display = "block";  // ਬਾਕਸ ਦਿਖਾਓ
+        pBtn.innerText = "Hide Penalty";
+        pBtn.style.background = "#da3633"; // ਰੰਗ ਲਾਲ (Hide ਲਈ)
+    } else {
+        pSec.style.display = "none";   // ਬਾਕਸ ਛੁਪਾਓ
+        pBtn.innerText = "Show Penalty";
+        pBtn.style.background = "#f39c12"; // ਰੰਗ ਪੀਲਾ (Show ਲਈ)
+    }
 
         // ਟਾਈਮਰ ਸਿੰਕ
         if (d.timerRunning) {
@@ -303,11 +305,19 @@
 
     // --- 6. Penalty Logic ---
     function addPenalty(team, icon) {
-        matchRef.child(team).once("value", snap => {
-            let current = snap.val() || "";
-            matchRef.update({ [team]: current + icon });
-        });
-    }
+
+    const currentBox = document.getElementById(team);
+
+    let currentValue = currentBox.value || "";
+
+    currentValue += icon;
+
+    currentBox.value = currentValue;
+
+    matchRef.update({
+        [team]: currentValue
+    });
+}
     
     function togglePenaltyVis() {
         matchRef.once("value", snap => {
@@ -337,9 +347,23 @@
         }
     }
 
-    // --- 8. Resets ---
-    function resetOnlyScore() { matchRef.update({ scoreA: 0, scoreB: 0 }); }
-    function resetPenaltyOnly() { matchRef.update({ pA: "", pB: "" }); }
+   function resetOnlyScore() {
+    // 1. Firebase ਵਿੱਚ ਸਕੋਰ ਅਤੇ ਕਾਰਡਸ ਨੂੰ ਜ਼ੀਰੋ/ਖਾਲੀ ਕਰੋ
+    matchRef.update({ 
+        scoreA: 0, 
+        scoreB: 0, 
+        cardA: "", 
+        cardB: "" 
+    });
+
+    // 2. ਐਡਮਿਨ ਪੈਨਲ ਵਿੱਚ ਜੋ ਕਾਰਡਸ ਦੀ ਲਿਸਟ (YC/RC) ਦਿਖ ਰਹੀ ਹੈ, ਉਸਨੂੰ ਵੀ ਸਾਫ਼ ਕਰੋ
+    document.getElementById('cardRecordA').innerHTML = "Record: -";
+    document.getElementById('cardRecordB').innerHTML = "Record: -";
+    
+    // 3. ਪਲੇਅਰ ਨੰਬਰ ਵਾਲੇ ਇਨਪੁਟ ਵੀ ਖਾਲੀ ਕਰ ਦਿਓ (Optional)
+    document.getElementById('playerA').value = "";
+    document.getElementById('playerB').value = "";
+}
     
     function fullReset() {
         if (confirm("Reset everything?")) {
