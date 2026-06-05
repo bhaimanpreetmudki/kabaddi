@@ -103,11 +103,12 @@
 }
 
 .p-team{
-    width:90px;
+    width:140px;
+    color:#fff;
+    font-size:24px;
+    font-weight:900;
     overflow:hidden;
     white-space:nowrap;
-    font-size:22px;
-    font-weight:900;
 }
 
 .p-team span{
@@ -122,18 +123,19 @@
     to{transform:translateX(-100%);}
 }
 .team-shots{
-    flex:1;
-    display:flex;
-    flex-wrap:wrap;
-    gap:2px;
-    align-content:flex-start;
+    width:260px;
+    display:grid;
+    grid-template-columns:repeat(5,40px);
+    gap:4px;
+    justify-content:center;
 }
 
 .ball{
-    width:26px;
-    height:26px;
-    font-size:16px;
+    width:40px;
+    height:40px;
+    font-size:22px;
 }
+
 .ball.goal{
     background:#55ff55;
     color:#000;
@@ -145,12 +147,11 @@
 }
 
 .p-score{
-    width:80px;
-    color:#fff;
-    font-size:42px;
-    font-weight:900;
+    width:60px;
+    font-size:38px;
     text-align:center;
-} 
+}
+        
         /* Contact Flasher */
         #contact-flasher { position: absolute; bottom: 120px; right: 20px; background: rgba(0,0,0,0.8); color: white; padding: 6px 15px; border-radius: 5px; border-left: 4px solid var(--main-red); font-size: 36px; font-weight: 900; display: flex; align-items: center; gap: 10px; z-index: 1001; }
 
