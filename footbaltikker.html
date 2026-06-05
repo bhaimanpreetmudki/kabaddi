@@ -88,14 +88,19 @@
 
 .penalty-title{
     background:#cc0000;
+    color:#fff;
+    text-align:center;
+    font-size:46px;
+    font-weight:900;
+    padding:12px;
 }
 
 .penalty-row{
     display:flex;
     align-items:center;
-    height:55px;
-    background:#ffffff;
-    border-top:1px solid #cc0000;
+    height:60px;
+    background:#cc0000;
+    border-top:1px solid #ffffff;
 }
 
 .p-team{
@@ -373,44 +378,14 @@ renderPenalties('penaltyB', d.pB);
         document.getElementById('match-timer-box').style.display = (localSecs > 0) ? "flex" : "none";
     }
 
- function renderPenalties(containerId, penaltyString){
-
-    const container = document.getElementById(containerId);
-    container.innerHTML = "";
-
-    let goals = 0;
-
-    for(let i=0;i<5;i++){
-
-        const box = document.createElement("div");
-        box.className = "ball";
-
-        const val = penaltyString ? penaltyString[i] : "";
-
-        if(val === "✅"){
-            box.className = "ball goal";
-            box.innerHTML = "✅";
-            goals++;
-        }
-        else if(val === "❌"){
-            box.className = "ball miss";
-            box.innerHTML = "❌";
-        }
-        else{
-            box.innerHTML = "";
-        }
-
-        container.appendChild(box);
-    }
-
-    if(containerId === "penaltyA"){
-        document.getElementById("pScoreA").innerText = goals;
-    }
-    else{
-        document.getElementById("pScoreB").innerText = goals;
-    }
+ .penalty-row{
+    display:flex;
+    align-items:center;
+    height:60px;
+    background:#cc0000;
+    border-top:1px solid #ffffff;
 }
-
+    
     // Ticker Update
     db.ref("tickerData").on("value", (snap) => {
         const d = snap.val() || {};
