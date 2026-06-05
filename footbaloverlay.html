@@ -2,74 +2,75 @@
 <html lang="pa">
 <head>
     <meta charset="UTF-8">
-    <title>Sukhdeep TV - Final Master Overlay</title>
+    <title>Sukhdeep TV - Fixed Overlay</title>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-app.js"></script>
     <script src="https://www.gstatic.com/firebasejs/8.10.0/firebase-database.js"></script>
     <link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@700&display=swap" rel="stylesheet">
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
     <style>
-        :root {
-            --arrow-width: 20px;
-            --arrow-height: 50px;
-            --label-padding: 25px;
-            --main-red: #cc0000;
-            --pure-white: #ffffff;
-            --pure-black: #000000;
-            --container-width: 610px;
-        }
+        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; }
 
-        body { margin: 0; padding: 0; overflow: hidden; font-family: 'Rajdhani', sans-serif; background: transparent; }
-
-        /* --- 1. Scoreboard Wrapper --- */
-        #scoreboard-wrapper { position: absolute; top: 25px; left: 20px; display: flex; flex-direction: column; gap: 2px; z-index: 100; }
-        #scoreboard-main-row { display: flex; align-items: flex-start; }
-        
+        /* --- ਸਥਿਰ ਸਕੋਰਬੋਰਡ --- */
+        #scoreboard-wrapper { position: absolute; top: 25px; left: 20px; z-index: 100; }
         #scoreboard-container { 
             display: flex; 
-            width: var(--container-width); 
-            border: 3px solid var(--pure-white); 
+            width: 610px; 
+            height: 60px;
+            border: 3px solid #ffffff; 
             border-radius: 6px; 
-            overflow: hidden; 
-            box-shadow: 0 5px 15px rgba(0,0,0,0.6); 
-            background: var(--pure-black); 
+            background: #000000; 
+            overflow: hidden;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.6);
         }
 
-        .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
-
-        .score-unit{
-    display:flex;
-    height:60px;
-    align-items:center;
-    flex:1;
-    position:relative;
-    overflow:hidden;
-}
- 
-        .name-area{
-    flex:1;
-    height:100%;
-    display:flex;
-    align-items:center;
-    justify-content:center;
-    overflow:hidden;
-    white-space:nowrap;
-    font-size:28px;
-    font-weight:900;
-    text-transform:uppercase;
-    padding:0 10px;
-}
+        .jersey-strip { width: 15px; height: 100%; flex-shrink: 0; }
         
-            .team-scroller{
-    display:inline-block;
-    white-space:nowrap;
-    padding-left:100%;
-    animation: team-scroll 10s linear infinite;
-}
+        .score-unit { 
+            display: flex; 
+            flex: 1; 
+            align-items: center; 
+            height: 100%; 
+            color: #ffffff;
+            position: relative;
+        }
 
-@keyframes team-scroll{
-    0%{ transform: translateX(0); }
-    100%{ transform: translateX(-100%); }
-}
+        .score-box { 
+            width: 60px; 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            justify-content: center; 
+            font-size: 40px; 
+            font-weight: 900; 
+            background: rgba(255,255,255,0.1);
+        }
+
+        .name-area { 
+            flex: 1; 
+            height: 100%; 
+            display: flex; 
+            align-items: center; 
+            padding: 0 10px; 
+            font-size: 28px; 
+            font-weight: 900; 
+            text-transform: uppercase; 
+            overflow: hidden;
+            white-space: nowrap;
+        }
+
+        /* ਟੀਮ ਨਾਮ ਸਕ੍ਰੋਲਿੰਗ */
+        .scroller {
+            display: inline-block;
+            white-space: nowrap;
+            animation: marquee 10s linear infinite;
+        }
+
+        @keyframes marquee {
+            0% { transform: translateX(100%); }
+            100% { transform: translateX(-100%); }
+        }
+
+        .side-a { border-right: 2px solid #ffffff; }
+        .side-b { border-left: 2px solid #ffffff; }
        /* SCORE BOX FIX */
 .score-box{
     width:75px;
@@ -255,23 +256,23 @@
     </div>
 
     <div id="scoreboard-wrapper">
-        <div id="scoreboard-main-row">
-            <div id="scoreboard-container">
-                <div id="jA" class="jersey-strip"></div>
-                <div class="score-unit side-a">
-                    <div class="score-box" id="scoreA">0</div>
-                   <div class="name-area" id="nA-container"><div id="nA" style="width:100%; text-align:center;">TEAM 1</div></div>
-                    <div id="cardA" class="card-indicator"></div>
-                </div>
-                <div class="score-unit side-b">
-                    <div id="cardB" class="card-indicator"></div>
-    
-        <div class="name-area" id="nB-container"><div id="nB" style="width:100%; text-align:center;">TEAM 2</div></div>
-                    <div class="score-box" id="scoreB">0</div>
-                </div>
-                <div id="jB" class="jersey-strip"></div>
+        <div id="scoreboard-container">
+            <!-- ਟੀਮ ਏ -->
+            <div id="jA" class="jersey-strip" style="background-color: #cc0000;"></div>
+            <div class="score-unit side-a">
+                <div class="score-box" id="scoreA">0</div>
+                <div class="name-area" id="nA">TEAM 1</div>
             </div>
-            <div id="match-timer-box">00:00</div>
+            
+            <!-- ਟੀਮ ਬੀ -->
+            <div class="score-unit side-b">
+                <div class="name-area" id="nB" style="justify-content: flex-end;">TEAM 2</div>
+                <div class="score-box" id="scoreB">0</div>
+            </div>
+            <div id="jB" class="jersey-strip" style="background-color: #ffffff;"></div>
+        </div>
+    </div>
+    <div id="match-timer-box">00:00</div>
         </div>
         
         <div id="match-details">
@@ -427,27 +428,14 @@ renderPenalties('penaltyB', d.pB);
         document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
     });
 
-function setTeamName(containerId, txt) {
-    const el = document.getElementById(containerId);
-    txt = (txt || "").toUpperCase();
-
-    el.innerHTML = "";
-
-    const span = document.createElement("div");
-    span.style.width = "100%";
-    span.style.textAlign = "center";
-    span.innerText = txt;
-
-    // scroll only when text is long
-    if (txt.length > 10) {
-        const scroller = document.createElement("div");
-        scroller.className = "team-scroller";
-        scroller.innerText = txt + "   •   " + txt;
-        el.appendChild(scroller);
-    } else {
-        el.appendChild(span);
+function updateTeamName(id, name) {
+        const el = document.getElementById(id);
+        if (name.length > 8) {
+            el.innerHTML = `<div class="scroller">${name.toUpperCase()} &nbsp;&nbsp;&nbsp; ${name.toUpperCase()}</div>`;
+        } else {
+            el.innerText = name.toUpperCase();
+        }
     }
-}
 function renderPenalties(containerId, penaltyString){
 
     const container = document.getElementById(containerId);
