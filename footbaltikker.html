@@ -109,13 +109,17 @@
     font-size:32px;
     font-weight:900;
     text-align:center;
+
+    overflow:hidden;
+    white-space:nowrap;
 }
 
 
 .p-team span{
     display:inline-block;
+    white-space:nowrap;
     padding-left:100%;
-    animation:teamScroll 8s linear infinite;
+    animation:teamScroll 10s linear infinite;
 }
 
 @keyframes teamScroll{
@@ -386,16 +390,20 @@ renderPenalties('penaltyB', d.pB);
 
     penaltyString = penaltyString || "";
 
-    let totalGoals = (penaltyString.match(/✅/g) || []).length;
+    const shots = [...penaltyString].filter(x =>
+        x === "✅" || x === "❌"
+    );
 
-    let lastFive = penaltyString.slice(-5);
+    const totalGoals = shots.filter(x => x === "✅").length;
+
+    const lastFive = shots.slice(-5);
 
     for(let i=0;i<5;i++){
 
         const box = document.createElement("div");
         box.className = "ball";
 
-        const val = lastFive[i] || "";
+        const val = lastFive[i];
 
         if(val === "✅"){
             box.className = "ball goal";
