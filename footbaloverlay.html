@@ -309,6 +309,10 @@ TEAM B
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
     
+        let localSecs = 0;
+        let timerInt = null;
+        let lastScoreA = 0, lastScoreB = 0;
+    
     // URL ਤੋਂ ID ਚੁੱਕੋ (ਉਦਾਹਰਣ: overlay.html?id=CLIENT_ID)
     const params = new URLSearchParams(window.location.search);
     const userID = params.get("id");
@@ -336,10 +340,6 @@ TEAM B
         initApp(userID);
     });
 
-    function initApp(id) {
-        let localSecs = 0;
-        let timerInt = null;
-        let lastScoreA = 0, lastScoreB = 0;
 
         // 1. ਮੈਚ ਡਾਟਾ ਸਿੰਕ
         db.ref("users/" + id + "/matchData").on("value", (snap) => {
