@@ -314,9 +314,25 @@ const userID = params.get("id");
 
     const userData = snap.val();
 
-    if (!userData) {
+   if(!userID){
+    document.body.innerHTML = `
+    <div style="width:100vw;height:100vh;background:black;color:white;display:flex;justify-content:center;align-items:center;text-align:center;">
+        <div>
+            <h1 style="color:red;">INVALID ID</h1>
+            <h2>User ID Missing</h2>
+        </div>
+    </div>`;
+    throw new Error("User ID Missing");
+}
+
+db.ref("users/" + userID).once("value",(snap)=>{
+
+    const userData = snap.val();
+
+    if(!userData){
+
         document.body.innerHTML = `
-        <div style="width:100vw;height:100vh;display:flex;justify-content:center;align-items:center;background:black;color:white;text-align:center;">
+        <div style="width:100vw;height:100vh;background:black;color:white;display:flex;justify-content:center;align-items:center;text-align:center;">
             <div>
                 <h1 style="color:red;">INVALID ID</h1>
                 <h2>Client ID Not Found</h2>
@@ -326,24 +342,23 @@ const userID = params.get("id");
     }
 
     const expiryDate = new Date(userData.expiry);
-    const now = new Date();
 
-    if (now > expiryDate) {
+    if(new Date() > expiryDate){
 
         document.body.innerHTML = `
         <div style="
             width:100vw;
             height:100vh;
-            background:#000;
-            color:#fff;
+            background:black;
+            color:white;
             display:flex;
             justify-content:center;
             align-items:center;
             text-align:center;
-            font-family:Arial,sans-serif;
+            font-family:Arial;
         ">
             <div>
-                <h1 style="color:#ff0000;font-size:60px;">
+                <h1 style="color:red;font-size:60px;">
                     PLAN EXPIRED
                 </h1>
 
@@ -359,8 +374,7 @@ const userID = params.get("id");
                     Manpreet Singh Mudki
                 </h3>
             </div>
-        </div>
-        `;
+        </div>`;
 
         throw new Error("Plan Expired");
     }
@@ -509,7 +523,7 @@ function renderPenalties(containerId, penaltyString){
     }
 }    
     // Ticker Update
-   db.ref("users/" + userID + "/tickerData").once("value", (snap) => {
+   db.ref("users/" + userID + "/tickerData").once("value"
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
         document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
@@ -526,7 +540,7 @@ function renderPenalties(containerId, penaltyString){
     const icon = document.getElementById('fl-icon');
     const numSpan = document.getElementById('fl-num');
 
-    db.ref("users/" + userID + "/tickerData").once("value", (snap) => {
+    db.ref("users/" + userID + "/tickerData").on("value"{
         const d = snap.val() || {};
             if (isW) {
                 icon.className = "fab fa-whatsapp";
