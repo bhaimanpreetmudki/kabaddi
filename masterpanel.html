@@ -82,23 +82,35 @@
         if(!id || !pass || !expiry) return alert("Please fill all fields!");
 
         // Kabaddi Default Setup
-        db.ref('users/' + id).set({
-            password: pass,
-            expiry: expiry,
-            matchData: {
-                nameA: "TEAM 1",
-                nameB: "TEAM 2",
-                scoreA: 0,
-                scoreB: 0,
-                round: "LIVE MATCH",
-                row1Txt: "WELCOME TO LIVE KABADDI",
-                row2Txt: "SUBSCRIBE OUR CHANNEL",
-                row3Txt: "LIKE & SHARE",
-                watermarkTxt: "M LIVE",
-                scoreVisible: true,
-                tickerVisible: true,
-                logoVisible: true
-            }
+       db.ref('users/' + id).set({
+    password: pass,
+    expiry: expiry,
+
+    matchData: {
+        nameA: "TEAM 1",
+        nameB: "TEAM 2",
+        scoreA: 0,
+        scoreB: 0,
+        round: "LIVE MATCH",
+        row1Txt: "WELCOME TO LIVE KABADDI",
+        row2Txt: "SUBSCRIBE OUR CHANNEL",
+        row3Txt: "LIKE & SHARE",
+        watermarkTxt: "M LIVE",
+        scoreVisible: true,
+        tickerVisible: true,
+        logoVisible: true
+    },
+
+    tickerData: {
+        tournamentName: "",
+        prizes: "",
+        contact: "",
+        whatsapp: "",
+        participatingTeams: "",
+        nextProgram: "",
+        watermarkText: "M LIVE",
+        tickerVis: true
+    }
         }).then(() => {
             alert("New Kabaddi Client Created Successfully!");
             document.getElementById('cID').value = "";
