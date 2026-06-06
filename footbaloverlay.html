@@ -310,7 +310,7 @@ TEAM B
     const db = firebase.database();
     const params = new URLSearchParams(window.location.search);
 const userID = params.get("id");
-    db.ref("users/" + userID).once("value", (snap) => {
+    db.ref("users/" + userID).on("value", (snap) => {
 
     const userData = snap.val();
 
@@ -523,10 +523,11 @@ function renderPenalties(containerId, penaltyString){
     // --- Flasher Logic Fixed ---
     let isW = false;
     setInterval(() => {
-        const icon = document.getElementById('fl-icon');
-        const numSpan = document.getElementById('fl-num');
-        db.ref("tickerData").once("value", (snap) => {
-            const d = snap.val() || {};
+    const icon = document.getElementById('fl-icon');
+    const numSpan = document.getElementById('fl-num');
+
+    db.ref("users/" + userID + "/tickerData").once("value", (snap) => {
+        const d = snap.val() || {};
             if (isW) {
                 icon.className = "fab fa-whatsapp";
                 icon.style.color = "#25D366";
