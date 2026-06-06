@@ -380,12 +380,15 @@ matchRef.on("value", (snap) => {
     document.getElementById("jB").style.backgroundColor =
         d.colorB || "#ffffff";
 
-    // TEAM NAMES PENALTY BOARD
-document.getElementById("pNameA").innerHTML = 
-    '<span class="scroll-text">' + (d.nameA || "TEAM A").toUpperCase() + '</span>';
+   document.getElementById("pNameA").innerHTML =
+'<marquee scrollamount="4">&nbsp;&nbsp;&nbsp;&nbsp;' +
+(d.nameA || "TEAM A").toUpperCase() +
+'&nbsp;&nbsp;&nbsp;&nbsp;</marquee>';
 
-document.getElementById("pNameB").innerHTML = 
-    '<span class="scroll-text">' + (d.nameB || "TEAM B").toUpperCase() + '</span>';
+document.getElementById("pNameB").innerHTML =
+'<marquee scrollamount="4">&nbsp;&nbsp;&nbsp;&nbsp;' +
+(d.nameB || "TEAM B").toUpperCase() +
+'&nbsp;&nbsp;&nbsp;&nbsp;</marquee>';
 
     // CARD A
     const cardA = document.getElementById("cardA");
