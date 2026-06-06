@@ -305,16 +305,44 @@ TEAM B
     </div>
 
 <script>
-    const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
-    if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
-    const db = firebase.database();
+  const firebaseConfig = {
+    databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/"
+};
 
-    let localSecs = 0;
-    let timerInt = null;
-    let lastScoreA = 0, lastScoreB = 0;
+if (!firebase.apps.length) {
+    firebase.initializeApp(firebaseConfig);
+}
+
+const db = firebase.database();
+
+// ==========================
+// UNIQUE USER ID SYSTEM
+// ==========================
+let userID = localStorage.getItem("overlayUserID");
+
+if (!userID) {
+    userID = "user_" + Date.now() + "_" +
+             Math.random().toString(36).substring(2, 10);
+
+    localStorage.setItem("overlayUserID", userID);
+}
+
+console.log("Overlay User ID:", userID);
+
+// Firebase References
+const matchRef  = db.ref("users/" + userID + "/matchData");
+const tickerRef = db.ref("users/" + userID + "/tickerData");
+
+// ==========================
+// VARIABLES
+// ==========================
+let localSecs = 0;
+let timerInt = null;
+let lastScoreA = 0;
+let lastScoreB = 0;
 
     // --- Data Sync ---
-    db.ref("matchData").on("value", (snap) => {
+    matchRef.on("value", (snap) => {
         const d = snap.val() || {};
         if (d.scoreA > lastScoreA || d.scoreB > lastScoreB) { triggerGoal(); }
         lastScoreA = d.scoreA || 0; lastScoreB = d.scoreB || 0;
