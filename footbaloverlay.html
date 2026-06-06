@@ -308,288 +308,130 @@ TEAM B
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }
     const db = firebase.database();
+    
+    // URL ਤੋਂ ID ਚੁੱਕੋ (ਉਦਾਹਰਣ: overlay.html?id=CLIENT_ID)
     const params = new URLSearchParams(window.location.search);
-const userID = params.get("id");
-    db.ref("users/" + userID).once("value",(snap)=>{
+    const userID = params.get("id");
 
-    const userData = snap.val();
-
-   if(!userID){
-    document.body.innerHTML = `
-    <div style="width:100vw;height:100vh;background:black;color:white;display:flex;justify-content:center;align-items:center;text-align:center;">
-        <div>
-            <h1 style="color:red;">INVALID ID</h1>
-            <h2>User ID Missing</h2>
-        </div>
-    </div>`;
-    throw new Error("User ID Missing");
-}
-
-db.ref("users/" + userID).once("value",(snap)=>{
-
-    const userData = snap.val();
-
-    if(!userData){
-
-        document.body.innerHTML = `
-        <div style="width:100vw;height:100vh;background:black;color:white;display:flex;justify-content:center;align-items:center;text-align:center;">
-            <div>
-                <h1 style="color:red;">INVALID ID</h1>
-                <h2>Client ID Not Found</h2>
-            </div>
-        </div>`;
-        return;
+    if (!userID) {
+        document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%;">Error: User ID Missing!</h1>';
+        throw new Error("User ID Missing");
     }
 
-    const expiryDate = new Date(userData.expiry);
-
-    if(new Date() > expiryDate){
-
-        document.body.innerHTML = `
-        <div style="
-            width:100vw;
-            height:100vh;
-            background:black;
-            color:white;
-            display:flex;
-            justify-content:center;
-            align-items:center;
-            text-align:center;
-            font-family:Arial;
-        ">
-            <div>
-                <h1 style="color:red;font-size:60px;">
-                    PLAN EXPIRED
-                </h1>
-
-                <h2>
-                    ਤੁਹਾਡਾ ਪਲਾਨ ਮੁੱਕ ਗਿਆ ਹੈ
-                </h2>
-
-                <h2 style="color:#f39c12;">
-                    Helpline: 8699640061
-                </h2>
-
-                <h3>
-                    Manpreet Singh Mudki
-                </h3>
-            </div>
-        </div>`;
-
-        throw new Error("Plan Expired");
-    }
-
-});
-
-if(!userID){
-    alert("User ID Missing");
-    throw new Error("User ID Missing");
-}
-
-    let localSecs = 0;
-    let timerInt = null;
-    let lastScoreA = 0, lastScoreB = 0;
-
-    // --- Data Sync ---
-    db.ref("users/" + userID + "/matchData").on("value", (snap) => {
-        const d = snap.val() || {};
-        if (d.scoreA > lastScoreA || d.scoreB > lastScoreB) { triggerGoal(); }
-        lastScoreA = d.scoreA || 0; lastScoreB = d.scoreB || 0;
-
-        document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
-        document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
-        document.getElementById('scoreA').innerText = d.scoreA || "0";
-        document.getElementById('scoreB').innerText = d.scoreB || "0";
-        document.getElementById('round-detail').innerText = "ROUND: " + (d.matchRound || "1");
-        document.getElementById('half-detail').innerText = (d.round || "FIRST HALF").toUpperCase();
-        document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
-        document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
-
- document.getElementById("pNameA").innerHTML =
-'<marquee scrollamount="3">'+(d.nameA || "TEAM A").toUpperCase()+'</marquee>';
-
-document.getElementById("pNameB").innerHTML =
-'<marquee scrollamount="3">'+(d.nameB || "TEAM B").toUpperCase()+'</marquee>';
-
-if(d.penaltyVisible){
-
-    document.getElementById("scoreboard-container").style.display="none";
-    document.getElementById("match-details").style.display="none";
-    document.getElementById("penalty-board").style.display="block";
-
-}else{
-
-    document.getElementById("scoreboard-container").style.display="flex";
-    document.getElementById("match-details").style.display="flex";
-    document.getElementById("penalty-board").style.display="none";
-}
-        document.getElementById("pNameA").innerHTML =
-'<marquee scrollamount="4">&nbsp;&nbsp;&nbsp;&nbsp;' +
-(d.nameA || "TEAM A").toUpperCase() +
-'&nbsp;&nbsp;&nbsp;&nbsp;</marquee>';
-
-document.getElementById("pNameB").innerHTML =
-'<marquee scrollamount="4">&nbsp;&nbsp;&nbsp;&nbsp;' +
-(d.nameB || "TEAM B").toUpperCase() +
-'&nbsp;&nbsp;&nbsp;&nbsp;</marquee>';
-
-        const cardA = document.getElementById("cardA");
-cardA.className = "card-indicator";
-
-if(d.cardA === "yellow"){
-    cardA.classList.add("yellow-card");
-}
-else if(d.cardA === "red"){
-    cardA.classList.add("red-card");
-}
-
-const cardB = document.getElementById("cardB");
-cardB.className = "card-indicator";
-
-if(d.cardB === "yellow"){
-    cardB.classList.add("yellow-card");
-}
-else if(d.cardB === "red"){
-    cardB.classList.add("red-card");
-}
-
-        let serverTime = d.matchTime || "00:00";
-        let parts = serverTime.split(':');
-        let serverTotalSecs = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
-        if (Math.abs(serverTotalSecs - localSecs) > 2) { localSecs = serverTotalSecs; }
-
-        if (d.timerRunning) {
-            if (!timerInt) { timerInt = setInterval(() => { localSecs++; updateTimerUI(); }, 1000); }
-        } else {
-            clearInterval(timerInt); timerInt = null; updateTimerUI();
+    // ਯੂਜ਼ਰ ਅਤੇ ਐਕਸਪਾਇਰੀ ਚੈੱਕ
+    db.ref("users/" + userID).once("value", (snap) => {
+        const userData = snap.val();
+        if (!userData) {
+            document.body.innerHTML = '<h1 style="color:red; text-align:center; margin-top:20%;">Invalid Client ID</h1>';
+            return;
         }
-
-renderPenalties('penaltyA', d.pA);
-renderPenalties('penaltyB', d.pB);
-        document.getElementById('penalty-shots-container').style.display = d.penaltyVisible ? 'flex' : 'none';
-        document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
+        if (new Date() > new Date(userData.expiry)) {
+            document.body.innerHTML = `
+                <div style="width:100vw;height:100vh;background:black;color:white;display:flex;justify-content:center;align-items:center;text-align:center;">
+                    <div><h1 style="color:red;font-size:60px;">PLAN EXPIRED</h1><h2>ਤੁਹਾਡਾ ਪਲਾਨ ਮੁੱਕ ਗਿਆ ਹੈ</h2></div>
+                </div>`;
+            return;
+        }
+        // ਸਭ ਸਹੀ ਹੈ ਤਾਂ ਐਪ ਸ਼ੁਰੂ ਕਰੋ
+        initApp(userID);
     });
 
+    function initApp(id) {
+        let localSecs = 0;
+        let timerInt = null;
+        let lastScoreA = 0, lastScoreB = 0;
+
+        // 1. ਮੈਚ ਡਾਟਾ ਸਿੰਕ
+        db.ref("users/" + id + "/matchData").on("value", (snap) => {
+            const d = snap.val() || {};
+            
+            // Goal Animation Trigger
+            if (d.scoreA > lastScoreA || d.scoreB > lastScoreB) triggerGoal();
+            lastScoreA = d.scoreA || 0; lastScoreB = d.scoreB || 0;
+
+            // ਸਕੋਰ ਅਤੇ ਨਾਮ ਅਪਡੇਟ
+            document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
+            document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
+            document.getElementById('scoreA').innerText = d.scoreA || "0";
+            document.getElementById('scoreB').innerText = d.scoreB || "0";
+            document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
+            document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
+            
+            // Penalty Board Logic
+            const isPenalty = d.penaltyVisible || false;
+            document.getElementById("scoreboard-container").style.display = isPenalty ? "none" : "flex";
+            document.getElementById("match-details").style.display = isPenalty ? "none" : "flex";
+            document.getElementById("penalty-board").style.display = isPenalty ? "block" : "none";
+            document.getElementById('penalty-shots-container').style.display = isPenalty ? 'flex' : 'none';
+
+            // ਟਾਈਮਰ
+            let parts = (d.matchTime || "00:00").split(':');
+            localSecs = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
+            if (d.timerRunning && !timerInt) {
+                timerInt = setInterval(() => { localSecs++; updateTimerUI(); }, 1000);
+            } else if (!d.timerRunning) {
+                clearInterval(timerInt); timerInt = null;
+            }
+            updateTimerUI();
+
+            // ਪੈਨਲਟੀ ਰੈਂਡਰਿੰਗ
+            renderPenalties('penaltyA', d.pA);
+            renderPenalties('penaltyB', d.pB);
+        });
+
+        // 2. Ticker ਡਾਟਾ ਸਿੰਕ
+        db.ref("users/" + id + "/tickerData").on("value", (snap) => {
+            const d = snap.val() || {};
+            document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
+            document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
+            document.getElementById('sub-info').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
+            document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
+            document.getElementById('watermark').innerText = (d.watermarkText || "SUKHDEEP TV").toUpperCase();
+            document.getElementById('fl-num').innerText = d.contact || "86996-40061";
+        });
+    }
+
+    // ਟਾਈਮਰ UI ਅਪਡੇਟ
     function updateTimerUI() {
         let m = Math.floor(localSecs / 60);
         let s = localSecs % 60;
-        document.getElementById('match-timer-box').innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
+        document.getElementById('match-timer-box').innerText = `${m<10?'0'+m:m}:${s<10?'0'+s:s}`;
         document.getElementById('match-timer-box').style.display = (localSecs > 0) ? "flex" : "none";
     }
 
-function renderPenalties(containerId, penaltyString){
-
-    const container = document.getElementById(containerId);
-    container.innerHTML = "";
-
-    penaltyString = penaltyString || "";
-
-    const shots = [...penaltyString].filter(v =>
-        v === "✅" || v === "❌"
-    );
-
-    // Total Goal Score
-    const totalGoals = shots.filter(v => v === "✅").length;
-
-    // ਹਰ 5 ਤੋਂ ਬਾਅਦ ਨਵਾਂ ਰਾਊਂਡ
-    const roundShots = shots.slice(
-        Math.floor((shots.length - 1) / 5) * 5,
-        Math.floor((shots.length - 1) / 5) * 5 + 5
-    );
-
-    for(let i = 0; i < 5; i++){
-
-        const box = document.createElement("div");
-        box.className = "ball";
-
-        const val = roundShots[i];
-
-        if(val === "✅"){
-            box.className = "ball goal";
-            box.innerHTML = "✓";
-        }
-        else if(val === "❌"){
-            box.className = "ball miss";
-            box.innerHTML = "✕";
-        }
-
-        container.appendChild(box);
+    // ਪੈਨਲਟੀ ਰੈਂਡਰਿੰਗ ਫੰਕਸ਼ਨ
+    function renderPenalties(containerId, penaltyString) {
+        const container = document.getElementById(containerId);
+        container.innerHTML = "";
+        const shots = (penaltyString || "").split("").filter(v => v === "✅" || v === "❌");
+        shots.slice(-5).forEach(v => {
+            const box = document.createElement("div");
+            box.className = `ball ${v === '✅' ? 'goal' : 'miss'}`;
+            box.innerHTML = v === '✅' ? '✓' : '✕';
+            container.appendChild(box);
+        });
+        document.getElementById(containerId === "penaltyA" ? "pScoreA" : "pScoreB").innerText = shots.filter(v => v === "✅").length;
     }
 
-    if(containerId === "penaltyA"){
-        document.getElementById("pScoreA").innerText = totalGoals;
-    }else{
-        document.getElementById("pScoreB").innerText = totalGoals;
-    }
-}    
-    // Ticker Update
-   db.ref("users/" + userID + "/tickerData").once("value", (snap) => {
-    const d = snap.val() || {};
-
-    document.getElementById('tour-name').innerText =
-        (d.tournamentName || "TOURNAMENT").toUpperCase();
-
-    document.getElementById('scroll-top').innerText =
-        (d.participatingTeams || "UPCOMING...").toUpperCase();
-
-    document.getElementById('sub-info').innerText =
-        (d.nextProgram || "LIVE COVERAGE").toUpperCase();
-
-    document.getElementById('scroll-bot').innerText =
-        ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
-
-    document.getElementById('watermark').innerText =
-        (d.watermarkText || "SUKHDEEP TV").toUpperCase();
-
-    document.getElementById('fl-num').innerText =
-        d.contact || "86996-40061";
-
-    document.getElementById('master-footer').style.display =
-        (d.tickerVis === false) ? 'none' : 'flex';
-});
-        
-    // --- Flasher Logic Fixed ---
-    let isW = false;
-    setInterval(() => {
-    const icon = document.getElementById('fl-icon');
-    const numSpan = document.getElementById('fl-num');
-
-    db.ref("users/" + userID + "/tickerData").once("value", (snap) => {
-    const d = snap.val() || {};
-
-    if (isW) {
-        icon.className = "fab fa-whatsapp";
-        icon.style.color = "#25D366";
-        numSpan.innerText = d.whatsapp || d.contact || "86996-40061";
-    } else {
-        icon.className = "fas fa-phone-alt";
-        icon.style.color = "white";
-        numSpan.innerText = d.contact || "86996-40061";
-    }
-
-    isW = !isW;
-});
-    function moveWatermark() {
-        const wm = document.getElementById('watermark');
-        const maxX = window.innerWidth - wm.offsetWidth - 50;
-        const maxY = window.innerHeight - 150;
-        wm.style.left = Math.floor(Math.random() * maxX) + 'px';
-        wm.style.top = (Math.floor(Math.random() * (maxY - 120)) + 120) + 'px';
-    }
-    setInterval(moveWatermark, 7000);
-
+    // ਗੋਲ ਐਨੀਮੇਸ਼ਨ
     function triggerGoal() {
         const overlay = document.getElementById('goal-overlay');
         overlay.style.display = 'flex';
         setTimeout(() => { overlay.style.display = 'none'; }, 3000);
     }
-
-    function updateClock() {
-        document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    
+    // ਵਾਟਰਮਾਰਕ ਮੂਵਮੈਂਟ
+    function moveWatermark() {
+        const wm = document.getElementById('watermark');
+        wm.style.left = Math.floor(Math.random() * (window.innerWidth - 200)) + 'px';
+        wm.style.top = (Math.floor(Math.random() * (window.innerHeight - 100)) + 50) + 'px';
     }
-    setInterval(updateClock, 1000);
-    updateClock();
-    window.onload = moveWatermark;
+    setInterval(moveWatermark, 7000);
+
+    // ਘੜੀ
+    setInterval(() => {
+        document.getElementById('live-clock').innerText = new Date().toLocaleTimeString('en-US', { hour: '2-digit', minute: '2-digit', hour12: true });
+    }, 1000);
 </script>
 </body>
 </html>
