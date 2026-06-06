@@ -161,12 +161,11 @@
     const firebaseConfig = { databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/" };
     if (!firebase.apps.length) { firebase.initializeApp(firebaseConfig); }const db = firebase.database();
 
-const params = new URLSearchParams(window.location.search);
-const userID = params.get("id");
+let userID = localStorage.getItem("overlayUserID");
 
 if(!userID){
-    alert("User ID Missing");
-    throw new Error("User ID Missing");
+    userID = "default_user";
+    localStorage.setItem("overlayUserID", userID);
 }
 
 const matchRef = db.ref("users/" + userID + "/matchData");
