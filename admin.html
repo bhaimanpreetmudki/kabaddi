@@ -171,6 +171,42 @@ if(!userID){
 
 const matchRef = db.ref("users/" + userID + "/matchData");
 const tickerRef = db.ref("users/" + userID + "/tickerData");
+    db.ref("users/" + userID + "/expiry").once("value", snap => {
+
+    const expiry = snap.val();
+
+    if (!expiry) return;
+
+    const now = new Date();
+    const expDate = new Date(expiry);
+
+    if (now > expDate) {
+
+        document.body.innerHTML = `
+        <div style="
+            width:100vw;
+            height:100vh;
+            display:flex;
+            justify-content:center;
+            align-items:center;
+            background:black;
+            color:white;
+            text-align:center;
+            font-family:Arial;
+        ">
+            <div>
+                <h1 style="color:red;">PLAN EXPIRED</h1>
+                <h2>ਤੁਹਾਡਾ ਪਲਾਨ ਮੁੱਕ ਗਿਆ ਹੈ</h2>
+                <h3>Helpline: 8699640061</h3>
+                <h3>Manpreet Singh Mudki</h3>
+            </div>
+        </div>
+        `;
+
+        throw new Error("Plan Expired");
+    }
+
+});
 
     let seconds = 0;
     let timerInterval = null;
