@@ -305,7 +305,10 @@ TEAM B
     </div>
 
 <script>
-  const firebaseConfig = {
+  // ==========================
+// FIREBASE
+// ==========================
+const firebaseConfig = {
     databaseURL: "https://manpreetteam-a86e9-default-rtdb.firebaseio.com/"
 };
 
@@ -317,14 +320,13 @@ const db = firebase.database();
 
 // ==========================
 // UNIQUE USER ID SYSTEM
-// ==========================const params = new URLSearchParams(window.location.search);
+// ==========================
+const params = new URLSearchParams(window.location.search);
 const userID = params.get("id") || "default_user";
 
-const matchRef = db.ref("users/" + userID + "/matchData");
-const tickerRef = db.ref("users/" + userID + "/tickerData");
+console.log("USER ID =", userID);
 
-// Firebase References
-const matchRef  = db.ref("users/" + userID + "/matchData");
+const matchRef = db.ref("users/" + userID + "/matchData");
 const tickerRef = db.ref("users/" + userID + "/tickerData");
 
 // ==========================
@@ -335,125 +337,186 @@ let timerInt = null;
 let lastScoreA = 0;
 let lastScoreB = 0;
 
-    // --- Data Sync ---
-    matchRef.on("value", (snap) => {
-        const d = snap.val() || {};
-        if (d.scoreA > lastScoreA || d.scoreB > lastScoreB) { triggerGoal(); }
-        lastScoreA = d.scoreA || 0; lastScoreB = d.scoreB || 0;
+// ==========================
+// MATCH DATA
+// ==========================
+matchRef.on("value", (snap) => {
 
-        document.getElementById('nameA').innerText = (d.nameA || "TEAM A").toUpperCase();
-        document.getElementById('nameB').innerText = (d.nameB || "TEAM B").toUpperCase();
-        document.getElementById('scoreA').innerText = d.scoreA || "0";
-        document.getElementById('scoreB').innerText = d.scoreB || "0";
-        document.getElementById('round-detail').innerText = "ROUND: " + (d.matchRound || "1");
-        document.getElementById('half-detail').innerText = (d.round || "FIRST HALF").toUpperCase();
-        document.getElementById('jA').style.backgroundColor = d.colorA || "#cc0000";
-        document.getElementById('jB').style.backgroundColor = d.colorB || "#ffffff";
+    const d = snap.val() || {};
 
- document.getElementById("pNameA").innerHTML =
-'<marquee scrollamount="3">'+(d.nameA || "TEAM A").toUpperCase()+'</marquee>';
-
-document.getElementById("pNameB").innerHTML =
-'<marquee scrollamount="3">'+(d.nameB || "TEAM B").toUpperCase()+'</marquee>';
-
-if(d.penaltyVisible){
-
-    document.getElementById("scoreboard-container").style.display="none";
-    document.getElementById("match-details").style.display="none";
-    document.getElementById("penalty-board").style.display="block";
-
-}else{
-
-    document.getElementById("scoreboard-container").style.display="flex";
-    document.getElementById("match-details").style.display="flex";
-    document.getElementById("penalty-board").style.display="none";
-}
-        document.getElementById("pNameA").innerHTML =
-'<marquee scrollamount="4">&nbsp;&nbsp;&nbsp;&nbsp;' +
-(d.nameA || "TEAM A").toUpperCase() +
-'&nbsp;&nbsp;&nbsp;&nbsp;</marquee>';
-
-document.getElementById("pNameB").innerHTML =
-'<marquee scrollamount="4">&nbsp;&nbsp;&nbsp;&nbsp;' +
-(d.nameB || "TEAM B").toUpperCase() +
-'&nbsp;&nbsp;&nbsp;&nbsp;</marquee>';
-
-        const cardA = document.getElementById("cardA");
-cardA.className = "card-indicator";
-
-if(d.cardA === "yellow"){
-    cardA.classList.add("yellow-card");
-}
-else if(d.cardA === "red"){
-    cardA.classList.add("red-card");
-}
-
-const cardB = document.getElementById("cardB");
-cardB.className = "card-indicator";
-
-if(d.cardB === "yellow"){
-    cardB.classList.add("yellow-card");
-}
-else if(d.cardB === "red"){
-    cardB.classList.add("red-card");
-}
-
-        let serverTime = d.matchTime || "00:00";
-        let parts = serverTime.split(':');
-        let serverTotalSecs = (parseInt(parts[0]) * 60) + parseInt(parts[1]);
-        if (Math.abs(serverTotalSecs - localSecs) > 2) { localSecs = serverTotalSecs; }
-
-        if (d.timerRunning) {
-            if (!timerInt) { timerInt = setInterval(() => { localSecs++; updateTimerUI(); }, 1000); }
-        } else {
-            clearInterval(timerInt); timerInt = null; updateTimerUI();
-        }
-
-renderPenalties('penaltyA', d.pA);
-renderPenalties('penaltyB', d.pB);
-        document.getElementById('penalty-shots-container').style.display = d.penaltyVisible ? 'flex' : 'none';
-        document.getElementById('scoreboard-wrapper').style.display = (d.scoreVisible === false) ? 'none' : 'flex';
-    });
-
-    function updateTimerUI() {
-        let m = Math.floor(localSecs / 60);
-        let s = localSecs % 60;
-        document.getElementById('match-timer-box').innerText = (m < 10 ? "0" + m : m) + ":" + (s < 10 ? "0" + s : s);
-        document.getElementById('match-timer-box').style.display = (localSecs > 0) ? "flex" : "none";
+    if ((d.scoreA || 0) > lastScoreA || (d.scoreB || 0) > lastScoreB) {
+        triggerGoal();
     }
 
-function renderPenalties(containerId, penaltyString){
+    lastScoreA = d.scoreA || 0;
+    lastScoreB = d.scoreB || 0;
+
+    document.getElementById("nameA").innerText =
+        (d.nameA || "TEAM A").toUpperCase();
+
+    document.getElementById("nameB").innerText =
+        (d.nameB || "TEAM B").toUpperCase();
+
+    document.getElementById("scoreA").innerText =
+        d.scoreA || 0;
+
+    document.getElementById("scoreB").innerText =
+        d.scoreB || 0;
+
+    document.getElementById("round-detail").innerText =
+        "ROUND: " + (d.matchRound || "1");
+
+    document.getElementById("half-detail").innerText =
+        (d.round || "FIRST HALF").toUpperCase();
+
+    document.getElementById("jA").style.backgroundColor =
+        d.colorA || "#cc0000";
+
+    document.getElementById("jB").style.backgroundColor =
+        d.colorB || "#ffffff";
+
+    // TEAM NAMES PENALTY BOARD
+    document.getElementById("pNameA").innerHTML =
+        '<marquee scrollamount="4">' +
+        (d.nameA || "TEAM A").toUpperCase() +
+        '</marquee>';
+
+    document.getElementById("pNameB").innerHTML =
+        '<marquee scrollamount="4">' +
+        (d.nameB || "TEAM B").toUpperCase() +
+        '</marquee>';
+
+    // CARD A
+    const cardA = document.getElementById("cardA");
+    cardA.className = "card-indicator";
+
+    if (d.cardA === "yellow") {
+        cardA.classList.add("yellow-card");
+    }
+    else if (d.cardA === "red") {
+        cardA.classList.add("red-card");
+    }
+
+    // CARD B
+    const cardB = document.getElementById("cardB");
+    cardB.className = "card-indicator";
+
+    if (d.cardB === "yellow") {
+        cardB.classList.add("yellow-card");
+    }
+    else if (d.cardB === "red") {
+        cardB.classList.add("red-card");
+    }
+
+    // TIMER
+    let serverTime = d.matchTime || "00:00";
+
+    let parts = serverTime.split(":");
+
+    let serverSecs =
+        (parseInt(parts[0]) * 60) +
+        parseInt(parts[1]);
+
+    if (Math.abs(serverSecs - localSecs) > 2) {
+        localSecs = serverSecs;
+    }
+
+    if (d.timerRunning) {
+
+        if (!timerInt) {
+
+            timerInt = setInterval(() => {
+
+                localSecs++;
+                updateTimerUI();
+
+            }, 1000);
+        }
+
+    } else {
+
+        clearInterval(timerInt);
+        timerInt = null;
+        updateTimerUI();
+    }
+
+    // PENALTIES
+    renderPenalties("penaltyA", d.pA);
+    renderPenalties("penaltyB", d.pB);
+
+    // SHOW HIDE PENALTY BOARD
+    if (d.penaltyVisible) {
+
+        document.getElementById("scoreboard-container").style.display = "none";
+        document.getElementById("match-details").style.display = "none";
+        document.getElementById("penalty-board").style.display = "block";
+
+    } else {
+
+        document.getElementById("scoreboard-container").style.display = "flex";
+        document.getElementById("match-details").style.display = "flex";
+        document.getElementById("penalty-board").style.display = "none";
+    }
+
+    document.getElementById("scoreboard-wrapper").style.display =
+        d.scoreVisible === false ? "none" : "flex";
+});
+
+// ==========================
+// TIMER UI
+// ==========================
+function updateTimerUI() {
+
+    let m = Math.floor(localSecs / 60);
+    let s = localSecs % 60;
+
+    document.getElementById("match-timer-box").innerText =
+        (m < 10 ? "0" + m : m) +
+        ":" +
+        (s < 10 ? "0" + s : s);
+
+    document.getElementById("match-timer-box").style.display =
+        localSecs > 0 ? "flex" : "none";
+}
+
+// ==========================
+// PENALTY RENDER
+// ==========================
+function renderPenalties(containerId, penaltyString) {
 
     const container = document.getElementById(containerId);
+
+    if (!container) return;
+
     container.innerHTML = "";
 
     penaltyString = penaltyString || "";
 
-    const shots = [...penaltyString].filter(v =>
-        v === "✅" || v === "❌"
+    const shots = [...penaltyString].filter(
+        v => v === "✅" || v === "❌"
     );
 
-    // Total Goal Score
-    const totalGoals = shots.filter(v => v === "✅").length;
+    const totalGoals =
+        shots.filter(v => v === "✅").length;
 
-    // ਹਰ 5 ਤੋਂ ਬਾਅਦ ਨਵਾਂ ਰਾਊਂਡ
-    const roundShots = shots.slice(
-        Math.floor((shots.length - 1) / 5) * 5,
-        Math.floor((shots.length - 1) / 5) * 5 + 5
-    );
+    const currentRound =
+        Math.floor(Math.max(0, shots.length - 1) / 5);
 
-    for(let i = 0; i < 5; i++){
+    const roundShots =
+        shots.slice(currentRound * 5, currentRound * 5 + 5);
+
+    for (let i = 0; i < 5; i++) {
 
         const box = document.createElement("div");
         box.className = "ball";
 
-        const val = roundShots[i];
+        if (roundShots[i] === "✅") {
 
-        if(val === "✅"){
             box.className = "ball goal";
             box.innerHTML = "✓";
-        }
-        else if(val === "❌"){
+
+        } else if (roundShots[i] === "❌") {
+
             box.className = "ball miss";
             box.innerHTML = "✕";
         }
@@ -461,24 +524,41 @@ function renderPenalties(containerId, penaltyString){
         container.appendChild(box);
     }
 
-    if(containerId === "penaltyA"){
+    if (containerId === "penaltyA") {
         document.getElementById("pScoreA").innerText = totalGoals;
-    }else{
+    } else {
         document.getElementById("pScoreB").innerText = totalGoals;
     }
-}    
-    // Ticker Update
-    tickerRef.on("value", (snap) => {
-        const d = snap.val() || {};
-        document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
-        document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
-        document.getElementById('sub-info').innerText = (d.nextProgram || "LIVE COVERAGE").toUpperCase();
-        document.getElementById('scroll-bot').innerText = ("🏆 " + (d.prizes || "UPDATING...")).toUpperCase();
-        document.getElementById('watermark').innerText = (d.watermarkText || "SUKHDEEP TV").toUpperCase();
-        document.getElementById('fl-num').innerText = d.contact || "86996-40061";
-        document.getElementById('master-footer').style.display = (d.tickerVis === false) ? 'none' : 'flex';
-    });
+}
 
+// ==========================
+// TICKER DATA
+// ==========================
+tickerRef.on("value", (snap) => {
+
+    const d = snap.val() || {};
+
+    document.getElementById("tour-name").innerText =
+        (d.tournamentName || "TOURNAMENT").toUpperCase();
+
+    document.getElementById("scroll-top").innerText =
+        (d.participatingTeams || "UPCOMING").toUpperCase();
+
+    document.getElementById("sub-info").innerText =
+        (d.nextProgram || "LIVE COVERAGE").toUpperCase();
+
+    document.getElementById("scroll-bot").innerText =
+        ("🏆 " + (d.prizes || "UPDATING")).toUpperCase();
+
+    document.getElementById("watermark").innerText =
+        (d.watermarkText || "SUKHDEEP TV").toUpperCase();
+
+    document.getElementById("fl-num").innerText =
+        d.contact || "86996-40061";
+
+    document.getElementById("master-footer").style.display =
+        d.tickerVis === false ? "none" : "flex";
+});
     // --- Flasher Logic Fixed ---
     let isW = false;
     setInterval(() => {
