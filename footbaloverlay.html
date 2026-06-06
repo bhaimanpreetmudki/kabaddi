@@ -317,17 +317,11 @@ const db = firebase.database();
 
 // ==========================
 // UNIQUE USER ID SYSTEM
-// ==========================
-let userID = localStorage.getItem("overlayUserID");
+// ==========================const params = new URLSearchParams(window.location.search);
+const userID = params.get("id") || "default_user";
 
-if (!userID) {
-    userID = "user_" + Date.now() + "_" +
-             Math.random().toString(36).substring(2, 10);
-
-    localStorage.setItem("overlayUserID", userID);
-}
-
-console.log("Overlay User ID:", userID);
+const matchRef = db.ref("users/" + userID + "/matchData");
+const tickerRef = db.ref("users/" + userID + "/tickerData");
 
 // Firebase References
 const matchRef  = db.ref("users/" + userID + "/matchData");
