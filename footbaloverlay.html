@@ -474,7 +474,7 @@ function renderPenalties(containerId, penaltyString){
     }
 }    
     // Ticker Update
-    db.ref("tickerData").on("value", (snap) => {
+    tickerRef.on("value", (snap) => {
         const d = snap.val() || {};
         document.getElementById('tour-name').innerText = (d.tournamentName || "TOURNAMENT").toUpperCase();
         document.getElementById('scroll-top').innerText = (d.participatingTeams || "UPCOMING...").toUpperCase();
@@ -490,7 +490,7 @@ function renderPenalties(containerId, penaltyString){
     setInterval(() => {
         const icon = document.getElementById('fl-icon');
         const numSpan = document.getElementById('fl-num');
-        db.ref("tickerData").once("value", (snap) => {
+        tickerRef.once("value", (snap) => {
             const d = snap.val() || {};
             if (isW) {
                 icon.className = "fab fa-whatsapp";
