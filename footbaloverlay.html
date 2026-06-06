@@ -372,15 +372,8 @@ matchRef.on("value", (snap) => {
     document.getElementById("jB").style.backgroundColor =
         d.colorB || "#ffffff";
 
-   document.getElementById("pNameA").innerHTML =
-'<marquee scrollamount="4">&nbsp;&nbsp;&nbsp;&nbsp;' +
-(d.nameA || "TEAM A").toUpperCase() +
-'&nbsp;&nbsp;&nbsp;&nbsp;</marquee>';
-
-document.getElementById("pNameB").innerHTML =
-'<marquee scrollamount="4">&nbsp;&nbsp;&nbsp;&nbsp;' +
-(d.nameB || "TEAM B").toUpperCase() +
-'&nbsp;&nbsp;&nbsp;&nbsp;</marquee>';
+  document.getElementById("pNameA").innerHTML = (d.nameA || "TEAM A").toUpperCase();
+document.getElementById("pNameB").innerHTML = (d.nameB || "TEAM B").toUpperCase();
 
     // CARD A
     const cardA = document.getElementById("cardA");
