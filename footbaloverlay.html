@@ -209,7 +209,7 @@
         #goal-overlay { position: fixed; top: 0; left: 0; width: 100%; height: 80vh; display: none; justify-content: center; align-items: center; z-index: 500; pointer-events: none; }
         .goal-text { font-size: 180px; color: #fff; font-weight: 900; text-shadow: 0 0 20px #ff0000; animation: ghaintGoal 0.5s ease-in-out infinite alternate; }
         @keyframes ghaintGoal { from { transform: scale(0.8); } to { transform: scale(1.1); } }
-    </style>
+     </style>
 </head>
 <body>
 
@@ -245,7 +245,16 @@
             <span id="half-detail">FIRST HALF</span>
         </div>
 
-        
+        <div id="penalty-shots-container">
+            <div class="team-shots" id="shotsA">
+                <div class="ball" id="a1">1</div><div class="ball" id="a2">2</div><div class="ball" id="a3">3</div><div class="ball" id="a4">4</div><div class="ball" id="a5">5</div>
+            </div>
+            <div style="color: white; font-weight: 900;">PENALTY</div>
+            <div class="team-shots" id="shotsB">
+                <div class="ball" id="b1">1</div><div class="ball" id="b2">2</div><div class="ball" id="b3">3</div><div class="ball" id="b4">4</div><div class="ball" id="b5">5</div>
+            </div>
+        </div>
+    </div>
    <div id="penalty-board">
 
 <div class="penalty-title">
@@ -296,7 +305,7 @@ TEAM B
     </div>
 
 <script>
-  // ==========================
+    // ==========================
 // FIREBASE
 // ==========================
 const firebaseConfig = {
