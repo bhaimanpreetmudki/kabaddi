@@ -577,17 +577,10 @@ tickerRef.on("value", (snap) => {
 
     const d = snap.val() || {};
 
-    document.getElementById("tour-name").innerText =
-        (d.tournamentName || "TOURNAMENT").toUpperCase();
-
-    document.getElementById("scroll-top").innerText =
-        (d.participatingTeams || "UPCOMING").toUpperCase();
-
-    document.getElementById("sub-info").innerText =
-        (d.nextProgram || "LIVE COVERAGE").toUpperCase();
-
-    document.getElementById("scroll-bot").innerText =
-        ("🏆 " + (d.prizes || "UPDATING")).toUpperCase();
+    document.getElementById("tour-name").textContent = d.tournamentName || "TOURNAMENT";
+document.getElementById("scroll-top").textContent = d.participatingTeams || "UPCOMING";
+document.getElementById("sub-info").textContent = d.nextProgram || "LIVE COVERAGE";
+document.getElementById("scroll-bot").textContent = "🏆 " + (d.prizes || "UPDATING");
 
     document.getElementById("watermark").innerText =
         (d.watermarkText || "SUKHDEEP TV").toUpperCase();
