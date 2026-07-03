@@ -394,7 +394,7 @@ matchRef.on("value", (snap) => {
     document.getElementById("jB").style.backgroundColor =
         d.colorB || "#ffffff";
 
- // ਪੁਰਾਣੇ pNameA/B ਸੈੱਟ ਕਰਨ ਵਾਲੇ ਕੋਡ ਨੂੰ ਹਟਾ ਕੇ ਇਹ ਲਗਾਓ:
+// ਪੁਰਾਣਾ ਕੋਡ ਹਟਾ ਕੇ ਇਹ ਵਰਤੋ:
 setTeamName("pNameA", d.nameA || "TEAM A");
 setTeamName("pNameB", d.nameB || "TEAM B");
 
@@ -480,16 +480,15 @@ setTeamName("pNameB", d.nameB || "TEAM B");
 
  function setTeamName(id, txt) {
     const el = document.getElementById(id);
-    const containerWidth = el.offsetWidth;
+    if (!el) return;
     
-    // ਜੇ ਨਾਮ 9 ਅੱਖਰਾਂ ਤੋਂ ਵੱਧ ਹੈ, ਸਕ੍ਰੋਲਿੰਗ ਚਲਾਓ
-    if (txt.length >= 9) {
-        el.innerHTML = `
-            <div class="team-scroll">
-                ${txt.toUpperCase()}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${txt.toUpperCase()}
-            </div>`;
+    txt = (txt || "").toUpperCase();
+    
+    // ਹੁਣ 8 ਅੱਖਰਾਂ ਦੀ ਲਿਮਿਟ ਹੈ
+    if (txt.length > 8) {
+        el.innerHTML = `<div class="team-scroll-wrapper">${txt}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${txt}</div>`;
     } else {
-        el.innerHTML = `<div class="team-static">${txt.toUpperCase()}</div>`;
+        el.innerHTML = txt;
     }
 }
   
