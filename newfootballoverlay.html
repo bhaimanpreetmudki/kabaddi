@@ -216,7 +216,27 @@
         .txt-red { color: var(--main-red); }
         .txt-white { color: var(--pure-white); }
         .clock-area { position: absolute; right: 0; background: var(--pure-white); color: var(--main-red); min-width: 140px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 36px; font-weight: 900; z-index: 110; border-left: 2px solid var(--main-red); }
+/* ਇਹ ਨਵੀਂ ਕਲਾਸ ਮਾਰਕੀ ਵਾਂਗ ਕੰਮ ਕਰੇਗੀ ਅਤੇ ਸਪੇਸਿੰਗ ਨੂੰ ਨਹੀਂ ਕੱਟੇਗੀ */
+.ticker-scroll {
+    display: inline-block;
+    white-space: pre; /* ਇਹ ਤੁਹਾਡੀ ਮਰਜ਼ੀ ਦੀਆਂ ਸਪੇਸਾਂ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖੇਗਾ */
+    padding-left: 100%;
+    animation: scroll-text 15s linear infinite;
+}
 
+@keyframes scroll-text {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-100%); }
+}
+
+/* ਕੰਟੇਨਰ ਨੂੰ ਹਾਈਡ ਕਰਨਾ ਤਾਂ ਜੋ ਟੈਕਸਟ ਬਾਹਰ ਨਾ ਦਿਸੇ */
+.ticker-container {
+    width: 100%;
+    overflow: hidden;
+    position: relative;
+    display: flex;
+    align-items: center;
+}
 
        #watermark { 
     position: fixed; 
