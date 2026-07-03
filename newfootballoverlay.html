@@ -658,29 +658,46 @@ document.getElementById("scroll-bot").textContent = "🏆 " + (d.prizes || "UPDA
         });
     }, 10000);
 
-    .ticker-scroll {
-    display: inline-block;
-    white-space: pre; 
-    padding-left: 100%;
-    animation: scroll-text 20s linear infinite; /* 20s ਕਰਨ ਨਾਲ ਸਪੀਡ ਹੌਲੀ ਹੋ ਜਾਵੇਗੀ */
-    font-size: 36px;       /* ਅੱਖਰਾਂ ਦਾ ਸਾਈਜ਼ ਵਾਪਸ ਵੱਡਾ ਕਰ ਦਿੱਤਾ */
-    font-weight: 900;      /* ਮੋਟਾਈ ਵਾਪਸ ਸੈੱਟ ਕੀਤੀ */
-    text-transform: uppercase;
+    <script>
+function startTicker() {
+    const tickers = document.querySelectorAll('.ticker-scroll');
+    const speed = 100; // ਇੱਥੇ ਸਪੀਡ ਸੈੱਟ ਕਰੋ (ਪਿਕਸਲ ਪ੍ਰਤੀ ਸੈਕਿੰਡ)
+
+    tickers.forEach(ticker => {
+        const textWidth = ticker.offsetWidth;
+        const containerWidth = ticker.parentElement.offsetWidth;
+        
+        // ਟੈਕਸਟ ਦੀ ਲੰਬਾਈ ਦੇ ਹਿਸਾਬ ਨਾਲ ਸਮਾਂ ਕੱਢੋ
+        const duration = (textWidth + containerWidth) / speed;
+        
+        ticker.style.transition = `transform ${duration}s linear`;
+        ticker.style.transform = `translateX(-${textWidth}px)`;
+        
+        // ਲੂਪ ਬਣਾਓ
+        ticker.addEventListener('transitionend', () => {
+            ticker.style.transition = 'none';
+            ticker.style.transform = `translateX(${containerWidth}px)`;
+            setTimeout(() => {
+                ticker.style.transition = `transform ${duration}s linear`;
+                ticker.style.transform = `translateX(-${textWidth}px)`;
+            }, 50);
+        });
+        
+        // ਪਹਿਲੀ ਵਾਰ ਚਲਾਓ
+        ticker.style.transform = `translateX(${containerWidth}px)`;
+        setTimeout(() => {
+            ticker.style.transition = `transform ${duration}s linear`;
+            ticker.style.transform = `translateX(-${textWidth}px)`;
+        }, 100);
+    });
 }
 
-@keyframes scroll-text {
-    0% { transform: translateX(0%); }
-    100% { transform: translateX(-100%); }
-}
-
-/* ਕੰਟੇਨਰ ਨੂੰ ਹਾਈਡ ਕਰਨਾ ਤਾਂ ਜੋ ਟੈਕਸਟ ਬਾਹਰ ਨਾ ਦਿਸੇ */
-.ticker-container {
-    width: 100%;
-    overflow: hidden;
-    position: relative;
-    display: flex;
-    align-items: center;
-}
+// ਪੇਜ ਲੋਡ ਹੋਣ 'ਤੇ ਚਲਾਓ
+window.onload = () => {
+    startTicker();
+    moveWatermark(); // ਤੁਹਾਡਾ ਪਹਿਲਾਂ ਵਾਲਾ ਫੰਕਸ਼ਨ
+};
+</script>
     
     function moveWatermark() {
         const wm = document.getElementById('watermark');
