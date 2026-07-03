@@ -53,6 +53,23 @@
             overflow: hidden;
             white-space: nowrap;
         }
+        /* ਸਕ੍ਰੋਲਿੰਗ ਲਈ */
+.team-scroll {
+    display: inline-block;
+    white-space: nowrap;
+    animation: scroll-left 8s linear infinite;
+}
+
+@keyframes scroll-left {
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
+}
+
+.team-static {
+    display: flex;
+    align-items: center;
+    height: 100%;
+}
         .score-box { width: 75px; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 40px; font-weight: 900; flex-shrink: 0; }
         
         /* --- Card Styles --- */
