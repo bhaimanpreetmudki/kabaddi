@@ -118,24 +118,17 @@
     font-weight: 900;
     display: flex;
     align-items: center;
-    padding: 0 10px; /* ਪੈਡਿੰਗ ਦਿੱਤੀ ਹੈ ਤਾਂ ਕਿ ਨਾਮ ਬਾਰਡਰ ਨਾਲ ਨਾ ਲੱਗੇ */
+    justify-content: center; /* ਨਾਮ ਨੂੰ ਵਿਚਕਾਰ ਰੱਖਣ ਲਈ */
     overflow: hidden;
-    white-space: nowrap;
     position: relative;
     border-right: 2px solid #cc0000;
 }
 
-/* ਸਕ੍ਰੋਲਿੰਗ ਲਈ ਐਨੀਮੇਸ਼ਨ ਜੋੜੋ */
-.team-scroll-wrapper {
-    display: inline-block;
-    padding-left: 100%;
-    animation: scroll-text 10s linear infinite;
+.scroll-text {
+    /* ਇੱਥੋਂ ਐਨੀਮੇਸ਼ਨ ਹਟਾ ਦਿੱਤੀ ਹੈ ਤਾਂ ਕਿ ਸਕ੍ਰੌਲ ਨਾ ਹੋਵੇ */
+    white-space: nowrap;
 }
 
-@keyframes scroll-text {
-    0% { transform: translate(0, 0); }
-    100% { transform: translate(-100%, 0); }
-}
         
 .team-shots{
     flex:1;
@@ -387,9 +380,13 @@ matchRef.on("value", (snap) => {
     document.getElementById("jB").style.backgroundColor =
         d.colorB || "#ffffff";
 
-// ਪੁਰਾਣਾ ਕੋਡ ਹਟਾ ਕੇ ਇਹ ਵਰਤੋ:
-setTeamName("pNameA", d.nameA || "TEAM A");
-setTeamName("pNameB", d.nameB || "TEAM B");
+// Scoreboard ਲਈ (ਸਕ੍ਰੋਲਿੰਗ ਵਾਲਾ ਫੰਕਸ਼ਨ)
+setTeamName("nameA", d.nameA || "TEAM A");
+setTeamName("nameB", d.nameB || "TEAM B");
+
+// Penalty Board ਲਈ (ਬਿਨਾਂ ਸਕ੍ਰੋਲਿੰਗ, ਸਿੱਧਾ ਨਾਮ)
+document.getElementById("pNameA").innerText = (d.nameA || "TEAM A").toUpperCase();
+document.getElementById("pNameB").innerText = (d.nameB || "TEAM B").toUpperCase();
 
     // CARD A
     const cardA = document.getElementById("cardA");
@@ -477,11 +474,14 @@ setTeamName("pNameB", d.nameB || "TEAM B");
     
     txt = (txt || "").toUpperCase();
     
-    // ਹੁਣ 8 ਅੱਖਰਾਂ ਦੀ ਲਿਮਿਟ ਹੈ
+    // Scoreboard ਲਈ ਸਕ੍ਰੋਲਿੰਗ (8 ਅੱਖਰਾਂ ਤੋਂ ਵੱਧ)
     if (txt.length > 8) {
-        el.innerHTML = `<div class="team-scroll-wrapper">${txt}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${txt}</div>`;
+        el.innerHTML = `
+            <div class="team-scroll">
+                ${txt}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${txt}
+            </div>`;
     } else {
-        el.innerHTML = txt;
+        el.innerHTML = `<div class="team-static">${txt}</div>`;
     }
 }
   
