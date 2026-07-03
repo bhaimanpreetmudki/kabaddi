@@ -493,15 +493,13 @@ document.getElementById("pNameB").innerText = (d.nameB || "TEAM B").toUpperCase(
     
     txt = (txt || "").toUpperCase();
     
-    // ਜੇ 8 ਅੱਖਰਾਂ ਤੋਂ ਵੱਡਾ ਹੈ ਤਾਂ ਸਕ੍ਰੋਲ
+    // ਜੇ 8 ਅੱਖਰਾਂ ਤੋਂ ਵੱਡਾ ਹੈ
     if (txt.length > 8) {
-        // ਨਾਮ ਨੂੰ ਦੋ ਵਾਰ ਲਿਖੋ ਤਾਂ ਕਿ ਲੂਪ smooth ਬਣੇ
         el.innerHTML = `
             <div class="team-scroll">
-                <span>${txt} &nbsp;&nbsp;&nbsp;&nbsp; ${txt} &nbsp;&nbsp;&nbsp;&nbsp;</span>
+                ${txt} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </div>`;
     } else {
-        // ਛੋਟੇ ਨਾਮ ਲਈ ਕੋਈ ਸਕ੍ਰੋਲਿੰਗ ਨਹੀਂ
         el.innerHTML = `<div class="team-static">${txt}</div>`;
     }
 }
