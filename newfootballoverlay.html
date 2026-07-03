@@ -220,13 +220,12 @@
 .ticker-scroll {
     display: inline-block;
     white-space: pre; 
-    /* padding-left: 100% ਦੀ ਬਜਾਏ min-width ਵਰਤੋ */
-    min-width: 100%;
-    animation: scroll-text linear infinite; 
-    /* ਇੱਥੇ duration ਨਾ ਲਿਖੋ, ਅਸੀਂ JavaScript ਰਾਹੀਂ ਕੰਟਰੋਲ ਕਰਾਂਗੇ */
+    padding-left: 100%;
+    /* animation: scroll-text 20s linear infinite;  <-- ਇਹ ਲਾਈਨ ਇੱਥੋਂ ਹਟਾ ਦਿਓ */
     font-size: 36px;
     font-weight: 900;
     text-transform: uppercase;
+    position: absolute; /* ਇਹ ਲਾਈਨ ਜੋੜੋ */
 }
 
 @keyframes scroll-text {
