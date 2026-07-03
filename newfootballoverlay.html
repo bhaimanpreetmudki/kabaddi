@@ -657,41 +657,7 @@ document.getElementById("scroll-bot").textContent = "🏆 " + (d.prizes || "UPDA
         });
     }, 10000);
 
-function startTicker() {
-    tickers.forEach(ticker => {
 
-        if(ticker.innerText.trim() === "") return;
-
-        const textWidth = ticker.offsetWidth;
-        const containerWidth = ticker.parentElement.offsetWidth;
-        // ... ਬਾਕੀ ਕੋਡ ਉਹੀ ਰਹੇਗਾ
-    });
-        
-        // ਟੈਕਸਟ ਦੀ ਲੰਬਾਈ ਦੇ ਹਿਸਾਬ ਨਾਲ ਸਮਾਂ ਕੱਢੋ
-        const duration = (textWidth + containerWidth) / speed;
-        
-        ticker.style.transition = `transform ${duration}s linear`;
-        ticker.style.transform = `translateX(-${textWidth}px)`;
-        
-        // ਲੂਪ ਬਣਾਓ
-        ticker.addEventListener('transitionend', () => {
-            ticker.style.transition = 'none';
-            ticker.style.transform = `translateX(${containerWidth}px)`;
-            setTimeout(() => {
-                ticker.style.transition = `transform ${duration}s linear`;
-                ticker.style.transform = `translateX(-${textWidth}px)`;
-            }, 50);
-        });
-        
-        // ਪਹਿਲੀ ਵਾਰ ਚਲਾਓ
-        ticker.style.transform = `translateX(${containerWidth}px)`;
-        setTimeout(() => {
-            ticker.style.transition = `transform ${duration}s linear`;
-            ticker.style.transform = `translateX(-${textWidth}px)`;
-        }, 100);
-    });
-}
-    
     function moveWatermark() {
         const wm = document.getElementById('watermark');
         const maxX = window.innerWidth - wm.offsetWidth - 50;
