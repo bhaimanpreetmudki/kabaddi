@@ -616,6 +616,9 @@ function renderPenalties(containerId, penaltyString) {
 // ==========================
 // TICKER DATA
 // ==========================
+// ==========================
+// TICKER DATA
+// ==========================
 tickerRef.on("value", (snap) => {
     const d = snap.val() || {};
 
@@ -624,29 +627,21 @@ tickerRef.on("value", (snap) => {
     document.getElementById("sub-info").textContent = d.nextProgram || "LIVE COVERAGE";
     document.getElementById("scroll-bot").textContent = "🏆 " + (d.prizes || "UPDATING");
 
+    document.getElementById("watermark").innerText = (d.watermarkText || "SUKHDEEP TV").toUpperCase();
+    document.getElementById("fl-num").innerText = d.contact || "86996-40061";
+
+    document.getElementById("master-footer").style.display = d.tickerVis === false ? "none" : "flex";
     
-
-    document.getElementById("watermark").innerText =
-        (d.watermarkText || "SUKHDEEP TV").toUpperCase();
-
-    document.getElementById("fl-num").innerText =
-        d.contact || "86996-40061";
-
-    document.getElementById("master-footer").style.display =
-        d.tickerVis === false ? "none" : "flex";
-});
-
- // ਡਾਟਾ ਅਪਡੇਟ ਹੋਣ ਤੋਂ ਬਾਅਦ ਟਿੱਕਰ ਚਲਾਓ
-    setTimeout(startTicker, 500); 
+    // ਇੱਥੇ ਐਨੀਮੇਸ਼ਨ ਨੂੰ ਦੁਬਾਰਾ ਚਲਾਓ
+    startTicker(); 
 });
 
 // ਸਟਾਰਟ ਟਿੱਕਰ ਫੰਕਸ਼ਨ
 function startTicker() {
     document.querySelectorAll(".ticker-scroll").forEach(el => {
         const textWidth = el.scrollWidth;
-        const speed = 60; // ਸਪੀਡ ਇੱਥੇ ਘਟਾ-ਵਧਾ ਸਕਦੇ ਹੋ
+        const speed = 60; 
         const duration = textWidth / speed;
-
         el.style.animation = `scroll-text ${duration}s linear infinite`;
     });
 }
