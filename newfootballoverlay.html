@@ -57,13 +57,14 @@
 .team-scroll {
     display: inline-block;
     white-space: nowrap;
-    /* ਨਾਮ ਦੀ ਲੰਬਾਈ ਦੇ ਹਿਸਾਬ ਨਾਲ ਟਾਈਮ ਸੈੱਟ ਹੋਵੇਗਾ */
+    /* ਨਾਮ ਦੀ ਲੰਬਾਈ ਦੇ ਹਿਸਾਬ ਨਾਲ ਆਟੋਮੈਟਿਕ ਚੱਲੇਗਾ */
+    padding-left: 100%; 
     animation: scroll-left 10s linear infinite;
 }
 
 @keyframes scroll-left {
-    from { transform: translateX(0); }
-    to { transform: translateX(-50%); } /* ਇਹ ਅੱਧੇ ਤੇ ਰੁਕੇਗਾ ਤਾਂ ਕਿ ਦੂਜਾ ਨਾਮ ਪਹਿਲੇ ਦੇ ਬਿਲਕੁਲ ਪਿੱਛੇ ਹੋਵੇ */
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-100%); }
 }
 
 .team-static {
@@ -492,14 +493,13 @@ document.getElementById("pNameB").innerText = (d.nameB || "TEAM B").toUpperCase(
     
     txt = (txt || "").toUpperCase();
     
-    // ਜੇ ਨਾਮ 8 ਅੱਖਰਾਂ ਤੋਂ ਵੱਡਾ ਹੈ ਤਾਂ ਸਕ੍ਰੋਲ ਕਰੋ
+    // ਜੇ 8 ਅੱਖਰਾਂ ਤੋਂ ਵੱਡਾ ਹੈ
     if (txt.length > 8) {
         el.innerHTML = `
             <div class="team-scroll">
-                ${txt}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${txt}
+                ${txt} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;
             </div>`;
     } else {
-        // ਜੇ ਛੋਟਾ ਹੈ ਤਾਂ ਸਿੱਧਾ ਦਿਖਾਓ
         el.innerHTML = `<div class="team-static">${txt}</div>`;
     }
 }
