@@ -372,7 +372,7 @@ TEAM B
             <div class="clock-area" id="live-clock">00:00 AM</div>
         </div>
     </div>
-</div>>
+</div>
 
 <script>
     // ==========================
@@ -658,18 +658,14 @@ document.getElementById("scroll-bot").textContent = "🏆 " + (d.prizes || "UPDA
     }, 10000);
 
 function startTicker() {
-    const tickers = document.querySelectorAll('.ticker-scroll');
-    const speed = 100;
-
     tickers.forEach(ticker => {
-        // ਇਹ ਚੈੱਕ ਕਰੋ ਕਿ ਟੈਕਸਟ ਵਿੱਚ ਕੁਝ ਲਿਖਿਆ ਹੈ
-        if(ticker.innerText.trim() === "") return; 
-        
+
+        if(ticker.innerText.trim() === "") return;
+
         const textWidth = ticker.offsetWidth;
         const containerWidth = ticker.parentElement.offsetWidth;
         // ... ਬਾਕੀ ਕੋਡ ਉਹੀ ਰਹੇਗਾ
     });
-}
         
         // ਟੈਕਸਟ ਦੀ ਲੰਬਾਈ ਦੇ ਹਿਸਾਬ ਨਾਲ ਸਮਾਂ ਕੱਢੋ
         const duration = (textWidth + containerWidth) / speed;
@@ -695,12 +691,6 @@ function startTicker() {
         }, 100);
     });
 }
-
-// ਪੇਜ ਲੋਡ ਹੋਣ 'ਤੇ ਚਲਾਓ
-window.onload = () => {
-    startTicker();
-    moveWatermark(); // ਤੁਹਾਡਾ ਪਹਿਲਾਂ ਵਾਲਾ ਫੰਕਸ਼ਨ
-};
     
     function moveWatermark() {
         const wm = document.getElementById('watermark');
