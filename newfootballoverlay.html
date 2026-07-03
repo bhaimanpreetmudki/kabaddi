@@ -220,15 +220,17 @@
 .ticker-scroll {
     display: inline-block;
     white-space: pre; 
-    padding-left: 100%;
-    animation: scroll-text 20s linear infinite; /* 20s ਕਰਨ ਨਾਲ ਸਪੀਡ ਹੌਲੀ ਹੋ ਜਾਵੇਗੀ */
-    font-size: 36px;       /* ਅੱਖਰਾਂ ਦਾ ਸਾਈਜ਼ ਵਾਪਸ ਵੱਡਾ ਕਰ ਦਿੱਤਾ */
-    font-weight: 900;      /* ਮੋਟਾਈ ਵਾਪਸ ਸੈੱਟ ਕੀਤੀ */
+    /* padding-left: 100% ਦੀ ਬਜਾਏ min-width ਵਰਤੋ */
+    min-width: 100%;
+    animation: scroll-text linear infinite; 
+    /* ਇੱਥੇ duration ਨਾ ਲਿਖੋ, ਅਸੀਂ JavaScript ਰਾਹੀਂ ਕੰਟਰੋਲ ਕਰਾਂਗੇ */
+    font-size: 36px;
+    font-weight: 900;
     text-transform: uppercase;
 }
 
 @keyframes scroll-text {
-    0% { transform: translateX(0%); }
+    0% { transform: translateX(100%); }
     100% { transform: translateX(-100%); }
 }
 
