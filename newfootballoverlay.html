@@ -391,8 +391,8 @@ matchRef.on("value", (snap) => {
     document.getElementById("jB").style.backgroundColor =
         d.colorB || "#ffffff";
 
- setTeamName("nameA", d.nameA || "TEAM A");
-setTeamName("nameB", d.nameB || "TEAM B");
+ document.getElementById("pNameA").innerHTML = (d.nameA || "TEAM A").toUpperCase();
+document.getElementById("pNameB").innerHTML = (d.nameB || "TEAM B").toUpperCase();
 
     // CARD A
     const cardA = document.getElementById("cardA");
