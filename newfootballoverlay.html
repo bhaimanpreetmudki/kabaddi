@@ -491,13 +491,14 @@ document.getElementById("pNameB").innerText = (d.nameB || "TEAM B").toUpperCase(
     
     txt = (txt || "").toUpperCase();
     
-    // Scoreboard ਲਈ ਸਕ੍ਰੋਲਿੰਗ (8 ਅੱਖਰਾਂ ਤੋਂ ਵੱਧ)
+    // ਜੇ ਨਾਮ 8 ਅੱਖਰਾਂ ਤੋਂ ਵੱਡਾ ਹੈ ਤਾਂ ਸਕ੍ਰੋਲ ਕਰੋ
     if (txt.length > 8) {
         el.innerHTML = `
             <div class="team-scroll">
                 ${txt}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${txt}
             </div>`;
     } else {
+        // ਜੇ ਛੋਟਾ ਹੈ ਤਾਂ ਸਿੱਧਾ ਦਿਖਾਓ
         el.innerHTML = `<div class="team-static">${txt}</div>`;
     }
 }
