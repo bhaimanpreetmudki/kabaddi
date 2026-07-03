@@ -617,13 +617,14 @@ function renderPenalties(containerId, penaltyString) {
 // TICKER DATA
 // ==========================
 tickerRef.on("value", (snap) => {
-
     const d = snap.val() || {};
 
     document.getElementById("tour-name").textContent = d.tournamentName || "TOURNAMENT";
-document.getElementById("scroll-top").textContent = d.participatingTeams || "UPCOMING";
-document.getElementById("sub-info").textContent = d.nextProgram || "LIVE COVERAGE";
-document.getElementById("scroll-bot").textContent = "🏆 " + (d.prizes || "UPDATING");
+    document.getElementById("scroll-top").textContent = d.participatingTeams || "UPCOMING";
+    document.getElementById("sub-info").textContent = d.nextProgram || "LIVE COVERAGE";
+    document.getElementById("scroll-bot").textContent = "🏆 " + (d.prizes || "UPDATING");
+
+    
 
     document.getElementById("watermark").innerText =
         (d.watermarkText || "SUKHDEEP TV").toUpperCase();
@@ -635,28 +636,19 @@ document.getElementById("scroll-bot").textContent = "🏆 " + (d.prizes || "UPDA
         d.tickerVis === false ? "none" : "flex";
 });
 
-    function startTicker() {
+ // ਡਾਟਾ ਅਪਡੇਟ ਹੋਣ ਤੋਂ ਬਾਅਦ ਟਿੱਕਰ ਚਲਾਓ
+    setTimeout(startTicker, 500); 
+});
 
+// ਸਟਾਰਟ ਟਿੱਕਰ ਫੰਕਸ਼ਨ
+function startTicker() {
     document.querySelectorAll(".ticker-scroll").forEach(el => {
+        const textWidth = el.scrollWidth;
+        const speed = 60; // ਸਪੀਡ ਇੱਥੇ ਘਟਾ-ਵਧਾ ਸਕਦੇ ਹੋ
+        const duration = textWidth / speed;
 
-        el.style.animation = "none";
-
-        requestAnimationFrame(() => {
-
-            const speed = 80; // pixels per second
-
-            const textWidth = el.scrollWidth;
-            const boxWidth = el.parentElement.offsetWidth;
-
-            const duration = (textWidth + boxWidth) / speed;
-
-            el.style.animation =
-                `scroll-text ${duration}s linear infinite`;
-
-        });
-
+        el.style.animation = `scroll-text ${duration}s linear infinite`;
     });
-
 }
     // --- Flasher Logic Fixed ---
     let isW = false;
