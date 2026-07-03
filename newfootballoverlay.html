@@ -57,12 +57,13 @@
 .team-scroll {
     display: inline-block;
     white-space: nowrap;
-    animation: scroll-left 8s linear infinite;
+    /* ਨਾਮ ਦੀ ਲੰਬਾਈ ਦੇ ਹਿਸਾਬ ਨਾਲ ਟਾਈਮ ਸੈੱਟ ਹੋਵੇਗਾ */
+    animation: scroll-left 10s linear infinite;
 }
 
 @keyframes scroll-left {
-    0% { transform: translateX(0%); }
-    100% { transform: translateX(-50%); }
+    from { transform: translateX(0); }
+    to { transform: translateX(-50%); } /* ਇਹ ਅੱਧੇ ਤੇ ਰੁਕੇਗਾ ਤਾਂ ਕਿ ਦੂਜਾ ਨਾਮ ਪਹਿਲੇ ਦੇ ਬਿਲਕੁਲ ਪਿੱਛੇ ਹੋਵੇ */
 }
 
 .team-static {
