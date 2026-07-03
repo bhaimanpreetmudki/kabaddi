@@ -637,6 +637,30 @@ document.getElementById("scroll-bot").textContent = "🏆 " + (d.prizes || "UPDA
     document.getElementById("master-footer").style.display =
         d.tickerVis === false ? "none" : "flex";
 });
+
+    function startTicker() {
+
+    document.querySelectorAll(".ticker-scroll").forEach(el => {
+
+        el.style.animation = "none";
+
+        requestAnimationFrame(() => {
+
+            const speed = 80; // pixels per second
+
+            const textWidth = el.scrollWidth;
+            const boxWidth = el.parentElement.offsetWidth;
+
+            const duration = (textWidth + boxWidth) / speed;
+
+            el.style.animation =
+                `scroll-text ${duration}s linear infinite`;
+
+        });
+
+    });
+
+}
     // --- Flasher Logic Fixed ---
     let isW = false;
     setInterval(() => {
