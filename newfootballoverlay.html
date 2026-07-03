@@ -219,9 +219,12 @@
 /* ਇਹ ਨਵੀਂ ਕਲਾਸ ਮਾਰਕੀ ਵਾਂਗ ਕੰਮ ਕਰੇਗੀ ਅਤੇ ਸਪੇਸਿੰਗ ਨੂੰ ਨਹੀਂ ਕੱਟੇਗੀ */
 .ticker-scroll {
     display: inline-block;
-    white-space: pre; /* ਇਹ ਤੁਹਾਡੀ ਮਰਜ਼ੀ ਦੀਆਂ ਸਪੇਸਾਂ ਨੂੰ ਬਰਕਰਾਰ ਰੱਖੇਗਾ */
+    white-space: pre; 
     padding-left: 100%;
-    animation: scroll-text 15s linear infinite;
+    animation: scroll-text 20s linear infinite; /* 20s ਕਰਨ ਨਾਲ ਸਪੀਡ ਹੌਲੀ ਹੋ ਜਾਵੇਗੀ */
+    font-size: 36px;       /* ਅੱਖਰਾਂ ਦਾ ਸਾਈਜ਼ ਵਾਪਸ ਵੱਡਾ ਕਰ ਦਿੱਤਾ */
+    font-weight: 900;      /* ਮੋਟਾਈ ਵਾਪਸ ਸੈੱਟ ਕੀਤੀ */
+    text-transform: uppercase;
 }
 
 @keyframes scroll-text {
