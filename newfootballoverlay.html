@@ -394,8 +394,9 @@ matchRef.on("value", (snap) => {
     document.getElementById("jB").style.backgroundColor =
         d.colorB || "#ffffff";
 
- document.getElementById("pNameA").innerHTML = (d.nameA || "TEAM A").toUpperCase();
-document.getElementById("pNameB").innerHTML = (d.nameB || "TEAM B").toUpperCase();
+ // ਪੁਰਾਣੇ pNameA/B ਸੈੱਟ ਕਰਨ ਵਾਲੇ ਕੋਡ ਨੂੰ ਹਟਾ ਕੇ ਇਹ ਲਗਾਓ:
+setTeamName("pNameA", d.nameA || "TEAM A");
+setTeamName("pNameB", d.nameB || "TEAM B");
 
     // CARD A
     const cardA = document.getElementById("cardA");
