@@ -34,9 +34,16 @@
             background: var(--pure-black); 
         }
 
-        .jersey-strip { width: 12px; height: 60px; flex-shrink: 0; }
+        .jersey-strip { width: 18px; height: 60px; flex-shrink: 0; }
 
-        .score-unit { display: flex; height: 60px; align-items: center; flex-grow: 1; position: relative; }
+      .score-unit { 
+    display: flex; 
+    height: 60px; 
+    align-items: center; 
+    flex: 1; /* ਇਹ ਦੋਵਾਂ ਪਾਸੇ ਬਰਾਬਰ ਜਗ੍ਹਾ ਦੇਵੇਗਾ */
+    position: relative; 
+    overflow: hidden; 
+}
         .team-display { 
             flex-grow: 1; 
             padding: 0 15px; 
@@ -102,17 +109,16 @@
     height:52px;
 }
 
-.team-display{
-    flex-grow:1;
-    padding:0 15px;
-    font-size:36px;
-    font-weight:900;
-    text-transform:uppercase;
-    overflow:hidden;
-    white-space:nowrap;
-    position:relative;
-    display:flex;
-    align-items:center;
+.team-display { 
+    flex: 1; 
+    padding: 0 10px; 
+    font-size: 32px; 
+    font-weight: 900; 
+    text-transform: uppercase; 
+    overflow: hidden; 
+    white-space: nowrap; 
+    display: flex;
+    align-items: center;
 }
 
 .team-scroll{
@@ -468,24 +474,19 @@ setTeamName("nameB", d.nameB || "TEAM B");
 // TIMER UI
 // ==========================
 
-  function setTeamName(id, txt){
-
-    txt = (txt || "").toUpperCase();
-
+ function setTeamName(id, txt) {
     const el = document.getElementById(id);
-
-    if(txt.length >= 9){
-
-        el.innerHTML =
-            `<div class="team-scroll">${txt}&nbsp;&nbsp;&nbsp;&nbsp;${txt}</div>`;
-
-    }else{
-
-        el.innerHTML =
-            `<div class="team-static">${txt}</div>`;
-
+    const containerWidth = el.offsetWidth;
+    
+    // ਜੇ ਨਾਮ 9 ਅੱਖਰਾਂ ਤੋਂ ਵੱਧ ਹੈ, ਸਕ੍ਰੋਲਿੰਗ ਚਲਾਓ
+    if (txt.length >= 9) {
+        el.innerHTML = `
+            <div class="team-scroll">
+                ${txt.toUpperCase()}&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;${txt.toUpperCase()}
+            </div>`;
+    } else {
+        el.innerHTML = `<div class="team-static">${txt.toUpperCase()}</div>`;
     }
-
 }
   
 function updateTimerUI() {
