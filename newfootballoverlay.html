@@ -659,11 +659,17 @@ document.getElementById("scroll-bot").textContent = "🏆 " + (d.prizes || "UPDA
 
 function startTicker() {
     const tickers = document.querySelectorAll('.ticker-scroll');
-    const speed = 100; // ਇੱਥੇ ਸਪੀਡ ਸੈੱਟ ਕਰੋ (ਪਿਕਸਲ ਪ੍ਰਤੀ ਸੈਕਿੰਡ)
+    const speed = 100;
 
     tickers.forEach(ticker => {
+        // ਇਹ ਚੈੱਕ ਕਰੋ ਕਿ ਟੈਕਸਟ ਵਿੱਚ ਕੁਝ ਲਿਖਿਆ ਹੈ
+        if(ticker.innerText.trim() === "") return; 
+        
         const textWidth = ticker.offsetWidth;
         const containerWidth = ticker.parentElement.offsetWidth;
+        // ... ਬਾਕੀ ਕੋਡ ਉਹੀ ਰਹੇਗਾ
+    });
+}
         
         // ਟੈਕਸਟ ਦੀ ਲੰਬਾਈ ਦੇ ਹਿਸਾਬ ਨਾਲ ਸਮਾਂ ਕੱਢੋ
         const duration = (textWidth + containerWidth) / speed;
