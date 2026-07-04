@@ -57,14 +57,12 @@
 .team-scroll {
     display: inline-block;
     white-space: nowrap;
-    /* ਨਾਮ ਦੀ ਲੰਬਾਈ ਦੇ ਹਿਸਾਬ ਨਾਲ ਆਟੋਮੈਟਿਕ ਚੱਲੇਗਾ */
-    padding-left: 100%; 
-    animation: scroll-left 10s linear infinite;
+    padding-left: 0; /* ਇਸਨੂੰ 0 ਕਰ ਦਿਓ */
 }
 
 @keyframes scroll-left {
-    0% { transform: translateX(0); }
-    100% { transform: translateX(-100%); }
+    0% { transform: translateX(0%); }
+    100% { transform: translateX(-50%); }
 }
 
 .team-static {
@@ -530,18 +528,17 @@ document.getElementById("pNameB").innerText = (d.nameB || "TEAM B").toUpperCase(
 // TIMER UI
 // ==========================
 
- function setTeamName(id, txt) {
+function setTeamName(id, txt) {
     const el = document.getElementById(id);
     if (!el) return;
     
     txt = (txt || "").toUpperCase();
-    
-    // ਨਾਮ ਦੇ ਅੱਗੇ ਅਤੇ ਪਿੱਛੇ ਖਾਲੀ ਥਾਂ (space) ਜੋੜੋ ਤਾਂ ਜੋ ਨਿਰਵਿਘਨ ਚੱਲੇ
     const spacing = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
     
     if (txt.length > 8) {
+        // ਇੱਥੇ 20s ਦੀ ਜਗ੍ਹਾ ਤੁਸੀਂ 30s ਜਾਂ 40s ਕਰ ਸਕਦੇ ਹੋ
         el.innerHTML = `
-            <div class="team-scroll">
+            <div class="team-scroll" style="animation: scroll-left 20s linear infinite;">
                 ${txt}${spacing}${txt}${spacing}
             </div>`;
     } else {
