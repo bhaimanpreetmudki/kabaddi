@@ -57,12 +57,13 @@
 .team-scroll {
     display: inline-block;
     white-space: nowrap;
-    padding-left: 0; /* ਇਸਨੂੰ 0 ਕਰ ਦਿਓ */
+    /* ਮਹੱਤਵਪੂਰਨ: ਇਹ ਯਕੀਨੀ ਬਣਾਓ ਕਿ ਕੋਈ ਵਾਧੂ ਪੈਡਿੰਗ ਨਾ ਹੋਵੇ */
+    padding-left: 0; 
 }
 
 @keyframes scroll-left {
-    0% { transform: translateX(0%); }
-    100% { transform: translateX(-50%); }
+    0% { transform: translateX(0); }
+    100% { transform: translateX(-50%); } 
 }
 
 .team-static {
@@ -533,12 +534,13 @@ function setTeamName(id, txt) {
     if (!el) return;
     
     txt = (txt || "").toUpperCase();
-    const spacing = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    
+    // ਸਪੇਸਿੰਗ ਨੂੰ ਥੋੜਾ ਘਟਾਇਆ ਹੈ
+    const spacing = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
     
     if (txt.length > 8) {
-        // ਇੱਥੇ 20s ਦੀ ਜਗ੍ਹਾ ਤੁਸੀਂ 30s ਜਾਂ 40s ਕਰ ਸਕਦੇ ਹੋ
         el.innerHTML = `
-            <div class="team-scroll" style="animation: scroll-left 20s linear infinite;">
+            <div class="team-scroll" style="animation: scroll-left 15s linear infinite;">
                 ${txt}${spacing}${txt}${spacing}
             </div>`;
     } else {
