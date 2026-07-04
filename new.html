@@ -536,12 +536,12 @@ function setTeamName(id, txt) {
     txt = (txt || "").toUpperCase();
     
     // ਸਪੇਸਿੰਗ ਨੂੰ ਥੋੜਾ ਘਟਾਇਆ ਹੈ
-    const spacing = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
+    const spacing = "&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;";
     
     if (txt.length > 8) {
         el.innerHTML = `
             <div class="team-scroll" style="animation: scroll-left 15s linear infinite;">
-                ${txt}${spacing}${txt}${spacing}
+                ${txt}${spacing}${txt}${spacing}${txt}${spacing}${txt}${spacing}
             </div>`;
     } else {
         el.innerHTML = `<div class="team-static">${txt}</div>`;
